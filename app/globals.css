@@ -1,5 +1,13 @@
 @import "tailwindcss";
 
+/* Smooth scrolling */
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Theme */
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -12,6 +20,8 @@
   --font-mono: var(--font-geist-mono);
 }
 
+/* Dark mode system */
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
@@ -19,8 +29,62 @@
   }
 }
 
+/* Base body */
+
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: #ffffff;
+  color: #111111;
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Smooth transitions */
+
+* {
+  transition: all 0.2s ease;
+}
+
+/* Text selection */
+
+::selection {
+  background: #ff0000;
+  color: white;
+}
+
+/* Scrollbar */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #ff0000;
+  border-radius: 20px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #111111;
+}
+
+/* Loader animation */
+
+@keyframes floatLogo {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.08);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.animate-pulse {
+  animation: floatLogo 1.5s infinite ease-in-out;
 }

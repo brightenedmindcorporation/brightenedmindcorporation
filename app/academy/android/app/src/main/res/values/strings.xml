@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Brightened Mind Academy</string>
+    <string name="title_activity_main">Brightened Mind Academy</string>
+    <string name="package_name">com.brightenedmind.academy</string>
+    <string name="custom_url_scheme">com.brightenedmind.academy</string>
+</resources>
