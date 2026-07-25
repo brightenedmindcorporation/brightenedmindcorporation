@@ -1,102 +1,202 @@
 "use client";
 
-import React, { useState } from "react";
+import { useEffect, useState } from "react";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
-interface StudentRequest {
-  id: string;
-  fullName: string;
-  email: string;
-  date: string;
-  status: "PENDING" | "APPROVED";
-  matricule?: string;
-}
+export const dynamic = "force-dynamic";
 
-export default function AdminDashboard() {
-  // Simulation de demandes d'étudiants en attente
-  const [students, setStudents] = useState<StudentRequest[]>([
-    { id: "1", fullName: "Marc Kabamba", email: "marc@example.com", date: "2026-07-24", status: "PENDING" },
-    { id: "2", fullName: "Sarah Luvumbu", email: "sarah@example.com", date: "2026-07-25", status: "APPROVED", matricule: "BMCA-2026-001" },
-  ]);
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+} from "firebase/firestore";
 
-  const approveStudent = (id: string) => {
-    setStudents((prev) =>
-      prev.map((student, index) => {
-        if (student.id === id) {
-          // Génération du matricule au format BMCA-2026-000
-          const sequenceNumber = String(index + 1).padStart(3, "0");
-          const generatedMatricule = `BMCA-2026-${sequenceNumber}`;
-          return {
-            ...student,
-            status: "APPROVED",
-            matricule: generatedMatricule,
-          };
-        }
-        return student;
-      })
+export default function AdminPage() {
+  const [students, setStudents] = useState<any[]>([]);
+  const [authorized, setAuthorized] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  const fetchStudents = async () => {
+    const snapshot = await getDocs(collection(db, "students"));
+
+    setStudents(
+      snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }))
     );
   };
 
-  return (
-    <div className="max-w-5xl mx-auto space-y-6">
-      <div className="flex justify-between items-center bg-slate-900 text-white p-6 rounded-xl">
-        <div>
-          <h1 className="text-2xl font-bold">Espace Administration BMCA</h1>
-          <p className="text-sm text-slate-400">Gestion des accès et validation des matricules</p>
-        </div>
-        <span className="px-3 py-1 bg-blue-600 text-xs font-semibold rounded-full uppercase">
-          Accès Sécurisé Admin
-        </span>
-      </div>
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("ADMIN USER:", user?.email);
 
-      <div className="bg-white p-6 rounded-xl border shadow-sm">
-        <h2 className="text-lg font-bold mb-4">Demandes d'inscription en attente</h2>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-slate-100 text-slate-700 uppercase text-xs">
-              <tr>
-                <th className="p-3">Nom complet</th>
-                <th className="p-3">Email</th>
-                <th className="p-3">Statut</th>
-                <th className="p-3">Matricule Attribué</th>
-                <th className="p-3 text-right">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y">
-              {students.map((student) => (
-                <tr key={student.id}>
-                  <td className="p-3 font-medium">{student.fullName}</td>
-                  <td className="p-3 text-slate-600">{student.email}</td>
-                  <td className="p-3">
-                    {student.status === "PENDING" ? (
-                      <span className="px-2 py-1 bg-amber-100 text-amber-800 rounded text-xs font-semibold">
-                        En attente
-                      </span>
-                    ) : (
-                      <span className="px-2 py-1 bg-green-100 text-green-800 rounded text-xs font-semibold">
-                        Approuvé
-                      </span>
-                    )}
-                  </td>
-                  <td className="p-3 font-mono text-blue-600 font-bold">
-                    {student.matricule || "—"}
-                  </td>
-                  <td className="p-3 text-right">
-                    {student.status === "PENDING" && (
-                      <button
-                        onClick={() => approveStudent(student.id)}
-                        className="px-3 py-1 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 transition"
-                      >
-                        Approuver & Générer Matricule
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      if (user && user.email === "brightenedmindcorporation@gmail.com") {
+        setAuthorized(true);
+      } else {
+        setAuthorized(false);
+      }
+
+      setChecking(false);
+    });
+
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (authorized) {
+      fetchStudents();
+    }
+  }, [authorized]);
+
+  const generateMatricule = (index: number) => {
+    const year = new Date().getFullYear();
+    const number = String(index + 1).padStart(3, "0");
+    return `BMCA-${year}-${number}`;
+  };
+
+  const sendEmail = async (
+  email: string,
+  name: string,
+  matricule: string
+  ) => {
+  const response = await fetch("/api/send-email", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      email,
+      name,
+      matricule,
+    }),
+  });
+
+  const result = await response.json();
+
+  console.log(result);
+
+  if (!response.ok) {
+    throw new Error(result.error || "Email failed");
+  }
+
+  return result;
+  };
+
+  const approveStudent = async (student: any) => {
+  try {
+    const snapshot = await getDocs(collection(db, "students"));
+
+    const approvedStudents = snapshot.docs.filter(
+      (d) => d.data().status === "Approved"
+    );
+
+    const nextNumber = approvedStudents.length + 1;
+
+    const matricule = `BMCA-${new Date().getFullYear()}-${String(
+      nextNumber
+    ).padStart(3, "0")}`;
+
+    await updateDoc(doc(db, "students", student.id), {
+      status: "Approved",
+      matricule,
+    });
+
+    try {
+      await sendEmail(
+        student.email,
+        student.name,
+        matricule
+      );
+
+      alert("Approved + Email sent!");
+    } catch (emailError) {
+      console.error("EMAIL ERROR:", emailError);
+
+      alert("Student approved but email failed");
+    }
+
+    fetchStudents();
+  } catch (error) {
+    console.error(error);
+    alert("Error approving student");
+  }
+};
+
+  const rejectStudent = async (student: any) => {
+    try {
+      await updateDoc(doc(db, "students", student.id), {
+        status: "Rejected",
+      });
+
+      alert("Rejected!");
+      fetchStudents();
+    } catch (error) {
+      console.error(error);
+      alert("Error rejecting student");
+    }
+  };
+
+  if (checking) {
+    return (
+      <main className="flex items-center justify-center min-h-screen bg-white text-black">
+        Loading...
+      </main>
+    );
+  }
+
+  if (!authorized) {
+    return (
+      <main className="flex items-center justify-center min-h-screen bg-white text-black">
+        <h1 className="text-3xl font-bold text-red-600">
+          Access Denied
+        </h1>
+      </main>
+    );
+  }
+
+  return (
+    <main className="p-10 min-h-screen bg-white text-black">
+      <h1 className="text-3xl font-bold mb-6 text-black">
+        Admin Panel
+      </h1>
+
+      {students.length === 0 ? (
+        <div className="p-4 border bg-white text-black">
+          No students found in Firestore
         </div>
-      </div>
-    </div>
+      ) : (
+        students.map((s, index) => (
+          <div
+            key={s.id}
+            className="p-5 mb-4 border bg-white text-black"
+          >
+            <p><b>Name:</b> {s.name}</p>
+            <p><b>Email:</b> {s.email}</p>
+            <p><b>Level:</b> {s.level}</p>
+            <p><b>Status:</b> {s.status}</p>
+            <p><b>Matricule:</b> {s.matricule || "-"}</p>
+
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() => approveStudent(s)}
+                className="bg-green-600 text-white px-4 py-2"
+              >
+                Approve
+              </button>
+
+              <button
+                onClick={() => rejectStudent(s)}
+                className="bg-red-600 text-white px-4 py-2"
+              >
+                Reject
+              </button>
+            </div>
+          </div>
+        ))
+      )}
+    </main>
   );
 }

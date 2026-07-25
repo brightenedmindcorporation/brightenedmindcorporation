@@ -1,48 +1,131 @@
-import React from "react";
-import Link from "next/link";
+"use client";
 
-export default function LoginPage() {
+import { useState } from "react";
+import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { useRouter } from "next/navigation";
+import { doc, getDoc } from "firebase/firestore";
+
+export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+
+  const router = useRouter();
+
+  // 🔐 LOGIN
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+
+      const userCred = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCred.user;
+
+      const snap = await getDoc(doc(db, "students", user.uid));
+
+      if (!snap.exists()) {
+        alert("Student not found");
+        return;
+      }
+
+      const data = snap.data();
+
+      if (data.status !== "Approved") {
+        alert("Account not approved yet");
+        return;
+      }
+
+      // ✅ SAVE USER LOCAL
+      localStorage.setItem(
+        "loggedStudent",
+        JSON.stringify({
+          uid: user.uid,
+          ...data,
+        })
+      );
+
+      // 🚀 REDIRECT DASHBOARD (avec le '/' obligatoire)
+      router.replace("/academy/dashboard");
+
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // 🔁 FORGOT PASSWORD
+  const handleForgotPassword = async () => {
+    try {
+      if (!email) {
+        alert("Enter your email first");
+        return;
+      }
+
+      setResetLoading(true);
+
+      await sendPasswordResetEmail(auth, email);
+
+      alert("Password reset email sent!");
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message);
+    } finally {
+      setResetLoading(false);
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto my-12 bg-white p-8 rounded-xl shadow-sm border">
-      <h1 className="text-2xl font-bold mb-6 text-center">Connexion Étudiant / Admin</h1>
-      
-      <form className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Adresse email
-          </label>
-          <input
-            type="email"
-            placeholder="votre.email@exemple.com"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+    <main className="min-h-screen flex items-center justify-center bg-red-50 px-4">
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Mot de passe
-          </label>
-          <input
-            type="password"
-            placeholder="••••••••"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+      <div className="bg-white p-8 shadow-xl rounded-2xl w-full max-w-md text-black">
 
+        <h1 className="text-2xl font-bold text-red-800 text-center mb-6">
+          Student Login
+        </h1>
+
+        {/* EMAIL */}
+        <input
+          type="email"
+          placeholder="Email"
+          className="w-full border p-3 mb-4 rounded text-black"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        {/* PASSWORD */}
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border p-3 mb-4 rounded text-black"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        {/* LOGIN BUTTON */}
         <button
-          type="submit"
-          className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+          onClick={handleLogin}
+          disabled={loading}
+          className="w-full bg-red-700 text-white p-3 rounded font-semibold disabled:opacity-50"
         >
-          Se connecter
+          {loading ? "Logging in..." : "Login"}
         </button>
-      </form>
 
-      <div className="mt-6 text-center text-sm text-slate-600">
-        Pas encore de compte ?{" "}
-        <Link href="/academy/register" className="text-blue-600 font-medium hover:underline">
-          S'inscrire
-        </Link>
+        {/* FORGOT PASSWORD */}
+        <button
+          onClick={handleForgotPassword}
+          disabled={resetLoading}
+          className="mt-4 text-sm text-red-700 underline w-full disabled:opacity-50"
+        >
+          {resetLoading ? "Sending email..." : "Forgot password?"}
+        </button>
+
       </div>
-    </div>
+    </main>
   );
 }

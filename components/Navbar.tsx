@@ -35,6 +35,8 @@ export default function Navbar() {
             alt="BM Logo"
             width={55}
             height={55}
+            priority
+            style={{ width: 'auto', height: 'auto' }}
           />
           <span className="font-bold text-white text-lg">
             BM Corporation

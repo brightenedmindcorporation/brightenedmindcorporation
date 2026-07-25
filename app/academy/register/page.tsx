@@ -1,65 +1,87 @@
-import React from "react";
-import Link from "next/link";
+"use client";
 
-export default function RegisterPage() {
+import { useState } from "react";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
+
+export default function Register() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [level, setLevel] = useState("Level 1");
+
+  const handleRegister = async () => {
+    try {
+      const userCred = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      const user = userCred.user;
+
+      await setDoc(doc(db, "students", user.uid), {
+        uid: user.uid,
+        name,
+        email,
+        level,
+        status: "Pending",
+        matricule: "",
+        createdAt: new Date(),
+      });
+
+      alert("Account created!");
+    } catch (error: any) {
+      alert(error.message);
+    }
+  };
+
   return (
-    <div className="max-w-md mx-auto my-12 bg-white p-8 rounded-xl shadow-sm border">
-      <h1 className="text-2xl font-bold mb-2 text-center">Inscription Étudiant</h1>
-      <p className="text-sm text-slate-500 mb-6 text-center">
-        Créez votre compte. Un administrateur devra valider votre inscription pour vous attribuer votre matricule BMCA.
-      </p>
-      
-      <form className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Nom complet
-          </label>
-          <input
-            type="text"
-            required
-            placeholder="Ex: Jean Dupont"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+    <main className="min-h-screen flex items-center justify-center bg-white text-black">
+      <div className="bg-white p-6 rounded-xl shadow w-96 border">
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Adresse email
-          </label>
-          <input
-            type="email"
-            required
-            placeholder="votre.email@exemple.com"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <h1 className="text-xl font-bold mb-4 text-black">
+          Student Register
+        </h1>
 
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1">
-            Mot de passe
-          </label>
-          <input
-            type="password"
-            required
-            placeholder="••••••••"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <input
+          placeholder="Full name"
+          className="w-full border p-2 mb-2 text-black bg-white"
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          placeholder="Email"
+          className="w-full border p-2 mb-2 text-black bg-white"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          className="w-full border p-2 mb-2 text-black bg-white"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+
+        <select
+          className="w-full border p-2 mb-3 text-black bg-white"
+          value={level}
+          onChange={(e) => setLevel(e.target.value)}
+        >
+          <option value="Level 1">Level 1</option>
+          <option value="Level 2">Level 2</option>
+          <option value="Level 3">Level 3</option>
+        </select>
 
         <button
-          type="submit"
-          className="w-full py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
+          onClick={handleRegister}
+          className="bg-red-600 text-white w-full p-2"
         >
-          Soumettre la demande d'inscription
+          Register
         </button>
-      </form>
 
-      <div className="mt-6 text-center text-sm text-slate-600">
-        Déjà inscrit ?{" "}
-        <Link href="/academy/login" className="text-blue-600 font-medium hover:underline">
-          Se connecter
-        </Link>
       </div>
-    </div>
+    </main>
   );
 }

@@ -28,6 +28,8 @@ export default function About() {
               src="/about-business.png"
               alt="About BM Corporation"
               fill
+              priority
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               className="object-cover"
             />
 
