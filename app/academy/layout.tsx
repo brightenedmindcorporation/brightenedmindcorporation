@@ -1,33 +1,33 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import Link from "next/link";
+import React from "react";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Brightened Mind Academy — Cours d'anglais en ligne",
-  description: "Apprenez l'anglais professionnellement avec Brightened Mind Academy. Cours en ligne pour particuliers et entreprises, du niveau débutant à business English. Inscrivez-vous dès aujourd'hui.",
-};
-
-export default function RootLayout({
+export default function AcademyLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
-    </html>
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900">
+      {/* Navbar de l'Académie */}
+      <header className="border-b bg-white px-6 py-4 flex items-center justify-between shadow-sm">
+        <Link href="/academy" className="text-xl font-bold text-blue-600">
+          BM Academy
+        </Link>
+        <nav className="flex items-center gap-6 text-sm font-medium">
+          <Link href="/academy" className="hover:text-blue-600 transition">
+            Accueil
+          </Link>
+          <Link href="/academy/dashboard" className="hover:text-blue-600 transition">
+            Tableau de bord
+          </Link>
+          <Link href="/academy/login" className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
+            Connexion
+          </Link>
+        </nav>
+      </header>
+
+      {/* Contenu principal */}
+      <main className="flex-1 max-w-7xl w-full mx-auto p-6">{children}</main>
+    </div>
   );
 }
