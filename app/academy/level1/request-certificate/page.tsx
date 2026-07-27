@@ -31,7 +31,7 @@ export default function RequestCertificatePage() {
       );
 
     if (!studentData) {
-      router.push("academy/login");
+      router.push("/academy/login");
       return;
     }
 

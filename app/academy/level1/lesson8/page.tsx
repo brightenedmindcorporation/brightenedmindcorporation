@@ -351,7 +351,7 @@ In the evening, I do my homework and sleep at nine p.m.
         {/* Quiz */}
         <div className="text-center mt-10">
 
-          <Link href="/level1/quiz8">
+          <Link href="/academy/level1/quiz8">
 
             <button className="bg-green-600 text-white px-8 py-4 rounded-2xl">
 

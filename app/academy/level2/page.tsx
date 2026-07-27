@@ -25,7 +25,7 @@ export default function Level2Page() {
     const student = JSON.parse(savedStudent);
 
     if (student.level !== "Level 2") {
-      router.push("academy/dashboard");
+      router.push("/academy/dashboard");
       return;
     }
 
@@ -119,7 +119,7 @@ export default function Level2Page() {
 
                 <div className="flex gap-3 mt-5">
                   {lessonUnlocked ? (
-                    <Link href={`academy/level2/lesson${lesson.id}`}>
+                    <Link href={`/academy/level2/lesson${lesson.id}`}>
                       <button className="bg-blue-700 text-white px-5 py-3 rounded-xl">
                         📘 Lesson
                       </button>
@@ -131,7 +131,7 @@ export default function Level2Page() {
                   )}
 
                   {quizUnlocked ? (
-                    <Link href={`academy/level2/quiz${lesson.id}`}>
+                    <Link href={`/academy/level2/quiz${lesson.id}`}>
                       <button className="bg-green-700 text-white px-5 py-3 rounded-xl">
                         📝 Quiz
                       </button>

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
+import AcademyHeader from "../components/AcademyHeader";
 
 export default function Level1Page() {
   const router = useRouter();
@@ -16,49 +17,58 @@ export default function Level1Page() {
   const progress = Math.round((completedQuizzes.length / 12) * 100);
 
   useEffect(() => {
-    const savedStudent = localStorage.getItem("loggedStudent");
+    try {
+      const savedStudent = localStorage.getItem("loggedStudent");
 
-    if (!savedStudent) {
+      if (!savedStudent) {
+        router.push("/academy/login");
+        return;
+      }
+
+      const student = JSON.parse(savedStudent);
+
+      // Si l'étudiant est connecté, on autorise l'accès (accepte 'Level 1' ou défaut)
+      if (student) {
+        setAllowed(true);
+      } else {
+        router.push("/academy/dashboard");
+        return;
+      }
+
+      const quizzes: number[] = [];
+      const lessons: number[] = [];
+
+      for (let i = 1; i <= 12; i++) {
+        const passed = localStorage.getItem(`quiz${i}Passed`);
+        if (passed === "true") {
+          quizzes.push(i);
+        }
+
+        const lessonDone = localStorage.getItem(`lesson${i}Completed`);
+        if (lessonDone === "true") {
+          lessons.push(i);
+        }
+      }
+
+      setCompletedQuizzes(quizzes);
+      setCompletedLessons(lessons);
+
+      if (localStorage.getItem("level1FinalPassed") === "true") {
+        setFinalPassed(true);
+      }
+    } catch (error) {
+      console.error("Erreur lors de la vérification de la session :", error);
       router.push("/academy/login");
-      return;
-    }
-
-    const student = JSON.parse(savedStudent);
-
-    if (student.level !== "Level 1") {
-      router.push("/academy/dashboard");
-      return;
-    }
-
-    setAllowed(true);
-
-    const quizzes: number[] = [];
-    const lessons: number[] = [];
-
-    for (let i = 1; i <= 12; i++) {
-      const passed = localStorage.getItem(`quiz${i}Passed`);
-      if (passed === "true") {
-        quizzes.push(i);
-      }
-
-      const lessonDone = localStorage.getItem(`lesson${i}Completed`);
-      if (lessonDone === "true") {
-        lessons.push(i);
-      }
-    }
-
-    setCompletedQuizzes(quizzes);
-    setCompletedLessons(lessons);
-
-    if (localStorage.getItem("level1FinalPassed") === "true") {
-      setFinalPassed(true);
     }
   }, [router]);
 
   if (!allowed) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300">
-        <p className="text-lg font-semibold animate-pulse">Checking access...</p>
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-lg font-semibold text-neutral-400">Checking access...</p>
+        </div>
       </main>
     );
   }
@@ -80,7 +90,8 @@ export default function Level1Page() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
-      {/* Navbar réutilisable */}
+      {/* AcademyHeader / Navbar */}
+      <AcademyHeader />
       <Navbar />
 
       <main className="p-6 md:p-10">
@@ -96,7 +107,7 @@ export default function Level1Page() {
             </Link>
           </div>
 
-          {/* Bannière du Niveau - Rouge & Noir */}
+          {/* Bannière du Niveau */}
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">
               Level 1 - Beginner English
@@ -106,7 +117,7 @@ export default function Level1Page() {
             </p>
           </div>
 
-          {/* Progression globale du cours */}
+          {/* Progression globale */}
           <div className="bg-neutral-900/90 backdrop-blur rounded-3xl shadow-xl border border-neutral-800 p-8 mt-8">
             <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
               <span>📈</span> Course Progress
@@ -126,7 +137,7 @@ export default function Level1Page() {
             </p>
           </div>
 
-          {/* Grille des leçons et quiz */}
+          {/* Grille des leçons */}
           <div className="mt-8 grid md:grid-cols-2 gap-6">
             {lessons.map((lesson) => {
               const lessonUnlocked =
@@ -181,14 +192,13 @@ export default function Level1Page() {
             })}
           </div>
 
-          {/* Section d'achèvement et certificat */}
+          {/* Section d'achèvement */}
           <div className="bg-neutral-900 rounded-3xl shadow-2xl border border-neutral-800 p-8 mt-10">
             <h2 className="text-2xl font-bold text-center text-white mb-6">
               🎓 Level Completion
             </h2>
 
             <div className="flex flex-col md:flex-row gap-4">
-              {/* Quiz Final */}
               {progress === 100 ? (
                 <Link href="/academy/level1/final-quiz" className="w-full">
                   <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60">
@@ -204,7 +214,6 @@ export default function Level1Page() {
                 </button>
               )}
 
-              {/* Demande de certificat */}
               {finalPassed ? (
                 <Link href="/academy/level1/request-certificate" className="w-full">
                   <button className="bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg">
@@ -221,6 +230,7 @@ export default function Level1Page() {
               )}
             </div>
           </div>
+
         </div>
       </main>
     </div>

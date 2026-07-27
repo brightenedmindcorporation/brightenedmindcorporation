@@ -367,7 +367,7 @@ I sit on a chair and study every morning.
         {/* Quiz */}
         <div className="text-center mt-10">
 
-          <Link href="/level1/quiz5">
+          <Link href="/academy/level1/quiz5">
 
             <button className="bg-green-600 text-white px-8 py-4 rounded-2xl">
 

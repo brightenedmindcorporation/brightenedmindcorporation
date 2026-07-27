@@ -15,7 +15,7 @@ export default function Level3Page() {
       );
 
     if (!savedStudent) {
-      router.push("academy/login");
+      router.push("/academy/login");
       return;
     }
 
@@ -25,7 +25,7 @@ export default function Level3Page() {
     if (
       student.level !== "Level 3"
     ) {
-      router.push("academy/dashboard");
+      router.push("/academy/dashboard");
       return;
     }
 

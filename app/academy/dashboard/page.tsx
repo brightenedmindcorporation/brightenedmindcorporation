@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
+import AcademyHeader from "../components/AcademyHeader";
 
 interface StudentData {
   name?: string;
@@ -22,7 +22,6 @@ export default function Dashboard() {
   const router = useRouter();
 
   useEffect(() => {
-    // Vérification côté client pour éviter l'erreur d'hydratation SSR
     const data = localStorage.getItem("loggedStudent");
 
     if (!data) {
@@ -34,7 +33,6 @@ export default function Dashboard() {
       const parsedStudent: StudentData = JSON.parse(data);
       setStudent(parsedStudent);
 
-      // Calcul de la dernière leçon accessible
       let completedCount = 0;
       let currentLesson = 1;
 
@@ -60,6 +58,11 @@ export default function Dashboard() {
     }
   }, [router]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("loggedStudent");
+    router.replace("/academy/login");
+  };
+
   if (loading || !student) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-400 font-medium">
@@ -84,15 +87,31 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-red-600 selection:text-white">
-      <Navbar />
+      <AcademyHeader />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 flex flex-col gap-8">
+      {/* Main container décalé avec pt-28 pour ne pas passer sous la Navbar */}
+      <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 pt-28 flex flex-col gap-8">
         
-        {/* CARTE DE BIENVENUE AVEC LOGO & THEME ROUGE/NOIR */}
+        {/* En-tête avec boutons Retour & Déconnexion */}
+        <div className="flex justify-between items-center bg-neutral-900/80 border border-neutral-800 p-4 rounded-2xl backdrop-blur-md">
+          <button 
+            onClick={() => router.back()}
+            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-sm font-semibold rounded-xl transition flex items-center gap-2"
+          >
+            ← Back / Retour
+          </button>
+
+          <button 
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-800/40 text-sm font-semibold rounded-xl transition"
+          >
+            Logout / Déconnexion
+          </button>
+        </div>
+
+        {/* Carte de bienvenue */}
         <div className="bg-neutral-900 rounded-3xl border border-neutral-800 p-8 relative overflow-hidden shadow-2xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-            
-            {/* Header avec Logo + Titre */}
             <div className="flex items-center gap-5">
               <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0">
                 <Image
@@ -102,7 +121,7 @@ export default function Dashboard() {
                   height={56}
                   className="object-cover rounded-[14px]"
                   priority
-                  unoptimized // 👈 Résout l'erreur 'output: export'
+                  unoptimized
                 />
               </div>
               <div>
@@ -115,7 +134,6 @@ export default function Dashboard() {
               </div>
             </div>
 
-            {/* Bouton d'action rapide */}
             <button
               onClick={handleContinue}
               className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-red-950/60 transition transform active:scale-95 flex items-center justify-center gap-2 shrink-0"
@@ -124,7 +142,7 @@ export default function Dashboard() {
             </button>
           </div>
 
-          {/* BARRE DE PROGRESSION */}
+          {/* Barre de progression */}
           <div className="bg-neutral-950/80 border border-neutral-800 rounded-2xl p-5 mb-6">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-bold text-neutral-300">
@@ -145,7 +163,7 @@ export default function Dashboard() {
             </p>
           </div>
 
-          {/* MINI-CARTES INFOS ÉTUDIANT */}
+          {/* Infos étudiant */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-neutral-950/60 rounded-xl border border-neutral-800">
               <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">
@@ -185,12 +203,11 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* SECTION NIVEAUX / COURS */}
+        {/* Sections des cours */}
         <div>
           <h2 className="text-xl font-black text-white mb-4">Your Courses</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            {/* Level 1 */}
             <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl flex flex-col justify-between hover:border-red-900/60 transition">
               <div>
                 <span className="text-xs font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
@@ -209,7 +226,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Level 2 */}
             <div className="bg-neutral-900/60 p-6 rounded-2xl border border-neutral-800/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-800/40">
@@ -237,7 +253,6 @@ export default function Dashboard() {
               </button>
             </div>
 
-            {/* Level 3 */}
             <div className="bg-neutral-900/60 p-6 rounded-2xl border border-neutral-800/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-purple-400 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800/40">

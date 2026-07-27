@@ -303,7 +303,7 @@ export default function Lesson12Page() {
 
         {/* Quiz */}
         <div className="text-center mt-10">
-          <Link href="/level1/quiz12">
+          <Link href="/academy/level1/quiz12">
             <button className="bg-green-600 text-white px-8 py-4 rounded-2xl">
               📝 Take Final Quiz
             </button>

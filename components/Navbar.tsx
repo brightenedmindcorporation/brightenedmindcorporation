@@ -1,12 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +19,11 @@ export default function Navbar() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // 🚫 Masque la Navbar globale sur toutes les pages /academy (login, dashboard, etc.)
+  if (pathname?.startsWith("/academy")) {
+    return null;
+  }
 
   return (
     <header
@@ -57,7 +64,7 @@ export default function Navbar() {
             Departments
           </a>
 
-          {/* NOUVEAU LIEN VERS ACADEMY */}
+          {/* LIEN VERS ACADEMY */}
           <Link href="/academy" className="hover:text-red-500 transition">
             Academy
           </Link>
@@ -92,7 +99,7 @@ export default function Navbar() {
             Departments
           </a>
 
-          {/* NOUVEAU LIEN MOBILE VERS ACADEMY */}
+          {/* LIEN MOBILE VERS ACADEMY */}
           <Link href="/academy" onClick={() => setMenuOpen(false)}>
             Academy
           </Link>

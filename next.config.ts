@@ -1,10 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Redirige automatiquement les anciens chemins /academy/app/... vers /academy/...
   async redirects() {
     return [
       {
-        // Redirige tout lien contenant /academy/app/... vers /academy/...
         source: "/academy/app/:path*",
         destination: "/academy/:path*",
         permanent: true,
