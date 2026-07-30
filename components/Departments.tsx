@@ -11,7 +11,7 @@ const departments = [
     description:
       "Valoriser l’image des particuliers, des entreprises et des institutions grâce à des services professionnels de communication visuelle, audiovisuelle et digitale.",
     image: "/communication.png",
-    url: "#"
+    url: "/communication"
   },
 
   {
@@ -19,7 +19,7 @@ const departments = [
     description:
       "Former et renforcer les compétences linguistiques, professionnelles et entrepreneuriales des apprenants pour favoriser leur insertion et leur réussite.",
     image: "/academy.png",
-    url: "/academy"
+    url: "/academia"
   },
 
   {
@@ -97,7 +97,7 @@ export default function Departments() {
                     href={dep.url}
                     className="inline-block mt-8 text-red-600 font-semibold hover:text-black transition"
                   >
-                    Accéder à l'académie →
+                    Accéder à la page →
                   </Link>
                 </div>
 

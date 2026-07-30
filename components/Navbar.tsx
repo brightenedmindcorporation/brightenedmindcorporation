@@ -64,9 +64,17 @@ export default function Navbar() {
             Departments
           </a>
 
-          {/* LIEN VERS ACADEMY */}
-          <Link href="/academy" className="hover:text-red-500 transition">
-            Academy
+          <Link href="/communication" className="hover:text-red-500 transition">
+            BM Communication
+          </Link>
+
+          <Link href="/domestica" className="hover:text-red-500 transition">
+            BM Domestica
+          </Link>
+
+          {/* LIEN VERS ACADEMIA (BM ACADEMIA) */}
+          <Link href="/academia" className="hover:text-red-500 transition">
+            BM Academia
           </Link>
 
           <a href="#contact" className="hover:text-red-500 transition">
@@ -99,9 +107,17 @@ export default function Navbar() {
             Departments
           </a>
 
-          {/* LIEN MOBILE VERS ACADEMY */}
-          <Link href="/academy" onClick={() => setMenuOpen(false)}>
-            Academy
+          <Link href="/communication" onClick={() => setMenuOpen(false)}>
+            BM Communication
+          </Link>
+
+          <Link href="/domestica" onClick={() => setMenuOpen(false)}>
+            BM Domestica
+          </Link>
+
+          {/* LIEN MOBILE VERS ACADEMIA (BM ACADEMIA) */}
+          <Link href="/academia" onClick={() => setMenuOpen(false)}>
+            BM Academia
           </Link>
 
           <a href="#contact" onClick={() => setMenuOpen(false)}>
