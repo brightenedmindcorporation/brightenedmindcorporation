@@ -98,8 +98,8 @@ export default function Footer() {
               📧 brightenedmindcorporation@gmail.com
             </a>
 
-            <a href="https://wa.me/243970874852">
-              📱 +243 970 874 852
+            <a href="https://wa.me/243988830799">
+              📱 +243 988 830 799
             </a>
 
             <a
