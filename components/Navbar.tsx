@@ -73,7 +73,7 @@ export default function Navbar() {
           </Link>
 
           {/* LIEN VERS ACADEMIA (BM ACADEMIA) */}
-          <Link href="/academia" className="hover:text-red-500 transition">
+          <Link href="/bmlearning" className="hover:text-red-500 transition">
             BM Academia
           </Link>
 

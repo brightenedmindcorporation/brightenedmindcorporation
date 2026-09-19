@@ -6,13 +6,15 @@ import Link from "next/link";
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const isHomePage = pathname === "/";
+  
+  // Masque l'en-tête et le pied de page sur "/" et sur "/bmlearning"
+  const hideLayoutElements = pathname === "/" || pathname === "/bmlearning";
   const phoneOfficial = "+243988830799";
 
   return (
     <>
-      {/* BARRE DE NAVIGATION (Masquée sur la page d'accueil "/") */}
-      {!isHomePage && (
+      {/* BARRE DE NAVIGATION (Masquée sur "/" et "/bmlearning") */}
+      {!hideLayoutElements && (
         <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-neutral-800">
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             {/* Logo */}
@@ -27,6 +29,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <Link href="/academia" className="hover:text-white transition">Academia</Link>
               <Link href="/academy" className="hover:text-white transition">Espace Élève</Link>
               <Link href="/communication" className="hover:text-white transition">Communication</Link>
+              <Link href="/bmlearning" className="hover:text-white transition">Bm Learning</Link>
             </nav>
 
             {/* Bouton Devise / Inscription */}
@@ -47,8 +50,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         {children}
       </div>
 
-      {/* PIED DE PAGE (Masqué sur la page d'accueil "/") */}
-      {!isHomePage && (
+      {/* PIED DE PAGE (Masqué sur "/" et "/bmlearning") */}
+      {!hideLayoutElements && (
         <footer className="bg-neutral-950 border-t border-neutral-900 py-12 px-6 text-neutral-400 text-sm">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>

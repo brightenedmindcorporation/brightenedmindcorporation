@@ -19,7 +19,7 @@ const departments = [
     description:
       "Former et renforcer les compétences linguistiques, professionnelles et entrepreneuriales des apprenants pour favoriser leur insertion et leur réussite.",
     image: "/academy.png",
-    url: "/academia"
+    url: "/bmlearning"
   },
 
   {
