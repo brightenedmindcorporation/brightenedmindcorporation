@@ -2,6 +2,62 @@
 
 import React, { useEffect } from "react";
 import Script from "next/script";
+// Déclaration pour que TypeScript reconnaisse les scripts externes sur window
+declare global {
+  interface Window {
+    lucide?: any;
+    confetti?: any;
+    router?: any;
+    currentUser?: any;
+    isStaffAuthenticated?: boolean;
+    staffRole?: string | null;
+    localStream?: MediaStream | null;
+    isLiveBroadcasting?: boolean;
+    currentLessonTitle?: string;
+    liveSeconds?: number;
+    liveTimerInterval?: any;
+    currentAnnouncement?: string;
+    isMicMuted?: boolean;
+    isCamOff?: boolean;
+    isScreenSharing?: boolean;
+    activeQuizLevel?: any;
+    activeQuizIndex?: number;
+    activeQuizScore?: number;
+    selectedQuizAnswer?: any;
+    teacherStartLiveBroadcast?: () => void;
+    teacherStopLiveBroadcast?: () => void;
+    updateLiveClockDisplay?: () => void;
+    syncLiveClassroomState?: () => void;
+    publishGlobalAnnouncement?: () => void;
+    togglePaymentInputs?: () => void;
+    handleRegistration?: (e: any) => void;
+    handleStudentLogin?: (e: any) => void;
+    logout?: () => void;
+    updateHeaderForUser?: () => void;
+    refreshDashboardUI?: () => void;
+    toggleCamera?: () => void;
+    toggleMicrophone?: () => void;
+    toggleScreenShare?: () => void;
+    raiseHand?: () => void;
+    sendLiveMessage?: (e: any) => void;
+    sendSystemChatMessage?: (text: string) => void;
+    initWhiteboard?: () => void;
+    toggleWhiteboard?: () => void;
+    clearWhiteboard?: () => void;
+    startQuizMode?: (level: any) => void;
+    renderQuizQuestion?: () => void;
+    submitQuizChoice?: () => void;
+    finishQuiz?: () => void;
+    showCertificate?: () => void;
+    resetQuizState?: () => void;
+    setAdminTab?: (tab: string) => void;
+    refreshAdminUI?: () => void;
+    toggleStudentApproval?: (id: string, status: string) => void;
+    openGenericModal?: (title: string, msg: string, icon?: string) => void;
+    showToast?: (msg: string, type?: string) => void;
+    escapeHtml?: (text: string) => void;
+  }
+}
 
 export default function BmLearningPage() {
   useEffect(() => {
