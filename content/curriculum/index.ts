@@ -6,6 +6,9 @@ import { frenchLevel1 } from "./french/level1";
 import { swahiliLevel1 } from "./swahili/level1";
 import { swahiliLevel2 } from "./swahili/level2";
 import { swahiliLevel3 } from "./swahili/level3";
+import { spanishLevel1 } from "./spanish/level1";
+import { spanishLevel2 } from "./spanish/level2";
+import { spanishLevel3 } from "./spanish/level3";
 
 // Add new entries here as more languages/levels are authored (Phase 4).
 // Each entry's key is `${langSlug}-${level}`.
@@ -17,6 +20,9 @@ const registry: Record<string, LevelCurriculum> = {
   "swahili-1": swahiliLevel1,
   "swahili-2": swahiliLevel2,
   "swahili-3": swahiliLevel3,
+  "spanish-1": spanishLevel1,
+  "spanish-2": spanishLevel2,
+  "spanish-3": spanishLevel3,
 };
 
 export const availableLanguages = [
