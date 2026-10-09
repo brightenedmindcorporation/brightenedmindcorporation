@@ -27,7 +27,7 @@ const departments = [
     description:
       "Assurer le recrutement, la sélection, la formation et le placement du personnel domestique qualifié afin de répondre aux besoins des ménages avec professionnalisme, confiance et efficacité.",
     image: "/domestica.png",
-    url: "#"
+    url: "/domestica"
   }
 ];
 

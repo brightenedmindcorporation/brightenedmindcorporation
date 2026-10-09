@@ -157,7 +157,7 @@ export default function AdminPage() {
 
   if (checking) {
     return (
-      <main className="flex items-center justify-center min-h-screen bg-white text-black">
+      <main className="flex items-center justify-center min-h-screen bg-neutral-950 text-neutral-400">
         Loading...
       </main>
     );
@@ -165,7 +165,7 @@ export default function AdminPage() {
 
   if (!authorized) {
     return (
-      <main className="flex items-center justify-center min-h-screen bg-white text-black">
+      <main className="flex items-center justify-center min-h-screen bg-neutral-950">
         <h1 className="text-3xl font-bold text-red-600">
           Access Denied
         </h1>
@@ -174,48 +174,50 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="p-10 min-h-screen bg-white text-black">
-      <h1 className="text-3xl font-bold mb-6 text-black">
-        Admin Panel
-      </h1>
+    <main className="p-6 md:p-10 min-h-screen bg-neutral-950 text-neutral-100">
+      <div className="max-w-5xl mx-auto">
+        <h1 className="text-3xl font-black tracking-tight text-white mb-6">
+          Admin Panel
+        </h1>
 
-      {students.length === 0 ? (
-        <div className="p-4 border bg-white text-black">
-          No students found in Firestore
-        </div>
-      ) : (
-        students.map((s, index) => (
-          <div
-            key={s.id}
-            className="p-5 mb-4 border bg-white text-black"
-          >
-            <p><b>Name:</b> {s.name}</p>
-            <p><b>Email:</b> {s.email}</p>
-            <p><b>Language:</b> {s.langCode || "EN (legacy)"}</p>
-            <p><b>Level:</b> {s.level}</p>
-            <p><b>Status:</b> {s.status}</p>
-            <p><b>Matricule:</b> {s.matricule || "-"}</p>
-
-            <div className="flex gap-3 mt-4">
-              <button
-                onClick={() => approveStudent(s)}
-                disabled={processingIds.has(s.id) || s.status !== "Pending"}
-                className="bg-green-600 text-white px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                {processingIds.has(s.id) ? "Processing..." : "Approve"}
-              </button>
-
-              <button
-                onClick={() => rejectStudent(s)}
-                disabled={processingIds.has(s.id) || s.status !== "Pending"}
-                className="bg-red-600 text-white px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Reject
-              </button>
-            </div>
+        {students.length === 0 ? (
+          <div className="p-4 rounded-2xl border border-neutral-800 bg-neutral-900 text-neutral-400">
+            No students found in Firestore
           </div>
-        ))
-      )}
+        ) : (
+          students.map((s, index) => (
+            <div
+              key={s.id}
+              className="p-5 mb-4 rounded-2xl border border-neutral-800 bg-neutral-900 shadow-xl"
+            >
+              <p className="text-neutral-200"><b className="text-white">Name:</b> {s.name}</p>
+              <p className="text-neutral-200"><b className="text-white">Email:</b> {s.email}</p>
+              <p className="text-neutral-200"><b className="text-white">Language:</b> {s.langCode || "EN (legacy)"}</p>
+              <p className="text-neutral-200"><b className="text-white">Level:</b> {s.level}</p>
+              <p className="text-neutral-200"><b className="text-white">Status:</b> {s.status}</p>
+              <p className="text-neutral-200"><b className="text-white">Matricule:</b> {s.matricule || "-"}</p>
+
+              <div className="flex gap-3 mt-4">
+                <button
+                  onClick={() => approveStudent(s)}
+                  disabled={processingIds.has(s.id) || s.status !== "Pending"}
+                  className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {processingIds.has(s.id) ? "Processing..." : "Approve"}
+                </button>
+
+                <button
+                  onClick={() => rejectStudent(s)}
+                  disabled={processingIds.has(s.id) || s.status !== "Pending"}
+                  className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Reject
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
     </main>
   );
 }

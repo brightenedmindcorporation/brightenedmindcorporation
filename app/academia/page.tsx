@@ -120,28 +120,52 @@ export default function AcademiaPage() {
             <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
               <span className="text-2xl mb-4 block">🇨🇩</span>
               <h3 className="text-xl font-bold text-white mb-2">Swahili</h3>
-              <p className="text-neutral-400 text-sm">Apprentissage complet de la langue parlée et écrite pour les affaires et le quotidien.</p>
+              <p className="text-neutral-400 text-sm mb-6">Apprentissage complet de la langue parlée et écrite pour les affaires et le quotidien.</p>
+              <Link
+                href="/academia/swahili"
+                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+              >
+                Ouvrir la plateforme de Swahili →
+              </Link>
             </div>
 
             {/* ESPAGNOL */}
             <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
               <span className="text-2xl mb-4 block">🇪🇸</span>
               <h3 className="text-xl font-bold text-white mb-2">Espagnol</h3>
-              <p className="text-neutral-400 text-sm">Bases solides de communication et vocabulaire professionnel.</p>
+              <p className="text-neutral-400 text-sm mb-6">Bases solides de communication et vocabulaire professionnel.</p>
+              <Link
+                href="/academia/espagnol"
+                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+              >
+                Ouvrir la plateforme d'Espagnol →
+              </Link>
             </div>
 
             {/* PORTUGAIS */}
             <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
               <span className="text-2xl mb-4 block">🇵🇹</span>
               <h3 className="text-xl font-bold text-white mb-2">Portugais</h3>
-              <p className="text-neutral-400 text-sm">Expression orale et écrite adaptées aux échanges régionaux et internationaux.</p>
+              <p className="text-neutral-400 text-sm mb-6">Expression orale et écrite adaptées aux échanges régionaux et internationaux.</p>
+              <Link
+                href="/academia/portugais"
+                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+              >
+                Ouvrir la plateforme de Portugais →
+              </Link>
             </div>
 
             {/* CHINOIS */}
             <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
               <span className="text-2xl mb-4 block">🇨🇳</span>
               <h3 className="text-xl font-bold text-white mb-2">Chinois (Mandarin)</h3>
-              <p className="text-neutral-400 text-sm">Initiation à la prononciation, aux caractères de base et au vocabulaire commercial.</p>
+              <p className="text-neutral-400 text-sm mb-6">Initiation à la prononciation, aux caractères de base et au vocabulaire commercial.</p>
+              <Link
+                href="/academia/chinois"
+                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+              >
+                Ouvrir la plateforme de Chinois →
+              </Link>
             </div>
           </div>
         </section>
