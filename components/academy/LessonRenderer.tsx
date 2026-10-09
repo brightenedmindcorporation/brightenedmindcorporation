@@ -2,10 +2,22 @@
 
 import type { Lesson } from "@/content/curriculum/types";
 
-function speak(text: string) {
+// Maps our URL language slugs to BCP-47 tags for the Web Speech API.
+// Without this, every language's "Listen" buttons were reading the text
+// aloud with an English voice (the bug this fixes).
+const SPEECH_LANG: Record<string, string> = {
+  english: "en-US",
+  french: "fr-FR",
+  swahili: "sw-KE",
+  spanish: "es-ES",
+  portuguese: "pt-PT",
+  chinese: "zh-CN",
+};
+
+function speak(text: string, langSlug: string) {
   window.speechSynthesis.cancel();
   const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = "en-US";
+  speech.lang = SPEECH_LANG[langSlug] ?? "en-US";
   speech.rate = 0.9;
   speech.pitch = 1;
   speech.volume = 1;
@@ -28,11 +40,11 @@ function CardTitle({ icon, children }: { icon: string; children: React.ReactNode
   );
 }
 
-function SpeakButtons({ text, label = "Listen" }: { text: string; label?: string }) {
+function SpeakButtons({ text, langSlug, label = "Listen" }: { text: string; langSlug: string; label?: string }) {
   return (
     <div className="mt-6 flex flex-wrap gap-4">
       <button
-        onClick={() => speak(text)}
+        onClick={() => speak(text, langSlug)}
         className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50"
       >
         🔊 {label}
@@ -47,7 +59,7 @@ function SpeakButtons({ text, label = "Listen" }: { text: string; label?: string
   );
 }
 
-export default function LessonRenderer({ lesson }: { lesson: Lesson }) {
+export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
   return (
     <div className="space-y-8">
       <Card>
@@ -64,7 +76,7 @@ export default function LessonRenderer({ lesson }: { lesson: Lesson }) {
             </div>
           ))}
         </div>
-        <SpeakButtons text={lesson.speakText} label="Listen Lesson" />
+        <SpeakButtons text={lesson.speakText} langSlug={langSlug} label="Listen Lesson" />
       </Card>
 
       <Card>
@@ -80,7 +92,7 @@ export default function LessonRenderer({ lesson }: { lesson: Lesson }) {
             <p key={i}>{p}</p>
           ))}
         </div>
-        <SpeakButtons text={lesson.readingSpeakText} label="Listen Reading" />
+        <SpeakButtons text={lesson.readingSpeakText} langSlug={langSlug} label="Listen Reading" />
       </Card>
 
       <Card>
