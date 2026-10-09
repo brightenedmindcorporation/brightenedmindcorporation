@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import Script from "next/script";
-// Déclaration pour que TypeScript reconnaisse les scripts externes sur window
+
 declare global {
   interface Window {
     lucide?: any;
@@ -56,12 +56,12 @@ declare global {
     openGenericModal?: (title: string, msg: string, icon?: string) => void;
     showToast?: (msg: string, type?: string) => void;
     escapeHtml?: (text: string) => void;
+    exitStaffMode?: () => void;
   }
 }
 
 export default function BmLearningPage() {
   useEffect(() => {
-    // Initialisation globale au chargement de la page
     if (window.lucide) {
       window.lucide.createIcons();
     }
@@ -69,7 +69,6 @@ export default function BmLearningPage() {
 
   return (
     <>
-      {/* Scripts externes nécessaires au fonctionnement de l'application */}
       <Script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js" strategy="afterInteractive" />
       <Script src="https://unpkg.com/lucide@latest" strategy="afterInteractive" onLoad={() => {
         if (window.lucide) window.lucide.createIcons();
@@ -450,10 +449,33 @@ export default function BmLearningPage() {
                   <div id="onlinePaymentSubBox" className="p-4 rounded-xl bg-[#0B0C10]/90 border border-[#272B36] space-y-3">
                     <label className="block text-xs text-gray-400">Sélectionnez la passerelle disponible :</label>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                      <div className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Mobile Money</div>
-                      <div className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Airtel / M-Pesa</div>
-                      <div className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Orange Money</div>
-                      <div className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Carte Visa/Master</div>
+                      <div onClick={() => {
+                        const codeInput = document.getElementById('regRefCodeOnline') as HTMLInputElement;
+                        if(codeInput) codeInput.value = 'M-PESA-' + Math.floor(100000 + Math.random() * 900000);
+                        (window as any).showToast('Passerelle Mobile Money sélectionnée', 'success');
+                      }} className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Mobile Money</div>
+                      
+                      <div onClick={() => {
+                        const codeInput = document.getElementById('regRefCodeOnline') as HTMLInputElement;
+                        if(codeInput) codeInput.value = 'AIRTEL-' + Math.floor(100000 + Math.random() * 900000);
+                        (window as any).showToast('Passerelle Airtel Money sélectionnée', 'success');
+                      }} className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Airtel / M-Pesa</div>
+                      
+                      <div onClick={() => {
+                        const codeInput = document.getElementById('regRefCodeOnline') as HTMLInputElement;
+                        if(codeInput) codeInput.value = 'ORANGE-' + Math.floor(100000 + Math.random() * 900000);
+                        (window as any).showToast('Passerelle Orange Money sélectionnée', 'success');
+                      }} className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Orange Money</div>
+                      
+                      <div onClick={() => {
+                        const codeInput = document.getElementById('regRefCodeOnline') as HTMLInputElement;
+                        if(codeInput) codeInput.value = 'VISA-' + Math.floor(100000 + Math.random() * 900000);
+                        (window as any).showToast('Passerelle Carte Bancaire sélectionnée', 'success');
+                      }} className="p-2.5 rounded-lg border border-[#272B36] bg-[#16181F] text-center font-medium hover:border-[#FF1E27] cursor-pointer">Carte Visa/Master</div>
+                    </div>
+                    <div className="mt-2">
+                      <label className="block text-xs text-gray-400 mb-1">ID de transaction automatique généré :</label>
+                      <input id="regRefCodeOnline" type="text" readOnly value="ONLINE-PAY-AUTO" className="w-full bg-[#16181F] border border-[#272B36] rounded-lg px-3 py-2 text-xs font-mono text-green-400" />
                     </div>
                   </div>
 
@@ -604,10 +626,16 @@ export default function BmLearningPage() {
                   </div>
                   <h3 className="text-2xl font-bold text-white mb-2">Salle de Cours en Direct</h3>
                   <p className="text-gray-400 text-sm leading-relaxed mb-6">
-                    Rejoignez la salle interactive. Si le professeur a démarré la session, le flux vidéo et audio sera immédiatement disponible.
+                    Rejoignez la salle interactive. Si le professeur a démarré la session et que votre compte est approuvé, le flux vidéo et audio sera immédiatement disponible.
                   </p>
                 </div>
-                <button onClick={() => (window as any).router?.navigate('live-class')} className="w-full py-3.5 bg-[#FF1E27] hover:bg-[#E0121B] text-white font-bold rounded-xl shadow-lg shadow-[#FF1E27]/30 flex items-center justify-center gap-2 transition-all">
+                <button onClick={() => {
+                  if ((window as any).currentUser && (window as any).currentUser.status !== 'approved') {
+                    (window as any).showToast?.("Accès restreint : Votre compte doit être approuvé par l'administration.", "warning");
+                    return;
+                  }
+                  (window as any).router?.navigate('live-class');
+                }} className="w-full py-3.5 bg-[#FF1E27] hover:bg-[#E0121B] text-white font-bold rounded-xl shadow-lg shadow-[#FF1E27]/30 flex items-center justify-center gap-2 transition-all">
                   <i data-lucide="video" className="w-5 h-5"></i> Accéder à la Salle de Cours
                 </button>
               </div>
@@ -622,7 +650,13 @@ export default function BmLearningPage() {
                     Validez les Niveaux 1, 2 et 3 puis terminez par le Quiz Global pour obtenir le certificat officiel délivré par Brightened Mind Corporation.
                   </p>
                 </div>
-                <button onClick={() => (window as any).router?.navigate('quiz')} className="w-full py-3.5 bg-[#16181F] hover:bg-[#272B36] text-white border border-[#272B36] font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
+                <button onClick={() => {
+                  if ((window as any).currentUser && (window as any).currentUser.status !== 'approved') {
+                    (window as any).showToast?.("Accès restreint : Votre compte doit être approuvé par l'administration.", "warning");
+                    return;
+                  }
+                  (window as any).router?.navigate('quiz');
+                }} className="w-full py-3.5 bg-[#16181F] hover:bg-[#272B36] text-white border border-[#272B36] font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
                   <i data-lucide="file-check-2" className="w-5 h-5"></i> Accéder aux Quiz
                 </button>
               </div>
@@ -731,7 +765,7 @@ export default function BmLearningPage() {
                       <i id="iconCam" data-lucide="video" className="w-5 h-5"></i>
                     </button>
                     <button id="btnToggleShare" onClick={() => (window as any).toggleScreenShare?.()} className="p-3.5 rounded-xl bg-[#16181F] hover:bg-[#272B36] text-white border border-[#272B36] transition-all" title="Partager l'écran">
-                      <i id="iconCam" data-lucide="monitor-up" className="w-5 h-5"></i>
+                      <i data-lucide="monitor-up" className="w-5 h-5"></i>
                     </button>
                     <button onClick={() => (window as any).raiseHand?.()} className="p-3.5 rounded-xl bg-[#16181F] hover:bg-[#272B36] text-yellow-400 border border-[#272B36] transition-all" title="Lever la main">
                       <i data-lucide="hand" className="w-5 h-5"></i>
@@ -1064,7 +1098,6 @@ export default function BmLearningPage() {
         </footer>
       </div>
 
-      {/* Script d'exécution de toute la logique JavaScript intégrée */}
       <Script id="cbm-app-script" strategy="afterInteractive" dangerouslySetInnerHTML={{ __html: `
         const INITIAL_STUDENTS = [
           {
@@ -1267,6 +1300,13 @@ export default function BmLearningPage() {
                 window.showToast("Veuillez vous connecter pour accéder à cet espace", "warning");
                 window.router.navigate('login');
                 return;
+              }
+              if (viewId === 'live-class' || viewId === 'quiz') {
+                if (window.currentUser && window.currentUser.status !== 'approved' && !window.isStaffAuthenticated) {
+                  window.showToast("Votre compte est en attente d'approbation par la direction.", "warning");
+                  window.router.navigate('dashboard');
+                  return;
+                }
               }
             }
 
@@ -1488,7 +1528,7 @@ export default function BmLearningPage() {
           }
 
           let refType = "Paiement en ligne";
-          let refCode = \`TXN-ONLINE-\${Math.floor(100000 + Math.random() * 900000)}\`;
+          let refCode = document.getElementById('regRefCodeOnline')?.value || \`TXN-ONLINE-\${Math.floor(100000 + Math.random() * 900000)}\`;
 
           if (paymentMode === 'reference') {
             refType = document.getElementById('regRefType')?.value;
@@ -1585,6 +1625,10 @@ export default function BmLearningPage() {
 
         window.refreshDashboardUI = function() {
           if (!window.currentUser) return;
+
+          // Rafraîchir les données depuis la base locale
+          const latest = db.findStudentByEmail(window.currentUser.email);
+          if (latest) window.currentUser = latest;
 
           const nameEl = document.getElementById('dashFullName');
           const emailEl = document.getElementById('dashEmail');
@@ -2116,6 +2160,13 @@ export default function BmLearningPage() {
           const div = document.createElement('div');
           div.textContent = text;
           return div.innerHTML;
+        };
+
+        window.exitStaffMode = function() {
+          window.isStaffAuthenticated = false;
+          window.staffRole = null;
+          window.showToast("Espace Direction fermé", "info");
+          window.router.navigate('home');
         };
 
         window.addEventListener('DOMContentLoaded', () => {
