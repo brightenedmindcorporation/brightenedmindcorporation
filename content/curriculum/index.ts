@@ -3,6 +3,8 @@ import { englishLevel1 } from "./english/level1";
 import { englishLevel2 } from "./english/level2";
 import { englishLevel3 } from "./english/level3";
 import { frenchLevel1 } from "./french/level1";
+import { frenchLevel2 } from "./french/level2";
+import { frenchLevel3 } from "./french/level3";
 import { swahiliLevel1 } from "./swahili/level1";
 import { swahiliLevel2 } from "./swahili/level2";
 import { swahiliLevel3 } from "./swahili/level3";
@@ -20,6 +22,8 @@ const registry: Record<string, LevelCurriculum> = {
   "english-2": englishLevel2,
   "english-3": englishLevel3,
   "french-1": frenchLevel1,
+  "french-2": frenchLevel2,
+  "french-3": frenchLevel3,
   "swahili-1": swahiliLevel1,
   "swahili-2": swahiliLevel2,
   "swahili-3": swahiliLevel3,
