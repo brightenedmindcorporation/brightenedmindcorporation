@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
 
 export default function Quiz1Page() {
   const questions = [
@@ -117,7 +116,6 @@ export default function Quiz1Page() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
-      <Navbar />
 
       <main className="p-6 md:p-10">
         <div className="max-w-4xl mx-auto space-y-8">

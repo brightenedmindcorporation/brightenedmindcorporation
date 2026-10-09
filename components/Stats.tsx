@@ -26,7 +26,7 @@ const stats = [
 
 export default function Stats() {
   return (
-    <section className="py-24 bg-[#f8f8f8]">
+    <section className="py-24 bg-neutral-950">
 
       <div className="max-w-7xl mx-auto px-8">
 
@@ -39,14 +39,14 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.2 }}
-              className="bg-white rounded-[25px] shadow-lg p-10 text-center hover:shadow-2xl transition"
+              className="bg-neutral-900 border border-neutral-800 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
             >
 
               <h2 className="text-5xl font-black text-red-600">
                 {stat.number}
               </h2>
 
-              <p className="mt-4 text-gray-600 font-medium">
+              <p className="mt-4 text-neutral-400 font-medium">
                 {stat.label}
               </p>
 

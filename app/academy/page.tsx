@@ -2,12 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col font-sans selection:bg-red-600 selection:text-white">
-      <Navbar />
 
       {/* HERO SECTION */}
       <section className="relative pt-16 pb-20 md:pt-28 md:pb-32 overflow-hidden border-b border-zinc-800">

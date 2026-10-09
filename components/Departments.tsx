@@ -19,7 +19,7 @@ const departments = [
     description:
       "Former et renforcer les compétences linguistiques, professionnelles et entrepreneuriales des apprenants pour favoriser leur insertion et leur réussite.",
     image: "/academy.png",
-    url: "/bmlearning"
+    url: "/academy"
   },
 
   {
@@ -36,7 +36,7 @@ export default function Departments() {
     <FadeIn>
       <section
         id="departments"
-        className="py-32 bg-[#f8f8f8]"
+        className="py-32 bg-black"
       >
         <div className="max-w-7xl mx-auto px-8">
 
@@ -46,7 +46,7 @@ export default function Departments() {
               Nos Départements
             </p>
 
-            <h2 className="text-5xl font-black mt-6 text-[#111111] leading-tight">
+            <h2 className="text-5xl font-black mt-6 text-white leading-tight">
               Trois expertises.
               <br />
               <span className="text-red-600">
@@ -68,7 +68,7 @@ export default function Departments() {
                   y: -12,
                   scale: 1.02
                 }}
-                className="bg-white rounded-[30px] overflow-hidden shadow-xl group transition-all duration-500"
+                className="bg-neutral-900 border border-neutral-800 rounded-[30px] overflow-hidden shadow-xl shadow-black/20 group transition-all duration-500"
               >
 
                 {/* IMAGE */}
@@ -85,17 +85,17 @@ export default function Departments() {
 
                 {/* CONTENT */}
                 <div className="p-8">
-                  <h3 className="text-2xl font-bold text-[#111111]">
+                  <h3 className="text-2xl font-bold text-white">
                     {dep.title}
                   </h3>
 
-                  <p className="mt-5 text-gray-600 leading-8">
+                  <p className="mt-5 text-neutral-400 leading-8">
                     {dep.description}
                   </p>
 
                   <Link
                     href={dep.url}
-                    className="inline-block mt-8 text-red-600 font-semibold hover:text-black transition"
+                    className="inline-block mt-8 text-red-600 font-semibold hover:text-white transition"
                   >
                     Accéder à la page →
                   </Link>

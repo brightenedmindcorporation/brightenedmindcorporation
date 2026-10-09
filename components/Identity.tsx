@@ -3,7 +3,7 @@ import FadeIn from "./FadeIn";
 export default function Identity() {
   return (
     <FadeIn>
-    <section className="py-28 bg-white">
+    <section className="py-28 bg-neutral-950">
 
       <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-12">
 

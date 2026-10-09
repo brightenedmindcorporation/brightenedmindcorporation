@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import Navbar from "@/components/Navbar";
 import SpeakingExercise from "@/components/SpeakingExercise";
 
 export default function Lesson1Page() {
@@ -23,7 +22,6 @@ export default function Lesson1Page() {
 
   return (
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
-      <Navbar />
 
       <main className="p-6 md:p-10">
         <div className="max-w-5xl mx-auto space-y-8">

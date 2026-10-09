@@ -55,7 +55,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-28 bg-white">
+    <section id="contact" className="py-28 bg-black">
 
       <div className="max-w-3xl mx-auto px-8">
 
@@ -65,7 +65,7 @@ export default function Contact() {
             Contact
           </p>
 
-          <h2 className="text-5xl font-black mt-5 text-[#111111]">
+          <h2 className="text-5xl font-black mt-5 text-white">
             Parlons de votre projet
           </h2>
 
@@ -80,7 +80,7 @@ export default function Contact() {
             value={form.name}
             onChange={handleChange}
             required
-            className="border p-4 rounded-xl"
+            className="border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600"
           />
 
           <input
@@ -90,7 +90,7 @@ export default function Contact() {
             value={form.email}
             onChange={handleChange}
             required
-            className="border p-4 rounded-xl"
+            className="border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600"
           />
 
           <textarea
@@ -100,12 +100,12 @@ export default function Contact() {
             onChange={handleChange}
             required
             rows={6}
-            className="border p-4 rounded-xl"
+            className="border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600"
           />
 
           <button
             type="submit"
-            className="bg-red-600 text-white py-4 rounded-xl hover:bg-black transition"
+            className="bg-red-600 text-white py-4 rounded-xl hover:bg-red-700 transition"
           >
             Envoyer
           </button>

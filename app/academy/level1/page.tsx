@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
 import AcademyHeader from "../components/AcademyHeader";
 
 export default function Level1Page() {
@@ -92,7 +91,6 @@ export default function Level1Page() {
     <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
       {/* AcademyHeader / Navbar */}
       <AcademyHeader />
-      <Navbar />
 
       <main className="p-6 md:p-10">
         <div className="max-w-7xl mx-auto">

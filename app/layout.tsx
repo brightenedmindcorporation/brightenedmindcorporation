@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-sans",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Brightened Mind Corporation",
@@ -46,7 +53,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth" className="dark">
+    <html lang="fr" data-scroll-behavior="smooth" className={`dark ${inter.variable}`}>
       <body className="bg-black text-white font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
         <ClientLayout>{children}</ClientLayout>
       </body>

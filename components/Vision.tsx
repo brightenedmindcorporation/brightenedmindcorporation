@@ -6,7 +6,7 @@ export default function Vision() {
   return (
     <section
       id="vision"
-      className="py-32 bg-[#f8f8f8]"
+      className="py-32 bg-neutral-950"
     >
 
       <div className="max-w-6xl mx-auto px-8 text-center">
@@ -22,7 +22,7 @@ export default function Vision() {
             Notre vision
           </p>
 
-          <h2 className="text-5xl font-bold mt-6 text-[#111111] leading-tight">
+          <h2 className="text-5xl font-bold mt-6 text-white leading-tight">
 
             Éclairer les esprits.
             <br />
@@ -36,7 +36,7 @@ export default function Vision() {
 
           </h2>
 
-          <p className="mt-10 max-w-3xl mx-auto text-gray-600 leading-9 text-lg">
+          <p className="mt-10 max-w-3xl mx-auto text-neutral-400 leading-9 text-lg">
 
             Nous croyons qu’un monde meilleur se construit
             lorsque les individus, les entreprises et les communautés
@@ -53,13 +53,13 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-white p-10 rounded-3xl shadow-lg"
+            className="bg-neutral-900 border border-neutral-800 p-10 rounded-3xl shadow-lg shadow-black/20"
           >
             <h3 className="text-3xl font-bold text-red-600">
               Innovation
             </h3>
 
-            <p className="mt-5 text-gray-600 leading-8">
+            <p className="mt-5 text-neutral-400 leading-8">
               Concevoir des solutions modernes
               adaptées aux défis actuels.
             </p>
@@ -67,13 +67,13 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-white p-10 rounded-3xl shadow-lg"
+            className="bg-neutral-900 border border-neutral-800 p-10 rounded-3xl shadow-lg shadow-black/20"
           >
             <h3 className="text-3xl font-bold text-red-600">
               Excellence
             </h3>
 
-            <p className="mt-5 text-gray-600 leading-8">
+            <p className="mt-5 text-neutral-400 leading-8">
               Offrir des services à forte valeur
               ajoutée avec professionnalisme.
             </p>
@@ -81,13 +81,13 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-white p-10 rounded-3xl shadow-lg"
+            className="bg-neutral-900 border border-neutral-800 p-10 rounded-3xl shadow-lg shadow-black/20"
           >
             <h3 className="text-3xl font-bold text-red-600">
               Impact
             </h3>
 
-            <p className="mt-5 text-gray-600 leading-8">
+            <p className="mt-5 text-neutral-400 leading-8">
               Générer des résultats concrets
               et durables pour tous.
             </p>

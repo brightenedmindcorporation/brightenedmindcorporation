@@ -8,7 +8,7 @@ import FadeIn from "./FadeIn";
 export default function Hero() {
   return (
     <FadeIn>
-    <section className="relative pt-44 pb-32 bg-white overflow-hidden">
+    <section className="relative pt-44 pb-32 bg-black overflow-hidden">
 
       {/* Decorative background */}
 
@@ -35,7 +35,7 @@ export default function Hero() {
             className="md:w-[110px] md:h-[110px]"
           />
 
-          <h1 className="mt-8 text-6xl lg:text-7xl font-black leading-tight text-[#111111]">
+          <h1 className="mt-8 text-6xl lg:text-7xl font-black leading-tight text-white">
   FORMER.
   <br />
   <span className="text-red-600">
@@ -45,7 +45,7 @@ export default function Hero() {
   VALORISER.
 </h1>
 
-          <p className="mt-8 text-gray-600 leading-9 text-lg max-w-xl">
+          <p className="mt-8 text-neutral-400 leading-9 text-lg max-w-xl">
   Brightened Mind Corporation développe le capital humain
   en proposant des solutions innovantes en communication,
   placement de personnel domestique et formation professionnelle.
@@ -62,7 +62,7 @@ export default function Hero() {
 
             <Link
               href="#contact"
-              className="border border-gray-300 px-6 md:px-8 py-3 md:py-4 rounded-xl hover:bg-black hover:text-white transition text-center"
+              className="border border-neutral-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl hover:bg-white hover:text-black transition text-center"
             >
               Contact
             </Link>

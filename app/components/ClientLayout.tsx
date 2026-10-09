@@ -1,55 +1,104 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import Image from "next/image";
 import Link from "next/link";
+
+const NAV_LINKS = [
+  { href: "/", label: "Accueil" },
+  { href: "/academia", label: "Academia" },
+  { href: "/academy", label: "Espace Apprentissage" },
+  { href: "/communication", label: "Communication" },
+];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  
-  // Masque l'en-tête et le pied de page sur "/" (qui a son propre header)
-  const hideLayoutElements = pathname === "/";
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Le département apprentissage a sa propre coquille (AcademyHeader /
+  // future LearningShell) : le header/footer public ne s'y affiche pas.
+  const hideLayoutElements = pathname?.startsWith("/academy") ?? false;
+  const isHome = pathname === "/";
   const phoneOfficial = "+243988830799";
+
+  useEffect(() => {
+    if (!isHome) return;
+    const handleScroll = () => setScrolled(window.scrollY > 80);
+    handleScroll();
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [isHome]);
+
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [pathname]);
+
+  // Sur la page d'accueil, le header démarre transparent par-dessus le
+  // hero puis devient opaque au scroll ; partout ailleurs il est opaque
+  // d'emblée (pas de hero plein écran sous lui).
+  const transparent = isHome && !scrolled;
 
   return (
     <>
-      {/* BARRE DE NAVIGATION (Masquée sur "/" et "/bmlearning") */}
       {!hideLayoutElements && (
-        <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-md border-b border-neutral-800">
+        <header
+          className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 border-b ${
+            transparent
+              ? "bg-transparent border-transparent py-2"
+              : "bg-black/90 backdrop-blur-md border-neutral-800 py-0"
+          }`}
+        >
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            {/* Logo */}
-            <Link href="/" className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              <span className="w-3 h-3 bg-red-600 rounded-full"></span>
+            <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-white">
+              <Image src="/logo-bm.png" alt="BM Logo" width={40} height={40} style={{ width: "auto", height: "40px" }} priority />
               BM <span className="text-red-600">Corporation</span>
             </Link>
 
-            {/* Liens de navigation */}
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-300">
-              <Link href="/" className="hover:text-white transition">Accueil</Link>
-              <Link href="/academia" className="hover:text-white transition">Academia</Link>
-              <Link href="/academy" className="hover:text-white transition">Espace Apprentissage</Link>
-              <Link href="/communication" className="hover:text-white transition">Communication</Link>
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="hover:text-white transition">
+                  {link.label}
+                </Link>
+              ))}
             </nav>
 
-            {/* Bouton Devise / Inscription */}
             <div className="flex items-center gap-4">
-              <Link 
-                href="/devis" 
-                className="bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-red-600/20"
+              <Link
+                href="/devis"
+                className="hidden sm:inline-block bg-red-600 hover:bg-red-700 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-red-600/20"
               >
                 Devis / Inscription
               </Link>
+
+              <button
+                onClick={() => setMenuOpen((v) => !v)}
+                className="md:hidden text-white text-2xl leading-none"
+                aria-label="Menu"
+              >
+                {menuOpen ? "✕" : "☰"}
+              </button>
             </div>
           </div>
+
+          {menuOpen && (
+            <nav className="md:hidden bg-black border-t border-neutral-800 px-6 py-6 flex flex-col gap-5 text-neutral-300">
+              {NAV_LINKS.map((link) => (
+                <Link key={link.href} href={link.href} className="hover:text-white transition">
+                  {link.label}
+                </Link>
+              ))}
+              <Link href="/devis" className="text-red-500 font-semibold hover:text-red-400 transition">
+                Devis / Inscription
+              </Link>
+            </nav>
+          )}
         </header>
       )}
 
-      {/* CONTENU PRINCIPAL DE LA PAGE */}
-      <div className="flex-grow">
-        {children}
-      </div>
+      <div className="flex-grow">{children}</div>
 
-      {/* PIED DE PAGE (Masqué sur "/" et "/bmlearning") */}
       {!hideLayoutElements && (
         <footer className="bg-neutral-950 border-t border-neutral-900 py-12 px-6 text-neutral-400 text-sm">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
@@ -86,10 +135,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div>
               <h4 className="text-white font-semibold mb-3">Contact Rapide</h4>
               <p className="text-xs text-neutral-500 mb-4">Besoin d'aide pour vous inscrire ? Contactez notre secrétariat direct.</p>
-              <a 
-                href="https://wa.me/243988830799" 
-                target="_blank" 
-                rel="noopener noreferrer" 
+              <a
+                href="https://wa.me/243988830799"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="inline-block bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold px-4 py-2.5 rounded-lg border border-neutral-800 transition"
               >
                 WhatsApp Direct ↗

@@ -29,7 +29,7 @@ export default function Loader({
             alt="BM Logo"
             width={130}
             height={130}
-            className="animate-pulse"
+            className="animate-float-logo"
           />
 
           <p className="text-white mt-6 text-lg tracking-[4px]">

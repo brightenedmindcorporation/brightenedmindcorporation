@@ -9,7 +9,7 @@ export default function About() {
     <FadeIn>
     <section
       id="about"
-      className="py-28 bg-white"
+      className="py-28 bg-black"
     >
       <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-20 items-center">
 
@@ -50,14 +50,14 @@ export default function About() {
             À propos
           </p>
 
-          <h2 className="text-5xl font-black mt-6 text-[#111111] leading-tight">
+          <h2 className="text-5xl font-black mt-6 text-white leading-tight">
 
             Construire un avenir
             <span className="text-red-600"> durable</span>
 
           </h2>
 
-          <p className="mt-8 text-gray-600 leading-9 text-lg">
+          <p className="mt-8 text-neutral-400 leading-9 text-lg">
 
             Brightened Mind Corporation est un groupe
             multidisciplinaire engagé dans le développement
@@ -73,21 +73,21 @@ export default function About() {
 
             <div>
               <h3 className="text-4xl font-black text-red-600">3</h3>
-              <p className="text-gray-600 mt-2">
+              <p className="text-neutral-400 mt-2">
                 Branches
               </p>
             </div>
 
             <div>
               <h3 className="text-4xl font-black text-red-600">1</h3>
-              <p className="text-gray-600 mt-2">
+              <p className="text-neutral-400 mt-2">
                 Vision
               </p>
             </div>
 
             <div>
               <h3 className="text-4xl font-black text-red-600">100%</h3>
-              <p className="text-gray-600 mt-2">
+              <p className="text-neutral-400 mt-2">
                 Engagement
               </p>
             </div>

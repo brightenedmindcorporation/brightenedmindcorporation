@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 
 import Loader from "@/components/Loader";
-import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Departments from "@/components/Departments";
 import WhyChooseUs from "@/components/WhyChooseUs";
@@ -11,7 +10,6 @@ import About from "@/components/About";
 import Vision from "@/components/Vision";
 import News from "@/components/News";
 import CTA from "@/components/CTA";
-import Footer from "@/components/Footer";
 import Projects from "@/components/Projects";
 import Contact from "@/components/Contact"; 
 import Identity from "@/components/Identity";
@@ -40,8 +38,6 @@ export default function Home() {
     <>
     <Loader>
 
-      <Navbar />
-
       <Hero />
 
       <Slogan />
@@ -67,8 +63,6 @@ export default function Home() {
       <CTA />
 
       <Contact />
-
-      <Footer />
 
     </Loader>
 
