@@ -26,6 +26,43 @@ const nextConfig: NextConfig = {
         destination: "/academy",
         permanent: true,
       },
+      // Anciennes URLs anglaises "à plat" -> nouvelles routes dynamiques
+      // multi-langues (voir app/academy/[lang]/level/[level]/...).
+      {
+        source: "/academy/level1",
+        destination: "/academy/english/level/1",
+        permanent: true,
+      },
+      {
+        source: "/academy/level2",
+        destination: "/academy/english/level/2",
+        permanent: true,
+      },
+      {
+        source: "/academy/level3",
+        destination: "/academy/english/level/3",
+        permanent: true,
+      },
+      {
+        source: "/academy/level1/lesson:n",
+        destination: "/academy/english/level/1/lesson/:n",
+        permanent: true,
+      },
+      {
+        source: "/academy/level1/quiz:n",
+        destination: "/academy/english/level/1/quiz/:n",
+        permanent: true,
+      },
+      {
+        source: "/academy/level1/final-quiz",
+        destination: "/academy/english/level/1/final-quiz",
+        permanent: true,
+      },
+      {
+        source: "/academy/level1/request-certificate",
+        destination: "/academy/english/level/1/certificate",
+        permanent: true,
+      },
     ];
   },
 };

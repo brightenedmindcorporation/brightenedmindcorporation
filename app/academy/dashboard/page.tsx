@@ -4,6 +4,13 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AcademyHeader from "../components/AcademyHeader";
+import { getLevelCurriculum } from "@/content/curriculum";
+import { getLevelProgress } from "@/lib/academy/progress";
+
+// Seule l'anglais a du contenu publié pour le moment (Phase 4 du plan
+// ajoutera les autres langues) ; le dashboard affiche donc ce parcours par
+// défaut tant que l'inscription multi-langue n'existe pas encore.
+const DEFAULT_LANG = "english";
 
 interface StudentData {
   name?: string;
@@ -33,13 +40,17 @@ export default function Dashboard() {
       const parsedStudent: StudentData = JSON.parse(data);
       setStudent(parsedStudent);
 
+      const level1 = getLevelCurriculum(DEFAULT_LANG, 1);
+      const progress = getLevelProgress(DEFAULT_LANG, 1);
+      const totalLessons = level1?.lessons.length ?? 12;
+
       let completedCount = 0;
       let currentLesson = 1;
 
-      for (let i = 1; i <= 12; i++) {
-        if (localStorage.getItem(`quiz${i}Passed`) === "true") {
+      for (let i = 1; i <= totalLessons; i++) {
+        if (progress.completedQuizzes.includes(i)) {
           completedCount++;
-          currentLesson = Math.min(i + 1, 12);
+          currentLesson = Math.min(i + 1, totalLessons);
         } else {
           break;
         }
@@ -79,10 +90,10 @@ export default function Dashboard() {
 
   const handleContinue = () => {
     const currentLevel = student.level || "Level 1";
-    if (currentLevel === "Level 1") router.push(`/academy/level1/lesson${lastLesson}`);
-    else if (currentLevel === "Level 2") router.push("/academy/level2");
-    else if (currentLevel === "Level 3") router.push("/academy/level3");
-    else router.push("/academy/level1");
+    if (currentLevel === "Level 1") router.push(`/academy/${DEFAULT_LANG}/level/1/lesson/${lastLesson}`);
+    else if (currentLevel === "Level 2") router.push(`/academy/${DEFAULT_LANG}/level/2`);
+    else if (currentLevel === "Level 3") router.push(`/academy/${DEFAULT_LANG}/level/3`);
+    else router.push(`/academy/${DEFAULT_LANG}/level/1`);
   };
 
   return (
@@ -219,7 +230,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <button
-                onClick={() => router.push("/academy/level1")}
+                onClick={() => router.push(`/academy/${DEFAULT_LANG}/level/1`)}
                 className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-lg shadow-red-950/40"
               >
                 Open Level 1
@@ -239,7 +250,7 @@ export default function Dashboard() {
               <button
                 onClick={() => {
                   if (student.level === "Level 2" || student.level === "Level 3") {
-                    router.push("/academy/level2");
+                    router.push(`/academy/${DEFAULT_LANG}/level/2`);
                   }
                 }}
                 disabled={student.level === "Level 1"}
@@ -265,7 +276,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (student.level === "Level 3") router.push("/academy/level3");
+                  if (student.level === "Level 3") router.push(`/academy/${DEFAULT_LANG}/level/3`);
                 }}
                 disabled={student.level !== "Level 3"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${

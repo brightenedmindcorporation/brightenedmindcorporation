@@ -32,5 +32,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/academy/dashboard", "/academy/admin", "/academy/level1/:path*"],
+  matcher: ["/academy/dashboard", "/academy/admin", "/academy/:lang/level/:path*"],
 };
