@@ -1,10 +1,12 @@
 import type { LevelCurriculum } from "./types";
 import { englishLevel1 } from "./english/level1";
+import { englishLevel2 } from "./english/level2";
 
 // Add new entries here as more languages/levels are authored (Phase 4).
 // Each entry's key is `${langSlug}-${level}`.
 const registry: Record<string, LevelCurriculum> = {
   "english-1": englishLevel1,
+  "english-2": englishLevel2,
 };
 
 export const availableLanguages = [
