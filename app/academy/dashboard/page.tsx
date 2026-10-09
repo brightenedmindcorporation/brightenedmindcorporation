@@ -25,7 +25,7 @@ export default function Dashboard() {
     const data = localStorage.getItem("loggedStudent");
 
     if (!data) {
-      router.replace("/academy/login");
+      router.replace("/login");
       return;
     }
 
@@ -52,7 +52,7 @@ export default function Dashboard() {
       }
     } catch (e) {
       console.error("Erreur de lecture des données utilisateur :", e);
-      router.replace("/academy/login");
+      router.replace("/login");
     } finally {
       setLoading(false);
     }
@@ -60,7 +60,7 @@ export default function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("loggedStudent");
-    router.replace("/academy/login");
+    router.replace("/login");
   };
 
   if (loading || !student) {

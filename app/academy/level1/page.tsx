@@ -21,7 +21,7 @@ export default function Level1Page() {
       const savedStudent = localStorage.getItem("loggedStudent");
 
       if (!savedStudent) {
-        router.push("/academy/login");
+        router.push("/login");
         return;
       }
 
@@ -58,7 +58,7 @@ export default function Level1Page() {
       }
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
-      router.push("/academy/login");
+      router.push("/login");
     }
   }, [router]);
 

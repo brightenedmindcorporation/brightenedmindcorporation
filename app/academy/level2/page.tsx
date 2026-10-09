@@ -18,7 +18,7 @@ export default function Level2Page() {
     const savedStudent = localStorage.getItem("loggedStudent");
 
     if (!savedStudent) {
-      router.push("/academy/login");
+      router.push("/login");
       return;
     }
 

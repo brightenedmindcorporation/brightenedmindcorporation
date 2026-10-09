@@ -13,7 +13,7 @@ export default function AcademyHeader() {
     try {
       await signOut(auth);
       localStorage.removeItem("loggedStudent");
-      router.replace("/academy/login");
+      router.replace("/login");
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }

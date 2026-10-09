@@ -15,7 +15,7 @@ export default function Level3Page() {
       );
 
     if (!savedStudent) {
-      router.push("/academy/login");
+      router.push("/login");
       return;
     }
 

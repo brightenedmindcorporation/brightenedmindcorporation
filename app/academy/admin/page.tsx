@@ -12,6 +12,7 @@ import {
   updateDoc,
   doc,
 } from "firebase/firestore";
+import { generateMatricule } from "@/lib/academy/matricule";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -51,12 +52,6 @@ export default function AdminPage() {
     }
   }, [authorized]);
 
-  const generateMatricule = (index: number) => {
-    const year = new Date().getFullYear();
-    const number = String(index + 1).padStart(3, "0");
-    return `BMCA-${year}-${number}`;
-  };
-
   const sendEmail = async (
   email: string,
   name: string,
@@ -87,17 +82,10 @@ export default function AdminPage() {
 
   const approveStudent = async (student: any) => {
   try {
-    const snapshot = await getDocs(collection(db, "students"));
-
-    const approvedStudents = snapshot.docs.filter(
-      (d) => d.data().status === "Approved"
-    );
-
-    const nextNumber = approvedStudents.length + 1;
-
-    const matricule = `BMCA-${new Date().getFullYear()}-${String(
-      nextNumber
-    ).padStart(3, "0")}`;
+    // "EN" (anglais) est la seule langue active pour le moment ;
+    // sera dérivé du champ langue de l'inscription une fois le moteur
+    // multilingue en place (Phase 3 du plan).
+    const matricule = await generateMatricule("EN");
 
     await updateDoc(doc(db, "students", student.id), {
       status: "Approved",

@@ -47,7 +47,7 @@ export default function Home() {
             </Link>
 
             <Link
-              href="/academy/login"
+              href="/login"
               className="bg-zinc-900 hover:bg-zinc-800 text-white border border-zinc-700 font-bold text-base px-8 py-4 rounded-xl transition flex items-center justify-center"
             >
               Student Login
@@ -231,7 +231,7 @@ export default function Home() {
 
           <div className="flex items-center gap-6 text-xs text-zinc-400 font-medium">
             <Link href="/academy/dashboard" className="hover:text-white transition">Dashboard</Link>
-            <Link href="/academy/login" className="hover:text-white transition">Login</Link>
+            <Link href="/login" className="hover:text-white transition">Login</Link>
           </div>
 
         </div>

@@ -7,8 +7,8 @@ import Link from "next/link";
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   
-  // Masque l'en-tête et le pied de page sur "/" et sur "/bmlearning"
-  const hideLayoutElements = pathname === "/" || pathname === "/bmlearning";
+  // Masque l'en-tête et le pied de page sur "/" (qui a son propre header)
+  const hideLayoutElements = pathname === "/";
   const phoneOfficial = "+243988830799";
 
   return (
@@ -27,9 +27,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-300">
               <Link href="/" className="hover:text-white transition">Accueil</Link>
               <Link href="/academia" className="hover:text-white transition">Academia</Link>
-              <Link href="/academy" className="hover:text-white transition">Espace Élève</Link>
+              <Link href="/academy" className="hover:text-white transition">Espace Apprentissage</Link>
               <Link href="/communication" className="hover:text-white transition">Communication</Link>
-              <Link href="/bmlearning" className="hover:text-white transition">Bm Learning</Link>
             </nav>
 
             {/* Bouton Devise / Inscription */}

@@ -109,7 +109,7 @@ export default function AcademiaPage() {
               <h3 className="text-xl font-bold text-white mb-2">Français</h3>
               <p className="text-neutral-400 text-sm">Renforcement de la grammaire, rédaction professionnelle et expression orale.</p>
               <Link 
-                href="academia/francais" 
+                href="/academia/francais"
                 className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
               >
                 Ouvrir la plateforme de Français →
