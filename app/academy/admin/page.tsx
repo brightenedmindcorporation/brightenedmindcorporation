@@ -11,6 +11,7 @@ import {
   getDocs,
   updateDoc,
   doc,
+  runTransaction,
 } from "firebase/firestore";
 import { generateMatricule } from "@/lib/academy/matricule";
 
@@ -18,6 +19,7 @@ export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
 
   const fetchStudents = async () => {
     const snapshot = await getDocs(collection(db, "students"));
@@ -81,39 +83,59 @@ export default function AdminPage() {
   };
 
   const approveStudent = async (student: any) => {
-  try {
-    // "EN" (anglais) est la seule langue active pour le moment ;
-    // sera dérivé du champ langue de l'inscription une fois le moteur
-    // multilingue en place (Phase 3 du plan).
-    const matricule = await generateMatricule("EN");
-
-    await updateDoc(doc(db, "students", student.id), {
-      status: "Approved",
-      matricule,
-    });
+    if (processingIds.has(student.id)) return;
+    setProcessingIds((prev) => new Set(prev).add(student.id));
 
     try {
-      await sendEmail(
-        student.email,
-        student.name,
-        matricule
-      );
+      // Claim the student atomically before generating a matricule, so two
+      // admins (or a double-click) can never both pass the "Pending" check
+      // and each generate a separate matricule for the same student.
+      const studentRef = doc(db, "students", student.id);
+      const claimed = await runTransaction(db, async (tx) => {
+        const snap = await tx.get(studentRef);
+        if (!snap.exists() || snap.data().status !== "Pending") return false;
+        tx.update(studentRef, { status: "Approving" });
+        return true;
+      });
 
-      alert("Approved + Email sent!");
-    } catch (emailError) {
-      console.error("EMAIL ERROR:", emailError);
+      if (!claimed) {
+        alert("This student was already processed (by you or another admin).");
+        fetchStudents();
+        return;
+      }
 
-      alert("Student approved but email failed");
+      const matricule = await generateMatricule(student.langCode || "EN");
+
+      await updateDoc(studentRef, {
+        status: "Approved",
+        matricule,
+      });
+
+      try {
+        await sendEmail(student.email, student.name, matricule);
+        alert("Approved + Email sent!");
+      } catch (emailError) {
+        console.error("EMAIL ERROR:", emailError);
+        alert("Student approved but email failed");
+      }
+
+      fetchStudents();
+    } catch (error) {
+      console.error(error);
+      alert("Error approving student");
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(student.id);
+        return next;
+      });
     }
-
-    fetchStudents();
-  } catch (error) {
-    console.error(error);
-    alert("Error approving student");
-  }
-};
+  };
 
   const rejectStudent = async (student: any) => {
+    if (processingIds.has(student.id)) return;
+    setProcessingIds((prev) => new Set(prev).add(student.id));
+
     try {
       await updateDoc(doc(db, "students", student.id), {
         status: "Rejected",
@@ -124,6 +146,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error(error);
       alert("Error rejecting student");
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(student.id);
+        return next;
+      });
     }
   };
 
@@ -163,6 +191,7 @@ export default function AdminPage() {
           >
             <p><b>Name:</b> {s.name}</p>
             <p><b>Email:</b> {s.email}</p>
+            <p><b>Language:</b> {s.langCode || "EN (legacy)"}</p>
             <p><b>Level:</b> {s.level}</p>
             <p><b>Status:</b> {s.status}</p>
             <p><b>Matricule:</b> {s.matricule || "-"}</p>
@@ -170,14 +199,16 @@ export default function AdminPage() {
             <div className="flex gap-3 mt-4">
               <button
                 onClick={() => approveStudent(s)}
-                className="bg-green-600 text-white px-4 py-2"
+                disabled={processingIds.has(s.id) || s.status !== "Pending"}
+                className="bg-green-600 text-white px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
-                Approve
+                {processingIds.has(s.id) ? "Processing..." : "Approve"}
               </button>
 
               <button
                 onClick={() => rejectStudent(s)}
-                className="bg-red-600 text-white px-4 py-2"
+                disabled={processingIds.has(s.id) || s.status !== "Pending"}
+                className="bg-red-600 text-white px-4 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 Reject
               </button>

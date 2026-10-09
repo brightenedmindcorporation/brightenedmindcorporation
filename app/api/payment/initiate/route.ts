@@ -1,8 +1,15 @@
 import { NextResponse } from "next/server";
+import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { confirmPayment } from "@/lib/academy/payments";
 
 export async function POST(request: Request) {
   try {
-    const { amount, currency, phone, studentName, courseName } = await request.json();
+    const { amount, currency, phone, studentName, studentEmail, courseName, uid, langCode, level } =
+      await request.json();
+
+    if (!uid || !langCode) {
+      return NextResponse.json({ error: "uid et langCode sont requis" }, { status: 400 });
+    }
 
     // Identifiants fournis par ta passerelle (FlexPay / CinetPay / MaxiCash)
     // À placer idéalement dans un fichier .env.local
@@ -26,8 +33,26 @@ export async function POST(request: Request) {
 
     console.log("Initiating payment request:", paymentPayload);
 
-    /* 
-    // APPEL RÉEL À L'API FLEXPAY :
+    if (isAdminConfigured()) {
+      const adminDb = getAdminDb();
+      await adminDb.collection("payments").doc(reference).set({
+        uid,
+        langCode,
+        level: level ?? 1,
+        studentName: studentName ?? null,
+        amount: amount ?? null,
+        currency: currency || "USD",
+        phone: phone ?? null,
+        status: "pending",
+        createdAt: new Date(),
+      });
+    }
+
+    /*
+    // APPEL RÉEL À L'API FLEXPAY — une fois activé, retirer le bloc
+    // "simulation" ci-dessous : la confirmation arrivera alors de façon
+    // asynchrone sur /api/payment/webhook (déjà branché sur la même
+    // logique confirmPayment), pas ici.
     const response = await fetch("https://backend.flexpay.cd/api/rest/v1/paymentService", {
       method: "POST",
       headers: {
@@ -40,13 +65,35 @@ export async function POST(request: Request) {
     const data = await response.json();
     */
 
-    // Simulation de réponse de l'API de paiement
-    return NextResponse.json({
-      status: "success",
-      message: "Demande de paiement envoyée sur le téléphone de l'utilisateur",
-      reference: reference,
+    // Simulation de la confirmation de paiement (pas encore de passerelle
+    // réelle branchée) : on confirme immédiatement via le même chemin que
+    // le webhook utiliserait, pour que la persistance Firestore et le
+    // matricule soient réels dès aujourd'hui.
+    const confirmation = await confirmPayment(reference, {
+      status: "SUCCESS",
+      amount,
+      currency,
+      customerPhone: phone,
+      customerEmail: studentEmail,
     });
 
+    if (confirmation.ok) {
+      return NextResponse.json({
+        status: "success",
+        message: "Paiement confirmé",
+        reference,
+        matricule: confirmation.matricule,
+      });
+    }
+
+    // Admin non configuré ou doc introuvable : on répond quand même succès
+    // côté passerelle (la demande a bien été envoyée) mais sans matricule
+    // réel — l'utilisateur devra être approuvé manuellement par un admin.
+    return NextResponse.json({
+      status: "success",
+      message: "Demande de paiement envoyée, en attente de validation manuelle",
+      reference,
+    });
   } catch (error) {
     console.error("Error initiating payment:", error);
     return NextResponse.json(

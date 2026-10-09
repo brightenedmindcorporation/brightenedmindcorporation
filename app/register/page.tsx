@@ -6,12 +6,14 @@ import { auth, db } from "@/lib/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { availableLanguages } from "@/content/curriculum";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [level, setLevel] = useState("Level 1");
+  const [langCode, setLangCode] = useState(availableLanguages[0].code);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -32,6 +34,7 @@ export default function RegisterPage() {
         name,
         email: email.trim(),
         level,
+        langCode,
         status: "Pending",
         matricule: "",
         createdAt: new Date(),
@@ -58,14 +61,23 @@ export default function RegisterPage() {
         <div className="bg-neutral-950 border border-neutral-800 p-8 rounded-2xl w-full max-w-md text-center text-white">
           <h1 className="text-2xl font-bold mb-2">Inscription enregistrée !</h1>
           <p className="text-neutral-400 text-sm mb-6">
-            Votre compte est en attente d'approbation par l'administration. Vous recevrez votre matricule par email dès validation.
+            Payez maintenant pour activer votre compte immédiatement et recevoir votre matricule tout de suite,
+            ou patientez pour une approbation manuelle par l'administration.
           </p>
-          <button
-            onClick={() => router.push("/login")}
-            className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-semibold transition"
-          >
-            Aller à la connexion
-          </button>
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={() => router.push("/paiement")}
+              className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-semibold transition"
+            >
+              Payer et activer mon compte
+            </button>
+            <button
+              onClick={() => router.push("/login")}
+              className="text-neutral-400 hover:text-white text-sm font-medium transition"
+            >
+              → Aller à la connexion plus tard
+            </button>
+          </div>
         </div>
       </main>
     );
@@ -118,6 +130,21 @@ export default function RegisterPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-neutral-300 mb-1">Langue</label>
+            <select
+              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+              value={langCode}
+              onChange={(e) => setLangCode(e.target.value)}
+            >
+              {availableLanguages.map((lang) => (
+                <option key={lang.code} value={lang.code}>
+                  {lang.label}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

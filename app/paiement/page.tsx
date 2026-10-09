@@ -1,31 +1,112 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { availableLanguages } from "@/content/curriculum";
+
+const COURSE_PRICE_USD = 50;
 
 export default function PaymentPage() {
+  const [user, setUser] = useState<User | null>(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const [langCode, setLangCode] = useState(availableLanguages[0].code);
   const [selectedMethod, setSelectedMethod] = useState<"mobile" | "card">("mobile");
   const [operator, setOperator] = useState<"mpesa" | "orange" | "airtel" | "afrimoney">("mpesa");
+  const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [matricule, setMatricule] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setCheckingAuth(false);
+    });
+    return unsubscribe;
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) return;
     setLoading(true);
+    setErrorMessage(null);
 
-    // Simulation de l'appel API vers la passerelle de paiement (CinetPay / FlexPay)
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const langLabel = availableLanguages.find((l) => l.code === langCode)?.label ?? langCode;
+
+      const response = await fetch("/api/payment/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: COURSE_PRICE_USD,
+          currency: "USD",
+          phone,
+          studentName: user.displayName || user.email,
+          studentEmail: user.email,
+          courseName: `${langLabel} — Niveau 1`,
+          uid: user.uid,
+          langCode,
+          level: 1,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Le paiement a échoué.");
+      }
+
+      setMatricule(result.matricule ?? null);
       setStatus("success");
-    }, 2500);
+    } catch (error) {
+      console.error("Erreur paiement:", error);
+      setErrorMessage("Une erreur est survenue lors du paiement. Veuillez réessayer.");
+      setStatus("error");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  if (checkingAuth) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-black text-neutral-400">
+        Chargement...
+      </main>
+    );
+  }
+
+  if (!user) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-black text-white px-6">
+        <div className="max-w-md text-center bg-neutral-950 border border-neutral-800 rounded-2xl p-8">
+          <h1 className="text-2xl font-bold mb-3">Connexion requise</h1>
+          <p className="text-neutral-400 text-sm mb-6">
+            Créez votre compte ou connectez-vous avant de procéder au paiement de votre formation.
+          </p>
+          <div className="flex flex-col gap-3">
+            <Link href="/register" className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition">
+              Créer un compte
+            </Link>
+            <Link href="/login?next=/paiement" className="text-red-500 hover:text-red-400 font-semibold text-sm">
+              → J'ai déjà un compte
+            </Link>
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black text-white pt-28 pb-16 px-6">
       <div className="max-w-3xl mx-auto bg-neutral-900 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
-        
+
         <h1 className="text-3xl font-extrabold mb-2">Finaliser votre inscription</h1>
         <p className="text-neutral-400 text-sm mb-8">
-          Choisissez votre mode de paiement sécurisé pour valider votre formation.
+          Choisissez votre langue et votre mode de paiement sécurisé pour valider votre formation.
         </p>
 
         {status === "success" ? (
@@ -35,18 +116,46 @@ export default function PaymentPage() {
             </div>
             <h2 className="text-2xl font-bold text-emerald-400">Paiement Reçu avec Succès !</h2>
             <p className="text-neutral-300 text-sm">
-              Votre transaction a été validée. Un message de confirmation vous a été envoyé par SMS/Email avec vos accès.
+              Votre transaction a été validée. Votre compte est maintenant activé.
             </p>
-            <a
-              href="/academy"
-              className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition mt-4"
-            >
-              Accéder à mon Espace Élève
-            </a>
+            {matricule && (
+              <div className="bg-black border border-emerald-700/50 rounded-xl p-4 inline-block">
+                <p className="text-xs text-neutral-500 mb-1">Votre matricule</p>
+                <p className="text-2xl font-black text-emerald-400 font-mono tracking-wider">{matricule}</p>
+              </div>
+            )}
+            <div>
+              <Link
+                href="/login"
+                className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition mt-4"
+              >
+                Me connecter à mon Espace Élève
+              </Link>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-6">
-            
+
+            {errorMessage && (
+              <div className="p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">{errorMessage}</div>
+            )}
+
+            {/* Choix de la langue */}
+            <div>
+              <label className="block text-sm font-semibold mb-3">Langue de la formation</label>
+              <select
+                value={langCode}
+                onChange={(e) => setLangCode(e.target.value)}
+                className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
+              >
+                {availableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
             {/* Choix du type de paiement */}
             <div>
               <label className="block text-sm font-semibold mb-3">Mode de paiement</label>
@@ -112,6 +221,8 @@ export default function PaymentPage() {
                     type="tel"
                     placeholder="+243 8X XXX XX XX"
                     required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
                     className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
                   />
                 </div>
@@ -140,7 +251,7 @@ export default function PaymentPage() {
             <div className="pt-4 border-t border-neutral-800 flex items-center justify-between">
               <div>
                 <p className="text-xs text-neutral-400">Total à payer</p>
-                <p className="text-2xl font-black text-red-500">$50.00 USD</p>
+                <p className="text-2xl font-black text-red-500">${COURSE_PRICE_USD}.00 USD</p>
               </div>
 
               <button

@@ -77,9 +77,20 @@ export default function LevelOverviewPage() {
             </Link>
           </div>
 
-          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
-            <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelSubtitle}</p>
+          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
+              <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelSubtitle}</p>
+            </div>
+            <Link href={`${base}/live`}>
+              <button className="bg-black/40 hover:bg-black/60 border border-red-400/40 text-white font-bold px-5 py-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                </span>
+                Live Class
+              </button>
+            </Link>
           </div>
 
           <div className="bg-neutral-900/90 backdrop-blur rounded-3xl shadow-xl border border-neutral-800 p-8 mt-8">
