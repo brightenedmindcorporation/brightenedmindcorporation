@@ -15,6 +15,8 @@
 export interface LevelProgress {
   completedQuizzes: number[];
   quizScores: Record<number, number>;
+  /** ISO date a lesson's quiz was first passed — the pacing clock starts here. */
+  completedAt: Record<number, string>;
   finalQuizPassed: boolean;
   finalQuizScore: number | null;
   certificateId: string | null;
@@ -28,10 +30,48 @@ function emptyProgress(): LevelProgress {
   return {
     completedQuizzes: [],
     quizScores: {},
+    completedAt: {},
     finalQuizPassed: false,
     finalQuizScore: null,
     certificateId: null,
   };
+}
+
+// Pacing: a student picks a 3-day or 5-day/week study track at
+// registration. The 5-day (intensive) track unlocks a new chapter every
+// calendar day; the 3-day (standard) track unlocks one every 2 calendar
+// days, roughly matching "3 chapters/week" vs "5 chapters/week" over a
+// month-long level. Once a chapter unlocks it stays unlocked indefinitely
+// — missing a day never permanently locks a student out.
+export function getCooldownDays(studyDays?: number): number {
+  return studyDays === 5 ? 1 : 2;
+}
+
+function atMidnight(date: Date): Date {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+
+/** The date lessonId unlocks on, or null if the previous lesson isn't completed yet. */
+export function getLessonUnlockDate(progress: LevelProgress, lessonId: number, studyDays?: number): Date | null {
+  if (lessonId <= 1) return null;
+  const prevCompletedAt = progress.completedAt[lessonId - 1];
+  if (!prevCompletedAt) return null;
+
+  const unlockDate = atMidnight(new Date(prevCompletedAt));
+  unlockDate.setDate(unlockDate.getDate() + getCooldownDays(studyDays));
+  return unlockDate;
+}
+
+export function isLessonUnlocked(progress: LevelProgress, lessonId: number, studyDays?: number): boolean {
+  if (lessonId === 1) return true;
+  if (!progress.completedQuizzes.includes(lessonId - 1)) return false;
+
+  const unlockDate = getLessonUnlockDate(progress, lessonId, studyDays);
+  if (!unlockDate) return false;
+
+  return atMidnight(new Date()).getTime() >= unlockDate.getTime();
 }
 
 export function getLevelProgress(langSlug: string, level: number): LevelProgress {
@@ -63,6 +103,7 @@ export function recordQuizResult(
     progress.quizScores[lessonId] = score;
     if (score >= passingScore && !progress.completedQuizzes.includes(lessonId)) {
       progress.completedQuizzes.push(lessonId);
+      progress.completedAt[lessonId] = new Date().toISOString();
     }
   }
 

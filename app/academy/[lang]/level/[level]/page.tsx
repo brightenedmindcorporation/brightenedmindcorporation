@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
-import { getLevelProgress, type LevelProgress } from "@/lib/academy/progress";
+import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
 
 export default function LevelOverviewPage() {
@@ -17,6 +17,7 @@ export default function LevelOverviewPage() {
   const [allowed, setAllowed] = useState(false);
   const [progress, setProgress] = useState<LevelProgress | null>(null);
   const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
+  const [studyDays, setStudyDays] = useState<number | undefined>(undefined);
 
   const curriculum = getLevelCurriculum(langSlug, level);
 
@@ -28,6 +29,7 @@ export default function LevelOverviewPage() {
         return;
       }
       setAllowed(true);
+      setStudyDays(JSON.parse(savedStudent).studyDays);
       setProgress(getLevelProgress(langSlug, level));
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
@@ -134,12 +136,15 @@ export default function LevelOverviewPage() {
 
           <div className="mt-8 grid md:grid-cols-2 gap-6">
             {curriculum.lessons.map((lesson) => {
-              // Lesson N unlocks once Quiz (N-1) is passed; Quiz N unlocks
-              // together with its lesson (the original app gated quizzes
-              // behind a separate "lesson completed" flag that nothing
-              // ever set for lesson 1, permanently locking quiz 1 — see
+              // Lesson N unlocks once Quiz (N-1) is passed AND the pacing
+              // cooldown for the student's chosen study track has elapsed
+              // (see lib/academy/progress.ts). Quiz N unlocks together with
+              // its lesson (the original app gated quizzes behind a
+              // separate "lesson completed" flag that nothing ever set for
+              // lesson 1, permanently locking quiz 1 — see
               // content/curriculum/english/level1.ts's header comment).
-              const unlocked = lesson.id === 1 || completedQuizzes.includes(lesson.id - 1);
+              const unlocked = isLessonUnlocked(progress, lesson.id, studyDays);
+              const unlockDate = !unlocked ? getLessonUnlockDate(progress, lesson.id, studyDays) : null;
 
               return (
                 <div
@@ -150,7 +155,7 @@ export default function LevelOverviewPage() {
                     <span className="text-red-500">Lesson {lesson.id} :</span> {lesson.title}
                   </h2>
 
-                  <div className="flex gap-3 mt-6 flex-wrap">
+                  <div className="flex gap-3 mt-6 flex-wrap items-center">
                     {unlocked ? (
                       <>
                         <Link href={`${base}/lesson/${lesson.id}`}>
@@ -165,9 +170,16 @@ export default function LevelOverviewPage() {
                         </Link>
                       </>
                     ) : (
-                      <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line">
-                        🔒 Locked
-                      </button>
+                      <>
+                        <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line">
+                          🔒 Locked
+                        </button>
+                        {unlockDate && (
+                          <p className="text-xs text-ink-faint">
+                            Disponible le {unlockDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

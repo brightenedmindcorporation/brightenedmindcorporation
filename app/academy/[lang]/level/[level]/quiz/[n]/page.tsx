@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
-import { getLevelProgress, recordQuizResult } from "@/lib/academy/progress";
-import { useState } from "react";
+import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
+import { useEffect, useState } from "react";
 
 export default function QuizPage() {
+  const router = useRouter();
   const params = useParams<{ lang: string; level: string; n: string }>();
   const langSlug = params.lang;
   const level = Number(params.level);
@@ -17,15 +18,48 @@ export default function QuizPage() {
   const curriculum = getLevelCurriculum(langSlug, level);
   const base = `/academy/${langSlug}/level/${level}`;
 
-  const [alreadyScore] = useState<number | null>(() => {
-    if (typeof window === "undefined") return null;
-    return getLevelProgress(langSlug, level).quizScores[lessonId] ?? null;
-  });
+  const [checked, setChecked] = useState(false);
+  const [unlocked, setUnlocked] = useState(false);
+  const [alreadyScore, setAlreadyScore] = useState<number | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedStudent = localStorage.getItem("loggedStudent");
+      if (!savedStudent) {
+        router.push("/login");
+        return;
+      }
+      const studyDays = JSON.parse(savedStudent).studyDays;
+      const progress = getLevelProgress(langSlug, level);
+      if (!isLessonUnlocked(progress, lessonId, studyDays)) {
+        router.push(base);
+        return;
+      }
+      setAlreadyScore(progress.quizScores[lessonId] ?? null);
+      setUnlocked(true);
+    } catch (error) {
+      console.error("Erreur lors de la vérification de la session :", error);
+      router.push("/login");
+    } finally {
+      setChecked(true);
+    }
+  }, [router, langSlug, level, lessonId, base]);
 
   if (!quiz || !curriculum) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <p>Quiz introuvable.</p>
+      </main>
+    );
+  }
+
+  if (!checked || !unlocked) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-lg font-semibold text-ink-soft">Checking access...</p>
+        </div>
       </main>
     );
   }
