@@ -213,6 +213,13 @@ export default function AcademiaPage() {
               </p>
             </div>
           </div>
+
+          <Link
+            href="/academia/bureautique"
+            className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition mt-6"
+          >
+            Voir le programme complet Bureautique →
+          </Link>
         </section>
 
         {/* 3. FORMATION VISUEL & AUDIOVISUEL */}
@@ -255,6 +262,13 @@ export default function AcademiaPage() {
               </p>
             </div>
           </div>
+
+          <Link
+            href="/academia/visuel"
+            className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition mt-6"
+          >
+            Voir le programme complet Visuel & Audiovisuel →
+          </Link>
         </section>
 
         {/* 4. FORMATION LOGICIEL DE GESTION */}
@@ -285,6 +299,13 @@ export default function AcademiaPage() {
               </div>
             ))}
           </div>
+
+          <Link
+            href="/academia/logiciels"
+            className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition mt-6"
+          >
+            Voir le programme complet Logiciels de Gestion (dont ODOO) →
+          </Link>
         </section>
 
       </div>
