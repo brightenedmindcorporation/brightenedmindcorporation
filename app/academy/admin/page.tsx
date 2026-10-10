@@ -86,14 +86,21 @@ export default function AdminPage() {
     if (processingIds.has(student.id)) return;
     setProcessingIds((prev) => new Set(prev).add(student.id));
 
+    const studentRef = doc(db, "students", student.id);
+    let claimedHere = false;
+
     try {
       // Claim the student atomically before generating a matricule, so two
-      // admins (or a double-click) can never both pass the "Pending" check
-      // and each generate a separate matricule for the same student.
-      const studentRef = doc(db, "students", student.id);
+      // admins (or a double-click) can never both pass the check and each
+      // generate a separate matricule for the same student. Anything that
+      // isn't already a final state (Approved/Rejected) can be (re)claimed —
+      // this matters if a previous attempt died mid-way and left the
+      // student stuck on the intermediate "Approving" status, which would
+      // otherwise never become actionable again.
       const claimed = await runTransaction(db, async (tx) => {
         const snap = await tx.get(studentRef);
-        if (!snap.exists() || snap.data().status !== "Pending") return false;
+        const currentStatus = snap.exists() ? snap.data().status : undefined;
+        if (!snap.exists() || currentStatus === "Approved" || currentStatus === "Rejected") return false;
         tx.update(studentRef, { status: "Approving" });
         return true;
       });
@@ -103,6 +110,7 @@ export default function AdminPage() {
         fetchStudents();
         return;
       }
+      claimedHere = true;
 
       const matricule = await generateMatricule(student.langCode || "EN");
 
@@ -110,6 +118,7 @@ export default function AdminPage() {
         status: "Approved",
         matricule,
       });
+      claimedHere = false;
 
       try {
         await sendEmail(student.email, student.name, matricule);
@@ -122,7 +131,17 @@ export default function AdminPage() {
       fetchStudents();
     } catch (error) {
       console.error(error);
-      alert("Error approving student");
+      // Roll back to "Pending" if we claimed the student but failed before
+      // finishing, so the row is immediately retryable instead of stuck.
+      if (claimedHere) {
+        try {
+          await updateDoc(studentRef, { status: "Pending" });
+        } catch (rollbackError) {
+          console.error("Rollback to Pending failed:", rollbackError);
+        }
+      }
+      alert("Error approving student — you can try again.");
+      fetchStudents();
     } finally {
       setProcessingIds((prev) => {
         const next = new Set(prev);
@@ -200,7 +219,7 @@ export default function AdminPage() {
               <div className="flex gap-3 mt-4">
                 <button
                   onClick={() => approveStudent(s)}
-                  disabled={processingIds.has(s.id) || s.status !== "Pending"}
+                  disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Rejected"}
                   className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   {processingIds.has(s.id) ? "Processing..." : "Approve"}
@@ -208,7 +227,7 @@ export default function AdminPage() {
 
                 <button
                   onClick={() => rejectStudent(s)}
-                  disabled={processingIds.has(s.id) || s.status !== "Pending"}
+                  disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Rejected"}
                   className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   Reject
