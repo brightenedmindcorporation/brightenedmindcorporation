@@ -2,9 +2,8 @@
 
 import { Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
-import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import PasswordInput from "@/components/academy/PasswordInput";
 
@@ -40,37 +39,23 @@ function LoginForm() {
 
       const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
       const user = userCred.user;
+      const idToken = await user.getIdToken();
 
-      const snap = await getDoc(doc(db, "students", user.uid));
+      const enrollResponse = await fetch("/api/academy/my-enrollments", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const enrollResult = await enrollResponse.json();
 
-      if (!snap.exists()) {
-        setLoginError("Compte étudiant introuvable dans la base de données.");
+      if (!enrollResponse.ok) {
+        setLoginError(
+          enrollResponse.status === 404
+            ? "Compte étudiant introuvable dans la base de données."
+            : enrollResult.error || "Une erreur est survenue lors de la connexion."
+        );
         return;
       }
 
-      const data = snap.data();
-
-      // A student can hold one enrollment per language (enrollments
-      // collection). Accounts created before multi-language enrollments
-      // existed still carry their single langCode/level/status/matricule
-      // directly on the students/{uid} doc — fall back to treating that as
-      // a single legacy enrollment so nothing breaks for them.
-      const enrollmentsSnap = await getDocs(query(collection(db, "enrollments"), where("uid", "==", user.uid)));
-      let enrollments: any[] = enrollmentsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-      if (enrollments.length === 0 && data.langCode) {
-        enrollments = [
-          {
-            id: user.uid,
-            langCode: data.langCode,
-            level: data.level,
-            studyDays: data.studyDays,
-            status: data.status,
-            matricule: data.matricule,
-          },
-        ];
-      }
-
+      const { student: data, enrollments } = enrollResult;
       const approved = enrollments.filter((en: any) => en.status === "Approved");
 
       if (approved.length === 0) {
@@ -97,7 +82,6 @@ function LoginForm() {
       // Admin n'est pas encore configuré côté serveur, on continue quand
       // même avec la session localStorage existante).
       try {
-        const idToken = await user.getIdToken();
         await fetch("/api/auth/session", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

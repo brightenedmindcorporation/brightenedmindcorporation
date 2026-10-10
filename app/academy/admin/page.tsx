@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { auth, db } from "@/lib/firebase";
+import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
 import { getOtherProgramLabel, otherPrograms } from "@/content/programs";
@@ -10,8 +10,6 @@ import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
 
 export const dynamic = "force-dynamic";
-
-import { collection, getDocs } from "firebase/firestore";
 
 type Tab = "students" | "live" | "payments" | "announcements";
 
@@ -65,26 +63,17 @@ export default function AdminPage() {
   // need to know which source a row came from — only approve/reject branch
   // on `row.kind` to hit the matching API route.
   const fetchStudents = async () => {
-    const [enrollmentsSnap, studentsSnap] = await Promise.all([
-      getDocs(collection(db, "enrollments")),
-      getDocs(collection(db, "students")),
-    ]);
-
-    const enrollmentRows = enrollmentsSnap.docs.map((doc) => ({
-      id: doc.id,
-      kind: "enrollment" as const,
-      ...doc.data(),
-    }));
-
-    const legacyRows = studentsSnap.docs
-      .filter((doc) => doc.data().langCode && doc.data().status)
-      .map((doc) => ({
-        id: doc.id,
-        kind: "legacyStudent" as const,
-        ...doc.data(),
-      }));
-
-    setStudents([...enrollmentRows, ...legacyRows]);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/students", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setStudents(result.students || []);
+      else console.error("Error fetching students:", result.error);
+    } catch (error) {
+      console.error("Error fetching students:", error);
+    }
   };
 
   useEffect(() => {
