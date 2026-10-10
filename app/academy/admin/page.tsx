@@ -12,7 +12,7 @@ import PasswordInput from "@/components/academy/PasswordInput";
 
 export const dynamic = "force-dynamic";
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -77,6 +77,18 @@ export default function AdminPage() {
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
   const [replySending, setReplySending] = useState(false);
+
+  // --- Gmail inbox tab ---
+  const [mailConfigured, setMailConfigured] = useState(false);
+  const [mailConnected, setMailConnected] = useState(false);
+  const [mailMessages, setMailMessages] = useState<any[]>([]);
+  const [mailLoading, setMailLoading] = useState(false);
+  const [mailConnecting, setMailConnecting] = useState(false);
+  const [mailNotice, setMailNotice] = useState<string | null>(null);
+  const [selectedMail, setSelectedMail] = useState<any | null>(null);
+  const [mailDetailLoading, setMailDetailLoading] = useState(false);
+  const [mailReplyBody, setMailReplyBody] = useState("");
+  const [mailReplySending, setMailReplySending] = useState(false);
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -447,6 +459,107 @@ export default function AdminPage() {
     }
   };
 
+  const fetchMailMessages = async () => {
+    setMailLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/gmail/messages", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) {
+        setMailConfigured(Boolean(result.configured));
+        setMailConnected(Boolean(result.connected));
+        setMailMessages(result.messages || []);
+      }
+    } catch (error) {
+      console.error("Error fetching Gmail messages:", error);
+    } finally {
+      setMailLoading(false);
+    }
+  };
+
+  const connectGmail = async () => {
+    setMailConnecting(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/gmail/auth-url", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      window.location.href = result.url;
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+      setMailConnecting(false);
+    }
+  };
+
+  const openMail = async (id: string) => {
+    setMailDetailLoading(true);
+    setSelectedMail(null);
+    setMailReplyBody("");
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/gmail/messages/${id}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setSelectedMail(result.message);
+      setMailMessages((prev) => prev.map((m) => (m.id === id ? { ...m, unread: false } : m)));
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setMailDetailLoading(false);
+    }
+  };
+
+  const sendMailReply = async () => {
+    if (!selectedMail || !mailReplyBody.trim()) return;
+    setMailReplySending(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const fromMatch = selectedMail.from.match(/<(.+)>/);
+      const to = fromMatch ? fromMatch[1] : selectedMail.from;
+      const response = await fetch("/api/admin/gmail/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          threadId: selectedMail.threadId,
+          to,
+          subject: selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`,
+          body: mailReplyBody,
+          inReplyToMessageId: selectedMail.id,
+          references: selectedMail.id,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setMailReplyBody("");
+      alert("Réponse envoyée !");
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setMailReplySending(false);
+    }
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const gmailStatus = params.get("gmail");
+    if (gmailStatus === "success") setMailNotice("Gmail connecté avec succès !");
+    else if (gmailStatus === "error") setMailNotice(`Échec de connexion Gmail : ${params.get("gmail_error") || "erreur inconnue"}`);
+    if (gmailStatus) {
+      params.delete("gmail");
+      params.delete("gmail_error");
+      const newUrl = window.location.pathname + (params.toString() ? `?${params}` : "");
+      window.history.replaceState({}, "", newUrl);
+      setTab("mail");
+    }
+  }, []);
+
   useEffect(() => {
     if (!authorized) return;
     if (tab === "live" && liveSessions.length === 0) fetchLiveSessions();
@@ -455,6 +568,7 @@ export default function AdminPage() {
     if (tab === "applications" && jobApplications.length === 0) fetchJobApplications();
     if (tab === "projects" && projectRequests.length === 0) fetchProjectRequests();
     if (tab === "devis" && devisRequests.length === 0) fetchDevisRequests();
+    if (tab === "mail" && mailMessages.length === 0) fetchMailMessages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -654,6 +768,7 @@ export default function AdminPage() {
     else if (t === "applications") fetchJobApplications();
     else if (t === "projects") fetchProjectRequests();
     else if (t === "devis") fetchDevisRequests();
+    else if (t === "mail") fetchMailMessages();
   };
 
   // --- Derived data ---
@@ -792,6 +907,7 @@ export default function AdminPage() {
             { id: "applications", label: "Candidatures" },
             { id: "projects", label: "Projets" },
             { id: "devis", label: "Devis" },
+            { id: "mail", label: "Mail" },
           ] as { id: Tab; label: string }[]).map((t) => (
             <button
               key={t.id}
@@ -1501,6 +1617,104 @@ export default function AdminPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= MAIL TAB ================= */}
+        {tab === "mail" && (
+          <div>
+            {mailNotice && (
+              <div className="p-3 mb-6 bg-surface border border-line rounded-xl text-sm text-ink flex items-center justify-between">
+                {mailNotice}
+                <button onClick={() => setMailNotice(null)} className="text-ink-faint hover:text-ink ml-4">✕</button>
+              </div>
+            )}
+
+            {!mailConfigured ? (
+              <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft">
+                Gmail n'est pas encore configuré côté serveur (variables GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET / GMAIL_REDIRECT_URI manquantes).
+              </div>
+            ) : !mailConnected ? (
+              <div className="p-10 rounded-2xl border border-line bg-surface text-center space-y-4">
+                <p className="text-ink font-bold">Connecte ta boîte Gmail pour voir et répondre à tes emails ici.</p>
+                <button
+                  onClick={connectGmail}
+                  disabled={mailConnecting}
+                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl transition"
+                >
+                  {mailConnecting ? "Redirection…" : "🔗 Connecter Gmail"}
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+                <div className="lg:col-span-2 space-y-2 max-h-[70vh] overflow-y-auto">
+                  {mailLoading ? (
+                    <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+                  ) : mailMessages.length === 0 ? (
+                    <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Boîte de réception vide.</div>
+                  ) : (
+                    mailMessages.map((m) => (
+                      <button
+                        key={m.id}
+                        onClick={() => openMail(m.id)}
+                        className={`w-full text-left p-4 rounded-xl border transition ${
+                          selectedMail?.id === m.id ? "border-red-600 bg-red-950/10" : "border-line bg-surface hover:bg-surface-alt"
+                        }`}
+                      >
+                        <p className={`text-sm truncate ${m.unread ? "font-black text-ink" : "font-semibold text-ink-soft"}`}>{m.from}</p>
+                        <p className={`text-sm truncate ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject}</p>
+                        <p className="text-xs text-ink-faint truncate mt-0.5">{m.snippet}</p>
+                      </button>
+                    ))
+                  )}
+                </div>
+
+                <div className="lg:col-span-3">
+                  {mailDetailLoading ? (
+                    <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+                  ) : !selectedMail ? (
+                    <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft text-center">
+                      Sélectionne un email à gauche pour le lire.
+                    </div>
+                  ) : (
+                    <div className="p-6 rounded-2xl border border-line bg-surface">
+                      <p className="text-lg font-bold text-ink">{selectedMail.subject}</p>
+                      <p className="text-xs text-ink-soft mt-1">
+                        De <span className="text-ink font-semibold">{selectedMail.from}</span> · {selectedMail.date}
+                      </p>
+                      <div className="mt-4 pt-4 border-t border-line">
+                        {/* Email HTML comes from arbitrary senders — never trusted, so it
+                            renders in a fully sandboxed iframe (no scripts, no same-origin
+                            access) instead of dangerouslySetInnerHTML on the page itself. */}
+                        <iframe
+                          sandbox=""
+                          srcDoc={selectedMail.body || selectedMail.snippet}
+                          className="w-full h-64 rounded-lg bg-white"
+                          title="Contenu de l'email"
+                        />
+                      </div>
+                      <div className="mt-6 pt-4 border-t border-line">
+                        <label className="block text-xs font-semibold text-ink-soft mb-1.5">Répondre</label>
+                        <textarea
+                          value={mailReplyBody}
+                          onChange={(e) => setMailReplyBody(e.target.value)}
+                          rows={5}
+                          placeholder="Écrivez votre réponse…"
+                          className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                        />
+                        <button
+                          onClick={sendMailReply}
+                          disabled={mailReplySending || !mailReplyBody.trim()}
+                          className="mt-3 glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                        >
+                          {mailReplySending ? "Envoi…" : "Envoyer"}
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
