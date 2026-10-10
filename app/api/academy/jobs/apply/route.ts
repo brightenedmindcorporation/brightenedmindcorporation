@@ -23,8 +23,15 @@ async function uploadFile(file: File, folder: string): Promise<string> {
   const path = `${folder}/${randomUUID()}.${ext}`;
   const bucket = getAdminBucket();
   const blob = bucket.file(path);
-  await blob.save(buffer, { contentType: file.type || "application/octet-stream" });
-  await blob.makePublic();
+  try {
+    await blob.save(buffer, { contentType: file.type || "application/octet-stream" });
+    await blob.makePublic();
+  } catch (error: any) {
+    if (error?.code === 404 || /bucket does not exist/i.test(error?.message || "")) {
+      throw { status: 503, message: "Le service de stockage de fichiers n'est pas encore configuré. Réessayez plus tard ou contactez l'administration." };
+    }
+    throw error;
+  }
   return `https://storage.googleapis.com/${bucket.name}/${path}`;
 }
 
@@ -127,6 +134,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ status: "success", id: docRef.id });
   } catch (error: any) {
     console.error("Error submitting job application:", error);
-    return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });
+    const status = error?.status ?? 500;
+    return NextResponse.json({ error: error?.message || "Erreur serveur." }, { status });
   }
 }

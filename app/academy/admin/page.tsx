@@ -127,6 +127,14 @@ export default function AdminPage() {
     }
   };
 
+  const handleAdminLogout = async () => {
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Erreur lors de la déconnexion:", error);
+    }
+  };
+
   const fetchLiveSessions = async () => {
     setLiveLoading(true);
     try {
@@ -540,7 +548,15 @@ export default function AdminPage() {
   return (
     <main className="p-6 md:p-10 min-h-screen bg-surface-sunken text-ink font-sans">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-3xl font-black tracking-tight text-ink mb-6">Admin Panel</h1>
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
+          <button
+            onClick={handleAdminLogout}
+            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
+          >
+            🚪 Déconnexion
+          </button>
+        </div>
 
         {/* TABS */}
         <div className="flex gap-2 mb-8 border-b border-line">

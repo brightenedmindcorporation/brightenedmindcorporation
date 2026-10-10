@@ -16,8 +16,19 @@ async function uploadFile(file: File, folder: string): Promise<string> {
   const path = `${folder}/${randomUUID()}.${ext}`;
   const bucket = getAdminBucket();
   const blob = bucket.file(path);
-  await blob.save(buffer, { contentType: file.type || "application/octet-stream" });
-  await blob.makePublic();
+  try {
+    await blob.save(buffer, { contentType: file.type || "application/octet-stream" });
+    await blob.makePublic();
+  } catch (error: any) {
+    if (error?.code === 404 || /bucket does not exist/i.test(error?.message || "")) {
+      throw {
+        status: 503,
+        message:
+          `Le bucket Firebase Storage "${bucket.name}" n'existe pas. Dans la console Firebase → Storage, clique sur "Get Started" pour l'activer, puis vérifie que NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET sur Render correspond exactement au nom du bucket affiché.`,
+      };
+    }
+    throw error;
+  }
   return `https://storage.googleapis.com/${bucket.name}/${path}`;
 }
 
