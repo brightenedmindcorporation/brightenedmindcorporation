@@ -11,6 +11,8 @@ export interface Lesson {
   /** Full text passed to the browser's speechSynthesis for "Listen Lesson". */
   speakText: string;
   videoTopic: string;
+  /** Optional YouTube/Vimeo URL embedded in the lesson's Video card. Falls back to videoTopic text when absent. */
+  videoUrl?: string;
   readingTitle: string;
   reading: string[];
   readingSpeakText: string;

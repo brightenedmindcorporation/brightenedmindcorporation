@@ -14,10 +14,30 @@ const SPEECH_LANG: Record<string, string> = {
   chinese: "zh-CN",
 };
 
+let cachedVoices: SpeechSynthesisVoice[] = [];
+if (typeof window !== "undefined" && "speechSynthesis" in window) {
+  cachedVoices = window.speechSynthesis.getVoices();
+  window.speechSynthesis.addEventListener("voiceschanged", () => {
+    cachedVoices = window.speechSynthesis.getVoices();
+  });
+}
+
+// Prefers a voice the device has installed locally (works without a network
+// request) over a cloud-streamed one, when the browser exposes that choice.
+function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
+  const base = langTag.split("-")[0];
+  const matches = cachedVoices.filter((v) => v.lang === langTag || v.lang.startsWith(base));
+  return matches.find((v) => v.localService) ?? matches[0];
+}
+
 function speak(text: string, langSlug: string) {
+  if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
   const speech = new SpeechSynthesisUtterance(text);
-  speech.lang = SPEECH_LANG[langSlug] ?? "en-US";
+  const langTag = SPEECH_LANG[langSlug] ?? "en-US";
+  speech.lang = langTag;
+  const voice = pickVoice(langTag);
+  if (voice) speech.voice = voice;
   speech.rate = 0.9;
   speech.pitch = 1;
   speech.volume = 1;
@@ -25,7 +45,42 @@ function speak(text: string, langSlug: string) {
 }
 
 function stopSpeaking() {
+  if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
+}
+
+// Lesson lines are written as "target-language phrase (phonetics) -
+// translation" (e.g. Chinese: "你好 (nǐ hǎo) - Bonjour"). Speaking the raw
+// line would read the phonetics and the French translation aloud too, so
+// we only speak the part before the first parenthesis.
+function extractSpeechText(line: string): string {
+  const parenIndex = line.indexOf("(");
+  if (parenIndex > 0) {
+    return line.slice(0, parenIndex).trim();
+  }
+  return line;
+}
+
+function getEmbedUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("youtube.com")) {
+      if (u.pathname.startsWith("/embed/")) return url;
+      const id = u.searchParams.get("v");
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if (u.hostname === "youtu.be") {
+      const id = u.pathname.slice(1);
+      if (id) return `https://www.youtube.com/embed/${id}`;
+    }
+    if (u.hostname.includes("vimeo.com")) {
+      const id = u.pathname.split("/").filter(Boolean).pop();
+      if (id) return `https://player.vimeo.com/video/${id}`;
+    }
+    return null;
+  } catch {
+    return null;
+  }
 }
 
 function Card({ children }: { children: React.ReactNode }) {
@@ -59,6 +114,51 @@ function SpeakButtons({ text, langSlug, label = "Listen" }: { text: string; lang
   );
 }
 
+function SpeakIconButton({ text, langSlug }: { text: string; langSlug: string }) {
+  return (
+    <button
+      onClick={() => speak(text, langSlug)}
+      aria-label="Écouter cette phrase"
+      title="Écouter cette phrase"
+      className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition text-sm mt-0.5"
+    >
+      🔊
+    </button>
+  );
+}
+
+function SpeakableLine({ text, langSlug, className = "" }: { text: string; langSlug: string; className?: string }) {
+  return (
+    <p className={`flex items-start gap-2 ${className}`}>
+      <SpeakIconButton text={extractSpeechText(text)} langSlug={langSlug} />
+      <span>{text}</span>
+    </p>
+  );
+}
+
+function VideoCard({ lesson }: { lesson: Lesson }) {
+  const embedUrl = lesson.videoUrl ? getEmbedUrl(lesson.videoUrl) : null;
+
+  return (
+    <Card>
+      <CardTitle icon="▶">Video</CardTitle>
+      {embedUrl ? (
+        <div className="mt-4 aspect-video rounded-2xl overflow-hidden border border-line bg-black">
+          <iframe
+            src={embedUrl}
+            className="w-full h-full"
+            title={lesson.title}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : (
+        <p className="text-ink-soft mt-3">{lesson.videoTopic}</p>
+      )}
+    </Card>
+  );
+}
+
 export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
   return (
     <div className="space-y-8">
@@ -70,7 +170,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
               <p className="font-semibold text-ink mt-4 first:mt-0">{section.heading}</p>
               <div className="space-y-1 mt-1">
                 {section.body.map((line, j) => (
-                  <p key={j}>{line}</p>
+                  <SpeakableLine key={j} text={line} langSlug={langSlug} />
                 ))}
               </div>
             </div>
@@ -79,17 +179,14 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
         <SpeakButtons text={lesson.speakText} langSlug={langSlug} label="Listen Lesson" />
       </Card>
 
-      <Card>
-        <CardTitle icon="▶">Video</CardTitle>
-        <p className="text-ink-soft mt-3">{lesson.videoTopic}</p>
-      </Card>
+      <VideoCard lesson={lesson} />
 
       <Card>
         <CardTitle icon="📄">Reading Text</CardTitle>
         <div className="text-ink-soft mt-4 space-y-3">
           <p className="font-bold text-ink">{lesson.readingTitle}</p>
           {lesson.reading.map((p, i) => (
-            <p key={i}>{p}</p>
+            <SpeakableLine key={i} text={p} langSlug={langSlug} />
           ))}
         </div>
         <SpeakButtons text={lesson.readingSpeakText} langSlug={langSlug} label="Listen Reading" />
