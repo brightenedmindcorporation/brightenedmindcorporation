@@ -6,12 +6,51 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Theme — le site est volontairement sombre partout (pas de bascule
-   claire/sombre), d'où l'absence de media query prefers-color-scheme. */
+/* ============================================================
+   PREMIUM DESIGN SYSTEM
+   ============================================================
+   The site stays deliberately dark everywhere (no light/dark
+   toggle). This overrides Tailwind's stock `red` scale with a
+   deeper, desaturated garnet/crimson ramp (every existing
+   bg-red-600 / text-red-500 / border-red-900 class across the
+   codebase picks this up automatically — no per-file edits
+   needed) and adds a new `gold` scale for premium accents
+   (badges, dividers, highlighted text) that didn't exist before.
+   ============================================================ */
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #09080a;
+  --foreground: #f6f3ee;
+}
+
+@theme {
+  /* Garnet/crimson — replaces Tailwind's default `red` palette */
+  --color-red-50: #fdf2f3;
+  --color-red-100: #fce4e6;
+  --color-red-200: #f9cad0;
+  --color-red-300: #f2a2ac;
+  --color-red-400: #e5707e;
+  --color-red-500: #d1455a;
+  --color-red-600: #b32e44;
+  --color-red-700: #8f2237;
+  --color-red-800: #701c2e;
+  --color-red-900: #5c1a29;
+  --color-red-950: #330a14;
+
+  /* Champagne gold — new accent for premium highlights */
+  --color-gold-50: #fdfbf3;
+  --color-gold-100: #faf3df;
+  --color-gold-200: #f3e4b8;
+  --color-gold-300: #e9cf87;
+  --color-gold-400: #dcb563;
+  --color-gold-500: #c89a4a;
+  --color-gold-600: #a97d38;
+  --color-gold-700: #86612d;
+  --color-gold-800: #6b4d27;
+  --color-gold-900: #584022;
+  --color-gold-950: #2f2110;
+
+  --font-display: var(--font-display), "Playfair Display", ui-serif, Georgia, serif;
 }
 
 @theme inline {
@@ -20,17 +59,65 @@ html {
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Smooth transitions */
+/* Display typography — headings use the serif display face
+   site-wide, no per-page edits needed. */
+
+h1,
+h2 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+/* Premium utility classes, used selectively on hero/CTA sections */
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, var(--color-gold-200) 0%, var(--color-gold-500) 50%, var(--color-gold-300) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.glass-panel {
+  background: color-mix(in srgb, var(--color-neutral-900) 55%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--color-gold-500) 18%, var(--color-neutral-800));
+}
+
+.glow-accent {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-red-600) 35%, transparent),
+    0 20px 60px -15px color-mix(in srgb, var(--color-red-700) 55%, transparent);
+}
+
+.radial-fade {
+  background: radial-gradient(
+    ellipse 70% 55% at 50% 0%,
+    color-mix(in srgb, var(--color-red-900) 38%, transparent) 0%,
+    transparent 70%
+  );
+}
+
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-gold-500), transparent);
+  opacity: 0.6;
+}
+
+/* Smooth transitions for interactive/stateful properties only —
+   transitioning `all` globally caused layout-affecting properties
+   to animate unintentionally. */
 
 * {
-  transition: all 0.2s ease;
+  transition-property: color, background-color, border-color, box-shadow, opacity, transform;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
 }
 
 /* Text selection */
 
 ::selection {
-  background: #ff0000;
-  color: white;
+  background: var(--color-red-600);
+  color: var(--color-gold-100);
 }
 
 /* Scrollbar */
@@ -40,16 +127,16 @@ html {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-neutral-950);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #ff0000;
+  background: var(--color-red-700);
   border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #111111;
+  background: var(--color-gold-600);
 }
 
 /* Loader animation */

@@ -55,13 +55,13 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" className="py-28 bg-black">
+    <section id="contact-form" className="py-28 bg-background">
 
       <div className="max-w-3xl mx-auto px-8">
 
         <div className="text-center mb-14">
 
-          <p className="uppercase tracking-[4px] text-red-600 font-semibold">
+          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
             Contact
           </p>
 
@@ -69,9 +69,11 @@ export default function Contact() {
             Parlons de votre projet
           </h2>
 
+          <div className="divider-gold w-16 mx-auto mt-6" />
+
         </div>
 
-        <form onSubmit={sendEmail} className="flex flex-col gap-6">
+        <form onSubmit={sendEmail} className="glass-panel rounded-3xl p-8 md:p-10 flex flex-col gap-6 shadow-xl shadow-black/30">
 
           <input
             type="text"
@@ -80,7 +82,7 @@ export default function Contact() {
             value={form.name}
             onChange={handleChange}
             required
-            className="border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600"
+            className="font-sans border border-neutral-700 bg-neutral-950/60 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
           <input
@@ -90,7 +92,7 @@ export default function Contact() {
             value={form.email}
             onChange={handleChange}
             required
-            className="border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600"
+            className="font-sans border border-neutral-700 bg-neutral-950/60 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
           <textarea
@@ -100,18 +102,18 @@ export default function Contact() {
             onChange={handleChange}
             required
             rows={6}
-            className="border border-neutral-700 bg-neutral-900 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600"
+            className="font-sans border border-neutral-700 bg-neutral-950/60 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
           <button
             type="submit"
-            className="bg-red-600 text-white py-4 rounded-xl hover:bg-red-700 transition"
+            className="glow-accent bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white font-semibold py-4 rounded-xl transition"
           >
             Envoyer
           </button>
 
           {sent && (
-            <p className="text-green-600 text-center font-medium">
+            <p className="text-gold-400 text-center font-medium font-sans">
               Message envoyé avec succès.
             </p>
           )}

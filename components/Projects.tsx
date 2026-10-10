@@ -31,7 +31,7 @@ const projects = [
 export default function Projects() {
   return (
     <FadeIn>
-    <section className="py-28 bg-black">
+    <section className="py-28 bg-background">
 
       <div className="max-w-7xl mx-auto px-8">
 
@@ -39,13 +39,15 @@ export default function Projects() {
 
         <div className="text-center mb-20">
 
-          <p className="uppercase tracking-[4px] text-red-600 font-semibold">
+          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
             Nos Réalisations
           </p>
 
           <h2 className="text-5xl font-black mt-5 text-white">
             Solutions & Impact
           </h2>
+
+          <div className="divider-gold w-16 mx-auto mt-6" />
 
         </div>
 
@@ -56,7 +58,7 @@ export default function Projects() {
           {projects.map((project) => (
             <div
               key={project.title}
-              className="bg-neutral-900 border border-neutral-800 rounded-[30px] overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition duration-500 hover:-translate-y-3 group"
+              className="bg-neutral-900 border border-neutral-800 hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition duration-500 hover:-translate-y-3 group"
             >
 
               {/* IMAGE */}
@@ -70,6 +72,8 @@ export default function Projects() {
                   className="object-cover group-hover:scale-105 transition duration-700"
                 />
 
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
               </div>
 
               {/* CONTENT */}
@@ -80,7 +84,7 @@ export default function Projects() {
                   {project.title}
                 </h3>
 
-                <p className="mt-5 text-neutral-400 leading-8">
+                <p className="mt-5 text-neutral-400 leading-8 font-sans">
                   {project.description}
                 </p>
 
@@ -92,7 +96,7 @@ export default function Projects() {
         </div>
 
       </div>
-        
+
     </section>
     </FadeIn>
   );

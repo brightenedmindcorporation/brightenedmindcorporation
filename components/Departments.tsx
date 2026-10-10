@@ -42,17 +42,19 @@ export default function Departments() {
 
           {/* TITLE */}
           <div className="text-center mb-20">
-            <p className="uppercase tracking-[4px] text-red-600 font-semibold">
+            <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
               Nos Départements
             </p>
 
             <h2 className="text-5xl font-black mt-6 text-white leading-tight">
               Trois expertises.
               <br />
-              <span className="text-red-600">
+              <span className="text-gradient-gold">
                 Une mission commune.
               </span>
             </h2>
+
+            <div className="divider-gold w-24 mx-auto mt-8" />
           </div>
 
           {/* CARDS */}
@@ -68,7 +70,7 @@ export default function Departments() {
                   y: -12,
                   scale: 1.02
                 }}
-                className="bg-neutral-900 border border-neutral-800 rounded-[30px] overflow-hidden shadow-xl shadow-black/20 group transition-all duration-500"
+                className="bg-neutral-900/80 border border-neutral-800 hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-xl shadow-black/30 group transition-all duration-500"
               >
 
                 {/* IMAGE */}
@@ -80,7 +82,7 @@ export default function Departments() {
                     sizes="(max-width: 1024px) 100vw, 33vw"
                     className="object-cover group-hover:scale-110 transition duration-700"
                   />
-                  <div className="absolute inset-0 bg-black/20"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
                 </div>
 
                 {/* CONTENT */}
@@ -89,13 +91,13 @@ export default function Departments() {
                     {dep.title}
                   </h3>
 
-                  <p className="mt-5 text-neutral-400 leading-8">
+                  <p className="mt-5 text-neutral-400 leading-8 font-sans">
                     {dep.description}
                   </p>
 
                   <Link
                     href={dep.url}
-                    className="inline-block mt-8 text-red-600 font-semibold hover:text-white transition"
+                    className="inline-flex items-center gap-2 mt-8 text-gold-400 font-semibold hover:text-gold-300 hover:gap-3 transition-all"
                   >
                     Accéder à la page →
                   </Link>

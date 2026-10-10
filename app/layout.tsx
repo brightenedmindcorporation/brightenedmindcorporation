@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
 
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -53,8 +59,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth" className={`dark ${inter.variable}`}>
-      <body className="bg-black text-white font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
+    <html lang="fr" data-scroll-behavior="smooth" className={`dark ${inter.variable} ${playfair.variable}`}>
+      <body className="bg-background text-foreground font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-gold-100">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

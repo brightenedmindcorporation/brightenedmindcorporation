@@ -7,12 +7,13 @@ export default function CTA() {
   return (
     <section
       id="contact"
-      className="py-32 bg-black text-white relative overflow-hidden"
+      className="py-32 bg-background text-white relative overflow-hidden"
     >
 
-      {/* Decorative circle */}
+      {/* Decorative glow */}
 
-      <div className="absolute left-[-120px] bottom-[-120px] w-[350px] h-[350px] border-[60px] border-red-600 rounded-full opacity-10"></div>
+      <div className="absolute inset-0 radial-fade pointer-events-none" />
+      <div className="absolute left-[-120px] bottom-[-120px] w-[350px] h-[350px] border-[60px] border-gold-600 rounded-full opacity-[0.06] blur-[2px]"></div>
 
       <div className="max-w-6xl mx-auto px-8 text-center relative z-10">
 
@@ -23,7 +24,7 @@ export default function CTA() {
           viewport={{ once: true }}
         >
 
-          <p className="uppercase text-red-500 tracking-[4px] font-semibold">
+          <p className="uppercase text-gold-500 tracking-[4px] font-semibold text-sm">
             Collaborons ensemble
           </p>
 
@@ -32,13 +33,13 @@ export default function CTA() {
             Construisons quelque chose
             <br />
 
-            <span className="text-red-600">
+            <span className="text-gradient-gold">
               d’exception ensemble.
             </span>
 
           </h2>
 
-          <p className="mt-10 max-w-3xl mx-auto text-gray-400 text-lg leading-9">
+          <p className="mt-10 max-w-3xl mx-auto text-neutral-400 text-lg leading-9 font-sans">
 
             Brightened Mind Corporation accompagne les individus,
             les entreprises et les communautés dans leur évolution
@@ -50,14 +51,14 @@ export default function CTA() {
 
             <Link
               href="mailto:brightenedmindcorporation@gmail.com"
-              className="bg-red-600 px-10 py-5 rounded-2xl font-semibold hover:bg-white hover:text-black transition duration-300"
+              className="glow-accent bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 px-10 py-5 rounded-2xl font-semibold transition duration-300"
             >
               Nous contacter
             </Link>
 
             <Link
               href="#departments"
-              className="border border-gray-600 px-10 py-5 rounded-2xl hover:bg-white hover:text-black transition duration-300"
+              className="border border-neutral-700 px-10 py-5 rounded-2xl hover:border-gold-500/60 hover:text-gold-300 transition duration-300"
             >
               Explorer nos branches
             </Link>

@@ -39,14 +39,14 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.2 }}
-              className="bg-neutral-900 border border-neutral-800 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
+              className="bg-neutral-900/60 border border-neutral-800 hover:border-gold-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
             >
 
-              <h2 className="text-5xl font-black text-red-600">
+              <h2 className="text-5xl font-black text-gradient-gold">
                 {stat.number}
               </h2>
 
-              <p className="mt-4 text-neutral-400 font-medium">
+              <p className="mt-4 text-neutral-400 font-medium font-sans">
                 {stat.label}
               </p>
 

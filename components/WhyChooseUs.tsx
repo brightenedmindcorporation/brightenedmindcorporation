@@ -26,13 +26,13 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-28 bg-black text-white">
+    <section className="py-28 bg-background text-white">
 
       <div className="max-w-7xl mx-auto px-8">
 
         <div className="text-center mb-20">
 
-          <p className="uppercase tracking-[4px] text-red-500 font-semibold">
+          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
             Pourquoi Nous Choisir
           </p>
 
@@ -40,21 +40,27 @@ export default function WhyChooseUs() {
             Ce qui nous distingue
           </h2>
 
+          <div className="divider-gold w-16 mx-auto mt-6" />
+
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
 
-          {reasons.map((reason) => (
+          {reasons.map((reason, index) => (
             <div
               key={reason.title}
-              className="border border-gray-800 rounded-[25px] p-8 hover:border-red-500 transition duration-500"
+              className="group border border-neutral-800 bg-neutral-900/40 rounded-[25px] p-8 hover:border-gold-600/40 hover:bg-neutral-900 transition duration-500"
             >
 
-              <h3 className="text-2xl font-bold">
+              <span className="font-display text-3xl text-red-700/70 group-hover:text-gold-500 transition-colors duration-500">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+
+              <h3 className="text-2xl font-bold mt-4">
                 {reason.title}
               </h3>
 
-              <p className="mt-5 text-gray-400 leading-8">
+              <p className="mt-4 text-neutral-400 leading-8 font-sans">
                 {reason.description}
               </p>
 

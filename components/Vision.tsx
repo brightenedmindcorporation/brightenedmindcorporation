@@ -18,7 +18,7 @@ export default function Vision() {
           viewport={{ once: true }}
         >
 
-          <p className="uppercase text-red-600 tracking-[4px] font-semibold">
+          <p className="uppercase text-gold-500 tracking-[4px] font-semibold text-sm">
             Notre vision
           </p>
 
@@ -30,13 +30,13 @@ export default function Vision() {
             Développer les talents.
             <br />
 
-            <span className="text-red-600">
+            <span className="text-gradient-gold">
               Créer un impact durable.
             </span>
 
           </h2>
 
-          <p className="mt-10 max-w-3xl mx-auto text-neutral-400 leading-9 text-lg">
+          <p className="mt-10 max-w-3xl mx-auto text-neutral-400 leading-9 text-lg font-sans">
 
             Nous croyons qu’un monde meilleur se construit
             lorsque les individus, les entreprises et les communautés
@@ -53,13 +53,13 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-neutral-900 border border-neutral-800 p-10 rounded-3xl shadow-lg shadow-black/20"
+            className="bg-neutral-900/60 border border-neutral-800 hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
           >
-            <h3 className="text-3xl font-bold text-red-600">
+            <h3 className="text-3xl font-bold text-red-500">
               Innovation
             </h3>
 
-            <p className="mt-5 text-neutral-400 leading-8">
+            <p className="mt-5 text-neutral-400 leading-8 font-sans">
               Concevoir des solutions modernes
               adaptées aux défis actuels.
             </p>
@@ -67,13 +67,13 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-neutral-900 border border-neutral-800 p-10 rounded-3xl shadow-lg shadow-black/20"
+            className="bg-neutral-900/60 border border-neutral-800 hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
           >
-            <h3 className="text-3xl font-bold text-red-600">
+            <h3 className="text-3xl font-bold text-red-500">
               Excellence
             </h3>
 
-            <p className="mt-5 text-neutral-400 leading-8">
+            <p className="mt-5 text-neutral-400 leading-8 font-sans">
               Offrir des services à forte valeur
               ajoutée avec professionnalisme.
             </p>
@@ -81,13 +81,13 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-neutral-900 border border-neutral-800 p-10 rounded-3xl shadow-lg shadow-black/20"
+            className="bg-neutral-900/60 border border-neutral-800 hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
           >
-            <h3 className="text-3xl font-bold text-red-600">
+            <h3 className="text-3xl font-bold text-red-500">
               Impact
             </h3>
 
-            <p className="mt-5 text-neutral-400 leading-8">
+            <p className="mt-5 text-neutral-400 leading-8 font-sans">
               Générer des résultats concrets
               et durables pour tous.
             </p>
