@@ -26,12 +26,14 @@ export default function Contact() {
 
     try {
       await emailjs.send(
-        "service_qjux4yb",
-        "template_v0melap",
+        "service_m7rwnia",
+        "template_slt7mce",
         {
-          from_name: form.name,
-          from_email: form.email,
+          name: form.name,
+          email: form.email,
           message: form.message,
+          title: "Nouveau message depuis le site",
+          time: new Date().toLocaleString("fr-FR"),
         },
         "I5Po_j3t-2H5h9OGV"
       );
