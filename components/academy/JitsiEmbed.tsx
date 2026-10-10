@@ -62,11 +62,11 @@ export default function JitsiEmbed({
 
   if (error) {
     return (
-      <div className="w-full h-full min-h-[480px] flex items-center justify-center bg-neutral-950 text-red-400 rounded-2xl border border-neutral-800">
+      <div className="w-full h-full min-h-[480px] flex items-center justify-center bg-surface-sunken text-red-400 rounded-2xl border border-line">
         {error}
       </div>
     );
   }
 
-  return <div ref={containerRef} className="w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-neutral-800" />;
+  return <div ref={containerRef} className="w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-line" />;
 }

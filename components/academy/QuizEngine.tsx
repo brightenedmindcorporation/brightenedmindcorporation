@@ -33,10 +33,10 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
   const passed = score >= quiz.passingScore;
 
   return (
-    <div className="bg-neutral-900 rounded-3xl p-6 md:p-8 border border-neutral-800 shadow-xl space-y-8">
+    <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-8">
       {quiz.questions.map((q, index) => (
-        <div key={index} className="border-b border-neutral-800/80 pb-6 last:border-b-0 last:pb-0">
-          <h2 className="font-bold text-lg text-white mb-4 flex items-start gap-3">
+        <div key={index} className="border-b border-line/80 pb-6 last:border-b-0 last:pb-0">
+          <h2 className="font-bold text-lg text-ink mb-4 flex items-start gap-3">
             <span className="text-red-500 font-extrabold">{index + 1}.</span>
             <span>{q.question}</span>
           </h2>
@@ -46,7 +46,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
               const isCorrect = option === q.answer;
               const isSelected = answers[index] === option;
 
-              let buttonStyle = "bg-neutral-950/60 border-neutral-800 text-neutral-300 hover:border-neutral-700";
+              let buttonStyle = "bg-surface-sunken/60 border-line text-ink-soft hover:border-line";
 
               if (submitted) {
                 if (isCorrect) {
@@ -54,7 +54,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
                 } else if (isSelected && !isCorrect) {
                   buttonStyle = "bg-red-950/80 border-red-600 text-red-200 font-semibold";
                 } else {
-                  buttonStyle = "bg-neutral-950/40 border-neutral-800/50 text-neutral-500 opacity-60";
+                  buttonStyle = "bg-surface-sunken/40 border-line/50 text-ink-faint opacity-60";
                 }
               } else if (isSelected) {
                 buttonStyle = "bg-red-600 border-red-500 text-white font-semibold shadow-lg shadow-red-950/50";
@@ -84,7 +84,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
             disabled={answers.includes("")}
             className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl ${
               answers.includes("")
-                ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                 : "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white shadow-red-950/60"
             }`}
           >
@@ -92,10 +92,10 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
           </button>
         </div>
       ) : (
-        <div className="mt-8 p-6 bg-neutral-950 rounded-2xl border border-neutral-800 space-y-4">
+        <div className="mt-8 p-6 bg-surface-sunken rounded-2xl border border-line space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <h2 className="text-2xl font-black text-white">
+              <h2 className="text-2xl font-black text-ink">
                 Your Score: <span className={passed ? "text-emerald-400" : "text-red-500"}>{score} / {quiz.questions.length}</span>
               </h2>
               <p className="mt-1 font-semibold text-sm">
@@ -112,13 +112,13 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
                 setAnswers(Array(quiz.questions.length).fill(""));
                 setSubmitted(false);
               }}
-              className="bg-neutral-800 hover:bg-neutral-700 text-white font-bold px-6 py-3 rounded-xl border border-neutral-700 transition self-start sm:self-auto"
+              className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto"
             >
               🔄 Retake (practice only)
             </button>
           </div>
 
-          <p className="text-xs text-red-400/80 italic font-medium pt-2 border-t border-neutral-900">
+          <p className="text-xs text-red-400/80 italic font-medium pt-2 border-t border-line">
             Note: Only your first attempt score is recorded in your progress.
           </p>
         </div>

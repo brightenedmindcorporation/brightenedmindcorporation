@@ -157,7 +157,7 @@ export default function AdminPage() {
 
   if (checking) {
     return (
-      <main className="flex items-center justify-center min-h-screen bg-neutral-950 text-neutral-400">
+      <main className="flex items-center justify-center min-h-screen bg-surface-sunken text-ink-soft">
         Loading...
       </main>
     );
@@ -165,7 +165,7 @@ export default function AdminPage() {
 
   if (!authorized) {
     return (
-      <main className="flex items-center justify-center min-h-screen bg-neutral-950">
+      <main className="flex items-center justify-center min-h-screen bg-surface-sunken">
         <h1 className="text-3xl font-bold text-red-600">
           Access Denied
         </h1>
@@ -174,28 +174,28 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="p-6 md:p-10 min-h-screen bg-neutral-950 text-neutral-100">
+    <main className="p-6 md:p-10 min-h-screen bg-surface-sunken text-ink">
       <div className="max-w-5xl mx-auto">
-        <h1 className="text-3xl font-black tracking-tight text-white mb-6">
+        <h1 className="text-3xl font-black tracking-tight text-ink mb-6">
           Admin Panel
         </h1>
 
         {students.length === 0 ? (
-          <div className="p-4 rounded-2xl border border-neutral-800 bg-neutral-900 text-neutral-400">
+          <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
             No students found in Firestore
           </div>
         ) : (
           students.map((s, index) => (
             <div
               key={s.id}
-              className="p-5 mb-4 rounded-2xl border border-neutral-800 bg-neutral-900 shadow-xl"
+              className="p-5 mb-4 rounded-2xl border border-line bg-surface shadow-xl"
             >
-              <p className="text-neutral-200"><b className="text-white">Name:</b> {s.name}</p>
-              <p className="text-neutral-200"><b className="text-white">Email:</b> {s.email}</p>
-              <p className="text-neutral-200"><b className="text-white">Language:</b> {s.langCode || "EN (legacy)"}</p>
-              <p className="text-neutral-200"><b className="text-white">Level:</b> {s.level}</p>
-              <p className="text-neutral-200"><b className="text-white">Status:</b> {s.status}</p>
-              <p className="text-neutral-200"><b className="text-white">Matricule:</b> {s.matricule || "-"}</p>
+              <p className="text-ink"><b className="text-ink">Name:</b> {s.name}</p>
+              <p className="text-ink"><b className="text-ink">Email:</b> {s.email}</p>
+              <p className="text-ink"><b className="text-ink">Language:</b> {s.langCode || "EN (legacy)"}</p>
+              <p className="text-ink"><b className="text-ink">Level:</b> {s.level}</p>
+              <p className="text-ink"><b className="text-ink">Status:</b> {s.status}</p>
+              <p className="text-ink"><b className="text-ink">Matricule:</b> {s.matricule || "-"}</p>
 
               <div className="flex gap-3 mt-4">
                 <button

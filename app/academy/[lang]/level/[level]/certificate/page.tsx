@@ -65,41 +65,41 @@ export default function CertificatePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <p>Loading...</p>
       </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10">
         <div className="max-w-3xl mx-auto space-y-8">
           <div>
             <Link
               href={`/academy/${langSlug}/level/${level}`}
-              className="inline-flex items-center gap-2 text-sm font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 rounded-xl border border-neutral-800 transition shadow-lg"
+              className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
             >
               ← Back to Level
             </Link>
           </div>
 
-          <div className="bg-neutral-900 rounded-3xl p-8 border border-neutral-800 shadow-2xl">
-            <h1 className="text-3xl md:text-4xl font-black text-center text-white mb-8">🏆 Certificate</h1>
+          <div className="bg-surface rounded-3xl p-8 border border-line shadow-2xl">
+            <h1 className="text-3xl md:text-4xl font-black text-center text-ink mb-8">🏆 Certificate</h1>
 
             {!eligible ? (
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-red-500">❌ Access Denied</h2>
-                <p className="mt-3 text-neutral-400">Pass the Final Quiz first.</p>
+                <p className="mt-3 text-ink-soft">Pass the Final Quiz first.</p>
               </div>
             ) : (
               <>
-                <div className="bg-neutral-950 border border-neutral-800 rounded-3xl p-8 text-neutral-200">
+                <div className="bg-surface-sunken border border-line rounded-3xl p-8 text-ink">
                   <h2 className="text-2xl font-bold text-red-500 mb-5">Student Summary</h2>
-                  <p><strong className="text-white">Student:</strong> {studentName}</p>
-                  <p><strong className="text-white">Level:</strong> {curriculum?.levelTitle}</p>
-                  <p><strong className="text-white">Final Average:</strong> {average}%</p>
-                  <p><strong className="text-white">Certificate ID:</strong> {certificateId}</p>
+                  <p><strong className="text-ink">Student:</strong> {studentName}</p>
+                  <p><strong className="text-ink">Level:</strong> {curriculum?.levelTitle}</p>
+                  <p><strong className="text-ink">Final Average:</strong> {average}%</p>
+                  <p><strong className="text-ink">Certificate ID:</strong> {certificateId}</p>
                   <p className="text-emerald-400 font-bold mt-3">✅ Eligible for Certificate</p>
                 </div>
 

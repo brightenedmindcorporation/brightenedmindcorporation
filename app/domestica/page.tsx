@@ -43,17 +43,17 @@ export default function DomesticaPage() {
   const whatsappUrl = `https://wa.me/243988830799?text=${encodeURIComponent("Bonjour BM Domestica, je souhaite en savoir plus sur vos services de personnel domestique.")}`;
 
   return (
-    <main className="min-h-screen bg-background text-white font-sans antialiased pt-28">
+    <main className="min-h-screen bg-page text-ink font-sans antialiased pt-28">
       {/* HERO SECTION */}
-      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800">
+      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
         <div className="relative z-10 max-w-4xl">
           <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-gold-700/40">
             BM CORPORATION
           </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             BM <span className="text-gradient-gold">Domestica</span>
           </h1>
-          <p className="text-xl text-neutral-400 mb-10 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl text-ink-soft mb-10 leading-relaxed max-w-2xl mx-auto">
             Recrutement, formation et placement de personnel domestique qualifié, pour répondre aux besoins
             de votre foyer avec professionnalisme, confiance et efficacité.
           </p>
@@ -61,7 +61,7 @@ export default function DomesticaPage() {
             <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
               Demander un Devis Gratuit
             </Link>
-            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-neutral-900 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-neutral-800 transition border border-neutral-700">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-surface text-ink font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-surface-alt transition border border-line">
               Nous écrire sur WhatsApp
             </a>
           </div>
@@ -71,8 +71,8 @@ export default function DomesticaPage() {
       {/* SERVICES */}
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-16">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Nos Services</h2>
-          <p className="text-neutral-400 max-w-xl mx-auto text-sm">
+          <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Nos Services</h2>
+          <p className="text-ink-soft max-w-xl mx-auto text-sm">
             Un accompagnement complet, de la sélection du personnel jusqu'à son intégration durable dans votre foyer.
           </p>
         </div>
@@ -83,15 +83,15 @@ export default function DomesticaPage() {
             return (
               <div
                 key={index}
-                className="group bg-neutral-900/60 p-8 rounded-3xl border border-neutral-800 transition-all duration-300 hover:border-red-600 hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-600/10"
+                className="group bg-surface/60 p-8 rounded-3xl border border-line transition-all duration-300 hover:border-red-600 hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-600/10"
               >
-                <div className="p-4 bg-black rounded-2xl border border-neutral-800 w-fit mb-6 group-hover:border-red-600/50 transition-colors">
+                <div className="p-4 bg-surface-alt rounded-2xl border border-line w-fit mb-6 group-hover:border-red-600/50 transition-colors">
                   <IconComponent />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-red-500 transition-colors">
+                <h3 className="text-xl font-bold text-ink mb-3 group-hover:text-red-500 transition-colors">
                   {service.title}
                 </h3>
-                <p className="text-neutral-400 text-sm leading-relaxed">{service.description}</p>
+                <p className="text-ink-soft text-sm leading-relaxed">{service.description}</p>
               </div>
             );
           })}
@@ -99,12 +99,12 @@ export default function DomesticaPage() {
       </div>
 
       {/* CALL TO ACTION */}
-      <section className="bg-neutral-950 py-24 px-6 border-t border-neutral-800 text-center">
+      <section className="bg-surface-sunken py-24 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-white mb-6">
+          <h2 className="text-4xl font-extrabold text-ink mb-6">
             Besoin de personnel domestique de confiance ?
           </h2>
-          <p className="text-xl text-neutral-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-ink-soft mb-10 max-w-2xl mx-auto">
             Contactez notre équipe pour décrire votre besoin et recevoir une proposition adaptée à votre foyer.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">

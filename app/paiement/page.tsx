@@ -73,7 +73,7 @@ export default function PaymentPage() {
 
   if (checkingAuth) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-neutral-400">
+      <main className="min-h-screen flex items-center justify-center bg-page text-ink-soft">
         Chargement...
       </main>
     );
@@ -81,10 +81,10 @@ export default function PaymentPage() {
 
   if (!user) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black text-white px-6">
-        <div className="max-w-md text-center bg-neutral-950 border border-neutral-800 rounded-2xl p-8">
+      <main className="min-h-screen flex items-center justify-center bg-page text-ink px-6">
+        <div className="max-w-md text-center bg-surface-sunken border border-line rounded-2xl p-8">
           <h1 className="text-2xl font-bold mb-3">Connexion requise</h1>
-          <p className="text-neutral-400 text-sm mb-6">
+          <p className="text-ink-soft text-sm mb-6">
             Créez votre compte ou connectez-vous avant de procéder au paiement de votre formation.
           </p>
           <div className="flex flex-col gap-3">
@@ -101,11 +101,11 @@ export default function PaymentPage() {
   }
 
   return (
-    <div className="min-h-screen bg-black text-white pt-28 pb-16 px-6">
-      <div className="max-w-3xl mx-auto bg-neutral-900 border border-neutral-800 rounded-2xl p-8 shadow-2xl">
+    <div className="min-h-screen bg-page text-ink pt-28 pb-16 px-6">
+      <div className="max-w-3xl mx-auto bg-surface border border-line rounded-2xl p-8 shadow-2xl">
 
         <h1 className="text-3xl font-extrabold mb-2">Finaliser votre inscription</h1>
-        <p className="text-neutral-400 text-sm mb-8">
+        <p className="text-ink-soft text-sm mb-8">
           Choisissez votre langue et votre mode de paiement sécurisé pour valider votre formation.
         </p>
 
@@ -115,12 +115,12 @@ export default function PaymentPage() {
               ✓
             </div>
             <h2 className="text-2xl font-bold text-emerald-400">Paiement Reçu avec Succès !</h2>
-            <p className="text-neutral-300 text-sm">
+            <p className="text-ink-soft text-sm">
               Votre transaction a été validée. Votre compte est maintenant activé.
             </p>
             {matricule && (
-              <div className="bg-black border border-emerald-700/50 rounded-xl p-4 inline-block">
-                <p className="text-xs text-neutral-500 mb-1">Votre matricule</p>
+              <div className="bg-surface-alt border border-emerald-700/50 rounded-xl p-4 inline-block">
+                <p className="text-xs text-ink-faint mb-1">Votre matricule</p>
                 <p className="text-2xl font-black text-emerald-400 font-mono tracking-wider">{matricule}</p>
               </div>
             )}
@@ -146,7 +146,7 @@ export default function PaymentPage() {
               <select
                 value={langCode}
                 onChange={(e) => setLangCode(e.target.value)}
-                className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
+                className="w-full bg-surface-alt border border-line rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
               >
                 {availableLanguages.map((lang) => (
                   <option key={lang.code} value={lang.code}>
@@ -165,8 +165,8 @@ export default function PaymentPage() {
                   onClick={() => setSelectedMethod("mobile")}
                   className={`p-4 rounded-xl border text-left font-semibold transition flex items-center justify-between ${
                     selectedMethod === "mobile"
-                      ? "border-red-600 bg-red-950/20 text-white"
-                      : "border-neutral-800 bg-neutral-950 text-neutral-400"
+                      ? "border-red-600 bg-red-950/20 text-ink"
+                      : "border-line bg-surface-sunken text-ink-soft"
                   }`}
                 >
                   <span>📱 Mobile Money</span>
@@ -178,8 +178,8 @@ export default function PaymentPage() {
                   onClick={() => setSelectedMethod("card")}
                   className={`p-4 rounded-xl border text-left font-semibold transition flex items-center justify-between ${
                     selectedMethod === "card"
-                      ? "border-red-600 bg-red-950/20 text-white"
-                      : "border-neutral-800 bg-neutral-950 text-neutral-400"
+                      ? "border-red-600 bg-red-950/20 text-ink"
+                      : "border-line bg-surface-sunken text-ink-soft"
                   }`}
                 >
                   <span>💳 Carte / Banques</span>
@@ -205,8 +205,8 @@ export default function PaymentPage() {
                       onClick={() => setOperator(item.id as any)}
                       className={`p-3 rounded-lg border text-xs font-bold transition flex items-center gap-2 ${
                         operator === item.id
-                          ? "border-white bg-neutral-800 text-white"
-                          : "border-neutral-800 bg-neutral-950 text-neutral-400"
+                          ? "border-white bg-surface-alt text-ink"
+                          : "border-line bg-surface-sunken text-ink-soft"
                       }`}
                     >
                       <span className={`w-2.5 h-2.5 rounded-full ${item.color}`}></span>
@@ -216,14 +216,14 @@ export default function PaymentPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-neutral-400 mb-1">Numéro de téléphone payeur</label>
+                  <label className="block text-xs text-ink-soft mb-1">Numéro de téléphone payeur</label>
                   <input
                     type="tel"
                     placeholder="+243 8X XXX XX XX"
                     required
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
-                    className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
+                    className="w-full bg-surface-alt border border-line rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
                   />
                 </div>
               </div>
@@ -231,26 +231,26 @@ export default function PaymentPage() {
 
             {/* Options Carte Bancaire */}
             {selectedMethod === "card" && (
-              <div className="space-y-4 bg-neutral-950 p-4 rounded-xl border border-neutral-800">
-                <p className="text-xs text-neutral-400">
+              <div className="space-y-4 bg-surface-sunken p-4 rounded-xl border border-line">
+                <p className="text-xs text-ink-soft">
                   Paiement sécurisé via Carte Visa, Mastercard ou virement bancaire direct.
                 </p>
                 <div>
-                  <label className="block text-xs text-neutral-400 mb-1">Nom sur la carte</label>
+                  <label className="block text-xs text-ink-soft mb-1">Nom sur la carte</label>
                   <input
                     type="text"
                     placeholder="Jordi Mukosa"
                     required
-                    className="w-full bg-black border border-neutral-800 rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
+                    className="w-full bg-surface-alt border border-line rounded-xl p-3 text-sm focus:border-red-600 focus:outline-none"
                   />
                 </div>
               </div>
             )}
 
             {/* Récapitulatif et validation */}
-            <div className="pt-4 border-t border-neutral-800 flex items-center justify-between">
+            <div className="pt-4 border-t border-line flex items-center justify-between">
               <div>
-                <p className="text-xs text-neutral-400">Total à payer</p>
+                <p className="text-xs text-ink-soft">Total à payer</p>
                 <p className="text-2xl font-black text-red-500">${COURSE_PRICE_USD}.00 USD</p>
               </div>
 

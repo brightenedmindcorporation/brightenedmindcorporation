@@ -36,7 +36,7 @@ export default function Departments() {
     <FadeIn>
       <section
         id="departments"
-        className="py-32 bg-black"
+        className="py-32 bg-page"
       >
         <div className="max-w-7xl mx-auto px-8">
 
@@ -46,7 +46,7 @@ export default function Departments() {
               Nos Départements
             </p>
 
-            <h2 className="text-5xl font-black mt-6 text-white leading-tight">
+            <h2 className="text-5xl font-black mt-6 text-ink leading-tight">
               Trois expertises.
               <br />
               <span className="text-gradient-gold">
@@ -70,7 +70,7 @@ export default function Departments() {
                   y: -12,
                   scale: 1.02
                 }}
-                className="bg-neutral-900/80 border border-neutral-800 hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-xl shadow-black/30 group transition-all duration-500"
+                className="bg-surface/80 border border-line hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-xl shadow-black/30 group transition-all duration-500"
               >
 
                 {/* IMAGE */}
@@ -87,11 +87,11 @@ export default function Departments() {
 
                 {/* CONTENT */}
                 <div className="p-8">
-                  <h3 className="text-2xl font-bold text-white">
+                  <h3 className="text-2xl font-bold text-ink">
                     {dep.title}
                   </h3>
 
-                  <p className="mt-5 text-neutral-400 leading-8 font-sans">
+                  <p className="mt-5 text-ink-soft leading-8 font-sans">
                     {dep.description}
                   </p>
 

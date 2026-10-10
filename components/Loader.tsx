@@ -20,7 +20,7 @@ export default function Loader({
 
   if (loading) {
     return (
-      <div className="fixed inset-0 bg-background flex items-center justify-center z-[9999] overflow-hidden">
+      <div className="fixed inset-0 bg-page flex items-center justify-center z-[9999] overflow-hidden">
 
         <div className="absolute inset-0 radial-fade" />
 

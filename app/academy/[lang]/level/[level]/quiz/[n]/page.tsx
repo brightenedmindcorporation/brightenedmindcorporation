@@ -24,20 +24,20 @@ export default function QuizPage() {
 
   if (!quiz || !curriculum) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <p>Quiz introuvable.</p>
       </main>
     );
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10">
         <div className="max-w-4xl mx-auto space-y-8">
           <div>
             <Link
               href={base}
-              className="inline-flex items-center gap-2 text-sm font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 rounded-xl border border-neutral-800 transition shadow-lg"
+              className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
             >
               ← Back to Level
             </Link>

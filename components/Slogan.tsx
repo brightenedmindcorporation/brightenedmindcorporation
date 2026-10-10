@@ -1,6 +1,6 @@
 export default function Slogan() {
   return (
-    <section className="py-20 bg-neutral-950 text-white text-center relative overflow-hidden">
+    <section className="py-20 bg-surface-sunken text-ink text-center relative overflow-hidden">
 
       <div className="absolute inset-0 radial-fade pointer-events-none" />
 

@@ -9,7 +9,7 @@ export default function About() {
     <FadeIn>
     <section
       id="about"
-      className="py-28 bg-background"
+      className="py-28 bg-page"
     >
       <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-20 items-center">
 
@@ -52,14 +52,14 @@ export default function About() {
             À propos
           </p>
 
-          <h2 className="text-5xl font-black mt-6 text-white leading-tight">
+          <h2 className="text-5xl font-black mt-6 text-ink leading-tight">
 
             Construire un avenir
             <span className="text-gradient-gold"> durable</span>
 
           </h2>
 
-          <p className="mt-8 text-neutral-400 leading-9 text-lg font-sans">
+          <p className="mt-8 text-ink-soft leading-9 text-lg font-sans">
 
             Brightened Mind Corporation est un groupe
             multidisciplinaire engagé dans le développement
@@ -71,25 +71,25 @@ export default function About() {
 
           </p>
 
-          <div className="mt-10 grid grid-cols-3 gap-6 pt-8 border-t border-neutral-800">
+          <div className="mt-10 grid grid-cols-3 gap-6 pt-8 border-t border-line">
 
             <div>
               <h3 className="text-4xl font-black text-gradient-gold">3</h3>
-              <p className="text-neutral-400 mt-2 font-sans text-sm">
+              <p className="text-ink-soft mt-2 font-sans text-sm">
                 Branches
               </p>
             </div>
 
             <div>
               <h3 className="text-4xl font-black text-gradient-gold">1</h3>
-              <p className="text-neutral-400 mt-2 font-sans text-sm">
+              <p className="text-ink-soft mt-2 font-sans text-sm">
                 Vision
               </p>
             </div>
 
             <div>
               <h3 className="text-4xl font-black text-gradient-gold">100%</h3>
-              <p className="text-neutral-400 mt-2 font-sans text-sm">
+              <p className="text-ink-soft mt-2 font-sans text-sm">
                 Engagement
               </p>
             </div>

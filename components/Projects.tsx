@@ -31,7 +31,7 @@ const projects = [
 export default function Projects() {
   return (
     <FadeIn>
-    <section className="py-28 bg-background">
+    <section className="py-28 bg-page">
 
       <div className="max-w-7xl mx-auto px-8">
 
@@ -43,7 +43,7 @@ export default function Projects() {
             Nos Réalisations
           </p>
 
-          <h2 className="text-5xl font-black mt-5 text-white">
+          <h2 className="text-5xl font-black mt-5 text-ink">
             Solutions & Impact
           </h2>
 
@@ -58,7 +58,7 @@ export default function Projects() {
           {projects.map((project) => (
             <div
               key={project.title}
-              className="bg-neutral-900 border border-neutral-800 hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition duration-500 hover:-translate-y-3 group"
+              className="bg-surface border border-line hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition duration-500 hover:-translate-y-3 group"
             >
 
               {/* IMAGE */}
@@ -80,11 +80,11 @@ export default function Projects() {
 
               <div className="p-8">
 
-                <h3 className="text-2xl font-bold text-white">
+                <h3 className="text-2xl font-bold text-ink">
                   {project.title}
                 </h3>
 
-                <p className="mt-5 text-neutral-400 leading-8 font-sans">
+                <p className="mt-5 text-ink-soft leading-8 font-sans">
                   {project.description}
                 </p>
 

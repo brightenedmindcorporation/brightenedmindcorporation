@@ -29,7 +29,7 @@ function stopSpeaking() {
 }
 
 function Card({ children }: { children: React.ReactNode }) {
-  return <div className="bg-neutral-900 rounded-3xl p-8 border border-neutral-800 shadow-xl">{children}</div>;
+  return <div className="bg-surface rounded-3xl p-8 border border-line shadow-xl">{children}</div>;
 }
 
 function CardTitle({ icon, children }: { icon: string; children: React.ReactNode }) {
@@ -51,7 +51,7 @@ function SpeakButtons({ text, langSlug, label = "Listen" }: { text: string; lang
       </button>
       <button
         onClick={stopSpeaking}
-        className="bg-neutral-800 hover:bg-neutral-700 text-neutral-300 font-bold px-6 py-3 rounded-xl border border-neutral-700 transition"
+        className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-6 py-3 rounded-xl border border-line transition"
       >
         ⏹ Stop
       </button>
@@ -64,10 +64,10 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
     <div className="space-y-8">
       <Card>
         <CardTitle icon="📘">Lesson</CardTitle>
-        <div className="text-neutral-300 mt-4 space-y-4">
+        <div className="text-ink-soft mt-4 space-y-4">
           {lesson.sections.map((section, i) => (
             <div key={i}>
-              <p className="font-semibold text-white mt-4 first:mt-0">{section.heading}</p>
+              <p className="font-semibold text-ink mt-4 first:mt-0">{section.heading}</p>
               <div className="space-y-1 mt-1">
                 {section.body.map((line, j) => (
                   <p key={j}>{line}</p>
@@ -81,13 +81,13 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
 
       <Card>
         <CardTitle icon="▶">Video</CardTitle>
-        <p className="text-neutral-300 mt-3">{lesson.videoTopic}</p>
+        <p className="text-ink-soft mt-3">{lesson.videoTopic}</p>
       </Card>
 
       <Card>
         <CardTitle icon="📄">Reading Text</CardTitle>
-        <div className="text-neutral-300 mt-4 space-y-3">
-          <p className="font-bold text-white">{lesson.readingTitle}</p>
+        <div className="text-ink-soft mt-4 space-y-3">
+          <p className="font-bold text-ink">{lesson.readingTitle}</p>
           {lesson.reading.map((p, i) => (
             <p key={i}>{p}</p>
           ))}
@@ -97,8 +97,8 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
 
       <Card>
         <CardTitle icon="🎤">Exercises</CardTitle>
-        <p className="text-neutral-300 mt-4">Complete the sentences:</p>
-        <ul className="list-disc ml-6 text-neutral-300 mt-4 space-y-1">
+        <p className="text-ink-soft mt-4">Complete the sentences:</p>
+        <ul className="list-disc ml-6 text-ink-soft mt-4 space-y-1">
           {lesson.exercises.map((ex, i) => (
             <li key={i}>{ex}</li>
           ))}
@@ -107,7 +107,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
 
       <Card>
         <CardTitle icon="🗣">Speaking Topic</CardTitle>
-        <p className="text-neutral-300 mt-4">{lesson.speakingTopic}</p>
+        <p className="text-ink-soft mt-4">{lesson.speakingTopic}</p>
       </Card>
     </div>
   );

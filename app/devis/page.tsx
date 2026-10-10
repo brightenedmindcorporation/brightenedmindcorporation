@@ -61,7 +61,7 @@ export default function DevisPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-white font-sans pt-28 pb-16 px-6 relative overflow-hidden">
+    <main className="min-h-screen bg-page text-ink font-sans pt-28 pb-16 px-6 relative overflow-hidden">
       <div className="absolute inset-0 radial-fade pointer-events-none" />
       <div className="max-w-3xl mx-auto glass-panel p-8 md:p-12 rounded-3xl shadow-2xl shadow-black/40 relative">
 
@@ -69,10 +69,10 @@ export default function DevisPage() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-3 border border-gold-700/40">
             DEMANDE DE DEVIS
           </span>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-white">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-ink">
             Parlez-nous de votre projet
           </h1>
-          <p className="text-neutral-400 mt-2">
+          <p className="text-ink-soft mt-2">
             Remplissez le formulaire ci-dessous ou contactez-nous directement via WhatsApp.
           </p>
         </div>
@@ -93,15 +93,15 @@ export default function DevisPage() {
         </div>
 
         <div className="relative flex py-2 items-center mb-10">
-          <div className="flex-grow border-t border-neutral-800"></div>
-          <span className="flex-shrink mx-4 text-neutral-500 text-sm">OU REMPLISSEZ LE FORMULAIRE</span>
-          <div className="flex-grow border-t border-neutral-800"></div>
+          <div className="flex-grow border-t border-line"></div>
+          <span className="flex-shrink mx-4 text-ink-faint text-sm">OU REMPLISSEZ LE FORMULAIRE</span>
+          <div className="flex-grow border-t border-line"></div>
         </div>
 
         {submitted ? (
           <div className="bg-red-600/10 border border-red-600 text-center p-8 rounded-2xl">
-            <h3 className="text-2xl font-bold text-white mb-2">Message envoyé avec succès !</h3>
-            <p className="text-neutral-300">
+            <h3 className="text-2xl font-bold text-ink mb-2">Message envoyé avec succès !</h3>
+            <p className="text-ink-soft">
               Merci ! L'équipe de BM Corporation a bien reçu votre demande et vous répondra sur votre e-mail très rapidement.
             </p>
           </div>
@@ -109,23 +109,23 @@ export default function DevisPage() {
           <form action="https://formspree.io/f/xbjnypqg" method="POST" onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Nom complet *</label>
+                <label className="block text-sm font-medium text-ink-soft mb-2">Nom complet *</label>
                 <input
                   type="text"
                   name="name"
                   required
                   placeholder="Votre nom"
-                  className="w-full bg-neutral-950/60 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Adresse E-mail *</label>
+                <label className="block text-sm font-medium text-ink-soft mb-2">Adresse E-mail *</label>
                 <input
                   type="email"
                   name="email"
                   required
                   placeholder="votre@email.com"
-                  className="w-full bg-neutral-950/60 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
                 />
               </div>
             </div>
@@ -133,12 +133,12 @@ export default function DevisPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* CHAMP TÉLÉPHONE AVEC SÉLECTEUR D'INDICATIF */}
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Téléphone / WhatsApp</label>
+                <label className="block text-sm font-medium text-ink-soft mb-2">Téléphone / WhatsApp</label>
                 <div className="flex gap-2">
                   <select
                     value={selectedCode}
                     onChange={(e) => setSelectedCode(e.target.value)}
-                    className="bg-neutral-950/60 border border-neutral-800 rounded-xl px-3 py-3 text-white focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition text-sm max-w-[130px]"
+                    className="bg-surface-sunken/60 border border-line rounded-xl px-3 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition text-sm max-w-[130px]"
                   >
                     {countryCodes.map((c, i) => (
                       <option key={i} value={c.code}>
@@ -152,7 +152,7 @@ export default function DevisPage() {
                     placeholder="81 234 5678"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full bg-neutral-950/60 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                    className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
                   />
                   
                   {/* Champ caché transmis avec le numéro complet pour le formulaire */}
@@ -165,10 +165,10 @@ export default function DevisPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">Service concerné</label>
+                <label className="block text-sm font-medium text-ink-soft mb-2">Service concerné</label>
                 <select
                   name="service"
-                  className="w-full bg-neutral-950/60 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
                 >
                   <option value="Photographie">Photographie</option>
                   <option value="Vidéographie">Vidéographie & Clips</option>
@@ -181,13 +181,13 @@ export default function DevisPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-neutral-300 mb-2">Détails de votre projet *</label>
+              <label className="block text-sm font-medium text-ink-soft mb-2">Détails de votre projet *</label>
               <textarea
                 name="message"
                 rows={5}
                 required
                 placeholder="Décrivez vos besoins, délais, objectifs..."
-                className="w-full bg-neutral-950/60 border border-neutral-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
               ></textarea>
             </div>
 
@@ -201,7 +201,7 @@ export default function DevisPage() {
         )}
 
         <div className="text-center mt-8">
-          <Link href="/communication" className="text-neutral-500 hover:text-white text-sm transition">
+          <Link href="/communication" className="text-ink-faint hover:text-ink text-sm transition">
             ← Retour à BM Communication
           </Link>
         </div>

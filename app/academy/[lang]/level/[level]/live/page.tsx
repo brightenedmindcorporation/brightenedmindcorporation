@@ -36,9 +36,9 @@ export default function LiveClassPage() {
 
   if (!curriculum) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300 text-center px-6">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft text-center px-6">
         <div>
-          <p className="text-2xl font-bold text-white mb-2">Contenu bientôt disponible</p>
+          <p className="text-2xl font-bold text-ink mb-2">Contenu bientôt disponible</p>
           <Link href="/academy/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
             ← Retour au dashboard
           </Link>
@@ -49,10 +49,10 @@ export default function LiveClassPage() {
 
   if (!allowed) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg font-semibold text-neutral-400">Checking access...</p>
+          <p className="text-lg font-semibold text-ink-soft">Checking access...</p>
         </div>
       </main>
     );
@@ -62,12 +62,12 @@ export default function LiveClassPage() {
   const appId = getJaasAppId();
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10">
         <div className="max-w-5xl mx-auto space-y-6">
           <Link
             href={base}
-            className="inline-flex items-center gap-2 text-sm font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 rounded-xl border border-neutral-800 transition shadow-lg"
+            className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
           >
             ← Back to Level
           </Link>
@@ -86,9 +86,9 @@ export default function LiveClassPage() {
           {isJitsiConfigured() && appId ? (
             <JitsiEmbed appId={appId} roomName={getLiveRoomName(curriculum.langCode, level)} displayName={studentName} />
           ) : (
-            <div className="bg-neutral-900 rounded-3xl p-10 border border-neutral-800 text-center space-y-3">
-              <p className="text-xl font-bold text-white">Classes en direct bientôt disponibles</p>
-              <p className="text-neutral-400 text-sm max-w-md mx-auto">
+            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
+              <p className="text-xl font-bold text-ink">Classes en direct bientôt disponibles</p>
+              <p className="text-ink-soft text-sm max-w-md mx-auto">
                 Cette fonctionnalité sera activée dès que l'administration aura configuré le service de
                 visioconférence. Revenez plus tard ou consultez le calendrier des sessions.
               </p>

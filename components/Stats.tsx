@@ -26,7 +26,7 @@ const stats = [
 
 export default function Stats() {
   return (
-    <section className="py-24 bg-neutral-950">
+    <section className="py-24 bg-surface-sunken">
 
       <div className="max-w-7xl mx-auto px-8">
 
@@ -39,14 +39,14 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.2 }}
-              className="bg-neutral-900/60 border border-neutral-800 hover:border-gold-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
+              className="bg-surface/60 border border-line hover:border-gold-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
             >
 
               <h2 className="text-5xl font-black text-gradient-gold">
                 {stat.number}
               </h2>
 
-              <p className="mt-4 text-neutral-400 font-medium font-sans">
+              <p className="mt-4 text-ink-soft font-medium font-sans">
                 {stat.label}
               </p>
 

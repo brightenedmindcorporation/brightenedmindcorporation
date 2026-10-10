@@ -117,10 +117,10 @@ function LoginForm() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black px-4 py-24">
-      <div className="bg-neutral-950 border border-neutral-800 p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-white relative">
+    <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
+      <div className="bg-surface-sunken border border-line p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-ink relative">
         <h1 className="text-2xl font-bold text-center mb-1">Connexion</h1>
-        <p className="text-sm text-neutral-500 text-center mb-6">Espace Apprentissage — BM Corporation</p>
+        <p className="text-sm text-ink-faint text-center mb-6">Espace Apprentissage — BM Corporation</p>
 
         {loginError && (
           <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">
@@ -130,24 +130,24 @@ function LoginForm() {
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Email</label>
             <input
               type="email"
               required
               placeholder="votre.email@exemple.com"
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Mot de passe</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Mot de passe</label>
             <input
               type="password"
               required
               placeholder="••••••••"
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -175,8 +175,8 @@ function LoginForm() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-neutral-800 text-center">
-          <p className="text-sm text-neutral-500">Pas encore inscrit ?</p>
+        <div className="mt-8 pt-6 border-t border-line text-center">
+          <p className="text-sm text-ink-faint">Pas encore inscrit ?</p>
           <Link
             href="/register"
             className="inline-block mt-2 text-sm font-bold text-red-500 hover:text-red-400 hover:underline transition"
@@ -188,9 +188,9 @@ function LoginForm() {
 
       {showResetModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-neutral-950 border border-neutral-800 p-6 rounded-2xl max-w-md w-full shadow-2xl relative text-white">
+          <div className="bg-surface-sunken border border-line p-6 rounded-2xl max-w-md w-full shadow-2xl relative text-ink">
             <h2 className="text-xl font-bold mb-2">Réinitialiser le mot de passe</h2>
-            <p className="text-sm text-neutral-400 mb-4">
+            <p className="text-sm text-ink-soft mb-4">
               Entrez votre adresse email ci-dessous. Nous vous enverrons un lien sécurisé pour créer un nouveau mot de passe.
             </p>
 
@@ -199,7 +199,7 @@ function LoginForm() {
                 type="email"
                 required
                 placeholder="votre.email@exemple.com"
-                className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+                className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
                 value={resetEmail}
                 onChange={(e) => setResetEmail(e.target.value)}
               />
@@ -223,7 +223,7 @@ function LoginForm() {
                     setShowResetModal(false);
                     setResetMessage(null);
                   }}
-                  className="px-4 py-2 text-sm font-medium text-neutral-400 hover:bg-neutral-900 rounded-lg"
+                  className="px-4 py-2 text-sm font-medium text-ink-soft hover:bg-surface rounded-lg"
                 >
                   Fermer
                 </button>

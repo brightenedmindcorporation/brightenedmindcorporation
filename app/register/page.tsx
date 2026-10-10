@@ -75,10 +75,10 @@ export default function RegisterPage() {
 
   if (done) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-black px-4 py-24">
-        <div className="bg-neutral-950 border border-neutral-800 p-8 rounded-2xl w-full max-w-md text-center text-white">
+      <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
+        <div className="bg-surface-sunken border border-line p-8 rounded-2xl w-full max-w-md text-center text-ink">
           <h1 className="text-2xl font-bold mb-2">Inscription enregistrée !</h1>
-          <p className="text-neutral-400 text-sm mb-6">
+          <p className="text-ink-soft text-sm mb-6">
             Payez maintenant pour activer votre compte immédiatement et recevoir votre matricule tout de suite,
             ou patientez pour une approbation manuelle par l'administration.
           </p>
@@ -91,7 +91,7 @@ export default function RegisterPage() {
             </button>
             <button
               onClick={() => router.push("/login")}
-              className="text-neutral-400 hover:text-white text-sm font-medium transition"
+              className="text-ink-soft hover:text-ink text-sm font-medium transition"
             >
               → Aller à la connexion plus tard
             </button>
@@ -102,10 +102,10 @@ export default function RegisterPage() {
   }
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-black px-4 py-24">
-      <div className="bg-neutral-950 border border-neutral-800 p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-white">
+    <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
+      <div className="bg-surface-sunken border border-line p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-ink">
         <h1 className="text-2xl font-bold text-center mb-1">Inscription</h1>
-        <p className="text-sm text-neutral-500 text-center mb-6">Espace Apprentissage — BM Corporation</p>
+        <p className="text-sm text-ink-faint text-center mb-6">Espace Apprentissage — BM Corporation</p>
 
         {error && (
           <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">
@@ -115,45 +115,45 @@ export default function RegisterPage() {
 
         <form onSubmit={handleRegister} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Nom complet</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Nom complet</label>
             <input
               required
               placeholder="Jordi Mukosa"
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Email</label>
             <input
               type="email"
               required
               placeholder="votre.email@exemple.com"
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Mot de passe</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Mot de passe</label>
             <input
               type="password"
               required
               minLength={6}
               placeholder="••••••••"
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white placeholder:text-neutral-600 focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Langue</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Langue</label>
             <select
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
               value={langCode}
               onChange={(e) => setLangCode(e.target.value)}
             >
@@ -166,9 +166,9 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-neutral-300 mb-1">Niveau</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Niveau</label>
             <select
-              className="w-full border border-neutral-700 bg-neutral-900 p-3 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-red-600"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
               value={level}
               onChange={(e) => setLevel(e.target.value)}
             >
@@ -187,8 +187,8 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-neutral-800 text-center">
-          <p className="text-sm text-neutral-500">Déjà inscrit ?</p>
+        <div className="mt-8 pt-6 border-t border-line text-center">
+          <p className="text-sm text-ink-faint">Déjà inscrit ?</p>
           <Link
             href="/login"
             className="inline-block mt-2 text-sm font-bold text-red-500 hover:text-red-400 hover:underline transition"

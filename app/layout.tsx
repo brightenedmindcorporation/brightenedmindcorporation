@@ -47,14 +47,22 @@ export const metadata: Metadata = {
   },
 };
 
+// Runs before paint (blocking, in <head>) so the page never flashes the
+// wrong theme: reads the stored preference (defaulting to the OS/browser
+// setting) and sets the `dark` class synchronously, before React hydrates.
+const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var t=(s==='light'||s==='dark')?s:'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth" className={`dark ${inter.variable}`}>
-      <body className="bg-background text-foreground font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-gold-100">
+    <html lang="fr" data-scroll-behavior="smooth" className={inter.variable} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
+      <body className="bg-page text-ink font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-gold-100">
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

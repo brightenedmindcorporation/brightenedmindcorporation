@@ -35,10 +35,10 @@ export default function LevelOverviewPage() {
 
   if (!curriculum) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300 text-center px-6">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft text-center px-6">
         <div>
-          <p className="text-2xl font-bold text-white mb-2">Contenu bientôt disponible</p>
-          <p className="text-neutral-400">Ce niveau n'est pas encore publié pour cette langue.</p>
+          <p className="text-2xl font-bold text-ink mb-2">Contenu bientôt disponible</p>
+          <p className="text-ink-soft">Ce niveau n'est pas encore publié pour cette langue.</p>
           <Link href="/academy/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
             ← Retour au dashboard
           </Link>
@@ -49,10 +49,10 @@ export default function LevelOverviewPage() {
 
   if (!allowed || !progress) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-300">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <div className="flex flex-col items-center gap-3">
           <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-lg font-semibold text-neutral-400">Checking access...</p>
+          <p className="text-lg font-semibold text-ink-soft">Checking access...</p>
         </div>
       </main>
     );
@@ -63,7 +63,7 @@ export default function LevelOverviewPage() {
   const base = `/academy/${langSlug}/level/${level}`;
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <AcademyHeader />
 
       <main className="p-6 md:p-10">
@@ -71,13 +71,13 @@ export default function LevelOverviewPage() {
           <div className="mb-6">
             <Link
               href="/academy/dashboard"
-              className="inline-flex items-center gap-2 text-sm font-bold text-neutral-300 hover:text-white bg-neutral-900 hover:bg-neutral-800 px-4 py-2 rounded-xl border border-neutral-800 transition shadow-lg"
+              className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
             >
               ← Back to Dashboard
             </Link>
           </div>
 
-          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-ink rounded-3xl p-8 shadow-2xl border border-red-900/40 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
               <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
               <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelSubtitle}</p>
@@ -93,11 +93,11 @@ export default function LevelOverviewPage() {
             </Link>
           </div>
 
-          <div className="bg-neutral-900/90 backdrop-blur rounded-3xl shadow-xl border border-neutral-800 p-8 mt-8">
+          <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-8 mt-8">
             <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
               <span>📈</span> Course Progress
             </h2>
-            <div className="w-full bg-neutral-950 rounded-full h-7 overflow-hidden border border-neutral-800 p-1">
+            <div className="w-full bg-surface-sunken rounded-full h-7 overflow-hidden border border-line p-1">
               <div
                 className="bg-red-600 h-full rounded-full flex items-center justify-center text-white text-xs font-black transition-all duration-500 shadow-lg shadow-red-900/50"
                 style={{ width: `${progressPct}%` }}
@@ -105,7 +105,7 @@ export default function LevelOverviewPage() {
                 {progressPct > 5 && `${progressPct}%`}
               </div>
             </div>
-            <p className="mt-4 text-neutral-400 font-medium text-sm">
+            <p className="mt-4 text-ink-soft font-medium text-sm">
               <span className="text-red-500 font-bold">{completedQuizzes.length}</span> / {curriculum.lessons.length} quizzes completed
             </p>
           </div>
@@ -122,9 +122,9 @@ export default function LevelOverviewPage() {
               return (
                 <div
                   key={lesson.id}
-                  className="bg-neutral-900 rounded-3xl p-6 shadow-xl border border-neutral-800/80 hover:border-red-950 transition duration-300 flex flex-col justify-between"
+                  className="bg-surface rounded-3xl p-6 shadow-xl border border-line/80 hover:border-red-950 transition duration-300 flex flex-col justify-between"
                 >
-                  <h2 className="text-xl font-bold text-white">
+                  <h2 className="text-xl font-bold text-ink">
                     <span className="text-red-500">Lesson {lesson.id} :</span> {lesson.title}
                   </h2>
 
@@ -143,7 +143,7 @@ export default function LevelOverviewPage() {
                         </Link>
                       </>
                     ) : (
-                      <button disabled className="bg-neutral-800 text-neutral-500 px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-neutral-800">
+                      <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line">
                         🔒 Locked
                       </button>
                     )}
@@ -153,8 +153,8 @@ export default function LevelOverviewPage() {
             })}
           </div>
 
-          <div className="bg-neutral-900 rounded-3xl shadow-2xl border border-neutral-800 p-8 mt-10">
-            <h2 className="text-2xl font-bold text-center text-white mb-6">🎓 Level Completion</h2>
+          <div className="bg-surface rounded-3xl shadow-2xl border border-line p-8 mt-10">
+            <h2 className="text-2xl font-bold text-center text-ink mb-6">🎓 Level Completion</h2>
 
             <div className="flex flex-col md:flex-row gap-4">
               {progressPct === 100 ? (
@@ -164,7 +164,7 @@ export default function LevelOverviewPage() {
                   </button>
                 </Link>
               ) : (
-                <button disabled className="bg-neutral-800 text-neutral-500 px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-neutral-800">
+                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line">
                   🔒 Complete 100% Course First
                 </button>
               )}
@@ -176,7 +176,7 @@ export default function LevelOverviewPage() {
                   </button>
                 </Link>
               ) : (
-                <button disabled className="bg-neutral-800 text-neutral-500 px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-neutral-800">
+                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line">
                   🔒 Pass Final Quiz First
                 </button>
               )}

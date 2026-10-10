@@ -86,24 +86,24 @@ const bmServicesData = [
 
 export default function CommunicationPage() {
   return (
-    <main className="min-h-screen bg-background text-white font-sans antialiased pt-28">
+    <main className="min-h-screen bg-page text-ink font-sans antialiased pt-28">
       {/* HERO SECTION */}
-      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800">
+      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
         <div className="relative z-10 max-w-4xl">
           <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-gold-700/40">
             BM CORPORATION
           </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             L'Agence de <span className="text-gradient-gold">Communication</span> Intégrale
           </h1>
-          <p className="text-xl text-neutral-400 mb-10 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl text-ink-soft mb-10 leading-relaxed max-w-2xl mx-auto">
             Propulsez votre marque avec l'expertise de BM Communication. Du visuel à fort impact au marketing digital stratégique.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
               Demander un Devis Gratuit
             </Link>
-            <a href="#visuelle" className="bg-neutral-900 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-neutral-800 transition border border-neutral-700">
+            <a href="#visuelle" className="bg-surface text-ink font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-surface-alt transition border border-line">
               Découvrir nos services
             </a>
           </div>
@@ -114,8 +114,8 @@ export default function CommunicationPage() {
       <div className="max-w-7xl mx-auto px-6 py-20 space-y-24">
         {bmServicesData.map((category, index) => (
           <section key={index} id={index === 0 ? "visuelle" : "marketing"} className="relative">
-            <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 border-b border-neutral-800 pb-6">
-              <h2 className="text-3xl md:text-4xl font-bold text-white flex items-center gap-3">
+            <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 border-b border-line pb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-ink flex items-center gap-3">
                 <span className="w-2 h-10 bg-red-600 rounded"></span>
                 {category.title}
               </h2>
@@ -127,17 +127,17 @@ export default function CommunicationPage() {
                 return (
                   <div
                     key={serviceIndex}
-                    className="group bg-neutral-900/60 p-8 rounded-3xl border border-neutral-800 transition-all duration-300 hover:border-red-600 hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-600/10"
+                    className="group bg-surface/60 p-8 rounded-3xl border border-line transition-all duration-300 hover:border-red-600 hover:-translate-y-2 hover:shadow-2xl hover:shadow-red-600/10"
                   >
                     <div className="flex items-center gap-5 mb-6">
-                      <div className="p-4 bg-black rounded-2xl border border-neutral-800 group-hover:border-red-600/50 transition-colors">
+                      <div className="p-4 bg-surface-alt rounded-2xl border border-line group-hover:border-red-600/50 transition-colors">
                         <IconComponent />
                       </div>
-                      <h3 className="text-xl font-bold text-white group-hover:text-red-500 transition-colors">
+                      <h3 className="text-xl font-bold text-ink group-hover:text-red-500 transition-colors">
                         {service.title}
                       </h3>
                     </div>
-                    <p className="text-neutral-400 leading-relaxed">
+                    <p className="text-ink-soft leading-relaxed">
                       {service.description}
                     </p>
                   </div>
@@ -149,12 +149,12 @@ export default function CommunicationPage() {
       </div>
 
       {/* CALL TO ACTION */}
-      <section className="bg-neutral-950 py-24 px-6 border-t border-neutral-800 text-center">
+      <section className="bg-surface-sunken py-24 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-white mb-6">
+          <h2 className="text-4xl font-extrabold text-ink mb-6">
             Vous avez un projet en tête ?
           </h2>
-          <p className="text-xl text-neutral-400 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-ink-soft mb-10 max-w-2xl mx-auto">
             BM Communication vous accompagne de la conception à la réalisation.
           </p>
           <Link href="/devis" className="glow-accent inline-block bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-xl transition hover:scale-105">

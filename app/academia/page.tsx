@@ -39,24 +39,24 @@ export default function AcademiaPage() {
   const whatsappUrl = `https://wa.me/243988830799?text=${encodeURIComponent("Bonjour BM Academia, je souhaite me renseigner sur vos formations.")}`;
 
   return (
-    <main className="min-h-screen bg-background text-white font-sans antialiased pt-28 pb-20">
+    <main className="min-h-screen bg-page text-ink font-sans antialiased pt-28 pb-20">
 
       {/* HERO SECTION */}
-      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800 overflow-hidden">
+      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line overflow-hidden">
         <div className="absolute inset-0 radial-fade pointer-events-none" />
         <div className="relative z-10 max-w-4xl">
           <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-gold-700/40">
             BM CORPORATION
           </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
+          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             BM <span className="text-gradient-gold">Academia</span>
           </h1>
-          <p className="text-xl text-neutral-400 mb-8 leading-relaxed max-w-2xl mx-auto">
+          <p className="text-xl text-ink-soft mb-8 leading-relaxed max-w-2xl mx-auto">
             Développez vos compétences professionnelles grâce à nos formations certifiantes en langues, bureautique, audiovisuel et logiciels de gestion.
           </p>
 
           {/* NUMÉRO OFFICIEL D'ASSISTANCE */}
-          <div className="mb-10 inline-flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-4 py-2 rounded-xl text-neutral-300 text-sm">
+          <div className="mb-10 inline-flex items-center gap-2 bg-surface border border-line px-4 py-2 rounded-xl text-ink-soft text-sm">
             <IconPhone />
             <span>Support & Info Officiel : <a href={`tel:${phoneOfficial}`} className="text-gold-400 font-bold hover:underline">{phoneOfficial}</a></span>
           </div>
@@ -65,7 +65,7 @@ export default function AcademiaPage() {
             <a href="#formations" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
               Explorer les Formations
             </a>
-            <Link href="/devis" className="bg-neutral-900 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-neutral-800 hover:border-gold-700/40 transition border border-neutral-700">
+            <Link href="/devis" className="bg-surface text-ink font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-surface-alt hover:border-gold-700/40 transition border border-line">
               S'inscrire / S'informer
             </Link>
           </div>
@@ -76,26 +76,26 @@ export default function AcademiaPage() {
       <div id="formations" className="max-w-7xl mx-auto px-6 py-20 space-y-20">
         
         {/* 1. FORMATION LANGUES */}
-        <section id="langues" className="bg-neutral-900/40 p-8 md:p-12 rounded-3xl border border-neutral-800 scroll-mt-28">
+        <section id="langues" className="bg-surface/40 p-8 md:p-12 rounded-3xl border border-line scroll-mt-28">
           <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-black rounded-2xl border border-neutral-800">
+            <div className="p-3 bg-surface-alt rounded-2xl border border-line">
               <IconLanguages />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-white">Formation Langues</h2>
-              <p className="text-neutral-400 text-sm">Maîtrisez les langues les plus parlées au monde et en région.</p>
+              <h2 className="text-3xl font-bold text-ink">Formation Langues</h2>
+              <p className="text-ink-soft text-sm">Maîtrisez les langues les plus parlées au monde et en région.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* ANGLAIS - AVEC LIEN INTERACTIF */}
-            <div className="relative group bg-neutral-900 p-6 rounded-2xl border border-gold-600/40 hover:border-gold-500/70 transition shadow-lg shadow-black/20">
+            <div className="relative group bg-surface p-6 rounded-2xl border border-gold-600/40 hover:border-gold-500/70 transition shadow-lg shadow-black/20">
               <div className="flex justify-between items-start mb-4">
                 <span className="text-2xl">🇬🇧 / 🇺🇸</span>
                 <span className="px-2.5 py-1 text-xs font-semibold bg-gold-500/15 text-gold-300 border border-gold-600/40 rounded-full">Interactif</span>
               </div>
-              <h3 className="text-xl font-bold text-white mb-2">Anglais</h3>
-              <p className="text-neutral-400 text-sm mb-6">Accédez à notre plateforme interactive d'apprentissage pour progresser rapidement.</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Anglais</h3>
+              <p className="text-ink-soft text-sm mb-6">Accédez à notre plateforme interactive d'apprentissage pour progresser rapidement.</p>
               <Link
                 href="/academy"
                 className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
@@ -105,10 +105,10 @@ export default function AcademiaPage() {
             </div>
 
             {/* FRANÇAIS */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇫🇷</span>
-              <h3 className="text-xl font-bold text-white mb-2">Français</h3>
-              <p className="text-neutral-400 text-sm">Renforcement de la grammaire, rédaction professionnelle et expression orale.</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Français</h3>
+              <p className="text-ink-soft text-sm">Renforcement de la grammaire, rédaction professionnelle et expression orale.</p>
               <Link 
                 href="/academia/francais"
                 className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
@@ -118,10 +118,10 @@ export default function AcademiaPage() {
             </div>
 
             {/* SWAHILI */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇨🇩</span>
-              <h3 className="text-xl font-bold text-white mb-2">Swahili</h3>
-              <p className="text-neutral-400 text-sm mb-6">Apprentissage complet de la langue parlée et écrite pour les affaires et le quotidien.</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Swahili</h3>
+              <p className="text-ink-soft text-sm mb-6">Apprentissage complet de la langue parlée et écrite pour les affaires et le quotidien.</p>
               <Link
                 href="/academia/swahili"
                 className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
@@ -131,10 +131,10 @@ export default function AcademiaPage() {
             </div>
 
             {/* ESPAGNOL */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇪🇸</span>
-              <h3 className="text-xl font-bold text-white mb-2">Espagnol</h3>
-              <p className="text-neutral-400 text-sm mb-6">Bases solides de communication et vocabulaire professionnel.</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Espagnol</h3>
+              <p className="text-ink-soft text-sm mb-6">Bases solides de communication et vocabulaire professionnel.</p>
               <Link
                 href="/academia/espagnol"
                 className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
@@ -144,10 +144,10 @@ export default function AcademiaPage() {
             </div>
 
             {/* PORTUGAIS */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇵🇹</span>
-              <h3 className="text-xl font-bold text-white mb-2">Portugais</h3>
-              <p className="text-neutral-400 text-sm mb-6">Expression orale et écrite adaptées aux échanges régionaux et internationaux.</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Portugais</h3>
+              <p className="text-ink-soft text-sm mb-6">Expression orale et écrite adaptées aux échanges régionaux et internationaux.</p>
               <Link
                 href="/academia/portugais"
                 className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
@@ -157,10 +157,10 @@ export default function AcademiaPage() {
             </div>
 
             {/* CHINOIS */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇨🇳</span>
-              <h3 className="text-xl font-bold text-white mb-2">Chinois (Mandarin)</h3>
-              <p className="text-neutral-400 text-sm mb-6">Initiation à la prononciation, aux caractères de base et au vocabulaire commercial.</p>
+              <h3 className="text-xl font-bold text-ink mb-2">Chinois (Mandarin)</h3>
+              <p className="text-ink-soft text-sm mb-6">Initiation à la prononciation, aux caractères de base et au vocabulaire commercial.</p>
               <Link
                 href="/academia/chinois"
                 className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
@@ -172,43 +172,43 @@ export default function AcademiaPage() {
         </section>
 
         {/* 2. FORMATION BUREAUTIQUE */}
-        <section id="bureautique" className="bg-neutral-900/40 p-8 md:p-12 rounded-3xl border border-neutral-800 scroll-mt-28">
+        <section id="bureautique" className="bg-surface/40 p-8 md:p-12 rounded-3xl border border-line scroll-mt-28">
           <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-black rounded-2xl border border-neutral-800">
+            <div className="p-3 bg-surface-alt rounded-2xl border border-line">
               <IconDesktop />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-white">Formation Bureautique</h2>
-              <p className="text-neutral-400 text-sm">Maîtrisez les outils incontournables du travail sur ordinateur.</p>
+              <h2 className="text-3xl font-bold text-ink">Formation Bureautique</h2>
+              <p className="text-ink-soft text-sm">Maîtrisez les outils incontournables du travail sur ordinateur.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
-              <h3 className="text-xl font-bold text-white mb-3">MS Office</h3>
-              <ul className="space-y-2 text-neutral-400 text-sm">
+            <div className="bg-surface p-6 rounded-2xl border border-line">
+              <h3 className="text-xl font-bold text-ink mb-3">MS Office</h3>
+              <ul className="space-y-2 text-ink-soft text-sm">
                 <li className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  <strong className="text-white">Word :</strong> Traitement de texte et mise en page de documents.
+                  <strong className="text-ink">Word :</strong> Traitement de texte et mise en page de documents.
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  <strong className="text-white">Excel :</strong> Tableaux, formules, gestion de données et calculs.
+                  <strong className="text-ink">Excel :</strong> Tableaux, formules, gestion de données et calculs.
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  <strong className="text-white">PowerPoint :</strong> Création de présentations visuelles percutantes.
+                  <strong className="text-ink">PowerPoint :</strong> Création de présentations visuelles percutantes.
                 </li>
                 <li className="flex items-center gap-2">
                   <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                  <strong className="text-white">Publisher :</strong> Conception de supports imprimés professionnels.
+                  <strong className="text-ink">Publisher :</strong> Conception de supports imprimés professionnels.
                 </li>
               </ul>
             </div>
 
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
-              <h3 className="text-xl font-bold text-white mb-3">Windows & Systèmes</h3>
-              <p className="text-neutral-400 text-sm leading-relaxed mb-4">
+            <div className="bg-surface p-6 rounded-2xl border border-line">
+              <h3 className="text-xl font-bold text-ink mb-3">Windows & Systèmes</h3>
+              <p className="text-ink-soft text-sm leading-relaxed mb-4">
                 Prise en main du système d'exploitation Windows, organisation des fichiers, sécurité informatique de base et gestion efficace de l'environnement de travail informatique.
               </p>
             </div>
@@ -216,41 +216,41 @@ export default function AcademiaPage() {
         </section>
 
         {/* 3. FORMATION VISUEL & AUDIOVISUEL */}
-        <section id="visuel" className="bg-neutral-900/40 p-8 md:p-12 rounded-3xl border border-neutral-800 scroll-mt-28">
+        <section id="visuel" className="bg-surface/40 p-8 md:p-12 rounded-3xl border border-line scroll-mt-28">
           <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-black rounded-2xl border border-neutral-800">
+            <div className="p-3 bg-surface-alt rounded-2xl border border-line">
               <IconVisual />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-white">Formation Visuel & Audiovisuel</h2>
-              <p className="text-neutral-400 text-sm">Apprenez le design, la production vidéo et le streaming direct.</p>
+              <h2 className="text-3xl font-bold text-ink">Formation Visuel & Audiovisuel</h2>
+              <p className="text-ink-soft text-sm">Apprenez le design, la production vidéo et le streaming direct.</p>
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* DESIGN */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+            <div className="bg-surface p-6 rounded-2xl border border-line">
               <span className="text-xs font-semibold px-3 py-1 bg-red-600/20 text-red-500 rounded-full border border-red-600/30 mb-4 inline-block">Design Graphique</span>
-              <h3 className="text-xl font-bold text-white mb-3">Photoshop & Illustrator</h3>
-              <p className="text-neutral-400 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-ink mb-3">Photoshop & Illustrator</h3>
+              <p className="text-ink-soft text-sm leading-relaxed">
                 Création de visuels publicitaires, affiches, retouche photo avancée et création de logos vectoriels.
               </p>
             </div>
 
             {/* MONTAGE VIDEO */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+            <div className="bg-surface p-6 rounded-2xl border border-line">
               <span className="text-xs font-semibold px-3 py-1 bg-red-600/20 text-red-500 rounded-full border border-red-600/30 mb-4 inline-block">Montage Vidéo</span>
-              <h3 className="text-xl font-bold text-white mb-3">DaVinci Resolve, Premiere Pro & CapCut</h3>
-              <p className="text-neutral-400 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-ink mb-3">DaVinci Resolve, Premiere Pro & CapCut</h3>
+              <p className="text-ink-soft text-sm leading-relaxed">
                 Montage professionnel, étalonnage des couleurs, effets visuels et découpe dynamique pour tous formats.
               </p>
             </div>
 
             {/* DIFFUSION DIRECT */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800">
+            <div className="bg-surface p-6 rounded-2xl border border-line">
               <span className="text-xs font-semibold px-3 py-1 bg-red-600/20 text-red-500 rounded-full border border-red-600/30 mb-4 inline-block">Diffusion Direct</span>
-              <h3 className="text-xl font-bold text-white mb-3">OBS Studio & vMix</h3>
-              <p className="text-neutral-400 text-sm leading-relaxed">
+              <h3 className="text-xl font-bold text-ink mb-3">OBS Studio & vMix</h3>
+              <p className="text-ink-soft text-sm leading-relaxed">
                 Gestion de régie vidéo en direct, captation multi-caméras et retransmission en live (Concerts, Cultes, Événements).
               </p>
             </div>
@@ -258,14 +258,14 @@ export default function AcademiaPage() {
         </section>
 
         {/* 4. FORMATION LOGICIEL DE GESTION */}
-        <section id="logiciels" className="bg-neutral-900/40 p-8 md:p-12 rounded-3xl border border-neutral-800 scroll-mt-28">
+        <section id="logiciels" className="bg-surface/40 p-8 md:p-12 rounded-3xl border border-line scroll-mt-28">
           <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-black rounded-2xl border border-neutral-800">
+            <div className="p-3 bg-surface-alt rounded-2xl border border-line">
               <IconSoftware />
             </div>
             <div>
-              <h2 className="text-3xl font-bold text-white">Formation Logiciels de Gestion</h2>
-              <p className="text-neutral-400 text-sm">Logiciels comptables, de gestion commerciale, douanière et d'audit.</p>
+              <h2 className="text-3xl font-bold text-ink">Formation Logiciels de Gestion</h2>
+              <p className="text-ink-soft text-sm">Logiciels comptables, de gestion commerciale, douanière et d'audit.</p>
             </div>
           </div>
 
@@ -279,9 +279,9 @@ export default function AcademiaPage() {
               { name: "Sydonia", desc: "Gestion des opérations douanières" },
               { name: "SEGUB", desc: "Guichet unique des opérations" },
             ].map((soft, i) => (
-              <div key={i} className="bg-neutral-900 p-5 rounded-2xl border border-neutral-800 text-center hover:border-red-600/40 transition">
-                <h3 className="text-lg font-bold text-white mb-1">{soft.name}</h3>
-                <p className="text-neutral-400 text-xs">{soft.desc}</p>
+              <div key={i} className="bg-surface p-5 rounded-2xl border border-line text-center hover:border-red-600/40 transition">
+                <h3 className="text-lg font-bold text-ink mb-1">{soft.name}</h3>
+                <p className="text-ink-soft text-xs">{soft.desc}</p>
               </div>
             ))}
           </div>
@@ -290,13 +290,13 @@ export default function AcademiaPage() {
       </div>
 
       {/* CALL TO ACTION */}
-      <section className="bg-neutral-950 py-20 px-6 border-t border-neutral-800 text-center">
+      <section className="bg-surface-sunken py-20 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-white mb-6">
+          <h2 className="text-4xl font-extrabold text-ink mb-6">
             Prêt à suivre une formation ?
           </h2>
-          <p className="text-xl text-neutral-400 mb-8 max-w-2xl mx-auto">
-            Contactez l'équipe de BM Academia au <span className="text-white font-bold">{phoneOfficial}</span> pour réserver votre session de formation individuelle ou en groupe.
+          <p className="text-xl text-ink-soft mb-8 max-w-2xl mx-auto">
+            Contactez l'équipe de BM Academia au <span className="text-ink font-bold">{phoneOfficial}</span> pour réserver votre session de formation individuelle ou en groupe.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-lg transition hover:scale-105">

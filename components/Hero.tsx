@@ -8,7 +8,7 @@ import FadeIn from "./FadeIn";
 export default function Hero() {
   return (
     <FadeIn>
-    <section className="relative pt-44 pb-32 bg-background overflow-hidden">
+    <section className="relative pt-44 pb-32 bg-page overflow-hidden">
 
       {/* Decorative background */}
 
@@ -41,7 +41,7 @@ export default function Hero() {
             Groupe multidisciplinaire
           </span>
 
-          <h1 className="mt-6 text-6xl lg:text-7xl font-black leading-[1.05] text-white">
+          <h1 className="mt-6 text-6xl lg:text-7xl font-black leading-[1.05] text-ink">
   FORMER.
   <br />
   <span className="text-gradient-gold">
@@ -51,7 +51,7 @@ export default function Hero() {
   VALORISER.
 </h1>
 
-          <p className="mt-8 text-neutral-400 leading-9 text-lg max-w-xl font-sans">
+          <p className="mt-8 text-ink-soft leading-9 text-lg max-w-xl font-sans">
   Brightened Mind Corporation développe le capital humain
   en proposant des solutions innovantes en communication,
   placement de personnel domestique et formation professionnelle.
@@ -68,7 +68,7 @@ export default function Hero() {
 
             <Link
               href="#contact-form"
-              className="border border-neutral-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl hover:border-gold-500/60 hover:text-gold-300 transition text-center font-semibold"
+              className="border border-line text-ink px-6 md:px-8 py-3 md:py-4 rounded-xl hover:border-gold-500/60 hover:text-gold-300 transition text-center font-semibold"
             >
               Contact
             </Link>
@@ -100,7 +100,7 @@ export default function Hero() {
 
             <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 right-6 md:right-10">
               <div className="glass-panel rounded-2xl px-6 py-5 inline-block">
-                <h3 className="text-xl md:text-2xl font-bold text-white leading-snug">
+                <h3 className="text-xl md:text-2xl font-bold text-ink leading-snug">
                   Vision. Leadership.
                   <br />
                   <span className="text-gradient-gold">Transformation.</span>

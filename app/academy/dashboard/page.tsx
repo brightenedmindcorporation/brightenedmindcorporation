@@ -76,7 +76,7 @@ export default function Dashboard() {
 
   if (loading || !student) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-neutral-950 text-neutral-400 font-medium">
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft font-medium">
         Redirecting...
       </main>
     );
@@ -97,17 +97,17 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col selection:bg-red-600 selection:text-white">
+    <div className="min-h-screen bg-surface-sunken text-ink flex flex-col selection:bg-red-600 selection:text-white">
       <AcademyHeader />
 
       {/* Main container décalé avec pt-28 pour ne pas passer sous la Navbar */}
       <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 pt-28 flex flex-col gap-8">
         
         {/* En-tête avec boutons Retour & Déconnexion */}
-        <div className="flex justify-between items-center bg-neutral-900/80 border border-neutral-800 p-4 rounded-2xl backdrop-blur-md">
+        <div className="flex justify-between items-center bg-surface/80 border border-line p-4 rounded-2xl backdrop-blur-md">
           <button 
             onClick={() => router.back()}
-            className="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-neutral-200 text-sm font-semibold rounded-xl transition flex items-center gap-2"
+            className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2"
           >
             ← Back / Retour
           </button>
@@ -121,7 +121,7 @@ export default function Dashboard() {
         </div>
 
         {/* Carte de bienvenue */}
-        <div className="bg-neutral-900 rounded-3xl border border-neutral-800 p-8 relative overflow-hidden shadow-2xl">
+        <div className="bg-surface rounded-3xl border border-line p-8 relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 radial-fade pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative">
             <div className="flex items-center gap-5">
@@ -137,10 +137,10 @@ export default function Dashboard() {
                 />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
+                <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
                   Welcome back, {fullName} 👋
                 </h1>
-                <p className="text-neutral-400 text-sm mt-1 font-sans">
+                <p className="text-ink-soft text-sm mt-1 font-sans">
                   Ready to boost your English skills today at <span className="text-gold-400 font-semibold">Brightened Mind Academy</span>?
                 </p>
               </div>
@@ -155,48 +155,48 @@ export default function Dashboard() {
           </div>
 
           {/* Barre de progression */}
-          <div className="bg-neutral-950/80 border border-neutral-800 rounded-2xl p-5 mb-6 relative">
+          <div className="bg-surface-sunken/80 border border-line rounded-2xl p-5 mb-6 relative">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-bold text-neutral-300 font-sans">
+              <span className="text-sm font-bold text-ink-soft font-sans">
                 Course Progress ({student.level || "Level 1"})
               </span>
               <span className="text-sm font-extrabold text-gold-400">
                 {progressPercentage}%
               </span>
             </div>
-            <div className="w-full bg-neutral-800 rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-surface-alt rounded-full h-3 overflow-hidden">
               <div
                 className="bg-gradient-to-r from-red-600 to-gold-500 h-full rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
-            <p className="text-xs text-neutral-400 mt-2 font-medium">
+            <p className="text-xs text-ink-soft mt-2 font-medium">
               {completedQuizzes} / {totalQuizzes} quizzes completed
             </p>
           </div>
 
           {/* Infos étudiant */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="p-4 bg-neutral-950/60 rounded-xl border border-neutral-800">
-              <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">
+            <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+              <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
                 Email
               </span>
-              <p className="text-sm font-semibold text-neutral-200 mt-1 truncate">
+              <p className="text-sm font-semibold text-ink mt-1 truncate">
                 {student.email || "N/A"}
               </p>
             </div>
 
-            <div className="p-4 bg-neutral-950/60 rounded-xl border border-neutral-800">
-              <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">
+            <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+              <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
                 Matricule
               </span>
-              <p className="text-sm font-semibold text-neutral-200 mt-1">
+              <p className="text-sm font-semibold text-ink mt-1">
                 {student.matricule || "N/A"}
               </p>
             </div>
 
-            <div className="p-4 bg-neutral-950/60 rounded-xl border border-neutral-800">
-              <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">
+            <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+              <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
                 Current Level
               </span>
               <p className="text-sm font-semibold text-red-500 mt-1">
@@ -204,8 +204,8 @@ export default function Dashboard() {
               </p>
             </div>
 
-            <div className="p-4 bg-neutral-950/60 rounded-xl border border-neutral-800">
-              <span className="text-[10px] text-neutral-500 uppercase font-bold tracking-wider">
+            <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+              <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
                 Status
               </span>
               <p className="text-sm font-semibold text-emerald-400 mt-1 capitalize">
@@ -217,16 +217,16 @@ export default function Dashboard() {
 
         {/* Sections des cours */}
         <div>
-          <h2 className="text-xl font-black text-white mb-4">Your Courses</h2>
+          <h2 className="text-xl font-black text-ink mb-4">Your Courses</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl flex flex-col justify-between hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line shadow-xl flex flex-col justify-between hover:border-gold-700/40 transition">
               <div>
                 <span className="text-xs font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
                   Beginner
                 </span>
-                <h3 className="text-lg font-bold text-white mt-3">Level 1</h3>
-                <p className="text-neutral-400 text-xs mt-1 font-sans">
+                <h3 className="text-lg font-bold text-ink mt-3">Level 1</h3>
+                <p className="text-ink-soft text-xs mt-1 font-sans">
                   Basics, everyday vocabulary, and simple conversation.
                 </p>
               </div>
@@ -238,13 +238,13 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="bg-neutral-900/60 p-6 rounded-2xl border border-neutral-800/80 shadow-xl flex flex-col justify-between opacity-80">
+            <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-800/40">
                   Intermediate
                 </span>
-                <h3 className="text-lg font-bold text-white mt-3">Level 2</h3>
-                <p className="text-neutral-400 text-xs mt-1">
+                <h3 className="text-lg font-bold text-ink mt-3">Level 2</h3>
+                <p className="text-ink-soft text-xs mt-1">
                   Grammar expansion, listening comprehension, and writing.
                 </p>
               </div>
@@ -257,7 +257,7 @@ export default function Dashboard() {
                 disabled={student.level === "Level 1"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
                   student.level === "Level 1"
-                    ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                    ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
@@ -265,13 +265,13 @@ export default function Dashboard() {
               </button>
             </div>
 
-            <div className="bg-neutral-900/60 p-6 rounded-2xl border border-neutral-800/80 shadow-xl flex flex-col justify-between opacity-80">
+            <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-purple-400 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800/40">
                   Business English
                 </span>
-                <h3 className="text-lg font-bold text-white mt-3">Level 3</h3>
-                <p className="text-neutral-400 text-xs mt-1">
+                <h3 className="text-lg font-bold text-ink mt-3">Level 3</h3>
+                <p className="text-ink-soft text-xs mt-1">
                   Professional communication, emails, and job interviews.
                 </p>
               </div>
@@ -282,7 +282,7 @@ export default function Dashboard() {
                 disabled={student.level !== "Level 3"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
                   student.level !== "Level 3"
-                    ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-800"
+                    ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >

@@ -7,7 +7,7 @@ export default function CTA() {
   return (
     <section
       id="contact"
-      className="py-32 bg-background text-white relative overflow-hidden"
+      className="py-32 bg-page text-ink relative overflow-hidden"
     >
 
       {/* Decorative glow */}
@@ -39,7 +39,7 @@ export default function CTA() {
 
           </h2>
 
-          <p className="mt-10 max-w-3xl mx-auto text-neutral-400 text-lg leading-9 font-sans">
+          <p className="mt-10 max-w-3xl mx-auto text-ink-soft text-lg leading-9 font-sans">
 
             Brightened Mind Corporation accompagne les individus,
             les entreprises et les communautés dans leur évolution
@@ -58,7 +58,7 @@ export default function CTA() {
 
             <Link
               href="#departments"
-              className="border border-neutral-700 px-10 py-5 rounded-2xl hover:border-gold-500/60 hover:text-gold-300 transition duration-300"
+              className="border border-line px-10 py-5 rounded-2xl hover:border-gold-500/60 hover:text-gold-300 transition duration-300"
             >
               Explorer nos branches
             </Link>

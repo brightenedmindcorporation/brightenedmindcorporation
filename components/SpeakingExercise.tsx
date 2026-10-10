@@ -47,14 +47,14 @@ export default function SpeakingExercise({
       <h3 className="text-lg font-semibold mb-2">Exercice d'élocution</h3>
       {targetText && (
         <p className="text-sm text-muted-foreground mb-3">
-          Répétez la phrase : <strong className="text-foreground">{targetText}</strong>
+          Répétez la phrase : <strong className="text-ink">{targetText}</strong>
         </p>
       )}
 
       <button
         onClick={handleListen}
         disabled={isListening}
-        className={`px-4 py-2 rounded-md font-medium text-white transition-colors ${
+        className={`px-4 py-2 rounded-md font-medium text-ink transition-colors ${
           isListening ? "bg-red-500 animate-pulse" : "bg-primary hover:bg-primary/90"
         }`}
       >

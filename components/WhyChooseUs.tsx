@@ -26,7 +26,7 @@ const reasons = [
 
 export default function WhyChooseUs() {
   return (
-    <section className="py-28 bg-background text-white">
+    <section className="py-28 bg-page text-ink">
 
       <div className="max-w-7xl mx-auto px-8">
 
@@ -49,7 +49,7 @@ export default function WhyChooseUs() {
           {reasons.map((reason, index) => (
             <div
               key={reason.title}
-              className="group border border-neutral-800 bg-neutral-900/40 rounded-[25px] p-8 hover:border-gold-600/40 hover:bg-neutral-900 transition duration-500"
+              className="group border border-line bg-surface/40 rounded-[25px] p-8 hover:border-gold-600/40 hover:bg-surface transition duration-500"
             >
 
               <span className="text-3xl text-red-700/70 group-hover:text-gold-500 transition-colors duration-500">
@@ -60,7 +60,7 @@ export default function WhyChooseUs() {
                 {reason.title}
               </h3>
 
-              <p className="mt-4 text-neutral-400 leading-8 font-sans">
+              <p className="mt-4 text-ink-soft leading-8 font-sans">
                 {reason.description}
               </p>
 

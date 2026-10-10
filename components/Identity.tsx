@@ -3,7 +3,7 @@ import FadeIn from "./FadeIn";
 export default function Identity() {
   return (
     <FadeIn>
-    <section className="py-28 bg-neutral-950">
+    <section className="py-28 bg-surface-sunken">
 
       <div className="max-w-7xl mx-auto px-8 grid lg:grid-cols-2 gap-12">
 
@@ -25,7 +25,7 @@ export default function Identity() {
 
         </div>
 
-        <div className="relative overflow-hidden bg-neutral-900 text-white p-10 rounded-[30px] border border-gold-700/20 shadow-2xl shadow-black/40">
+        <div className="relative overflow-hidden bg-surface text-ink p-10 rounded-[30px] border border-gold-700/20 shadow-2xl shadow-black/40">
           <div className="absolute -bottom-16 -left-16 w-56 h-56 rounded-full bg-gold-500/5 blur-3xl" />
 
           <p className="uppercase tracking-[3px] text-gold-500 text-xs font-semibold mb-4 relative">Mission</p>
@@ -34,7 +34,7 @@ export default function Identity() {
             Notre Mission
           </h2>
 
-          <p className="leading-8 text-neutral-300 font-sans relative">
+          <p className="leading-8 text-ink-soft font-sans relative">
             Accompagner les particuliers, les familles et les organisations
             en proposant des services de communication de qualité,
             un personnel domestique compétent et fiable,

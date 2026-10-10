@@ -56,7 +56,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact-form" className="py-28 bg-background">
+    <section id="contact-form" className="py-28 bg-page">
 
       <div className="max-w-3xl mx-auto px-8">
 
@@ -66,7 +66,7 @@ export default function Contact() {
             Contact
           </p>
 
-          <h2 className="text-5xl font-black mt-5 text-white">
+          <h2 className="text-5xl font-black mt-5 text-ink">
             Parlons de votre projet
           </h2>
 
@@ -83,7 +83,7 @@ export default function Contact() {
             value={form.name}
             onChange={handleChange}
             required
-            className="font-sans border border-neutral-700 bg-neutral-950/60 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
+            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
           <input
@@ -93,7 +93,7 @@ export default function Contact() {
             value={form.email}
             onChange={handleChange}
             required
-            className="font-sans border border-neutral-700 bg-neutral-950/60 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
+            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
           <textarea
@@ -103,7 +103,7 @@ export default function Contact() {
             onChange={handleChange}
             required
             rows={6}
-            className="font-sans border border-neutral-700 bg-neutral-950/60 text-white placeholder:text-neutral-500 p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
+            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
           <button
