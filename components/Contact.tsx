@@ -48,9 +48,10 @@ export default function Contact() {
         setSent(false);
       }, 4000);
 
-    } catch (error) {
-      console.log(error);
-      alert("Erreur lors de l’envoi.");
+    } catch (error: any) {
+      console.error("EmailJS error:", error);
+      const detail = error?.text || error?.message || JSON.stringify(error);
+      alert(`Erreur lors de l'envoi : ${detail}`);
     }
   };
 

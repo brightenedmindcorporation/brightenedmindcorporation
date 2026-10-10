@@ -52,7 +52,7 @@ export default function WhyChooseUs() {
               className="group border border-neutral-800 bg-neutral-900/40 rounded-[25px] p-8 hover:border-gold-600/40 hover:bg-neutral-900 transition duration-500"
             >
 
-              <span className="font-display text-3xl text-red-700/70 group-hover:text-gold-500 transition-colors duration-500">
+              <span className="text-3xl text-red-700/70 group-hover:text-gold-500 transition-colors duration-500">
                 {String(index + 1).padStart(2, "0")}
               </span>
 

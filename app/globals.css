@@ -50,22 +50,12 @@ html {
   --color-gold-900: #584022;
   --color-gold-950: #2f2110;
 
-  --font-display: var(--font-display), "Playfair Display", ui-serif, Georgia, serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
-}
-
-/* Display typography — headings use the serif display face
-   site-wide, no per-page edits needed. */
-
-h1,
-h2 {
-  font-family: var(--font-display);
-  letter-spacing: -0.01em;
 }
 
 /* Premium utility classes, used selectively on hero/CTA sections */

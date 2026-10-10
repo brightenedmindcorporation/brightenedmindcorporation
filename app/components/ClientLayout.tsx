@@ -51,7 +51,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           }`}
         >
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-white font-display">
+            <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-white">
               <Image src="/logo-bm.png" alt="BM Logo" width={40} height={40} style={{ width: "auto", height: "40px" }} priority />
               BM <span className="text-gradient-gold">Corporation</span>
             </Link>
@@ -103,7 +103,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         <footer className="bg-neutral-950 border-t border-neutral-900 py-12 px-6 text-neutral-400 text-sm font-sans">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h3 className="text-white font-bold text-base mb-3 font-display">BM Corporation</h3>
+              <h3 className="text-white font-bold text-base mb-3">BM Corporation</h3>
               <p className="text-neutral-500 text-xs leading-relaxed mb-4">
                 Solutions professionnelles, technologies, assistance et formations certifiantes.
               </p>

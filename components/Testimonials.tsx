@@ -51,7 +51,7 @@ export default function Testimonials() {
               className="bg-neutral-900/60 border border-neutral-800 hover:border-gold-700/30 rounded-[25px] p-10 shadow-lg shadow-black/20 transition-colors duration-500"
             >
 
-              <span className="font-display text-5xl text-gold-600/50 leading-none">"</span>
+              <span className="text-5xl text-gold-600/50 leading-none">"</span>
 
               <p className="text-neutral-300 leading-8 italic font-sans -mt-4">
                 {item.text}

@@ -6,14 +6,7 @@ import { onAuthStateChanged } from "firebase/auth";
 
 export const dynamic = "force-dynamic";
 
-import {
-  collection,
-  getDocs,
-  updateDoc,
-  doc,
-  runTransaction,
-} from "firebase/firestore";
-import { generateMatricule } from "@/lib/academy/matricule";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -82,46 +75,34 @@ export default function AdminPage() {
   return result;
   };
 
+  // Both actions go through server routes using the Admin SDK (see
+  // app/api/admin/{approve,reject}-student/route.ts) instead of writing
+  // directly to Firestore from the browser. The previous client-side
+  // writes silently failed or got stuck whenever the project's Firestore
+  // rules didn't grant the admin account write access to another user's
+  // students/{uid} doc (a common and correct rule for "users can only
+  // write their own document") — and that client-side email check was
+  // never real security anyway, just a UI gate. The server route verifies
+  // the caller's ID token server-side instead.
   const approveStudent = async (student: any) => {
     if (processingIds.has(student.id)) return;
     setProcessingIds((prev) => new Set(prev).add(student.id));
 
-    const studentRef = doc(db, "students", student.id);
-    let claimedHere = false;
-
     try {
-      // Claim the student atomically before generating a matricule, so two
-      // admins (or a double-click) can never both pass the check and each
-      // generate a separate matricule for the same student. Anything that
-      // isn't already a final state (Approved/Rejected) can be (re)claimed —
-      // this matters if a previous attempt died mid-way and left the
-      // student stuck on the intermediate "Approving" status, which would
-      // otherwise never become actionable again.
-      const claimed = await runTransaction(db, async (tx) => {
-        const snap = await tx.get(studentRef);
-        const currentStatus = snap.exists() ? snap.data().status : undefined;
-        if (!snap.exists() || currentStatus === "Approved" || currentStatus === "Rejected") return false;
-        tx.update(studentRef, { status: "Approving" });
-        return true;
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/approve-student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, studentId: student.id }),
       });
+      const result = await response.json();
 
-      if (!claimed) {
-        alert("This student was already processed (by you or another admin).");
-        fetchStudents();
-        return;
+      if (!response.ok) {
+        throw new Error(result.error || "Erreur serveur inconnue");
       }
-      claimedHere = true;
-
-      const matricule = await generateMatricule(student.langCode || "EN");
-
-      await updateDoc(studentRef, {
-        status: "Approved",
-        matricule,
-      });
-      claimedHere = false;
 
       try {
-        await sendEmail(student.email, student.name, matricule);
+        await sendEmail(student.email, student.name, result.matricule);
         alert("Approved + Email sent!");
       } catch (emailError) {
         console.error("EMAIL ERROR:", emailError);
@@ -129,18 +110,9 @@ export default function AdminPage() {
       }
 
       fetchStudents();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      // Roll back to "Pending" if we claimed the student but failed before
-      // finishing, so the row is immediately retryable instead of stuck.
-      if (claimedHere) {
-        try {
-          await updateDoc(studentRef, { status: "Pending" });
-        } catch (rollbackError) {
-          console.error("Rollback to Pending failed:", rollbackError);
-        }
-      }
-      alert("Error approving student — you can try again.");
+      alert(`Error approving student: ${error.message || error}`);
       fetchStudents();
     } finally {
       setProcessingIds((prev) => {
@@ -156,15 +128,24 @@ export default function AdminPage() {
     setProcessingIds((prev) => new Set(prev).add(student.id));
 
     try {
-      await updateDoc(doc(db, "students", student.id), {
-        status: "Rejected",
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/reject-student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, studentId: student.id }),
       });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Erreur serveur inconnue");
+      }
 
       alert("Rejected!");
       fetchStudents();
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Error rejecting student");
+      alert(`Error rejecting student: ${error.message || error}`);
+      fetchStudents();
     } finally {
       setProcessingIds((prev) => {
         const next = new Set(prev);

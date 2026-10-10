@@ -34,7 +34,7 @@ export default function Loader({
             className="animate-float-logo drop-shadow-[0_0_30px_rgba(179,46,68,0.35)]"
           />
 
-          <p className="text-gradient-gold mt-6 text-lg tracking-[4px] font-display font-semibold">
+          <p className="text-gradient-gold mt-6 text-lg tracking-[4px] font-semibold">
             BRIGHTENED MIND CORPORATION
           </p>
 
