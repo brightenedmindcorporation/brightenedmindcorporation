@@ -39,6 +39,29 @@ const services = [
   },
 ];
 
+const profiles = [
+  { title: "Aides ménagères", description: "Entretien courant du foyer, repassage, gestion du linge." },
+  { title: "Nounous & gardes d'enfants", description: "Encadrement, sécurité et accompagnement scolaire des enfants." },
+  { title: "Cuisiniers / Cuisinières", description: "Préparation des repas quotidiens, gestion des stocks de cuisine." },
+  { title: "Chauffeurs privés", description: "Conduite sécurisée, entretien du véhicule, ponctualité garantie." },
+  { title: "Gardiens & agents de sécurité", description: "Surveillance de la propriété, contrôle des accès, rondes." },
+  { title: "Jardiniers", description: "Entretien des espaces verts, arrosage, aménagement paysager." },
+];
+
+const steps = [
+  { step: "01", title: "Expression du besoin", description: "Vous nous décrivez le profil recherché via le formulaire de devis ou WhatsApp : type de poste, horaires, lieu, budget." },
+  { step: "02", title: "Présélection", description: "Notre équipe identifie et vérifie plusieurs candidats correspondant à votre besoin (références, identité, expérience)." },
+  { step: "03", title: "Entretien & choix", description: "Vous rencontrez les profils retenus et choisissez celui qui vous convient le mieux." },
+  { step: "04", title: "Placement & suivi", description: "Nous formalisons le placement et assurons un suivi de satisfaction régulier après l'intégration." },
+];
+
+const trustPoints = [
+  "Personnel vérifié et présélectionné avant toute présentation",
+  "Formation pratique avant placement : hygiène, sécurité, savoir-être",
+  "Accompagnement administratif tout au long du processus",
+  "Suivi de satisfaction après le placement, remplacement possible en cas de besoin",
+];
+
 export default function DomesticaPage() {
   const whatsappUrl = `https://wa.me/243988830799?text=${encodeURIComponent("Bonjour BM Domestica, je souhaite en savoir plus sur vos services de personnel domestique.")}`;
 
@@ -95,6 +118,67 @@ export default function DomesticaPage() {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* PROFILS DISPONIBLES */}
+      <div className="bg-surface-sunken border-t border-line py-20 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Profils Disponibles</h2>
+            <p className="text-ink-soft max-w-xl mx-auto text-sm">
+              Quel que soit le profil recherché, nous avons des candidats présélectionnés prêts à être présentés.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {profiles.map((profile, index) => (
+              <div
+                key={index}
+                className="bg-surface p-6 rounded-2xl border border-line hover:border-red-600/60 transition-colors"
+              >
+                <h3 className="text-lg font-bold text-ink mb-2">{profile.title}</h3>
+                <p className="text-ink-soft text-sm leading-relaxed">{profile.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* COMMENT CA MARCHE */}
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Comment ça marche</h2>
+          <p className="text-ink-soft max-w-xl mx-auto text-sm">
+            Un processus simple et encadré, de votre demande jusqu'au placement durable.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+          {steps.map((item) => (
+            <div key={item.step} className="relative">
+              <span className="text-5xl font-black text-red-600/20">{item.step}</span>
+              <h3 className="text-lg font-bold text-ink mt-2 mb-2">{item.title}</h3>
+              <p className="text-ink-soft text-sm leading-relaxed">{item.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* POURQUOI NOUS CHOISIR */}
+      <div className="bg-surface-sunken border-t border-line py-20 px-6">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Pourquoi choisir BM Domestica</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {trustPoints.map((point, index) => (
+              <div key={index} className="flex items-start gap-3 bg-surface p-5 rounded-2xl border border-line">
+                <span className="text-red-500 font-bold shrink-0">✓</span>
+                <p className="text-ink-soft text-sm leading-relaxed">{point}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 

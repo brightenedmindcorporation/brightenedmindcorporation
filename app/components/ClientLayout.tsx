@@ -10,6 +10,7 @@ const NAV_LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/academy", label: "Academia" },
   { href: "/communication", label: "Communication" },
+  { href: "/domestica", label: "Domestica" },
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -127,6 +128,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 <li><Link href="/academia/bureautique" className="hover:text-red-500 transition">Bureautique & MS Office</Link></li>
                 <li><Link href="/academia/visuel" className="hover:text-red-500 transition">Visuel & Audiovisuel</Link></li>
                 <li><Link href="/academia/logiciels" className="hover:text-red-500 transition">Logiciels de Gestion</Link></li>
+                <li><Link href="/domestica" className="hover:text-red-500 transition">Domestica</Link></li>
               </ul>
             </div>
 

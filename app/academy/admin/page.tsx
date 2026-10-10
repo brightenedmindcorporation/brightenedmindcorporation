@@ -12,7 +12,7 @@ import PasswordInput from "@/components/academy/PasswordInput";
 
 export const dynamic = "force-dynamic";
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -63,6 +63,14 @@ export default function AdminPage() {
   // --- Job applications ---
   const [jobApplications, setJobApplications] = useState<any[]>([]);
   const [jobApplicationsLoading, setJobApplicationsLoading] = useState(false);
+
+  // --- Project requests (Contact "Parlons de votre projet") ---
+  const [projectRequests, setProjectRequests] = useState<any[]>([]);
+  const [projectRequestsLoading, setProjectRequestsLoading] = useState(false);
+
+  // --- Devis requests ---
+  const [devisRequests, setDevisRequests] = useState<any[]>([]);
+  const [devisRequestsLoading, setDevisRequestsLoading] = useState(false);
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -273,12 +281,136 @@ export default function AdminPage() {
     }
   };
 
+  const fetchProjectRequests = async () => {
+    setProjectRequestsLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/project-requests", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setProjectRequests(result.requests || []);
+    } catch (error) {
+      console.error("Error fetching project requests:", error);
+    } finally {
+      setProjectRequestsLoading(false);
+    }
+  };
+
+  const fetchDevisRequests = async () => {
+    setDevisRequestsLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/devis-requests", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setDevisRequests(result.requests || []);
+    } catch (error) {
+      console.error("Error fetching devis requests:", error);
+    } finally {
+      setDevisRequestsLoading(false);
+    }
+  };
+
+  const updateJobApplicationStatus = async (id: string, status: string) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/job-applications/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, status }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchJobApplications();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const updateProjectRequestStatus = async (id: string, status: string) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/project-requests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, status }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchProjectRequests();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const deleteProjectRequest = async (id: string) => {
+    if (!confirm("Supprimer cette demande ?")) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/project-requests/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchProjectRequests();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const updateDevisRequestStatus = async (id: string, status: string) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/devis-requests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, status }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchDevisRequests();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const deleteDevisRequest = async (id: string) => {
+    if (!confirm("Supprimer cette demande ?")) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/devis-requests/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchDevisRequests();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   useEffect(() => {
     if (!authorized) return;
     if (tab === "live" && liveSessions.length === 0) fetchLiveSessions();
     if (tab === "payments" && payments.length === 0) fetchPayments();
     if (tab === "announcements" && announcements.length === 0) fetchAnnouncements();
     if (tab === "applications" && jobApplications.length === 0) fetchJobApplications();
+    if (tab === "projects" && projectRequests.length === 0) fetchProjectRequests();
+    if (tab === "devis" && devisRequests.length === 0) fetchDevisRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -596,6 +728,8 @@ export default function AdminPage() {
             { id: "payments", label: "Paiements" },
             { id: "announcements", label: "Publicité" },
             { id: "applications", label: "Candidatures" },
+            { id: "projects", label: "Projets" },
+            { id: "devis", label: "Devis" },
           ] as { id: Tab; label: string }[]).map((t) => (
             <button
               key={t.id}
@@ -1108,14 +1242,127 @@ export default function AdminPage() {
               <div className="space-y-3">
                 {jobApplications.map((app) => (
                   <div key={app.id} className="p-5 rounded-2xl border border-line bg-surface">
-                    <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
-                    <p className="text-ink font-bold">{app.name}</p>
-                    <p className="text-ink-soft text-sm">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
+                        <p className="text-ink font-bold">{app.name}</p>
+                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                        app.status === "accepted" ? "bg-emerald-950/60 text-emerald-400" :
+                        app.status === "rejected" ? "bg-red-950/60 text-red-400" :
+                        app.status === "reviewing" ? "bg-amber-950/60 text-amber-400" :
+                        "bg-surface-alt text-ink-soft"
+                      }`}>
+                        {app.status === "accepted" ? "Accepté" : app.status === "rejected" ? "Rejeté" : app.status === "reviewing" ? "En étude" : "Nouveau"}
+                      </span>
+                    </div>
+                    <p className="text-ink-soft text-sm mt-1">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
                     {app.message && <p className="text-ink-soft text-sm mt-2">{app.message}</p>}
                     <p className="text-xs text-ink-faint mt-3">
                       📧 Fichiers envoyés par email à l'administration
                       {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
                     </p>
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <button onClick={() => updateJobApplicationStatus(app.id, "reviewing")} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">En étude</button>
+                      <button onClick={() => updateJobApplicationStatus(app.id, "accepted")} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Accepter</button>
+                      <button onClick={() => updateJobApplicationStatus(app.id, "rejected")} className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Rejeter</button>
+                      <a href={`mailto:${app.email}`} className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center">Répondre par email →</a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= PROJECT REQUESTS TAB ================= */}
+        {tab === "projects" && (
+          <div>
+            <p className="text-xs text-ink-soft mb-6">
+              Demandes envoyées depuis le formulaire « Parlons de votre projet » de la page d'accueil.
+            </p>
+            {projectRequestsLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : projectRequests.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucune demande pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {projectRequests.map((req) => (
+                  <div key={req.id} className="p-5 rounded-2xl border border-line bg-surface">
+                    <div className="flex items-start justify-between gap-3">
+                      <p className="text-ink font-bold">{req.name}</p>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                        req.status === "contacted" ? "bg-emerald-950/60 text-emerald-400" :
+                        req.status === "closed" ? "bg-surface-alt text-ink-faint" :
+                        "bg-amber-950/60 text-amber-400"
+                      }`}>
+                        {req.status === "contacted" ? "Contacté" : req.status === "closed" ? "Clôturé" : "Nouveau"}
+                      </span>
+                    </div>
+                    <p className="text-ink-soft text-sm mt-1">{req.email}</p>
+                    {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <button onClick={() => updateProjectRequestStatus(req.id, "contacted")} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Marquer contacté</button>
+                      <button onClick={() => updateProjectRequestStatus(req.id, "closed")} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Clôturer</button>
+                      <a href={`mailto:${req.email}`} className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center">Répondre par email →</a>
+                      <button onClick={() => deleteProjectRequest(req.id)} className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5 self-center">Supprimer</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= DEVIS REQUESTS TAB ================= */}
+        {tab === "devis" && (
+          <div>
+            <p className="text-xs text-ink-soft mb-6">
+              Demandes envoyées depuis le formulaire de devis (/devis), tous départements confondus.
+            </p>
+            {devisRequestsLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : devisRequests.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucune demande de devis pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {devisRequests.map((req) => (
+                  <div key={req.id} className="p-5 rounded-2xl border border-line bg-surface">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">{req.service}</p>
+                        <p className="text-ink font-bold">{req.name}</p>
+                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                        req.status === "contacted" ? "bg-emerald-950/60 text-emerald-400" :
+                        req.status === "closed" ? "bg-surface-alt text-ink-faint" :
+                        "bg-amber-950/60 text-amber-400"
+                      }`}>
+                        {req.status === "contacted" ? "Contacté" : req.status === "closed" ? "Clôturé" : "Nouveau"}
+                      </span>
+                    </div>
+                    <p className="text-ink-soft text-sm mt-1">{req.email}{req.phone ? ` · ${req.phone}` : ""}</p>
+                    {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <button onClick={() => updateDevisRequestStatus(req.id, "contacted")} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Marquer contacté</button>
+                      <button onClick={() => updateDevisRequestStatus(req.id, "closed")} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Clôturer</button>
+                      <a href={`mailto:${req.email}`} className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center">Email →</a>
+                      {req.phone && (
+                        <a
+                          href={`https://wa.me/${req.phone.replace(/[^0-9]/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-emerald-500 hover:text-emerald-400 text-xs font-bold px-3 py-1.5 self-center"
+                        >
+                          WhatsApp →
+                        </a>
+                      )}
+                      <button onClick={() => deleteDevisRequest(req.id)} className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5 self-center">Supprimer</button>
+                    </div>
                   </div>
                 ))}
               </div>

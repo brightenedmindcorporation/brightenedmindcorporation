@@ -61,6 +61,12 @@ export default function Contact() {
 
       setSent(true);
 
+      fetch("/api/contact/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: form.name, email: form.email, message: form.message }),
+      }).catch((err) => console.error("Project request persistence failed (non-fatal):", err));
+
       setForm({
         name: "",
         email: "",

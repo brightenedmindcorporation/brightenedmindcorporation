@@ -2,6 +2,8 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { availableLanguages } from '@/content/curriculum';
+import { otherPrograms } from '@/content/programs';
 
 // Liste des pays avec leurs indicatifs téléphoniques
 const countryCodes = [
@@ -48,16 +50,43 @@ const countryCodes = [
 
 export default function DevisPage() {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [selectedCode, setSelectedCode] = useState("+243"); // Code par défaut (RDC)
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [service, setService] = useState("Photographie");
+  const [message, setMessage] = useState("");
 
   // Renseigne ici le vrai numéro WhatsApp de ton entreprise (au format international sans le +)
-  const whatsappNumber = "+243970874852"; 
+  const whatsappNumber = "+243970874852";
   const whatsappMessage = encodeURIComponent("Bonjour BM Corporation, je souhaite obtenir un devis pour mes projets de communication.");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(null);
+    setSubmitting(true);
+    try {
+      const response = await fetch("/api/devis/submit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          email,
+          phone: `${selectedCode} ${phoneNumber}`,
+          service,
+          message,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setSubmitted(true);
+    } catch (error: any) {
+      setSubmitError(error.message || "Une erreur est survenue. Réessayez ou contactez-nous sur WhatsApp.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -102,11 +131,14 @@ export default function DevisPage() {
           <div className="bg-red-600/10 border border-red-600 text-center p-8 rounded-2xl">
             <h3 className="text-2xl font-bold text-ink mb-2">Message envoyé avec succès !</h3>
             <p className="text-ink-soft">
-              Merci ! L'équipe de BM Corporation a bien reçu votre demande et vous répondra sur votre e-mail très rapidement.
+              Merci ! L'équipe de BM Corporation a bien reçu votre demande et vous répondra sur votre e-mail ou votre WhatsApp très rapidement.
             </p>
           </div>
         ) : (
-          <form action="https://formspree.io/f/xbjnypqg" method="POST" onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {submitError && (
+              <p className="text-red-500 text-sm text-center font-medium">{submitError}</p>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-ink-soft mb-2">Nom complet *</label>
@@ -115,6 +147,8 @@ export default function DevisPage() {
                   name="name"
                   required
                   placeholder="Votre nom"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                 />
               </div>
@@ -125,6 +159,8 @@ export default function DevisPage() {
                   name="email"
                   required
                   placeholder="votre@email.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                 />
               </div>
@@ -165,16 +201,33 @@ export default function DevisPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-ink-soft mb-2">Service concerné</label>
+                <label className="block text-sm font-medium text-ink-soft mb-2">Service / Département concerné</label>
                 <select
                   name="service"
+                  value={service}
+                  onChange={(e) => setService(e.target.value)}
                   className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                 >
-                  <option value="Photographie">Photographie</option>
-                  <option value="Vidéographie">Vidéographie & Clips</option>
-                  <option value="Design & Supports">Design, Logo & Print</option>
-                  <option value="Marketing Digital">Marketing Digital & Réseaux</option>
-                  <option value="Site Web / Application">Création Site Web / App</option>
+                  <optgroup label="Communication">
+                    <option value="Photographie">Photographie</option>
+                    <option value="Vidéographie">Vidéographie & Clips</option>
+                    <option value="Design & Supports">Design, Logo & Print</option>
+                    <option value="Marketing Digital">Marketing Digital & Réseaux</option>
+                    <option value="Site Web / Application">Création Site Web / App</option>
+                  </optgroup>
+                  <optgroup label="Academia — Langues">
+                    {availableLanguages.map((lang) => (
+                      <option key={lang.code} value={`Formation — ${lang.label}`}>Formation en {lang.label}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Academia — Formations professionnelles">
+                    {otherPrograms.map((program) => (
+                      <option key={program.code} value={`Formation — ${program.label}`}>{program.label}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Domestica">
+                    <option value="Domestica — Personnel domestique">Recrutement de personnel domestique</option>
+                  </optgroup>
                   <option value="Autre">Autre projet</option>
                 </select>
               </div>
@@ -187,15 +240,18 @@ export default function DevisPage() {
                 rows={5}
                 required
                 placeholder="Décrivez vos besoins, délais, objectifs..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
               ></textarea>
             </div>
 
             <button
               type="submit"
-              className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-4 rounded-xl text-lg transition"
+              disabled={submitting}
+              className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold py-4 rounded-xl text-lg transition"
             >
-              Envoyer la demande de devis
+              {submitting ? "Envoi en cours..." : "Envoyer la demande de devis"}
             </button>
           </form>
         )}
