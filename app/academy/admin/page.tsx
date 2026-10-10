@@ -54,8 +54,8 @@ export default function AdminPage() {
   const [annDescription, setAnnDescription] = useState("");
   const [annType, setAnnType] = useState<"normal" | "job">("normal");
   const [annDetails, setAnnDetails] = useState("");
-  const [annImageUrl, setAnnImageUrl] = useState("");
-  const [annVideoUrl, setAnnVideoUrl] = useState("");
+  const [annImage, setAnnImage] = useState<File | null>(null);
+  const [annVideo, setAnnVideo] = useState<File | null>(null);
   const [annSubmitting, setAnnSubmitting] = useState(false);
 
   // --- Job applications ---
@@ -192,19 +192,16 @@ export default function AdminPage() {
     setAnnSubmitting(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/announcements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken,
-          title: annTitle,
-          description: annDescription,
-          type: annType,
-          details: annDetails,
-          imageUrl: annImageUrl,
-          videoUrl: annVideoUrl,
-        }),
-      });
+      const form = new FormData();
+      form.append("idToken", idToken || "");
+      form.append("title", annTitle);
+      form.append("description", annDescription);
+      form.append("type", annType);
+      form.append("details", annDetails);
+      if (annImage) form.append("image", annImage);
+      if (annVideo) form.append("video", annVideo);
+
+      const response = await fetch("/api/admin/announcements", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
 
@@ -212,8 +209,8 @@ export default function AdminPage() {
       setAnnDescription("");
       setAnnType("normal");
       setAnnDetails("");
-      setAnnImageUrl("");
-      setAnnVideoUrl("");
+      setAnnImage(null);
+      setAnnVideo(null);
       fetchAnnouncements();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -978,28 +975,23 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Lien de la photo (optionnel)</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Photo (optionnel)</label>
                 <input
-                  type="text"
-                  value={annImageUrl}
-                  onChange={(e) => setAnnImageUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setAnnImage(e.target.files?.[0] ?? null)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-semibold"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Lien de la vidéo (optionnel)</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Vidéo (optionnel)</label>
                 <input
-                  type="text"
-                  value={annVideoUrl}
-                  onChange={(e) => setAnnVideoUrl(e.target.value)}
-                  placeholder="https://..."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setAnnVideo(e.target.files?.[0] ?? null)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface file:text-ink file:font-semibold"
                 />
               </div>
-              <p className="sm:col-span-2 text-xs text-ink-faint -mt-2">
-                Astuce : héberge d'abord ta photo/vidéo (ex. un lien partagé Google Drive, Imgur, YouTube...) puis colle le lien ici.
-              </p>
               <div className="sm:col-span-2">
                 <button
                   type="submit"

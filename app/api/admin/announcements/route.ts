@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { uploadToCloudinary } from "@/lib/cloudinary";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -30,31 +31,49 @@ export async function GET(request: Request) {
   }
 }
 
-// Images/videos are plain links (pasted by the admin) rather than
-// uploaded files — Firebase Storage needs the paid Blaze plan, which
-// this project isn't on, so file uploads are avoided entirely here.
+// Photos/videos are uploaded straight to Cloudinary (not Firebase
+// Storage, which needs the paid Blaze plan) and the resulting URL is
+// stored on the announcement doc.
 export async function POST(request: Request) {
   try {
     if (!isAdminConfigured()) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
 
-    const body = await request.json();
-    const { idToken, title, description, type, details, imageUrl, videoUrl } = body;
+    const form = await request.formData();
+    const idToken = form.get("idToken")?.toString();
     await requireAdmin(idToken);
 
-    if (!title?.trim() || !description?.trim()) {
+    const title = form.get("title")?.toString()?.trim();
+    const description = form.get("description")?.toString()?.trim();
+    const type = form.get("type")?.toString() === "job" ? "job" : "normal";
+    const details = form.get("details")?.toString()?.trim() || "";
+
+    if (!title || !description) {
       return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
+    }
+
+    const imageFile = form.get("image");
+    const videoFile = form.get("video");
+
+    let imageUrl: string | null = null;
+    let videoUrl: string | null = null;
+
+    if (imageFile instanceof File && imageFile.size > 0) {
+      imageUrl = await uploadToCloudinary(imageFile, "announcements", "image");
+    }
+    if (videoFile instanceof File && videoFile.size > 0) {
+      videoUrl = await uploadToCloudinary(videoFile, "announcements", "video");
     }
 
     const adminDb = getAdminDb();
     const docRef = await adminDb.collection("announcements").add({
-      title: title.trim(),
-      description: description.trim(),
-      type: type === "job" ? "job" : "normal",
-      details: details?.trim() || "",
-      imageUrl: imageUrl?.trim() || null,
-      videoUrl: videoUrl?.trim() || null,
+      title,
+      description,
+      type,
+      details,
+      imageUrl,
+      videoUrl,
       active: true,
       createdAt: new Date().toISOString(),
     });
