@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { motion, type PanInfo } from "framer-motion";
 import Image from "next/image";
 
 interface Announcement {
@@ -13,7 +14,28 @@ interface Announcement {
   videoUrl?: string | null;
 }
 
+// With many announcements, showing one dot per item gets cluttered —
+// show a window of dots centered on the active slide instead, plus a
+// "x / n" counter so it's still clear there are many more.
+function visibleDotIndices(total: number, current: number, max = 7): number[] {
+  if (total <= max) return Array.from({ length: total }, (_, i) => i);
+  const half = Math.floor(max / 2);
+  let start = current - half;
+  let end = current + half;
+  if (start < 0) {
+    end -= start;
+    start = 0;
+  }
+  if (end > total - 1) {
+    start -= end - (total - 1);
+    end = total - 1;
+  }
+  start = Math.max(0, start);
+  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+}
+
 export default function Announcements() {
+  const router = useRouter();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [index, setIndex] = useState(0);
 
@@ -34,55 +56,112 @@ export default function Announcements() {
 
   if (announcements.length === 0) return null;
 
-  const current = announcements[index];
-  const isJob = current.type === "job";
-  const href = isJob ? `/annonces/${current.id}/postuler` : `/annonces/${current.id}`;
-  const ctaLabel = isJob ? "Postuler" : "Voir le détail";
+  const total = announcements.length;
+  const goTo = (i: number) => setIndex(((i % total) + total) % total);
+
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
+    const threshold = 60;
+    if (info.offset.x < -threshold) {
+      goTo(index + 1);
+    } else if (info.offset.x > threshold) {
+      goTo(index - 1);
+    }
+  };
+
+  const hrefFor = (a: Announcement) => (a.type === "job" ? `/annonces/${a.id}/postuler` : `/annonces/${a.id}`);
+
+  const dots = visibleDotIndices(total, index);
 
   return (
     <section className="py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
         <div className="relative bg-gradient-to-br from-red-950 via-red-900 to-black rounded-3xl overflow-hidden border border-red-900/40 shadow-2xl">
-          <div className="grid grid-cols-1 md:grid-cols-2">
-            {current.imageUrl ? (
-              <div className="relative w-full min-h-[260px] md:min-h-[360px]">
-                <Image src={current.imageUrl} alt={current.title} fill unoptimized className="object-cover" />
-              </div>
-            ) : current.videoUrl ? (
-              <div className="relative w-full min-h-[260px] md:min-h-[360px] bg-black">
-                <video src={current.videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
-              </div>
-            ) : null}
+          <div className="overflow-hidden">
+            <motion.div
+              className="flex cursor-grab active:cursor-grabbing"
+              drag={total > 1 ? "x" : false}
+              dragConstraints={{ left: 0, right: 0 }}
+              dragElastic={0.15}
+              animate={{ x: `-${index * 100}%` }}
+              transition={{ type: "spring", stiffness: 300, damping: 32 }}
+              onDragEnd={handleDragEnd}
+            >
+              {announcements.map((a) => {
+                const isJob = a.type === "job";
+                return (
+                  <motion.div
+                    key={a.id}
+                    onTap={() => router.push(hrefFor(a))}
+                    className="w-full shrink-0 select-none cursor-pointer"
+                  >
+                    <div className="grid grid-cols-1 md:grid-cols-2">
+                      {a.imageUrl ? (
+                        <div className="relative w-full min-h-[260px] md:min-h-[360px] pointer-events-none">
+                          <Image src={a.imageUrl} alt={a.title} fill unoptimized draggable={false} className="object-cover" />
+                        </div>
+                      ) : a.videoUrl ? (
+                        <div className="relative w-full min-h-[260px] md:min-h-[360px] bg-black pointer-events-none">
+                          <video src={a.videoUrl} autoPlay muted loop playsInline className="w-full h-full object-cover" />
+                        </div>
+                      ) : null}
 
-            <div className={`flex flex-col justify-center p-8 md:p-12 ${!current.imageUrl && !current.videoUrl ? "md:col-span-2" : ""}`}>
-              <span className="inline-block w-fit text-xs font-bold uppercase tracking-widest text-gold-400 bg-black/30 px-3 py-1.5 rounded-full border border-gold-700/40 mb-5">
-                {isJob ? "Offre d'emploi" : "Annonce"}
-              </span>
-              <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
-                {current.title}
-              </h2>
-              <p className="text-red-100/80 text-sm sm:text-base leading-relaxed mb-8">{current.description}</p>
+                      <div className={`flex flex-col justify-center p-8 md:p-12 ${!a.imageUrl && !a.videoUrl ? "md:col-span-2" : ""}`}>
+                        <span className="inline-block w-fit text-xs font-bold uppercase tracking-widest text-gold-400 bg-black/30 px-3 py-1.5 rounded-full border border-gold-700/40 mb-5">
+                          {isJob ? "Offre d'emploi" : "Annonce"}
+                        </span>
+                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
+                          {a.title}
+                        </h2>
+                        <p className="text-red-100/80 text-sm sm:text-base leading-relaxed mb-8">{a.description}</p>
 
-              <Link
-                href={href}
-                className="w-fit bg-gold-500 hover:bg-gold-400 text-black font-bold px-8 py-3.5 rounded-xl text-base transition"
-              >
-                {ctaLabel}
-              </Link>
-            </div>
+                        <span className="w-fit bg-gold-500 group-hover:bg-gold-400 text-black font-bold px-8 py-3.5 rounded-xl text-base transition">
+                          {isJob ? "Postuler" : "Voir le détail"}
+                        </span>
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </motion.div>
           </div>
 
-          {announcements.length > 1 && (
-            <div className="absolute bottom-4 right-4 flex gap-1.5">
-              {announcements.map((a, i) => (
-                <button
-                  key={a.id}
-                  onClick={() => setIndex(i)}
-                  aria-label={`Annonce ${i + 1}`}
-                  className={`w-2.5 h-2.5 rounded-full transition ${i === index ? "bg-gold-400" : "bg-white/30"}`}
-                />
-              ))}
-            </div>
+          {total > 1 && (
+            <>
+              <button
+                onClick={() => goTo(index - 1)}
+                aria-label="Annonce précédente"
+                className="hidden sm:flex absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white transition"
+              >
+                ←
+              </button>
+              <button
+                onClick={() => goTo(index + 1)}
+                aria-label="Annonce suivante"
+                className="hidden sm:flex absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 items-center justify-center rounded-full bg-black/40 hover:bg-black/60 text-white transition"
+              >
+                →
+              </button>
+
+              <div className="absolute bottom-4 right-4 flex items-center gap-3">
+                {total > 8 && (
+                  <span className="text-xs font-semibold text-white/70">
+                    {index + 1} / {total}
+                  </span>
+                )}
+                <div className="flex gap-1.5">
+                  {dots.map((i) => (
+                    <button
+                      key={i}
+                      onClick={() => goTo(i)}
+                      aria-label={`Annonce ${i + 1}`}
+                      className={`rounded-full transition ${
+                        i === index ? "bg-gold-400 w-2.5 h-2.5" : "bg-white/30 w-2 h-2"
+                      }`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </>
           )}
         </div>
       </div>
