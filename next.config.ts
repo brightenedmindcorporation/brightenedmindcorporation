@@ -26,6 +26,17 @@ const nextConfig: NextConfig = {
         destination: "/academy",
         permanent: true,
       },
+      {
+        // Academia (page vitrine) et Espace Apprentissage (portail
+        // interactif) ont fusionné en un seul onglet pour ne plus
+        // dérouter les visiteurs. Seule la page d'accueil /academia est
+        // redirigée : ses sous-pages (langues, bureautique, visuel,
+        // logiciels) restent des destinations valides, liées depuis le
+        // nouveau hub /academy.
+        source: "/academia",
+        destination: "/academy",
+        permanent: true,
+      },
       // Anciennes URLs anglaises "à plat" -> nouvelles routes dynamiques
       // multi-langues (voir app/academy/[lang]/level/[level]/...).
       {

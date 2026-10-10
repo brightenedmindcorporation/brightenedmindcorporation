@@ -1,4 +1,5 @@
 import Hero from "@/components/Hero";
+import Announcements from "@/components/Announcements";
 import Departments from "@/components/Departments";
 import WhyChooseUs from "@/components/WhyChooseUs";
 import About from "@/components/About";
@@ -17,6 +18,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <Announcements />
       <Slogan />
       <Identity />
       <Departments />

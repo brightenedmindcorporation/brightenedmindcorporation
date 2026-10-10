@@ -4,6 +4,33 @@ import Image from "next/image";
 import Link from "next/link";
 import { availableLanguages } from "@/content/curriculum";
 
+const DEPARTMENTS = [
+  {
+    icon: "🗣",
+    title: "Langues",
+    description: "Plateforme interactive : leçons, quiz, suivi de progression et cours en direct.",
+    href: "#langues",
+  },
+  {
+    icon: "💻",
+    title: "Bureautique",
+    description: "Word, Excel, PowerPoint et la gestion de votre environnement Windows.",
+    href: "/academia/bureautique",
+  },
+  {
+    icon: "🎬",
+    title: "Visuel & Audiovisuel",
+    description: "Design graphique, montage vidéo professionnel et diffusion en direct.",
+    href: "/academia/visuel",
+  },
+  {
+    icon: "🧾",
+    title: "Logiciels de Gestion",
+    description: "ODOO, SAGE, Dolibarr et les logiciels comptables/douaniers.",
+    href: "/academia/logiciels",
+  },
+];
+
 const LANGUAGE_TAGLINES: Record<string, string> = {
   english: "Master professional English, from everyday conversation to business fluency.",
   french: "Renforcez votre grammaire, votre rédaction et votre aisance à l'oral en français.",
@@ -32,7 +59,7 @@ export default function Home() {
 
           {/* Titre principal */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-ink tracking-tight leading-[1.15] max-w-4xl">
-            Master New Languages with <br className="hidden sm:inline" />
+            Toutes les formations de <br className="hidden sm:inline" />
             <span className="text-red-500">
               Brightened Mind Academy
             </span>
@@ -40,8 +67,8 @@ export default function Home() {
 
           {/* Description claire et confortable */}
           <p className="mt-6 text-base sm:text-lg text-ink-soft max-w-2xl leading-relaxed">
-            Six languages, structured lessons, interactive quizzes, and real-time progress
-            tracking — choose your language below to get started.
+            Langues, bureautique, visuel & audiovisuel et logiciels de gestion — un seul endroit
+            pour découvrir et rejoindre toutes nos formations.
           </p>
 
           {/* Boutons d'action CTA */}
@@ -93,8 +120,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION LANGUES */}
+      {/* SECTION 4 PÔLES DE FORMATION */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
+            Nos Pôles de Formation
+          </h2>
+          <h3 className="text-3xl sm:text-4xl font-black text-ink">
+            Quatre domaines, une seule Academia
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {DEPARTMENTS.map((dept) => (
+            <Link
+              key={dept.title}
+              href={dept.href}
+              className="group bg-surface rounded-2xl p-6 border border-line hover:border-red-600/40 flex flex-col shadow-md transition"
+            >
+              <div className="text-3xl mb-4">{dept.icon}</div>
+              <h4 className="text-lg font-bold text-ink mb-2 group-hover:text-red-500 transition-colors">
+                {dept.title}
+              </h4>
+              <p className="text-ink-soft text-xs leading-relaxed">{dept.description}</p>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      {/* SECTION LANGUES */}
+      <section id="langues" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-10">
         <div className="text-center mb-16">
           <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
             Choose Your Language

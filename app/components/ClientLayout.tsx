@@ -8,8 +8,7 @@ import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
-  { href: "/academia", label: "Academia" },
-  { href: "/academy", label: "Espace Apprentissage" },
+  { href: "/academy", label: "Academia" },
   { href: "/communication", label: "Communication" },
 ];
 
@@ -121,10 +120,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div>
               <h4 className="text-ink font-semibold mb-3">Pôles Academia</h4>
               <ul className="space-y-2 text-xs">
-                <li><Link href="/academia#langues" className="hover:text-gold-500 transition">Langues (Français, Anglais...)</Link></li>
-                <li><Link href="/academia#bureautique" className="hover:text-gold-500 transition">Bureautique & MS Office</Link></li>
-                <li><Link href="/academia#visuel" className="hover:text-gold-500 transition">Visuel & Audiovisuel</Link></li>
-                <li><Link href="/academia#logiciels" className="hover:text-gold-500 transition">Logiciels de Gestion</Link></li>
+                <li><Link href="/academy" className="hover:text-gold-500 transition">Langues (Français, Anglais...)</Link></li>
+                <li><Link href="/academia/bureautique" className="hover:text-gold-500 transition">Bureautique & MS Office</Link></li>
+                <li><Link href="/academia/visuel" className="hover:text-gold-500 transition">Visuel & Audiovisuel</Link></li>
+                <li><Link href="/academia/logiciels" className="hover:text-gold-500 transition">Logiciels de Gestion</Link></li>
               </ul>
             </div>
 
@@ -132,8 +131,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <h4 className="text-ink font-semibold mb-3">Navigation</h4>
               <ul className="space-y-2 text-xs">
                 <li><Link href="/" className="hover:text-gold-500 transition">Accueil</Link></li>
-                <li><Link href="/academia" className="hover:text-gold-500 transition">Formations</Link></li>
-                <li><Link href="/academy" className="hover:text-gold-500 transition">Portail Interactif</Link></li>
+                <li><Link href="/academy" className="hover:text-gold-500 transition">Formations / Academia</Link></li>
                 <li><Link href="/devis" className="hover:text-gold-500 transition">Demander un Devis</Link></li>
               </ul>
             </div>

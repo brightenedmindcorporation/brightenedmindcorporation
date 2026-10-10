@@ -11,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 import { collection, getDocs } from "firebase/firestore";
 
-type Tab = "students" | "live" | "payments";
+type Tab = "students" | "live" | "payments" | "announcements";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -39,6 +39,14 @@ export default function AdminPage() {
   // --- Payments ---
   const [payments, setPayments] = useState<any[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
+
+  // --- Announcements ---
+  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(false);
+  const [annTitle, setAnnTitle] = useState("");
+  const [annDescription, setAnnDescription] = useState("");
+  const [annCtaLabel, setAnnCtaLabel] = useState("");
+  const [annCtaUrl, setAnnCtaUrl] = useState("");
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -123,10 +131,95 @@ export default function AdminPage() {
     }
   };
 
+  const fetchAnnouncements = async () => {
+    setAnnouncementsLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/announcements", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setAnnouncements(result.announcements || []);
+    } catch (error) {
+      console.error("Error fetching announcements:", error);
+    } finally {
+      setAnnouncementsLoading(false);
+    }
+  };
+
+  const createAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!annTitle.trim() || !annDescription.trim()) {
+      alert("Titre et description requis.");
+      return;
+    }
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          title: annTitle,
+          description: annDescription,
+          ctaLabel: annCtaLabel,
+          ctaUrl: annCtaUrl,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+
+      setAnnTitle("");
+      setAnnDescription("");
+      setAnnCtaLabel("");
+      setAnnCtaUrl("");
+      fetchAnnouncements();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const toggleAnnouncement = async (id: string, active: boolean) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/announcements/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, active }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchAnnouncements();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const deleteAnnouncement = async (id: string) => {
+    if (!confirm("Supprimer cette annonce ?")) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/announcements/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchAnnouncements();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   useEffect(() => {
     if (!authorized) return;
     if (tab === "live" && liveSessions.length === 0) fetchLiveSessions();
     if (tab === "payments" && payments.length === 0) fetchPayments();
+    if (tab === "announcements" && announcements.length === 0) fetchAnnouncements();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -363,6 +456,7 @@ export default function AdminPage() {
             { id: "students", label: "Étudiants" },
             { id: "live", label: "Cours en direct" },
             { id: "payments", label: "Paiements" },
+            { id: "announcements", label: "Publicité" },
           ] as { id: Tab; label: string }[]).map((t) => (
             <button
               key={t.id}
@@ -708,6 +802,111 @@ export default function AdminPage() {
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= ANNOUNCEMENTS TAB ================= */}
+        {tab === "announcements" && (
+          <div>
+            <p className="text-xs text-ink-soft mb-6">
+              Les annonces actives s'affichent dans un bandeau bien visible juste sous l'en-tête de la page d'accueil
+              du site (offres d'emploi, promotions, informations diverses...).
+            </p>
+
+            <form onSubmit={createAnnouncement} className="bg-surface border border-line rounded-2xl p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre</label>
+                <input
+                  type="text"
+                  value={annTitle}
+                  onChange={(e) => setAnnTitle(e.target.value)}
+                  placeholder="Ex: Nous recrutons !"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Description</label>
+                <textarea
+                  value={annDescription}
+                  onChange={(e) => setAnnDescription(e.target.value)}
+                  rows={2}
+                  placeholder="Ex: BM Corporation recrute un(e) formateur/formatrice en anglais. Postulez dès maintenant."
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Texte du bouton (optionnel)</label>
+                <input
+                  type="text"
+                  value={annCtaLabel}
+                  onChange={(e) => setAnnCtaLabel(e.target.value)}
+                  placeholder="Ex: Postuler"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Lien du bouton (optionnel)</label>
+                <input
+                  type="text"
+                  value={annCtaUrl}
+                  onChange={(e) => setAnnCtaUrl(e.target.value)}
+                  placeholder="Ex: /devis ou https://wa.me/..."
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                />
+              </div>
+              <div className="sm:col-span-2">
+                <button
+                  type="submit"
+                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition"
+                >
+                  Publier l'annonce
+                </button>
+              </div>
+            </form>
+
+            {announcementsLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : announcements.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucune annonce pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {announcements.map((a) => (
+                  <div
+                    key={a.id}
+                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-line bg-surface ${a.active ? "" : "opacity-50"}`}
+                  >
+                    <div>
+                      <p className="font-bold text-ink">
+                        {a.title}
+                        {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
+                      </p>
+                      <p className="text-xs text-ink-soft mt-1">{a.description}</p>
+                      {a.ctaUrl && (
+                        <p className="text-xs text-gold-500 mt-1">
+                          {a.ctaLabel || "En savoir plus"} → {a.ctaUrl}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-4 self-start sm:self-center">
+                      <button
+                        onClick={() => toggleAnnouncement(a.id, !a.active)}
+                        className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-4 py-2 rounded-xl border border-line transition"
+                      >
+                        {a.active ? "Masquer" : "Afficher"}
+                      </button>
+                      <button
+                        onClick={() => deleteAnnouncement(a.id)}
+                        className="text-red-500 hover:text-red-400 text-sm font-semibold"
+                      >
+                        Supprimer
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

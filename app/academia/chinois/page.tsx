@@ -73,7 +73,7 @@ export default function ChineseCoursePage() {
       {/* HERO SECTION */}
       <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
         <div className="relative z-10 max-w-4xl">
-          <Link href="/academia" className="inline-flex items-center gap-2 text-gold-400 font-semibold text-sm mb-6 hover:underline">
+          <Link href="/academy" className="inline-flex items-center gap-2 text-gold-400 font-semibold text-sm mb-6 hover:underline">
             ← Retour aux formations BM Academia
           </Link>
           <div className="flex justify-center mb-4">
