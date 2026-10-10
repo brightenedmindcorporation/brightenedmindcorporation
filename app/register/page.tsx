@@ -7,6 +7,7 @@ import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { availableLanguages } from "@/content/curriculum";
+import PasswordInput from "@/components/academy/PasswordInput";
 
 export default function RegisterPage() {
   const [name, setName] = useState("");
@@ -139,11 +140,10 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-sm font-medium text-ink-soft mb-1">Mot de passe</label>
-            <input
-              type="password"
+            <PasswordInput
               required
               minLength={6}
-              placeholder="••••••••"
+              autoComplete="new-password"
               className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

@@ -6,6 +6,7 @@ import { auth, db } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import { doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import PasswordInput from "@/components/academy/PasswordInput";
 
 export default function LoginPage() {
   return (
@@ -143,10 +144,9 @@ function LoginForm() {
 
           <div>
             <label className="block text-sm font-medium text-ink-soft mb-1">Mot de passe</label>
-            <input
-              type="password"
+            <PasswordInput
               required
-              placeholder="••••••••"
+              autoComplete="current-password"
               className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
