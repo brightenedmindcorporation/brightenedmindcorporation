@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
@@ -11,7 +12,7 @@ import PasswordInput from "@/components/academy/PasswordInput";
 
 export const dynamic = "force-dynamic";
 
-type Tab = "students" | "live" | "payments" | "announcements";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -51,8 +52,15 @@ export default function AdminPage() {
   const [announcementsLoading, setAnnouncementsLoading] = useState(false);
   const [annTitle, setAnnTitle] = useState("");
   const [annDescription, setAnnDescription] = useState("");
-  const [annCtaLabel, setAnnCtaLabel] = useState("");
-  const [annCtaUrl, setAnnCtaUrl] = useState("");
+  const [annType, setAnnType] = useState<"normal" | "job">("normal");
+  const [annDetails, setAnnDetails] = useState("");
+  const [annImage, setAnnImage] = useState<File | null>(null);
+  const [annVideo, setAnnVideo] = useState<File | null>(null);
+  const [annSubmitting, setAnnSubmitting] = useState(false);
+
+  // --- Job applications ---
+  const [jobApplications, setJobApplications] = useState<any[]>([]);
+  const [jobApplicationsLoading, setJobApplicationsLoading] = useState(false);
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -173,29 +181,49 @@ export default function AdminPage() {
       alert("Titre et description requis.");
       return;
     }
+    setAnnSubmitting(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/announcements", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken,
-          title: annTitle,
-          description: annDescription,
-          ctaLabel: annCtaLabel,
-          ctaUrl: annCtaUrl,
-        }),
-      });
+      const form = new FormData();
+      form.append("idToken", idToken || "");
+      form.append("title", annTitle);
+      form.append("description", annDescription);
+      form.append("type", annType);
+      form.append("details", annDetails);
+      if (annImage) form.append("image", annImage);
+      if (annVideo) form.append("video", annVideo);
+
+      const response = await fetch("/api/admin/announcements", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
 
       setAnnTitle("");
       setAnnDescription("");
-      setAnnCtaLabel("");
-      setAnnCtaUrl("");
+      setAnnType("normal");
+      setAnnDetails("");
+      setAnnImage(null);
+      setAnnVideo(null);
       fetchAnnouncements();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setAnnSubmitting(false);
+    }
+  };
+
+  const fetchJobApplications = async () => {
+    setJobApplicationsLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/job-applications", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setJobApplications(result.applications || []);
+    } catch (error) {
+      console.error("Error fetching job applications:", error);
+    } finally {
+      setJobApplicationsLoading(false);
     }
   };
 
@@ -240,6 +268,7 @@ export default function AdminPage() {
     if (tab === "live" && liveSessions.length === 0) fetchLiveSessions();
     if (tab === "payments" && payments.length === 0) fetchPayments();
     if (tab === "announcements" && announcements.length === 0) fetchAnnouncements();
+    if (tab === "applications" && jobApplications.length === 0) fetchJobApplications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -520,6 +549,7 @@ export default function AdminPage() {
             { id: "live", label: "Cours en direct" },
             { id: "payments", label: "Paiements" },
             { id: "announcements", label: "Publicité" },
+            { id: "applications", label: "Candidatures" },
           ] as { id: Tab; label: string }[]).map((t) => (
             <button
               key={t.id}
@@ -882,6 +912,18 @@ export default function AdminPage() {
             </p>
 
             <form onSubmit={createAnnouncement} className="bg-surface border border-line rounded-2xl p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Type</label>
+                <select
+                  value={annType}
+                  onChange={(e) => setAnnType(e.target.value as "normal" | "job")}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                >
+                  <option value="normal">Annonce normale (bouton "Voir le détail")</option>
+                  <option value="job">Offre d'emploi (bouton "Postuler")</option>
+                </select>
+              </div>
+              <div className="hidden sm:block" />
               <div className="sm:col-span-2">
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre</label>
                 <input
@@ -893,7 +935,9 @@ export default function AdminPage() {
                 />
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Description</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">
+                  Description courte (affichée dans le bandeau de la page d'accueil)
+                </label>
                 <textarea
                   value={annDescription}
                   onChange={(e) => setAnnDescription(e.target.value)}
@@ -902,32 +946,43 @@ export default function AdminPage() {
                   className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
                 />
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Texte du bouton (optionnel)</label>
-                <input
-                  type="text"
-                  value={annCtaLabel}
-                  onChange={(e) => setAnnCtaLabel(e.target.value)}
-                  placeholder="Ex: Postuler"
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">
+                  Détails complets (affichés uniquement sur la page "Voir le détail" / "Postuler")
+                </label>
+                <textarea
+                  value={annDetails}
+                  onChange={(e) => setAnnDetails(e.target.value)}
+                  rows={5}
+                  placeholder="Description complète de l'offre ou de l'annonce..."
                   className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Lien du bouton (optionnel)</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Photo (optionnel)</label>
                 <input
-                  type="text"
-                  value={annCtaUrl}
-                  onChange={(e) => setAnnCtaUrl(e.target.value)}
-                  placeholder="Ex: /devis ou https://wa.me/..."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setAnnImage(e.target.files?.[0] ?? null)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Vidéo (optionnel)</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setAnnVideo(e.target.files?.[0] ?? null)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface file:text-ink file:font-semibold"
                 />
               </div>
               <div className="sm:col-span-2">
                 <button
                   type="submit"
-                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition"
+                  disabled={annSubmitting}
+                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition disabled:opacity-50"
                 >
-                  Publier l'annonce
+                  {annSubmitting ? "Publication..." : "Publier l'annonce"}
                 </button>
               </div>
             </form>
@@ -945,17 +1000,24 @@ export default function AdminPage() {
                     key={a.id}
                     className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-line bg-surface ${a.active ? "" : "opacity-50"}`}
                   >
-                    <div>
-                      <p className="font-bold text-ink">
-                        {a.title}
-                        {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
-                      </p>
-                      <p className="text-xs text-ink-soft mt-1">{a.description}</p>
-                      {a.ctaUrl && (
-                        <p className="text-xs text-gold-500 mt-1">
-                          {a.ctaLabel || "En savoir plus"} → {a.ctaUrl}
-                        </p>
+                    <div className="flex items-start gap-3">
+                      {a.imageUrl && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={a.imageUrl} alt="" className="w-16 h-16 rounded-xl object-cover border border-line shrink-0" />
                       )}
+                      <div>
+                        <p className="font-bold text-ink">
+                          {a.title}
+                          <span className="ml-2 text-xs font-semibold text-gold-500">
+                            {a.type === "job" ? "· Offre d'emploi" : "· Annonce"}
+                          </span>
+                          {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
+                        </p>
+                        <p className="text-xs text-ink-soft mt-1">{a.description}</p>
+                        <Link href={`/annonces/${a.id}`} className="text-xs text-gold-500 hover:underline mt-1 inline-block">
+                          Voir la page publique →
+                        </Link>
+                      </div>
                     </div>
                     <div className="flex items-center gap-4 self-start sm:self-center">
                       <button
@@ -970,6 +1032,45 @@ export default function AdminPage() {
                       >
                         Supprimer
                       </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= JOB APPLICATIONS TAB ================= */}
+        {tab === "applications" && (
+          <div>
+            {jobApplicationsLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : jobApplications.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucune candidature pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {jobApplications.map((app) => (
+                  <div key={app.id} className="p-5 rounded-2xl border border-line bg-surface">
+                    <p className="text-xs text-gold-500 font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
+                    <p className="text-ink font-bold">{app.name}</p>
+                    <p className="text-ink-soft text-sm">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
+                    {app.message && <p className="text-ink-soft text-sm mt-2">{app.message}</p>}
+                    <div className="flex flex-wrap gap-3 mt-3">
+                      <a href={app.cvUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-red-500 hover:text-red-400 bg-red-950/40 px-3 py-1.5 rounded-lg border border-red-800/40">
+                        📄 Voir le CV
+                      </a>
+                      {app.coverLetterUrl && (
+                        <a href={app.coverLetterUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-ink-soft hover:text-ink bg-surface-alt px-3 py-1.5 rounded-lg border border-line">
+                          Lettre de motivation
+                        </a>
+                      )}
+                      {app.referenceLetterUrl && (
+                        <a href={app.referenceLetterUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-ink-soft hover:text-ink bg-surface-alt px-3 py-1.5 rounded-lg border border-line">
+                          Lettre de référence
+                        </a>
+                      )}
                     </div>
                   </div>
                 ))}
