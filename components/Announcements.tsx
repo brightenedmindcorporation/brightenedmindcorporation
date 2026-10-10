@@ -106,7 +106,7 @@ export default function Announcements() {
                       ) : null}
 
                       <div className={`flex flex-col justify-center p-8 md:p-12 ${!a.imageUrl && !a.videoUrl ? "md:col-span-2" : ""}`}>
-                        <span className="inline-block w-fit text-xs font-bold uppercase tracking-widest text-gold-400 bg-black/30 px-3 py-1.5 rounded-full border border-gold-700/40 mb-5">
+                        <span className="inline-block w-fit text-xs font-bold uppercase tracking-widest text-white bg-black/30 px-3 py-1.5 rounded-full border border-white/30 mb-5">
                           {isJob ? "Offre d'emploi" : "Annonce"}
                         </span>
                         <h2 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-4 leading-tight">
@@ -114,7 +114,7 @@ export default function Announcements() {
                         </h2>
                         <p className="text-red-100/80 text-sm sm:text-base leading-relaxed mb-8">{a.description}</p>
 
-                        <span className="w-fit bg-gold-500 group-hover:bg-gold-400 text-black font-bold px-8 py-3.5 rounded-xl text-base transition">
+                        <span className="w-fit bg-white hover:bg-red-50 text-red-900 font-bold px-8 py-3.5 rounded-xl text-base transition">
                           {isJob ? "Postuler" : "Voir le détail"}
                         </span>
                       </div>
@@ -155,7 +155,7 @@ export default function Announcements() {
                       onClick={() => goTo(i)}
                       aria-label={`Annonce ${i + 1}`}
                       className={`rounded-full transition ${
-                        i === index ? "bg-gold-400 w-2.5 h-2.5" : "bg-white/30 w-2 h-2"
+                        i === index ? "bg-white w-2.5 h-2.5" : "bg-white/30 w-2 h-2"
                       }`}
                     />
                   ))}
