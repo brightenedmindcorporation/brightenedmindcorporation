@@ -73,14 +73,14 @@ export default function SwahiliCoursePage() {
       {/* HERO SECTION */}
       <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
         <div className="relative z-10 max-w-4xl">
-          <Link href="/academy" className="inline-flex items-center gap-2 text-gold-400 font-semibold text-sm mb-6 hover:underline">
+          <Link href="/academy" className="inline-flex items-center gap-2 text-red-400 font-semibold text-sm mb-6 hover:underline">
             ← Retour aux formations BM Academia
           </Link>
           <div className="flex justify-center mb-4">
             <span className="text-4xl">🇨🇩</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
-            Apprendre le <span className="text-gradient-gold">Swahili</span> en Ligne
+            Apprendre le <span className="text-gradient-red">Swahili</span> en Ligne
           </h1>
           <p className="text-xl text-ink-soft mb-8 leading-relaxed max-w-2xl mx-auto">
             Aperçu complet du programme : du vocabulaire du quotidien jusqu'à la communication professionnelle et interculturelle.

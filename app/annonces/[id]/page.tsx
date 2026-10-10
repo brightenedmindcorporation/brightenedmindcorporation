@@ -66,7 +66,7 @@ export default function AnnouncementDetailPage() {
           )}
 
           <div className="p-8">
-            <span className="inline-block text-xs font-bold uppercase tracking-widest text-gold-500 bg-gold-500/10 px-3 py-1 rounded-full border border-gold-700/40 mb-4">
+            <span className="inline-block text-xs font-bold uppercase tracking-widest text-red-500 bg-red-500/10 px-3 py-1 rounded-full border border-red-700/40 mb-4">
               Annonce
             </span>
             <h1 className="text-3xl font-black text-ink mb-4">{announcement.title}</h1>

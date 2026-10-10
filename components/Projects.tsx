@@ -39,7 +39,7 @@ export default function Projects() {
 
         <div className="text-center mb-20">
 
-          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
+          <p className="uppercase tracking-[4px] text-red-500 font-semibold text-sm">
             Nos Réalisations
           </p>
 
@@ -47,7 +47,7 @@ export default function Projects() {
             Solutions & Impact
           </h2>
 
-          <div className="divider-gold w-16 mx-auto mt-6" />
+          <div className="divider-red w-16 mx-auto mt-6" />
 
         </div>
 
@@ -58,7 +58,7 @@ export default function Projects() {
           {projects.map((project) => (
             <div
               key={project.title}
-              className="bg-surface border border-line hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition duration-500 hover:-translate-y-3 group"
+              className="bg-surface border border-line hover:border-red-700/40 rounded-[30px] overflow-hidden shadow-lg shadow-black/20 hover:shadow-2xl transition duration-500 hover:-translate-y-3 group"
             >
 
               {/* IMAGE */}

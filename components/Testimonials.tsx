@@ -27,7 +27,7 @@ export default function Testimonials() {
 
         <div className="text-center mb-20">
 
-          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
+          <p className="uppercase tracking-[4px] text-red-500 font-semibold text-sm">
             Témoignages
           </p>
 
@@ -35,7 +35,7 @@ export default function Testimonials() {
             Ils nous font confiance
           </h2>
 
-          <div className="divider-gold w-16 mx-auto mt-6" />
+          <div className="divider-red w-16 mx-auto mt-6" />
 
         </div>
 
@@ -48,16 +48,16 @@ export default function Testimonials() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.2 }}
-              className="bg-surface/60 border border-line hover:border-gold-700/30 rounded-[25px] p-10 shadow-lg shadow-black/20 transition-colors duration-500"
+              className="bg-surface/60 border border-line hover:border-red-700/30 rounded-[25px] p-10 shadow-lg shadow-black/20 transition-colors duration-500"
             >
 
-              <span className="text-5xl text-gold-600/50 leading-none">"</span>
+              <span className="text-5xl text-red-600/50 leading-none">"</span>
 
               <p className="text-ink-soft leading-8 italic font-sans -mt-4">
                 {item.text}
               </p>
 
-              <h4 className="mt-6 font-bold text-gold-400 font-sans text-sm uppercase tracking-wide">
+              <h4 className="mt-6 font-bold text-red-400 font-sans text-sm uppercase tracking-wide">
                 — {item.name}
               </h4>
 

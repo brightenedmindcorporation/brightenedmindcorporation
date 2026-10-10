@@ -13,7 +13,7 @@ export default function CTA() {
       {/* Decorative glow */}
 
       <div className="absolute inset-0 radial-fade pointer-events-none" />
-      <div className="absolute left-[-120px] bottom-[-120px] w-[350px] h-[350px] border-[60px] border-gold-600 rounded-full opacity-[0.06] blur-[2px]"></div>
+      <div className="absolute left-[-120px] bottom-[-120px] w-[350px] h-[350px] border-[60px] border-red-600 rounded-full opacity-[0.06] blur-[2px]"></div>
 
       <div className="max-w-6xl mx-auto px-8 text-center relative z-10">
 
@@ -24,7 +24,7 @@ export default function CTA() {
           viewport={{ once: true }}
         >
 
-          <p className="uppercase text-gold-500 tracking-[4px] font-semibold text-sm">
+          <p className="uppercase text-red-500 tracking-[4px] font-semibold text-sm">
             Collaborons ensemble
           </p>
 
@@ -33,7 +33,7 @@ export default function CTA() {
             Construisons quelque chose
             <br />
 
-            <span className="text-gradient-gold">
+            <span className="text-gradient-red">
               d’exception ensemble.
             </span>
 

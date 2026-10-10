@@ -6,7 +6,7 @@ export default function News() {
 
         <div className="text-center mb-16">
 
-          <p className="uppercase text-gold-500 tracking-[4px] font-semibold text-sm">
+          <p className="uppercase text-red-500 tracking-[4px] font-semibold text-sm">
             Actualités
           </p>
 
@@ -14,7 +14,7 @@ export default function News() {
             Nos dernières initiatives
           </h2>
 
-          <div className="divider-gold w-16 mx-auto mt-6" />
+          <div className="divider-red w-16 mx-auto mt-6" />
 
         </div>
 

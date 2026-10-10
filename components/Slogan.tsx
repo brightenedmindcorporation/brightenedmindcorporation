@@ -6,18 +6,18 @@ export default function Slogan() {
 
       <div className="max-w-5xl mx-auto px-8 relative">
 
-        <p className="uppercase tracking-[6px] text-gold-500 font-semibold text-sm">
+        <p className="uppercase tracking-[6px] text-red-500 font-semibold text-sm">
           Notre Engagement
         </p>
 
-        <div className="divider-gold w-16 mx-auto mt-5" />
+        <div className="divider-red w-16 mx-auto mt-5" />
 
         <h2 className="text-5xl font-black mt-6 leading-tight">
           FORMER.
           <br />
           CONNECTER.
           <br />
-          <span className="text-gradient-gold">
+          <span className="text-gradient-red">
             VALORISER.
           </span>
         </h2>

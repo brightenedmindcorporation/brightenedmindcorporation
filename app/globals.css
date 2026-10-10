@@ -24,10 +24,9 @@ html {
    anti-FOUC script in app/layout.tsx) and the whole site repaints
    consistently with no per-component logic.
 
-   The garnet (red-*) and champagne (gold-*) accent scales stay the
-   same hex values in both themes — they're used at shades dark/saturated
-   enough (red-600/700/900, gold on dark badge backgrounds) to keep
-   working on both a white and a near-black page.
+   The garnet (red-*) accent scale stays the same hex values in both
+   themes — it's used at shades dark/saturated enough (red-600/700/900)
+   to keep working on both a white and a near-black page.
    ============================================================ */
 
 :root {
@@ -74,22 +73,6 @@ html {
   --color-red-800: #701c2e;
   --color-red-900: #5c1a29;
   --color-red-950: #330a14;
-
-  /* Champagne gold — accent for premium highlights. 400/500 are deep
-     enough to stay legible as standalone text on a white page *and*
-     still read as "gold" on a near-black one, so components can use
-     text-gold-400/500 without a dark: pair for every single usage. */
-  --color-gold-50: #fdfbf3;
-  --color-gold-100: #faf3df;
-  --color-gold-200: #f3e4b8;
-  --color-gold-300: #e9cf87;
-  --color-gold-400: #b8903f;
-  --color-gold-500: #9c7530;
-  --color-gold-600: #7d5d26;
-  --color-gold-700: #86612d;
-  --color-gold-800: #6b4d27;
-  --color-gold-900: #584022;
-  --color-gold-950: #2f2110;
 }
 
 @theme inline {
@@ -105,15 +88,15 @@ body {
 
 /* Premium utility classes, used selectively on hero/CTA sections */
 
-.text-gradient-gold {
-  background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-400) 50%, var(--color-gold-700) 100%);
+.text-gradient-red {
+  background: linear-gradient(135deg, var(--color-red-700) 0%, var(--color-red-500) 50%, var(--color-red-800) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
-:root.dark .text-gradient-gold {
-  background: linear-gradient(135deg, var(--color-gold-200) 0%, var(--color-gold-500) 50%, var(--color-gold-300) 100%);
+:root.dark .text-gradient-red {
+  background: linear-gradient(135deg, var(--color-red-300) 0%, var(--color-red-500) 50%, var(--color-red-200) 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -123,7 +106,7 @@ body {
   background: color-mix(in srgb, var(--color-bg-surface) 55%, transparent);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--color-gold-500) 18%, var(--color-line));
+  border: 1px solid color-mix(in srgb, var(--color-red-500) 18%, var(--color-line));
 }
 
 .glow-accent {
@@ -147,9 +130,9 @@ body {
   );
 }
 
-.divider-gold {
+.divider-red {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-gold-500), transparent);
+  background: linear-gradient(90deg, transparent, var(--color-red-500), transparent);
   opacity: 0.6;
 }
 

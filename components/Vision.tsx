@@ -18,7 +18,7 @@ export default function Vision() {
           viewport={{ once: true }}
         >
 
-          <p className="uppercase text-gold-500 tracking-[4px] font-semibold text-sm">
+          <p className="uppercase text-red-500 tracking-[4px] font-semibold text-sm">
             Notre vision
           </p>
 
@@ -30,7 +30,7 @@ export default function Vision() {
             Développer les talents.
             <br />
 
-            <span className="text-gradient-gold">
+            <span className="text-gradient-red">
               Créer un impact durable.
             </span>
 

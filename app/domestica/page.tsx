@@ -47,11 +47,11 @@ export default function DomesticaPage() {
       {/* HERO SECTION */}
       <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
         <div className="relative z-10 max-w-4xl">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-gold-700/40">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/5 text-red-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-red-700/40">
             BM CORPORATION
           </span>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
-            BM <span className="text-gradient-gold">Domestica</span>
+            BM <span className="text-gradient-red">Domestica</span>
           </h1>
           <p className="text-xl text-ink-soft mb-10 leading-relaxed max-w-2xl mx-auto">
             Recrutement, formation et placement de personnel domestique qualifié, pour répondre aux besoins

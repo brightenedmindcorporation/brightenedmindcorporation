@@ -66,7 +66,7 @@ export default function DevisPage() {
       <div className="max-w-3xl mx-auto glass-panel p-8 md:p-12 rounded-3xl shadow-2xl shadow-black/40 relative">
 
         <div className="text-center mb-10">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-3 border border-gold-700/40">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/5 text-red-400 font-semibold text-xs tracking-[0.2em] uppercase mb-3 border border-red-700/40">
             DEMANDE DE DEVIS
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-ink">
@@ -115,7 +115,7 @@ export default function DevisPage() {
                   name="name"
                   required
                   placeholder="Votre nom"
-                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                 />
               </div>
               <div>
@@ -125,7 +125,7 @@ export default function DevisPage() {
                   name="email"
                   required
                   placeholder="votre@email.com"
-                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                 />
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function DevisPage() {
                   <select
                     value={selectedCode}
                     onChange={(e) => setSelectedCode(e.target.value)}
-                    className="bg-surface-sunken/60 border border-line rounded-xl px-3 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition text-sm max-w-[130px]"
+                    className="bg-surface-sunken/60 border border-line rounded-xl px-3 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition text-sm max-w-[130px]"
                   >
                     {countryCodes.map((c, i) => (
                       <option key={i} value={c.code}>
@@ -152,7 +152,7 @@ export default function DevisPage() {
                     placeholder="81 234 5678"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                    className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                   />
                   
                   {/* Champ caché transmis avec le numéro complet pour le formulaire */}
@@ -168,7 +168,7 @@ export default function DevisPage() {
                 <label className="block text-sm font-medium text-ink-soft mb-2">Service concerné</label>
                 <select
                   name="service"
-                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                 >
                   <option value="Photographie">Photographie</option>
                   <option value="Vidéographie">Vidéographie & Clips</option>
@@ -187,7 +187,7 @@ export default function DevisPage() {
                 rows={5}
                 required
                 placeholder="Décrivez vos besoins, délais, objectifs..."
-                className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-gold-600/60 focus:ring-2 focus:ring-gold-600/30 transition"
+                className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
               ></textarea>
             </div>
 

@@ -53,7 +53,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-ink">
               <Image src="/logo-bm.png" alt="BM Logo" width={40} height={40} style={{ width: "auto", height: "40px" }} priority />
-              BM <span className="text-gradient-gold">Corporation</span>
+              BM <span className="text-gradient-red">Corporation</span>
             </Link>
 
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-ink-soft font-sans">
@@ -116,26 +116,26 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 Solutions professionnelles, technologies, assistance et formations certifiantes.
               </p>
               <p className="text-xs text-ink-soft">
-                Support Officiel : <span className="text-gold-500 font-semibold">{phoneOfficial}</span>
+                Support Officiel : <span className="text-red-500 font-semibold">{phoneOfficial}</span>
               </p>
             </div>
 
             <div>
               <h4 className="text-ink font-semibold mb-3">Pôles Academia</h4>
               <ul className="space-y-2 text-xs">
-                <li><Link href="/academy" className="hover:text-gold-500 transition">Langues (Français, Anglais...)</Link></li>
-                <li><Link href="/academia/bureautique" className="hover:text-gold-500 transition">Bureautique & MS Office</Link></li>
-                <li><Link href="/academia/visuel" className="hover:text-gold-500 transition">Visuel & Audiovisuel</Link></li>
-                <li><Link href="/academia/logiciels" className="hover:text-gold-500 transition">Logiciels de Gestion</Link></li>
+                <li><Link href="/academy" className="hover:text-red-500 transition">Langues (Français, Anglais...)</Link></li>
+                <li><Link href="/academia/bureautique" className="hover:text-red-500 transition">Bureautique & MS Office</Link></li>
+                <li><Link href="/academia/visuel" className="hover:text-red-500 transition">Visuel & Audiovisuel</Link></li>
+                <li><Link href="/academia/logiciels" className="hover:text-red-500 transition">Logiciels de Gestion</Link></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-ink font-semibold mb-3">Navigation</h4>
               <ul className="space-y-2 text-xs">
-                <li><Link href="/" className="hover:text-gold-500 transition">Accueil</Link></li>
-                <li><Link href="/academy" className="hover:text-gold-500 transition">Formations / Academia</Link></li>
-                <li><Link href="/devis" className="hover:text-gold-500 transition">Demander un Devis</Link></li>
+                <li><Link href="/" className="hover:text-red-500 transition">Accueil</Link></li>
+                <li><Link href="/academy" className="hover:text-red-500 transition">Formations / Academia</Link></li>
+                <li><Link href="/devis" className="hover:text-red-500 transition">Demander un Devis</Link></li>
               </ul>
             </div>
 
@@ -146,14 +146,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 href="https://wa.me/243988830799"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-block bg-surface hover:bg-surface-alt hover:border-gold-700/40 text-ink text-xs font-bold px-4 py-2.5 rounded-lg border border-line transition"
+                className="inline-block bg-surface hover:bg-surface-alt hover:border-red-700/40 text-ink text-xs font-bold px-4 py-2.5 rounded-lg border border-line transition"
               >
                 WhatsApp Direct ↗
               </a>
             </div>
           </div>
 
-          <div className="divider-gold max-w-7xl mx-auto" />
+          <div className="divider-red max-w-7xl mx-auto" />
 
           <div className="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row justify-between items-center text-xs text-ink-faint">
             <p>© 2026 BM Corporation. Tous droits réservés.</p>

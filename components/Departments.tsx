@@ -42,19 +42,19 @@ export default function Departments() {
 
           {/* TITLE */}
           <div className="text-center mb-20">
-            <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
+            <p className="uppercase tracking-[4px] text-red-500 font-semibold text-sm">
               Nos Départements
             </p>
 
             <h2 className="text-5xl font-black mt-6 text-ink leading-tight">
               Trois expertises.
               <br />
-              <span className="text-gradient-gold">
+              <span className="text-gradient-red">
                 Une mission commune.
               </span>
             </h2>
 
-            <div className="divider-gold w-24 mx-auto mt-8" />
+            <div className="divider-red w-24 mx-auto mt-8" />
           </div>
 
           {/* CARDS */}
@@ -70,7 +70,7 @@ export default function Departments() {
                   y: -12,
                   scale: 1.02
                 }}
-                className="bg-surface/80 border border-line hover:border-gold-700/40 rounded-[30px] overflow-hidden shadow-xl shadow-black/30 group transition-all duration-500"
+                className="bg-surface/80 border border-line hover:border-red-700/40 rounded-[30px] overflow-hidden shadow-xl shadow-black/30 group transition-all duration-500"
               >
 
                 {/* IMAGE */}
@@ -97,7 +97,7 @@ export default function Departments() {
 
                   <Link
                     href={dep.url}
-                    className="inline-flex items-center gap-2 mt-8 text-gold-400 font-semibold hover:text-gold-300 hover:gap-3 transition-all"
+                    className="inline-flex items-center gap-2 mt-8 text-red-400 font-semibold hover:text-red-300 hover:gap-3 transition-all"
                   >
                     Accéder à la page →
                   </Link>

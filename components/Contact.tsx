@@ -87,7 +87,7 @@ export default function Contact() {
 
         <div className="text-center mb-14">
 
-          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
+          <p className="uppercase tracking-[4px] text-red-500 font-semibold text-sm">
             Contact
           </p>
 
@@ -95,7 +95,7 @@ export default function Contact() {
             Parlons de votre projet
           </h2>
 
-          <div className="divider-gold w-16 mx-auto mt-6" />
+          <div className="divider-red w-16 mx-auto mt-6" />
 
         </div>
 
@@ -108,7 +108,7 @@ export default function Contact() {
             value={form.name}
             onChange={handleChange}
             required
-            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
+            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60"
           />
 
           <input
@@ -118,7 +118,7 @@ export default function Contact() {
             value={form.email}
             onChange={handleChange}
             required
-            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
+            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60"
           />
 
           <textarea
@@ -128,7 +128,7 @@ export default function Contact() {
             onChange={handleChange}
             required
             rows={6}
-            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
+            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60"
           />
 
           {emailError && (

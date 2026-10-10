@@ -17,7 +17,7 @@ export default function Hero() {
       <div className="absolute top-10 md:top-20 right-[-120px] md:right-[-150px]
       w-[250px] md:w-[450px] h-[250px] md:h-[450px]
       border-[40px] md:border-[70px]
-      border-gold-600 rounded-full opacity-[0.07] blur-[2px]"></div>
+      border-red-600 rounded-full opacity-[0.07] blur-[2px]"></div>
 
       <div className="max-w-7xl mx-auto px-6 md:px-8 grid lg:grid-cols-2 gap-14 lg:gap-20 items-center relative z-10">
 
@@ -37,14 +37,14 @@ export default function Hero() {
             className="md:w-[110px] md:h-[110px]"
           />
 
-          <span className="mt-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold-700/40 bg-gold-500/5 text-gold-400 text-xs font-semibold tracking-[0.2em] uppercase">
+          <span className="mt-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-700/40 bg-red-500/5 text-red-400 text-xs font-semibold tracking-[0.2em] uppercase">
             Groupe multidisciplinaire
           </span>
 
           <h1 className="mt-6 text-6xl lg:text-7xl font-black leading-[1.05] text-ink">
   FORMER.
   <br />
-  <span className="text-gradient-gold">
+  <span className="text-gradient-red">
     CONNECTER.
   </span>
   <br />
@@ -85,7 +85,7 @@ export default function Hero() {
           transition={{ duration: 1.2 }}
         >
 
-          <div className="relative h-[320px] sm:h-[420px] lg:h-[600px] rounded-[25px] lg:rounded-[40px] overflow-hidden shadow-2xl shadow-black/60 group ring-1 ring-gold-700/20">
+          <div className="relative h-[320px] sm:h-[420px] lg:h-[600px] rounded-[25px] lg:rounded-[40px] overflow-hidden shadow-2xl shadow-black/60 group ring-1 ring-red-700/20">
 
             <Image
               src="/hero-business.png"
@@ -103,7 +103,7 @@ export default function Hero() {
                 <h3 className="text-xl md:text-2xl font-bold text-ink leading-snug">
                   Vision. Leadership.
                   <br />
-                  <span className="text-gradient-gold">Transformation.</span>
+                  <span className="text-gradient-red">Transformation.</span>
                 </h3>
               </div>
             </div>

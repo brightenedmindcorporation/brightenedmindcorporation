@@ -32,7 +32,7 @@ export default function WhyChooseUs() {
 
         <div className="text-center mb-20">
 
-          <p className="uppercase tracking-[4px] text-gold-500 font-semibold text-sm">
+          <p className="uppercase tracking-[4px] text-red-500 font-semibold text-sm">
             Pourquoi Nous Choisir
           </p>
 
@@ -40,7 +40,7 @@ export default function WhyChooseUs() {
             Ce qui nous distingue
           </h2>
 
-          <div className="divider-gold w-16 mx-auto mt-6" />
+          <div className="divider-red w-16 mx-auto mt-6" />
 
         </div>
 
@@ -49,10 +49,10 @@ export default function WhyChooseUs() {
           {reasons.map((reason, index) => (
             <div
               key={reason.title}
-              className="group border border-line bg-surface/40 rounded-[25px] p-8 hover:border-gold-600/40 hover:bg-surface transition duration-500"
+              className="group border border-line bg-surface/40 rounded-[25px] p-8 hover:border-red-600/40 hover:bg-surface transition duration-500"
             >
 
-              <span className="text-3xl text-red-700/70 group-hover:text-gold-500 transition-colors duration-500">
+              <span className="text-3xl text-red-700/70 group-hover:text-red-500 transition-colors duration-500">
                 {String(index + 1).padStart(2, "0")}
               </span>
 

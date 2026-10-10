@@ -39,10 +39,10 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.2 }}
-              className="bg-surface/60 border border-line hover:border-gold-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
+              className="bg-surface/60 border border-line hover:border-red-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
             >
 
-              <h2 className="text-5xl font-black text-gradient-gold">
+              <h2 className="text-5xl font-black text-gradient-red">
                 {stat.number}
               </h2>
 

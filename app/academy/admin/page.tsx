@@ -603,12 +603,12 @@ export default function AdminPage() {
                 placeholder="Rechercher par nom, email, matricule…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
               />
               <select
                 value={langFilter}
                 onChange={(e) => setLangFilter(e.target.value)}
-                className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
               >
                 <option value="all">Toutes les formations</option>
                 {availableLanguages.map((l) => (
@@ -621,7 +621,7 @@ export default function AdminPage() {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
               >
                 <option value="all">Tous les statuts</option>
                 <option value="Pending">Pending</option>
@@ -676,7 +676,7 @@ export default function AdminPage() {
                 <select
                   value={sessionLangCode}
                   onChange={(e) => setSessionLangCode(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 >
                   {availableLanguages.map((l) => (
                     <option key={l.code} value={l.code}>{l.label}</option>
@@ -689,7 +689,7 @@ export default function AdminPage() {
                 <select
                   value={sessionLevel}
                   onChange={(e) => setSessionLevel(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 >
                   <option value="1">Niveau 1</option>
                   <option value="2">Niveau 2</option>
@@ -704,7 +704,7 @@ export default function AdminPage() {
                   value={sessionDate}
                   onChange={(e) => setSessionDate(e.target.value)}
                   required
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 />
               </div>
 
@@ -715,7 +715,7 @@ export default function AdminPage() {
                   value={sessionTime}
                   onChange={(e) => setSessionTime(e.target.value)}
                   required
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 />
               </div>
 
@@ -727,7 +727,7 @@ export default function AdminPage() {
                   step="15"
                   value={sessionDuration}
                   onChange={(e) => setSessionDuration(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 />
               </div>
 
@@ -745,7 +745,7 @@ export default function AdminPage() {
                   placeholder="Ex. Session de conversation hebdomadaire"
                   value={sessionTitle}
                   onChange={(e) => setSessionTitle(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
             </form>
@@ -849,7 +849,7 @@ export default function AdminPage() {
                 <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Payés</p>
               </div>
               <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-gold-500">${paymentsStats.totalAmount}</p>
+                <p className="text-2xl font-black text-red-500">${paymentsStats.totalAmount}</p>
                 <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Revenu confirmé</p>
               </div>
               <div className="p-4 rounded-2xl border border-line bg-surface">
@@ -917,7 +917,7 @@ export default function AdminPage() {
                 <select
                   value={annType}
                   onChange={(e) => setAnnType(e.target.value as "normal" | "job")}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 >
                   <option value="normal">Annonce normale (bouton "Voir le détail")</option>
                   <option value="job">Offre d'emploi (bouton "Postuler")</option>
@@ -931,7 +931,7 @@ export default function AdminPage() {
                   value={annTitle}
                   onChange={(e) => setAnnTitle(e.target.value)}
                   placeholder="Ex: Nous recrutons !"
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -943,7 +943,7 @@ export default function AdminPage() {
                   onChange={(e) => setAnnDescription(e.target.value)}
                   rows={2}
                   placeholder="Ex: BM Corporation recrute un(e) formateur/formatrice en anglais. Postulez dès maintenant."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
               <div className="sm:col-span-2">
@@ -955,7 +955,7 @@ export default function AdminPage() {
                   onChange={(e) => setAnnDetails(e.target.value)}
                   rows={5}
                   placeholder="Description complète de l'offre ou de l'annonce..."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-gold-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
               <div>
