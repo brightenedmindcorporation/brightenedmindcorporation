@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
 
 export default function FinalQuizPage() {
+  const router = useRouter();
   const params = useParams<{ lang: string; level: string }>();
   const langSlug = params.lang;
   const level = Number(params.level);
@@ -15,15 +16,59 @@ export default function FinalQuizPage() {
   const curriculum = getLevelCurriculum(langSlug, level);
   const base = `/academy/${langSlug}/level/${level}`;
 
-  const [alreadyScore] = useState<number | null>(() => {
-    if (typeof window === "undefined") return null;
-    return getLevelProgress(langSlug, level).finalQuizScore;
-  });
+  const [checked, setChecked] = useState(false);
+  const [allowed, setAllowed] = useState(false);
+  const [alreadyScore, setAlreadyScore] = useState<number | null>(null);
+
+  useEffect(() => {
+    try {
+      const savedStudent = localStorage.getItem("loggedStudent");
+      if (!savedStudent) {
+        router.push("/login");
+        return;
+      }
+      const parsed = JSON.parse(savedStudent);
+      const enrollment = (parsed.enrollments || []).find(
+        (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
+      );
+      if (!enrollment) {
+        router.push("/academy/dashboard");
+        return;
+      }
+
+      const progress = getLevelProgress(langSlug, level);
+      const totalLessons = curriculum?.lessons.length ?? 0;
+      const allLessonsDone = totalLessons > 0 && progress.completedQuizzes.length >= totalLessons;
+      if (!allLessonsDone) {
+        router.push(base);
+        return;
+      }
+
+      setAlreadyScore(progress.finalQuizScore);
+      setAllowed(true);
+    } catch (error) {
+      console.error("Erreur lors de la vérification de la session :", error);
+      router.push("/login");
+    } finally {
+      setChecked(true);
+    }
+  }, [router, langSlug, level, base, curriculum?.langCode]);
 
   if (!curriculum) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <p>Quiz final introuvable.</p>
+      </main>
+    );
+  }
+
+  if (!checked || !allowed) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-4 border-red-600 border-t-transparent rounded-full animate-spin" />
+          <p className="text-lg font-semibold text-ink-soft">Checking access...</p>
+        </div>
       </main>
     );
   }
