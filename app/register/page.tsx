@@ -26,6 +26,24 @@ export default function RegisterPage() {
 
     try {
       setLoading(true);
+
+      const checkResponse = await fetch("/api/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+      const check = await checkResponse.json();
+
+      if (!check.valid) {
+        setError(
+          check.reason === "format"
+            ? "Le format de l'adresse email n'est pas valide."
+            : "Cette adresse email semble invalide : son domaine ne peut pas recevoir d'emails. Vérifiez qu'il n'y a pas de faute de frappe."
+        );
+        setLoading(false);
+        return;
+      }
+
       const userCred = await createUserWithEmailAndPassword(auth, email.trim(), password);
       const user = userCred.user;
 
