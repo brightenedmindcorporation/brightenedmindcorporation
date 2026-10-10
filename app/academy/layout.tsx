@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ThemeToggle from "@/components/ThemeToggle";
 
 export const metadata: Metadata = {
   title: "Brightened Mind Academy — Cours de langues en ligne",
@@ -11,5 +12,16 @@ export default function AcademyLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="min-h-full flex flex-col">{children}</div>;
+  return (
+    <div className="min-h-full flex flex-col">
+      {/* The public ClientLayout header (and its ThemeToggle) is hidden on
+          every /academy/* route in favor of AcademyHeader/admin's own top
+          bars — none of which always carry a theme control (AcademyHeader
+          hides it on mobile, and some pages like admin, lesson, quiz, live
+          have no header at all). One floating toggle here covers all of
+          them uniformly instead of patching each page individually. */}
+      <ThemeToggle className="fixed bottom-4 right-4 z-[70] shadow-lg bg-surface" />
+      {children}
+    </div>
+  );
 }

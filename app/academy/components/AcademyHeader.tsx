@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
-import ThemeToggle from "@/components/ThemeToggle";
 
 export default function AcademyHeader() {
   const router = useRouter();
@@ -51,8 +50,6 @@ export default function AcademyHeader() {
 
         {/* CÔTÉ DROIT */}
         <div className="flex items-center gap-3">
-          <ThemeToggle className="hidden sm:inline-flex" />
-
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"

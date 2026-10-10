@@ -88,12 +88,16 @@ export default function AdminPage() {
   const [selectedMail, setSelectedMail] = useState<any | null>(null);
   const [mailDetailLoading, setMailDetailLoading] = useState(false);
   const [mailReplyBody, setMailReplyBody] = useState("");
+  const [mailReplyAttachments, setMailReplyAttachments] = useState<File[]>([]);
   const [mailReplySending, setMailReplySending] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeTo, setComposeTo] = useState("");
   const [composeSubject, setComposeSubject] = useState("");
   const [composeBody, setComposeBody] = useState("");
+  const [composeAttachments, setComposeAttachments] = useState<File[]>([]);
   const [composeSending, setComposeSending] = useState(false);
+  const [mailFilter, setMailFilter] = useState<"all" | "unread" | "read">("all");
+  const [mailSearch, setMailSearch] = useState("");
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -527,22 +531,21 @@ export default function AdminPage() {
       const idToken = await auth.currentUser?.getIdToken();
       const fromMatch = selectedMail.from.match(/<(.+)>/);
       const to = fromMatch ? fromMatch[1] : selectedMail.from;
-      const response = await fetch("/api/admin/gmail/reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken,
-          threadId: selectedMail.threadId,
-          to,
-          subject: selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`,
-          body: mailReplyBody,
-          inReplyToMessageId: selectedMail.id,
-          references: selectedMail.id,
-        }),
-      });
+      const form = new FormData();
+      form.append("idToken", idToken || "");
+      form.append("threadId", selectedMail.threadId);
+      form.append("to", to);
+      form.append("subject", selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`);
+      form.append("body", mailReplyBody);
+      form.append("inReplyToMessageId", selectedMail.id);
+      form.append("references", selectedMail.id);
+      mailReplyAttachments.forEach((file) => form.append("attachments", file));
+
+      const response = await fetch("/api/admin/gmail/reply", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
       setMailReplyBody("");
+      setMailReplyAttachments([]);
       alert("Réponse envoyée !");
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -555,6 +558,7 @@ export default function AdminPage() {
     setComposeTo(prefillTo);
     setComposeSubject(prefillSubject);
     setComposeBody("");
+    setComposeAttachments([]);
     setComposeOpen(true);
   };
 
@@ -563,11 +567,14 @@ export default function AdminPage() {
     setComposeSending(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/gmail/send", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, to: composeTo, subject: composeSubject, body: composeBody }),
-      });
+      const form = new FormData();
+      form.append("idToken", idToken || "");
+      form.append("to", composeTo);
+      form.append("subject", composeSubject);
+      form.append("body", composeBody);
+      composeAttachments.forEach((file) => form.append("attachments", file));
+
+      const response = await fetch("/api/admin/gmail/send", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
       setComposeOpen(false);
@@ -585,6 +592,19 @@ export default function AdminPage() {
   // the Gmail "From" header, which belongs to the sending service instead
   // — surfacing addresses found in the body lets the admin start a message
   // to the actual person with one click.
+  const filteredMailMessages = useMemo(() => {
+    return mailMessages.filter((m) => {
+      if (mailFilter === "unread" && !m.unread) return false;
+      if (mailFilter === "read" && m.unread) return false;
+      if (mailSearch.trim()) {
+        const q = mailSearch.trim().toLowerCase();
+        const haystack = `${m.from} ${m.subject} ${m.snippet}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+  }, [mailMessages, mailFilter, mailSearch]);
+
   const detectedAddresses = useMemo(() => {
     if (!selectedMail) return [];
     const text = String(selectedMail.body || selectedMail.snippet || "").replace(/<[^>]*>/g, " ");
@@ -1736,13 +1756,40 @@ export default function AdminPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-5">
-                  <div className="lg:col-span-2 lg:border-r border-line max-h-[65vh] overflow-y-auto">
+                  <div className="lg:col-span-2 lg:border-r border-line flex flex-col">
+                    <div className="p-3 border-b border-line space-y-2 shrink-0">
+                      <input
+                        type="text"
+                        value={mailSearch}
+                        onChange={(e) => setMailSearch(e.target.value)}
+                        placeholder="Rechercher par expéditeur, sujet…"
+                        className="w-full bg-surface-alt border border-line rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                      />
+                      <div className="flex gap-1.5">
+                        {([
+                          { id: "all", label: "Tous" },
+                          { id: "unread", label: "Non lus" },
+                          { id: "read", label: "Lus" },
+                        ] as { id: "all" | "unread" | "read"; label: string }[]).map((f) => (
+                          <button
+                            key={f.id}
+                            onClick={() => setMailFilter(f.id)}
+                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${
+                              mailFilter === f.id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
+                            }`}
+                          >
+                            {f.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto max-h-[55vh]">
                     {mailLoading ? (
                       <div className="p-6 text-ink-soft text-sm">Chargement…</div>
-                    ) : mailMessages.length === 0 ? (
-                      <div className="p-6 text-ink-soft text-sm">Boîte de réception vide.</div>
+                    ) : filteredMailMessages.length === 0 ? (
+                      <div className="p-6 text-ink-soft text-sm">Aucun email ne correspond.</div>
                     ) : (
-                      mailMessages.map((m) => {
+                      filteredMailMessages.map((m) => {
                         const { name } = parseFromHeader(m.from);
                         return (
                           <button
@@ -1767,6 +1814,7 @@ export default function AdminPage() {
                         );
                       })
                     )}
+                    </div>
                   </div>
 
                   <div className="lg:col-span-3 max-h-[65vh] overflow-y-auto">
@@ -1826,13 +1874,34 @@ export default function AdminPage() {
                             placeholder="Écrivez votre réponse…"
                             className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                           />
-                          <button
-                            onClick={sendMailReply}
-                            disabled={mailReplySending || !mailReplyBody.trim()}
-                            className="mt-3 glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
-                          >
-                            {mailReplySending ? "Envoi…" : "Envoyer"}
-                          </button>
+                          {mailReplyAttachments.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {mailReplyAttachments.map((file, i) => (
+                                <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                                  📎 {file.name}
+                                  <button onClick={() => setMailReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500">✕</button>
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                          <div className="flex items-center gap-3 mt-3">
+                            <label className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt">
+                              📎 Joindre un fichier
+                              <input
+                                type="file"
+                                multiple
+                                className="hidden"
+                                onChange={(e) => setMailReplyAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
+                              />
+                            </label>
+                            <button
+                              onClick={sendMailReply}
+                              disabled={mailReplySending || !mailReplyBody.trim()}
+                              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                            >
+                              {mailReplySending ? "Envoi…" : "Envoyer"}
+                            </button>
+                          </div>
                         </div>
                       </div>
                     )}
@@ -1870,8 +1939,27 @@ export default function AdminPage() {
               onChange={(e) => setComposeBody(e.target.value)}
               rows={6}
               placeholder="Écrivez votre message…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
             />
+            {composeAttachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {composeAttachments.map((file, i) => (
+                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                    📎 {file.name}
+                    <button onClick={() => setComposeAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500">✕</button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <label className="inline-block text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+              📎 Joindre un fichier
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => setComposeAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
+              />
+            </label>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setComposeOpen(false)}

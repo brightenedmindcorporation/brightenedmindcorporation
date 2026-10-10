@@ -158,24 +158,54 @@ export async function getMessageDetail(id: string): Promise<GmailMessageDetail> 
   };
 }
 
+export interface GmailAttachment {
+  filename: string;
+  mimeType: string;
+  content: Buffer;
+}
+
 function buildRawMessage(opts: {
   to: string;
   subject: string;
   body: string;
   inReplyToMessageId?: string;
   references?: string;
+  attachments?: GmailAttachment[];
 }): string {
-  const lines = [
-    `From: ${ADMIN_EMAIL}`,
-    `To: ${opts.to}`,
-    `Subject: ${opts.subject}`,
-    "Content-Type: text/html; charset=UTF-8",
-  ];
-  if (opts.inReplyToMessageId) lines.push(`In-Reply-To: ${opts.inReplyToMessageId}`);
-  if (opts.references) lines.push(`References: ${opts.references}`);
-  lines.push("", `<div style="white-space: pre-wrap; font-family: sans-serif;">${opts.body.replace(/\n/g, "<br/>")}</div>`);
+  const headers = [`From: ${ADMIN_EMAIL}`, `To: ${opts.to}`, `Subject: ${opts.subject}`, "MIME-Version: 1.0"];
+  if (opts.inReplyToMessageId) headers.push(`In-Reply-To: ${opts.inReplyToMessageId}`);
+  if (opts.references) headers.push(`References: ${opts.references}`);
 
-  const raw = lines.join("\r\n");
+  const htmlBody = `<div style="white-space: pre-wrap; font-family: sans-serif;">${opts.body.replace(/\n/g, "<br/>")}</div>`;
+
+  if (!opts.attachments?.length) {
+    headers.push("Content-Type: text/html; charset=UTF-8");
+    const raw = [...headers, "", htmlBody].join("\r\n");
+    return Buffer.from(raw).toString("base64url");
+  }
+
+  const boundary = `bm_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  headers.push(`Content-Type: multipart/mixed; boundary="${boundary}"`);
+
+  const parts = [
+    `--${boundary}`,
+    "Content-Type: text/html; charset=UTF-8",
+    "",
+    htmlBody,
+    "",
+    ...opts.attachments.flatMap((att) => [
+      `--${boundary}`,
+      `Content-Type: ${att.mimeType}; name="${att.filename}"`,
+      `Content-Disposition: attachment; filename="${att.filename}"`,
+      "Content-Transfer-Encoding: base64",
+      "",
+      att.content.toString("base64"),
+      "",
+    ]),
+    `--${boundary}--`,
+  ];
+
+  const raw = [...headers, "", ...parts].join("\r\n");
   return Buffer.from(raw).toString("base64url");
 }
 
@@ -189,6 +219,7 @@ export async function sendGmailReply(opts: {
   body: string;
   inReplyToMessageId?: string;
   references?: string;
+  attachments?: GmailAttachment[];
 }): Promise<void> {
   const gmail = await getGmailClient();
   const raw = buildRawMessage(opts);
@@ -199,7 +230,12 @@ export async function sendGmailReply(opts: {
 }
 
 /** Sends a brand-new (non-reply) email from the BM Corporation Gmail account. */
-export async function sendGmailMessage(opts: { to: string; subject: string; body: string }): Promise<void> {
+export async function sendGmailMessage(opts: {
+  to: string;
+  subject: string;
+  body: string;
+  attachments?: GmailAttachment[];
+}): Promise<void> {
   const gmail = await getGmailClient();
   const raw = buildRawMessage(opts);
   await gmail.users.messages.send({ userId: "me", requestBody: { raw } });
