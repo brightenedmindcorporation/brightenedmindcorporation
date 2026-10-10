@@ -6,14 +6,14 @@ import Link from "next/link";
 interface Announcement {
   id: string;
   title: string;
+  description: string;
   type: "job" | "normal";
 }
 
 /**
- * Thin continuously-scrolling marquee, separate from the big Announcements
- * carousel below it — gives active announcements a second, always-moving
- * point of visibility right under the hero, for visitors who scroll past
- * the carousel without noticing it.
+ * Continuously-scrolling marquee, fixed to the bottom of the viewport so it
+ * stays visible while scrolling the homepage — separate from the big
+ * Announcements carousel, which scrolls away with the page content.
  */
 export default function AnnouncementsTicker() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -33,8 +33,8 @@ export default function AnnouncementsTicker() {
   const track = [...announcements, ...announcements];
 
   return (
-    <div className="relative bg-black border-y border-red-900/40 overflow-hidden py-2.5">
-      <div className="flex w-max animate-[ticker-scroll_35s_linear_infinite] hover:[animation-play-state:paused]">
+    <div className="fixed bottom-0 left-0 right-0 z-40 bg-black border-t border-red-900/40 overflow-hidden py-2.5 shadow-[0_-4px_20px_rgba(0,0,0,0.4)]">
+      <div className="flex w-max animate-[ticker-scroll_45s_linear_infinite] hover:[animation-play-state:paused]">
         {track.map((a, i) => (
           <Link
             key={`${a.id}-${i}`}
@@ -42,8 +42,9 @@ export default function AnnouncementsTicker() {
             className="flex items-center gap-2 px-8 text-sm font-semibold text-white/90 hover:text-white whitespace-nowrap shrink-0"
           >
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
-            {a.type === "job" && <span className="text-red-400 font-bold">OFFRE D'EMPLOI</span>}
-            {a.title}
+            {a.type === "job" && <span className="text-red-400 font-bold">OFFRE D'EMPLOI ·</span>}
+            <span className="text-white">{a.title}</span>
+            {a.description && <span className="text-white/60 font-normal">— {a.description}</span>}
           </Link>
         ))}
       </div>

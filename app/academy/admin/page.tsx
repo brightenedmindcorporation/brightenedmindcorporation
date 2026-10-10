@@ -72,6 +72,12 @@ export default function AdminPage() {
   const [devisRequests, setDevisRequests] = useState<any[]>([]);
   const [devisRequestsLoading, setDevisRequestsLoading] = useState(false);
 
+  // --- Inline reply (Projets / Devis / Candidatures) ---
+  const [replyTarget, setReplyTarget] = useState<{ collection: string; docId: string; to: string } | null>(null);
+  const [replySubject, setReplySubject] = useState("");
+  const [replyMessage, setReplyMessage] = useState("");
+  const [replySending, setReplySending] = useState(false);
+
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
   // accounts were added) and any `students/{uid}` doc that still carries
@@ -403,6 +409,44 @@ export default function AdminPage() {
     }
   };
 
+  const openReply = (collection: string, docId: string, to: string, subject: string) => {
+    setReplyTarget({ collection, docId, to });
+    setReplySubject(subject);
+    setReplyMessage("");
+  };
+
+  const sendReply = async () => {
+    if (!replyTarget || !replyMessage.trim()) return;
+    setReplySending(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/send-reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          to: replyTarget.to,
+          subject: replySubject,
+          message: replyMessage,
+          collection: replyTarget.collection,
+          docId: replyTarget.docId,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+
+      setReplyTarget(null);
+      setReplyMessage("");
+      if (replyTarget.collection === "projectRequests") fetchProjectRequests();
+      if (replyTarget.collection === "devisRequests") fetchDevisRequests();
+      if (replyTarget.collection === "jobApplications") fetchJobApplications();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setReplySending(false);
+    }
+  };
+
   useEffect(() => {
     if (!authorized) return;
     if (tab === "live" && liveSessions.length === 0) fetchLiveSessions();
@@ -602,6 +646,16 @@ export default function AdminPage() {
     }
   };
 
+  const refreshTab = (t: Tab) => {
+    if (t === "students") fetchStudents();
+    else if (t === "live") fetchLiveSessions();
+    else if (t === "payments") fetchPayments();
+    else if (t === "announcements") fetchAnnouncements();
+    else if (t === "applications") fetchJobApplications();
+    else if (t === "projects") fetchProjectRequests();
+    else if (t === "devis") fetchDevisRequests();
+  };
+
   // --- Derived data ---
   const languageLabel = (code?: string) =>
     availableLanguages.find((l) => l.code === code)?.label ?? getOtherProgramLabel(code) ?? code ?? "EN (legacy)";
@@ -712,12 +766,20 @@ export default function AdminPage() {
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
-          <button
-            onClick={handleAdminLogout}
-            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
-          >
-            🚪 Déconnexion
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => refreshTab(tab)}
+              className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all duration-200 bg-surface"
+            >
+              🔄 Actualiser
+            </button>
+            <button
+              onClick={handleAdminLogout}
+              className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
+            >
+              🚪 Déconnexion
+            </button>
+          </div>
         </div>
 
         {/* TABS */}
@@ -1263,10 +1325,40 @@ export default function AdminPage() {
                       {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-4">
-                      <button onClick={() => updateJobApplicationStatus(app.id, "reviewing")} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">En étude</button>
-                      <button onClick={() => updateJobApplicationStatus(app.id, "accepted")} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Accepter</button>
-                      <button onClick={() => updateJobApplicationStatus(app.id, "rejected")} className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Rejeter</button>
-                      <a href={`mailto:${app.email}`} className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center">Répondre par email →</a>
+                      <button
+                        onClick={() => updateJobApplicationStatus(app.id, "reviewing")}
+                        disabled={app.status === "reviewing"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default ${
+                          app.status === "reviewing" ? "bg-amber-600 border-amber-600 text-white" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
+                        }`}
+                      >
+                        {app.status === "reviewing" ? "✓ En étude" : "En étude"}
+                      </button>
+                      <button
+                        onClick={() => updateJobApplicationStatus(app.id, "accepted")}
+                        disabled={app.status === "accepted"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                          app.status === "accepted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
+                        }`}
+                      >
+                        {app.status === "accepted" ? "✓ Accepté" : "Accepter"}
+                      </button>
+                      <button
+                        onClick={() => updateJobApplicationStatus(app.id, "rejected")}
+                        disabled={app.status === "rejected"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                          app.status === "rejected" ? "bg-red-900 text-white/80" : "bg-red-600 hover:bg-red-700 text-white"
+                        }`}
+                      >
+                        {app.status === "rejected" ? "✓ Rejeté" : "Rejeter"}
+                      </button>
+                      <button
+                        onClick={() => openReply("jobApplications", app.id, app.email, `Votre candidature — ${app.announcementTitle}`)}
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center"
+                      >
+                        ✉️ Répondre sur le site
+                      </button>
+                      <a href={`mailto:${app.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
                     </div>
                   </div>
                 ))}
@@ -1304,9 +1396,31 @@ export default function AdminPage() {
                     <p className="text-ink-soft text-sm mt-1">{req.email}</p>
                     {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
                     <div className="flex flex-wrap gap-2 mt-4">
-                      <button onClick={() => updateProjectRequestStatus(req.id, "contacted")} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Marquer contacté</button>
-                      <button onClick={() => updateProjectRequestStatus(req.id, "closed")} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Clôturer</button>
-                      <a href={`mailto:${req.email}`} className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center">Répondre par email →</a>
+                      <button
+                        onClick={() => updateProjectRequestStatus(req.id, "contacted")}
+                        disabled={req.status === "contacted"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                          req.status === "contacted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
+                        }`}
+                      >
+                        {req.status === "contacted" ? "✓ Contacté" : "Marquer contacté"}
+                      </button>
+                      <button
+                        onClick={() => updateProjectRequestStatus(req.id, "closed")}
+                        disabled={req.status === "closed"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default ${
+                          req.status === "closed" ? "bg-surface text-ink-faint border-line" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
+                        }`}
+                      >
+                        {req.status === "closed" ? "✓ Clôturé" : "Clôturer"}
+                      </button>
+                      <button
+                        onClick={() => openReply("projectRequests", req.id, req.email, "Votre demande — BM Corporation")}
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center"
+                      >
+                        ✉️ Répondre sur le site
+                      </button>
+                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
                       <button onClick={() => deleteProjectRequest(req.id)} className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5 self-center">Supprimer</button>
                     </div>
                   </div>
@@ -1348,9 +1462,31 @@ export default function AdminPage() {
                     <p className="text-ink-soft text-sm mt-1">{req.email}{req.phone ? ` · ${req.phone}` : ""}</p>
                     {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
                     <div className="flex flex-wrap gap-2 mt-4">
-                      <button onClick={() => updateDevisRequestStatus(req.id, "contacted")} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Marquer contacté</button>
-                      <button onClick={() => updateDevisRequestStatus(req.id, "closed")} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Clôturer</button>
-                      <a href={`mailto:${req.email}`} className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center">Email →</a>
+                      <button
+                        onClick={() => updateDevisRequestStatus(req.id, "contacted")}
+                        disabled={req.status === "contacted"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                          req.status === "contacted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
+                        }`}
+                      >
+                        {req.status === "contacted" ? "✓ Contacté" : "Marquer contacté"}
+                      </button>
+                      <button
+                        onClick={() => updateDevisRequestStatus(req.id, "closed")}
+                        disabled={req.status === "closed"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default ${
+                          req.status === "closed" ? "bg-surface text-ink-faint border-line" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
+                        }`}
+                      >
+                        {req.status === "closed" ? "✓ Clôturé" : "Clôturer"}
+                      </button>
+                      <button
+                        onClick={() => openReply("devisRequests", req.id, req.email, `Votre demande de devis — ${req.service}`)}
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center"
+                      >
+                        ✉️ Répondre sur le site
+                      </button>
+                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
                       {req.phone && (
                         <a
                           href={`https://wa.me/${req.phone.replace(/[^0-9]/g, "")}`}
@@ -1370,6 +1506,48 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* ================= REPLY MODAL ================= */}
+      {replyTarget && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 className="text-lg font-bold text-ink mb-1">Répondre sur le site</h3>
+            <p className="text-xs text-ink-soft mb-4">
+              Le message part immédiatement par email à <span className="text-ink font-semibold">{replyTarget.to}</span>, depuis l'adresse centrale BM Corporation.
+            </p>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <input
+              type="text"
+              value={replySubject}
+              onChange={(e) => setReplySubject(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <textarea
+              value={replyMessage}
+              onChange={(e) => setReplyMessage(e.target.value)}
+              rows={6}
+              placeholder="Écrivez votre réponse…"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setReplyTarget(null)}
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={sendReply}
+                disabled={replySending || !replyMessage.trim()}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+              >
+                {replySending ? "Envoi…" : "Envoyer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

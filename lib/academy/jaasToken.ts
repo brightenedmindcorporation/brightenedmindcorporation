@@ -22,7 +22,23 @@ function getPrivateKey(): string {
     raw = Buffer.from(raw, "base64").toString("utf-8");
   }
   // Some env var UIs flatten real newlines into literal "\n" sequences.
-  return raw.replace(/\\n/g, "\n");
+  raw = raw.replace(/\\n/g, "\n");
+
+  // Some env var UIs instead strip newlines entirely, collapsing the PEM
+  // onto a single line — Node's crypto module rejects that (surfaces as
+  // jsonwebtoken's generic "must be an asymmetric key" error). Detect it
+  // and rebuild standard PEM line breaks (64-char body lines).
+  if (!raw.includes("\n")) {
+    const match = raw.match(/-----BEGIN ([A-Z ]+)-----(.*)-----END \1-----/);
+    if (match) {
+      const label = match[1];
+      const body = match[2].replace(/\s+/g, "");
+      const lines = body.match(/.{1,64}/g) || [];
+      raw = `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n`;
+    }
+  }
+
+  return raw;
 }
 
 export function generateJaasToken({
