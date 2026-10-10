@@ -29,13 +29,20 @@ export default function LiveClassPage() {
         return;
       }
       const parsed = JSON.parse(savedStudent);
+      const enrollment = (parsed.enrollments || []).find(
+        (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
+      );
+      if (!enrollment) {
+        router.push("/academy/dashboard");
+        return;
+      }
       setStudentName(parsed.name || parsed.email || "Élève");
       setAllowed(true);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");
     }
-  }, [router]);
+  }, [router, curriculum?.langCode]);
 
   useEffect(() => {
     if (!curriculum) return;

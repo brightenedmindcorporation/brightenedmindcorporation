@@ -29,9 +29,16 @@ export default function QuizPage() {
         router.push("/login");
         return;
       }
-      const studyDays = JSON.parse(savedStudent).studyDays;
+      const parsed = JSON.parse(savedStudent);
+      const enrollment = (parsed.enrollments || []).find(
+        (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
+      );
+      if (!enrollment) {
+        router.push("/academy/dashboard");
+        return;
+      }
       const progress = getLevelProgress(langSlug, level);
-      if (!isLessonUnlocked(progress, lessonId, studyDays)) {
+      if (!isLessonUnlocked(progress, lessonId, enrollment.studyDays)) {
         router.push(base);
         return;
       }
@@ -43,7 +50,7 @@ export default function QuizPage() {
     } finally {
       setChecked(true);
     }
-  }, [router, langSlug, level, lessonId, base]);
+  }, [router, langSlug, level, lessonId, base, curriculum?.langCode]);
 
   if (!quiz || !curriculum) {
     return (

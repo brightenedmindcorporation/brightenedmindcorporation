@@ -4,7 +4,7 @@ import { Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
 import { auth, db } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, where, getDocs } from "firebase/firestore";
 import Link from "next/link";
 import PasswordInput from "@/components/academy/PasswordInput";
 
@@ -50,12 +50,48 @@ function LoginForm() {
 
       const data = snap.data();
 
-      if (data.status !== "Approved") {
-        setLoginError("Votre compte n'a pas encore été approuvé par l'administration.");
+      // A student can hold one enrollment per language (enrollments
+      // collection). Accounts created before multi-language enrollments
+      // existed still carry their single langCode/level/status/matricule
+      // directly on the students/{uid} doc — fall back to treating that as
+      // a single legacy enrollment so nothing breaks for them.
+      const enrollmentsSnap = await getDocs(query(collection(db, "enrollments"), where("uid", "==", user.uid)));
+      let enrollments: any[] = enrollmentsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+      if (enrollments.length === 0 && data.langCode) {
+        enrollments = [
+          {
+            id: user.uid,
+            langCode: data.langCode,
+            level: data.level,
+            studyDays: data.studyDays,
+            status: data.status,
+            matricule: data.matricule,
+          },
+        ];
+      }
+
+      const approved = enrollments.filter((en: any) => en.status === "Approved");
+
+      if (approved.length === 0) {
+        setLoginError(
+          enrollments.length > 0
+            ? "Aucune de vos inscriptions n'a encore été approuvée par l'administration."
+            : "Aucune inscription trouvée pour ce compte. Inscrivez-vous d'abord."
+        );
         return;
       }
 
-      localStorage.setItem("loggedStudent", JSON.stringify({ uid: user.uid, ...data }));
+      localStorage.setItem(
+        "loggedStudent",
+        JSON.stringify({
+          uid: user.uid,
+          name: data.name,
+          email: data.email,
+          enrollments,
+          activeLangCode: (approved[0] as any).langCode,
+        })
+      );
 
       // Pose le cookie de session côté serveur (best-effort : si Firebase
       // Admin n'est pas encore configuré côté serveur, on continue quand

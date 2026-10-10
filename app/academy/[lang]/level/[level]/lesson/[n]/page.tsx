@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getLesson } from "@/content/curriculum";
+import { getLesson, getLevelCurriculum } from "@/content/curriculum";
 import LessonRenderer from "@/components/academy/LessonRenderer";
 import { getLevelProgress, isLessonUnlocked } from "@/lib/academy/progress";
 
@@ -19,6 +19,7 @@ export default function LessonPage() {
   const [unlocked, setUnlocked] = useState(false);
 
   const lesson = getLesson(langSlug, level, lessonId);
+  const curriculum = getLevelCurriculum(langSlug, level);
 
   useEffect(() => {
     try {
@@ -27,9 +28,16 @@ export default function LessonPage() {
         router.push("/login");
         return;
       }
-      const studyDays = JSON.parse(savedStudent).studyDays;
+      const parsed = JSON.parse(savedStudent);
+      const enrollment = (parsed.enrollments || []).find(
+        (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
+      );
+      if (!enrollment) {
+        router.push("/academy/dashboard");
+        return;
+      }
       const progress = getLevelProgress(langSlug, level);
-      if (!isLessonUnlocked(progress, lessonId, studyDays)) {
+      if (!isLessonUnlocked(progress, lessonId, enrollment.studyDays)) {
         router.push(base);
         return;
       }
@@ -40,7 +48,7 @@ export default function LessonPage() {
     } finally {
       setChecked(true);
     }
-  }, [router, langSlug, level, lessonId, base]);
+  }, [router, langSlug, level, lessonId, base, curriculum?.langCode]);
 
   if (!lesson) {
     return (

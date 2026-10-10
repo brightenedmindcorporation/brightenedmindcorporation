@@ -30,6 +30,13 @@ export default function CertificatePage() {
     }
 
     const student = JSON.parse(studentData);
+    const enrollment = (student.enrollments || []).find(
+      (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
+    );
+    if (!enrollment) {
+      router.push("/academy/dashboard");
+      return;
+    }
     setStudentName(student.name || "Student");
 
     const progress = getLevelProgress(langSlug, level);

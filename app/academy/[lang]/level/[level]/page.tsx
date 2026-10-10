@@ -28,14 +28,22 @@ export default function LevelOverviewPage() {
         router.push("/login");
         return;
       }
+      const parsed = JSON.parse(savedStudent);
+      const enrollment = (parsed.enrollments || []).find(
+        (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
+      );
+      if (!enrollment) {
+        router.push("/academy/dashboard");
+        return;
+      }
       setAllowed(true);
-      setStudyDays(JSON.parse(savedStudent).studyDays);
+      setStudyDays(enrollment.studyDays);
       setProgress(getLevelProgress(langSlug, level));
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");
     }
-  }, [router, langSlug, level]);
+  }, [router, langSlug, level, curriculum?.langCode]);
 
   useEffect(() => {
     if (!curriculum) return;

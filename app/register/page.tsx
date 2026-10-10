@@ -1,9 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/lib/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { availableLanguages } from "@/content/curriculum";
@@ -46,31 +45,62 @@ export default function RegisterPage() {
         return;
       }
 
-      const userCred = await createUserWithEmailAndPassword(auth, email.trim(), password);
-      const user = userCred.user;
+      // One email can hold several language enrollments, so a registration
+      // can either create a brand new account or, if this email already
+      // has one, add a new language to it (confirmed via the password just
+      // entered) instead of failing outright.
+      let idToken: string;
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        idToken = await cred.user.getIdToken();
+      } catch (authErr: any) {
+        if (authErr.code === "auth/email-already-in-use") {
+          try {
+            const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+            idToken = await cred.user.getIdToken();
+          } catch {
+            setError(
+              "Un compte existe déjà avec cet email. Pour ajouter une nouvelle langue, saisissez le mot de passe de ce compte existant (ou connectez-vous puis réessayez)."
+            );
+            setLoading(false);
+            return;
+          }
+        } else if (authErr.code === "auth/weak-password") {
+          setError("Mot de passe trop court (6 caractères minimum).");
+          setLoading(false);
+          return;
+        } else {
+          console.error("Erreur inscription:", authErr);
+          setError("Une erreur est survenue lors de l'inscription.");
+          setLoading(false);
+          return;
+        }
+      }
 
-      await setDoc(doc(db, "students", user.uid), {
-        uid: user.uid,
-        name,
-        email: email.trim(),
-        level,
-        langCode,
-        studyDays,
-        status: "Pending",
-        matricule: "",
-        createdAt: new Date(),
+      const enrollResponse = await fetch("/api/academy/enroll", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, name, langCode, level, studyDays }),
       });
+      const enrollResult = await enrollResponse.json();
+
+      if (!enrollResponse.ok) {
+        if (enrollResponse.status === 409) {
+          const langLabel = availableLanguages.find((l) => l.code === langCode)?.label ?? langCode;
+          setError(
+            `Vous avez déjà une inscription en ${langLabel} (statut : ${enrollResult.status}). Choisissez une autre langue, ou contactez l'administration.`
+          );
+        } else {
+          setError(enrollResult.error || "Une erreur est survenue lors de l'inscription.");
+        }
+        setLoading(false);
+        return;
+      }
 
       setDone(true);
     } catch (err: any) {
       console.error("Erreur inscription:", err);
-      if (err.code === "auth/email-already-in-use") {
-        setError("Un compte existe déjà avec cet email.");
-      } else if (err.code === "auth/weak-password") {
-        setError("Mot de passe trop court (6 caractères minimum).");
-      } else {
-        setError("Une erreur est survenue lors de l'inscription.");
-      }
+      setError("Une erreur est survenue lors de l'inscription.");
     } finally {
       setLoading(false);
     }
@@ -109,6 +139,9 @@ export default function RegisterPage() {
       <div className="bg-surface-sunken border border-line p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-ink">
         <h1 className="text-2xl font-bold text-center mb-1">Inscription</h1>
         <p className="text-sm text-ink-faint text-center mb-6">Espace Apprentissage — BM Corporation</p>
+        <p className="text-xs text-ink-faint text-center mb-6">
+          Déjà inscrit(e) à une autre langue ? Utilisez le même email et mot de passe pour ajouter une nouvelle langue à votre compte.
+        </p>
 
         {error && (
           <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">

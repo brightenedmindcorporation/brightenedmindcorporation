@@ -8,13 +8,19 @@ import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { getLevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
 
+interface Enrollment {
+  langCode: string;
+  level?: string;
+  status?: string;
+  matricule?: string;
+  studyDays?: number;
+}
+
 interface StudentData {
   name?: string;
   email?: string;
-  matricule?: string;
-  level?: string;
-  status?: string;
-  langCode?: string;
+  enrollments?: Enrollment[];
+  activeLangCode?: string;
   completedQuizzes?: number;
   totalQuizzes?: number;
 }
@@ -31,10 +37,12 @@ function resolveLangSlug(langCode?: string): string {
 export default function Dashboard() {
   const [student, setStudent] = useState<StudentData | null>(null);
   const [lastLesson, setLastLesson] = useState<number>(1);
+  const [progressStats, setProgressStats] = useState({ completed: 0, total: 12 });
   const [loading, setLoading] = useState<boolean>(true);
   const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
   const router = useRouter();
 
+  // Load the logged-in student once on mount.
   useEffect(() => {
     const data = localStorage.getItem("loggedStudent");
 
@@ -45,38 +53,11 @@ export default function Dashboard() {
 
     try {
       const parsedStudent: StudentData = JSON.parse(data);
+      if (!parsedStudent.enrollments || parsedStudent.enrollments.filter((e) => e.status === "Approved").length === 0) {
+        router.replace("/login");
+        return;
+      }
       setStudent(parsedStudent);
-
-      const langSlug = resolveLangSlug(parsedStudent.langCode);
-      const level1 = getLevelCurriculum(langSlug, 1);
-      const progress = getLevelProgress(langSlug, 1);
-      const studentLevelNum = Number((parsedStudent.level || "Level 1").slice(-1)) || 1;
-      const curriculumForLiveCheck = getLevelCurriculum(langSlug, studentLevelNum);
-      if (curriculumForLiveCheck) {
-        fetch(`/api/live-sessions?langCode=${curriculumForLiveCheck.langCode}&level=${studentLevelNum}`)
-          .then((res) => res.json())
-          .then((d) => setLiveSession(d.session ?? null))
-          .catch(() => setLiveSession(null));
-      }
-      const totalLessons = level1?.lessons.length ?? 12;
-
-      let completedCount = 0;
-      let currentLesson = 1;
-
-      for (let i = 1; i <= totalLessons; i++) {
-        if (progress.completedQuizzes.includes(i)) {
-          completedCount++;
-          currentLesson = Math.min(i + 1, totalLessons);
-        } else {
-          break;
-        }
-      }
-
-      setLastLesson(currentLesson);
-
-      if (parsedStudent.completedQuizzes === undefined) {
-        setStudent((prev) => (prev ? { ...prev, completedQuizzes: completedCount } : null));
-      }
     } catch (e) {
       console.error("Erreur de lecture des données utilisateur :", e);
       router.replace("/login");
@@ -85,12 +66,55 @@ export default function Dashboard() {
     }
   }, [router]);
 
+  const approvedEnrollments = student?.enrollments?.filter((e) => e.status === "Approved") ?? [];
+  const activeEnrollment = approvedEnrollments.find((e) => e.langCode === student?.activeLangCode) ?? approvedEnrollments[0];
+
+  // Recompute progress/live-session whenever the active language changes.
+  useEffect(() => {
+    if (!activeEnrollment) return;
+
+    const langSlug = resolveLangSlug(activeEnrollment.langCode);
+    const level1 = getLevelCurriculum(langSlug, 1);
+    const progress = getLevelProgress(langSlug, 1);
+    const studentLevelNum = Number((activeEnrollment.level || "Level 1").slice(-1)) || 1;
+    const curriculumForLiveCheck = getLevelCurriculum(langSlug, studentLevelNum);
+    if (curriculumForLiveCheck) {
+      fetch(`/api/live-sessions?langCode=${curriculumForLiveCheck.langCode}&level=${studentLevelNum}`)
+        .then((res) => res.json())
+        .then((d) => setLiveSession(d.session ?? null))
+        .catch(() => setLiveSession(null));
+    }
+    const totalLessons = level1?.lessons.length ?? 12;
+
+    let completedCount = 0;
+    let currentLesson = 1;
+
+    for (let i = 1; i <= totalLessons; i++) {
+      if (progress.completedQuizzes.includes(i)) {
+        completedCount++;
+        currentLesson = Math.min(i + 1, totalLessons);
+      } else {
+        break;
+      }
+    }
+
+    setLastLesson(currentLesson);
+    setProgressStats({ completed: completedCount, total: totalLessons });
+  }, [activeEnrollment?.langCode, activeEnrollment?.level]);
+
+  const switchLanguage = (langCode: string) => {
+    if (!student) return;
+    const updated = { ...student, activeLangCode: langCode };
+    setStudent(updated);
+    localStorage.setItem("loggedStudent", JSON.stringify(updated));
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("loggedStudent");
     router.replace("/login");
   };
 
-  if (loading || !student) {
+  if (loading || !student || !activeEnrollment) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft font-medium">
         Redirecting...
@@ -99,16 +123,16 @@ export default function Dashboard() {
   }
 
   const fullName = student.name || "Student";
-  const completedQuizzes = student.completedQuizzes ?? 0;
-  const totalQuizzes = student.totalQuizzes ?? 12;
+  const completedQuizzes = progressStats.completed;
+  const totalQuizzes = progressStats.total;
   const progressPercentage =
     totalQuizzes > 0 ? Math.round((completedQuizzes / totalQuizzes) * 100) : 0;
 
-  const langSlug = resolveLangSlug(student.langCode);
+  const langSlug = resolveLangSlug(activeEnrollment.langCode);
   const langInfo = availableLanguages.find((l) => l.slug === langSlug) ?? availableLanguages[0];
 
   const handleContinue = () => {
-    const currentLevel = student.level || "Level 1";
+    const currentLevel = activeEnrollment.level || "Level 1";
     if (currentLevel === "Level 1") router.push(`/academy/${langSlug}/level/1/lesson/${lastLesson}`);
     else if (currentLevel === "Level 2") router.push(`/academy/${langSlug}/level/2`);
     else if (currentLevel === "Level 3") router.push(`/academy/${langSlug}/level/3`);
@@ -139,6 +163,29 @@ export default function Dashboard() {
           </button>
         </div>
 
+        {/* Sélecteur de langue (si inscrit à plusieurs langues) */}
+        {approvedEnrollments.length > 1 && (
+          <div className="flex flex-wrap gap-2 bg-surface/80 border border-line p-3 rounded-2xl backdrop-blur-md">
+            {approvedEnrollments.map((en) => {
+              const info = availableLanguages.find((l) => l.code === en.langCode);
+              const isActive = en.langCode === activeEnrollment.langCode;
+              return (
+                <button
+                  key={en.langCode}
+                  onClick={() => switchLanguage(en.langCode)}
+                  className={`px-4 py-2 text-sm font-bold rounded-xl transition ${
+                    isActive
+                      ? "bg-gradient-to-br from-red-600 to-red-900 text-white shadow-md"
+                      : "bg-surface-alt text-ink-soft hover:text-ink border border-line"
+                  }`}
+                >
+                  {info?.label ?? en.langCode}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
         {/* Carte de bienvenue */}
         <div className="bg-surface rounded-3xl border border-line p-8 relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 radial-fade pointer-events-none" />
@@ -168,7 +215,7 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               {liveSession && isSessionJoinable(liveSession) ? (
                 <button
-                  onClick={() => router.push(`/academy/${langSlug}/level/${(student.level || "Level 1").slice(-1)}/live`)}
+                  onClick={() => router.push(`/academy/${langSlug}/level/${(activeEnrollment.level || "Level 1").slice(-1)}/live`)}
                   className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
                 >
                   <span className="relative flex h-2.5 w-2.5">
@@ -202,7 +249,7 @@ export default function Dashboard() {
           <div className="bg-surface-sunken/80 border border-line rounded-2xl p-5 mb-6 relative">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-bold text-ink-soft font-sans">
-                Course Progress ({student.level || "Level 1"})
+                Course Progress ({activeEnrollment.level || "Level 1"})
               </span>
               <span className="text-sm font-extrabold text-gold-400">
                 {progressPercentage}%
@@ -235,7 +282,7 @@ export default function Dashboard() {
                 Matricule
               </span>
               <p className="text-sm font-semibold text-ink mt-1">
-                {student.matricule || "N/A"}
+                {activeEnrollment.matricule || "N/A"}
               </p>
             </div>
 
@@ -244,7 +291,7 @@ export default function Dashboard() {
                 Current Level
               </span>
               <p className="text-sm font-semibold text-red-500 mt-1">
-                {student.level || "Level 1"}
+                {activeEnrollment.level || "Level 1"}
               </p>
             </div>
 
@@ -253,7 +300,7 @@ export default function Dashboard() {
                 Status
               </span>
               <p className="text-sm font-semibold text-emerald-400 mt-1 capitalize">
-                {student.status || "Active"}
+                {activeEnrollment.status || "Active"}
               </p>
             </div>
           </div>
@@ -294,18 +341,18 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (student.level === "Level 2" || student.level === "Level 3") {
+                  if (activeEnrollment.level === "Level 2" || activeEnrollment.level === "Level 3") {
                     router.push(`/academy/${langSlug}/level/2`);
                   }
                 }}
-                disabled={student.level === "Level 1"}
+                disabled={activeEnrollment.level === "Level 1"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                  student.level === "Level 1"
+                  activeEnrollment.level === "Level 1"
                     ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
-                {student.level === "Level 1" ? "🔒 Locked" : "Open Level 2"}
+                {activeEnrollment.level === "Level 1" ? "🔒 Locked" : "Open Level 2"}
               </button>
             </div>
 
@@ -321,16 +368,16 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (student.level === "Level 3") router.push(`/academy/${langSlug}/level/3`);
+                  if (activeEnrollment.level === "Level 3") router.push(`/academy/${langSlug}/level/3`);
                 }}
-                disabled={student.level !== "Level 3"}
+                disabled={activeEnrollment.level !== "Level 3"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                  student.level !== "Level 3"
+                  activeEnrollment.level !== "Level 3"
                     ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >
-                {student.level !== "Level 3" ? "🔒 Locked" : "Open Level 3"}
+                {activeEnrollment.level !== "Level 3" ? "🔒 Locked" : "Open Level 3"}
               </button>
             </div>
 

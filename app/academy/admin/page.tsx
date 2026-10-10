@@ -40,15 +40,35 @@ export default function AdminPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
 
+  // Rows come from two sources: the new `enrollments` collection (one doc
+  // per uid+language — how every registration works since multi-language
+  // accounts were added) and any `students/{uid}` doc that still carries
+  // its langCode/level/status/matricule directly (accounts created before
+  // that change, which never got an enrollments doc). Both are normalized
+  // to the same shape so the existing stats/filter/list code below doesn't
+  // need to know which source a row came from — only approve/reject branch
+  // on `row.kind` to hit the matching API route.
   const fetchStudents = async () => {
-    const snapshot = await getDocs(collection(db, "students"));
+    const [enrollmentsSnap, studentsSnap] = await Promise.all([
+      getDocs(collection(db, "enrollments")),
+      getDocs(collection(db, "students")),
+    ]);
 
-    setStudents(
-      snapshot.docs.map((doc) => ({
+    const enrollmentRows = enrollmentsSnap.docs.map((doc) => ({
+      id: doc.id,
+      kind: "enrollment" as const,
+      ...doc.data(),
+    }));
+
+    const legacyRows = studentsSnap.docs
+      .filter((doc) => doc.data().langCode && doc.data().status)
+      .map((doc) => ({
         id: doc.id,
+        kind: "legacyStudent" as const,
         ...doc.data(),
-      }))
-    );
+      }));
+
+    setStudents([...enrollmentRows, ...legacyRows]);
   };
 
   useEffect(() => {
@@ -141,10 +161,11 @@ export default function AdminPage() {
 
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/approve-student", {
+      const isEnrollment = student.kind === "enrollment";
+      const response = await fetch(isEnrollment ? "/api/admin/approve-enrollment" : "/api/admin/approve-student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, studentId: student.id }),
+        body: JSON.stringify(isEnrollment ? { idToken, enrollmentId: student.id } : { idToken, studentId: student.id }),
       });
       const result = await response.json();
 
@@ -188,10 +209,11 @@ export default function AdminPage() {
 
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/reject-student", {
+      const isEnrollment = student.kind === "enrollment";
+      const response = await fetch(isEnrollment ? "/api/admin/reject-enrollment" : "/api/admin/reject-student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, studentId: student.id }),
+        body: JSON.stringify(isEnrollment ? { idToken, enrollmentId: student.id } : { idToken, studentId: student.id }),
       });
       const result = await response.json();
 

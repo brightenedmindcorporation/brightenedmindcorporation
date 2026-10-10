@@ -114,9 +114,14 @@ export async function confirmPayment(
         uid: data.uid,
         langCode: data.langCode,
         level: data.level,
-        status: "paid",
+        // Must match the status value the approve-enrollment route and
+        // the login/dashboard/level gating logic check for — a payment
+        // is itself the approval, so it goes straight to "Approved"
+        // rather than a separate "paid" status those paths don't know.
+        status: "Approved",
         matricule,
-        enrolledAt: now,
+        createdAt: now,
+        approvedAt: now,
         paymentRef: reference,
         source: "payment",
       },
