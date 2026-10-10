@@ -2,6 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { availableLanguages } from "@/content/curriculum";
+
+const LANGUAGE_TAGLINES: Record<string, string> = {
+  english: "Master professional English, from everyday conversation to business fluency.",
+  french: "Renforcez votre grammaire, votre rédaction et votre aisance à l'oral en français.",
+  swahili: "Apprenez le swahili pour les affaires et la vie quotidienne.",
+  spanish: "Du vocabulaire de base à la communication professionnelle en espagnol.",
+  portuguese: "Expression orale et écrite en portugais, pour le quotidien et le travail.",
+  chinese: "Prononciation, caractères et chinois des affaires, étape par étape.",
+};
 
 export default function Home() {
   return (
@@ -13,7 +23,7 @@ export default function Home() {
         <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-red-600/10 blur-[160px] rounded-full pointer-events-none -z-10" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
-          
+
           {/* Badge d'accueil */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-surface border border-line text-red-400 text-xs font-semibold mb-8">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -22,7 +32,7 @@ export default function Home() {
 
           {/* Titre principal */}
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-ink tracking-tight leading-[1.15] max-w-4xl">
-            Master English with <br className="hidden sm:inline" />
+            Master New Languages with <br className="hidden sm:inline" />
             <span className="text-red-500">
               Brightened Mind Academy
             </span>
@@ -30,8 +40,8 @@ export default function Home() {
 
           {/* Description claire et confortable */}
           <p className="mt-6 text-base sm:text-lg text-ink-soft max-w-2xl leading-relaxed">
-            Elevate your speaking, grammar, and professional fluency through 
-            structured lessons, interactive quizzes, and real-time tracking.
+            Six languages, structured lessons, interactive quizzes, and real-time progress
+            tracking — choose your language below to get started.
           </p>
 
           {/* Boutons d'action CTA */}
@@ -55,15 +65,15 @@ export default function Home() {
           {/* CHIFFRES CLÉS */}
           <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-4xl">
             <div className="p-6 rounded-2xl bg-surface border border-line/80 text-center">
-              <p className="text-3xl font-black text-ink">12+</p>
+              <p className="text-3xl font-black text-red-500">6</p>
               <p className="text-xs font-medium text-ink-soft mt-1 uppercase tracking-wider">
-                Guided Lessons
+                Languages
               </p>
             </div>
             <div className="p-6 rounded-2xl bg-surface border border-line/80 text-center">
-              <p className="text-3xl font-black text-red-500">3</p>
+              <p className="text-3xl font-black text-ink">12+</p>
               <p className="text-xs font-medium text-ink-soft mt-1 uppercase tracking-wider">
-                Skill Levels
+                Guided Lessons / Level
               </p>
             </div>
             <div className="p-6 rounded-2xl bg-surface border border-line/80 text-center">
@@ -83,83 +93,47 @@ export default function Home() {
         </div>
       </section>
 
-      {/* SECTION NIVEAUX DE FORMATION */}
+      {/* SECTION LANGUES */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
-            Structured Learning Path
+            Choose Your Language
           </h2>
           <h3 className="text-3xl sm:text-4xl font-black text-ink">
-            Curriculum Overview
+            Six Languages, One Platform
           </h3>
           <p className="text-ink-soft text-sm mt-2 max-w-lg mx-auto">
-            Access to each level is managed and granted directly by our instructors based on your progress.
+            Each language has 3 levels — Beginner, Intermediate, and Advanced/Professional.
+            Access is granted once your enrollment is approved.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Level 1 Card */}
-          <div className="bg-surface rounded-2xl p-8 border border-line flex flex-col justify-between shadow-md">
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-surface-alt border border-line text-red-500 flex items-center justify-center font-black text-lg mb-6">
-                01
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {availableLanguages.map((lang) => (
+            <Link
+              key={lang.slug}
+              href={`/academy/${lang.slug}/level/1`}
+              className="group bg-surface rounded-2xl p-8 border border-line hover:border-red-600/40 flex flex-col justify-between shadow-md transition"
+            >
+              <div>
+                <div className="w-12 h-12 rounded-xl bg-surface-alt border border-line text-red-500 flex items-center justify-center font-black text-lg mb-6">
+                  {lang.code}
+                </div>
+                <h4 className="text-2xl font-bold text-ink mt-1 mb-3 group-hover:text-red-500 transition-colors">
+                  {lang.label}
+                </h4>
+                <p className="text-ink-soft text-sm leading-relaxed">
+                  {LANGUAGE_TAGLINES[lang.slug] ?? "Structured lessons, quizzes, and real progress tracking."}
+                </p>
               </div>
-              <span className="text-xs font-bold text-red-500 uppercase tracking-wider">
-                Beginner
-              </span>
-              <h4 className="text-2xl font-bold text-ink mt-1 mb-3">Level 1: Foundations</h4>
-              <p className="text-ink-soft text-sm leading-relaxed">
-                Essential vocabulary, simple grammar rules, daily conversations, and confidence building.
-              </p>
-            </div>
-            <div className="mt-8 pt-6 border-t border-line flex items-center justify-between text-xs font-semibold text-ink-soft">
-              <span className="flex items-center gap-1.5">
-                🔒 Access granted upon enrollment
-              </span>
-            </div>
-          </div>
-
-          {/* Level 2 Card */}
-          <div className="bg-surface rounded-2xl p-8 border border-line flex flex-col justify-between shadow-md">
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-surface-alt border border-line text-ink flex items-center justify-center font-black text-lg mb-6">
-                02
+              <div className="mt-8 pt-6 border-t border-line flex items-center justify-between text-xs font-semibold text-ink-soft">
+                <span className="flex items-center gap-1.5">
+                  3 niveaux disponibles
+                </span>
+                <span className="text-red-500 group-hover:translate-x-1 transition-transform">→</span>
               </div>
-              <span className="text-xs font-bold text-ink-soft uppercase tracking-wider">
-                Intermediate
-              </span>
-              <h4 className="text-2xl font-bold text-ink mt-1 mb-3">Level 2: Fluency</h4>
-              <p className="text-ink-soft text-sm leading-relaxed">
-                Complex sentence structures, listening comprehension, reading passages, and dialogue practice.
-              </p>
-            </div>
-            <div className="mt-8 pt-6 border-t border-line flex items-center justify-between text-xs font-semibold text-ink-soft">
-              <span className="flex items-center gap-1.5">
-                🔒 Level 1 completion required
-              </span>
-            </div>
-          </div>
-
-          {/* Level 3 Card */}
-          <div className="bg-surface rounded-2xl p-8 border border-line flex flex-col justify-between shadow-md">
-            <div>
-              <div className="w-12 h-12 rounded-xl bg-surface-alt border border-line text-red-500 flex items-center justify-center font-black text-lg mb-6">
-                03
-              </div>
-              <span className="text-xs font-bold text-red-500 uppercase tracking-wider">
-                Advanced
-              </span>
-              <h4 className="text-2xl font-bold text-ink mt-1 mb-3">Level 3: Business English</h4>
-              <p className="text-ink-soft text-sm leading-relaxed">
-                Professional communication, email writing, job interview prep, and corporate presentation skills.
-              </p>
-            </div>
-            <div className="mt-8 pt-6 border-t border-line flex items-center justify-between text-xs font-semibold text-ink-soft">
-              <span className="flex items-center gap-1.5">
-                🔒 Admin permission required
-              </span>
-            </div>
-          </div>
+            </Link>
+          ))}
         </div>
       </section>
 
@@ -206,15 +180,15 @@ export default function Home() {
       {/* FOOTER */}
       <footer className="mt-auto border-t border-line bg-surface-sunken py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
-          
+
           <div className="flex items-center gap-3">
-            <div className="relative w-8 h-8 rounded-xl bg-red-600 p-0.5 flex items-center justify-center overflow-hidden">
+            <div className="relative w-8 h-8 flex items-center justify-center overflow-hidden">
               <Image
                 src="/logo-bm.png"
                 alt="Brightened Mind Academy"
                 width={32}
                 height={32}
-                className="object-cover rounded-[10px]"
+                className="object-contain"
                 unoptimized
               />
             </div>
