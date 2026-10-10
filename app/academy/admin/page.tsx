@@ -42,6 +42,8 @@ export default function AdminPage() {
   const [sessionDuration, setSessionDuration] = useState("60");
   const [sessionTitle, setSessionTitle] = useState("");
   const [hostingSession, setHostingSession] = useState<{ langCode: string; level: number; title?: string } | null>(null);
+  const [hostingToken, setHostingToken] = useState<string | null>(null);
+  const [hostingTokenError, setHostingTokenError] = useState<string | null>(null);
 
   // --- Payments ---
   const [payments, setPayments] = useState<any[]>([]);
@@ -279,6 +281,34 @@ export default function AdminPage() {
     if (tab === "applications" && jobApplications.length === 0) fetchJobApplications();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
+
+  // Fetches a fresh moderator JaaS token whenever the admin opens a
+  // live-room panel, so moderator status is explicit instead of relying
+  // on "whoever joins first".
+  useEffect(() => {
+    if (!hostingSession) {
+      setHostingToken(null);
+      setHostingTokenError(null);
+      return;
+    }
+    setHostingToken(null);
+    setHostingTokenError(null);
+    (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch("/api/academy/live-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken, langCode: hostingSession.langCode, level: hostingSession.level }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Erreur serveur");
+        setHostingToken(result.token);
+      } catch (error: any) {
+        setHostingTokenError(error.message || "Erreur serveur.");
+      }
+    })();
+  }, [hostingSession]);
 
   const sendEmail = async (email: string, name: string, matricule: string, langLabel: string, level: string, studyDays?: number) => {
     const response = await fetch("/api/send-email", {
@@ -836,12 +866,21 @@ export default function AdminPage() {
                   </button>
                 </div>
 
-                {isJitsiConfigured() && getJaasAppId() ? (
+                {hostingTokenError ? (
+                  <div className="p-6 rounded-2xl border border-line bg-surface-sunken text-ink-soft text-center">
+                    {hostingTokenError}
+                  </div>
+                ) : isJitsiConfigured() && getJaasAppId() && hostingToken ? (
                   <JitsiEmbed
                     appId={getJaasAppId()!}
                     roomName={getLiveRoomName(hostingSession.langCode, hostingSession.level)}
                     displayName="Enseignant — BM Academy"
+                    jwt={hostingToken}
                   />
+                ) : isJitsiConfigured() && getJaasAppId() ? (
+                  <div className="p-6 rounded-2xl border border-line bg-surface-sunken text-ink-soft text-center">
+                    Connexion à la salle…
+                  </div>
                 ) : (
                   <div className="p-6 rounded-2xl border border-line bg-surface-sunken text-ink-soft text-center">
                     Le service de visioconférence n'est pas encore configuré (variable NEXT_PUBLIC_JAAS_APP_ID manquante).

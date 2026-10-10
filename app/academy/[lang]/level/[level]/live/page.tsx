@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { getLiveRoomName, getJaasAppId, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
@@ -18,6 +20,8 @@ export default function LiveClassPage() {
   const [studentName, setStudentName] = useState("Élève");
   const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
   const [sessionChecked, setSessionChecked] = useState(false);
+  const [liveToken, setLiveToken] = useState<string | null>(null);
+  const [liveTokenError, setLiveTokenError] = useState<string | null>(null);
 
   const curriculum = getLevelCurriculum(langSlug, level);
 
@@ -52,6 +56,32 @@ export default function LiveClassPage() {
       .catch(() => setLiveSession(null))
       .finally(() => setSessionChecked(true));
   }, [curriculum, level]);
+
+  // Once the join window is open, fetch a (non-moderator) JaaS token —
+  // wait for onAuthStateChanged rather than reading auth.currentUser
+  // directly, since the SDK may not have rehydrated the session yet.
+  useEffect(() => {
+    if (!curriculum || !liveSession || !isSessionJoinable(liveSession)) return;
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch("/api/academy/live-token", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken, langCode: curriculum.langCode, level }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Erreur serveur");
+        setLiveToken(result.token);
+      } catch (error: any) {
+        setLiveTokenError(error.message || "Erreur serveur.");
+      }
+    });
+
+    return unsubscribe;
+  }, [curriculum, level, liveSession]);
 
   if (!curriculum) {
     return (
@@ -124,8 +154,21 @@ export default function LiveClassPage() {
                 L'accès s'ouvre 10 minutes avant le début.
               </p>
             </div>
+          ) : liveTokenError ? (
+            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
+              <p className="text-xl font-bold text-ink">{liveTokenError}</p>
+            </div>
+          ) : isJitsiConfigured() && appId && liveToken ? (
+            <JitsiEmbed
+              appId={appId}
+              roomName={getLiveRoomName(curriculum.langCode, level)}
+              displayName={studentName}
+              jwt={liveToken}
+            />
           ) : isJitsiConfigured() && appId ? (
-            <JitsiEmbed appId={appId} roomName={getLiveRoomName(curriculum.langCode, level)} displayName={studentName} />
+            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
+              <p className="text-xl font-bold text-ink">Connexion à la salle…</p>
+            </div>
           ) : (
             <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
               <p className="text-xl font-bold text-ink">Classes en direct bientôt disponibles</p>

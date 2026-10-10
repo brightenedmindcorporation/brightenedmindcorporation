@@ -14,10 +14,14 @@ export default function JitsiEmbed({
   appId,
   roomName,
   displayName,
+  jwt,
 }: {
   appId: string;
   roomName: string;
   displayName: string;
+  /** Signed JaaS token carrying the moderator claim — without it, JaaS
+   * falls back to granting moderator to whoever joins the room first. */
+  jwt?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -31,6 +35,7 @@ export default function JitsiEmbed({
       try {
         api = new window.JitsiMeetExternalAPI("8x8.vc", {
           roomName: `${appId}/${roomName}`,
+          jwt,
           parentNode: containerRef.current,
           userInfo: { displayName },
           width: "100%",
@@ -58,7 +63,7 @@ export default function JitsiEmbed({
       api?.dispose();
       if (script) document.body.removeChild(script);
     };
-  }, [appId, roomName, displayName]);
+  }, [appId, roomName, displayName, jwt]);
 
   if (error) {
     return (
