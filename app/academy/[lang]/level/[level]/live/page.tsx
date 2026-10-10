@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { getLiveRoomName, getJaasAppId, isJitsiConfigured } from "@/lib/academy/liveRooms";
+import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 
 export default function LiveClassPage() {
@@ -15,6 +16,8 @@ export default function LiveClassPage() {
 
   const [allowed, setAllowed] = useState(false);
   const [studentName, setStudentName] = useState("Élève");
+  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
+  const [sessionChecked, setSessionChecked] = useState(false);
 
   const curriculum = getLevelCurriculum(langSlug, level);
 
@@ -34,6 +37,15 @@ export default function LiveClassPage() {
     }
   }, [router]);
 
+  useEffect(() => {
+    if (!curriculum) return;
+    fetch(`/api/live-sessions?langCode=${curriculum.langCode}&level=${level}`)
+      .then((res) => res.json())
+      .then((data) => setLiveSession(data.session ?? null))
+      .catch(() => setLiveSession(null))
+      .finally(() => setSessionChecked(true));
+  }, [curriculum, level]);
+
   if (!curriculum) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft text-center px-6">
@@ -47,7 +59,7 @@ export default function LiveClassPage() {
     );
   }
 
-  if (!allowed) {
+  if (!allowed || !sessionChecked) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <div className="flex flex-col items-center gap-3">
@@ -57,6 +69,8 @@ export default function LiveClassPage() {
       </main>
     );
   }
+
+  const canJoinNow = liveSession ? isSessionJoinable(liveSession) : false;
 
   const base = `/academy/${langSlug}/level/${level}`;
   const appId = getJaasAppId();
@@ -83,7 +97,27 @@ export default function LiveClassPage() {
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelTitle}</p>
           </div>
 
-          {isJitsiConfigured() && appId ? (
+          {!liveSession ? (
+            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
+              <p className="text-xl font-bold text-ink">Aucun cours en direct programmé</p>
+              <p className="text-ink-soft text-sm max-w-md mx-auto">
+                Aucune session n'est actuellement programmée pour ce niveau. Consultez votre tableau de bord
+                régulièrement, ou contactez l'administration pour connaître le prochain horaire.
+              </p>
+            </div>
+          ) : !canJoinNow ? (
+            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
+              <p className="text-xl font-bold text-ink">Le cours n'a pas encore commencé</p>
+              <p className="text-ink-soft text-sm max-w-md mx-auto">
+                Prochaine session {liveSession.title ? `« ${liveSession.title} » ` : ""}:{" "}
+                <span className="text-gold-400 font-semibold">
+                  {new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })}
+                </span>
+                <br />
+                L'accès s'ouvre 10 minutes avant le début.
+              </p>
+            </div>
+          ) : isJitsiConfigured() && appId ? (
             <JitsiEmbed appId={appId} roomName={getLiveRoomName(curriculum.langCode, level)} displayName={studentName} />
           ) : (
             <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">

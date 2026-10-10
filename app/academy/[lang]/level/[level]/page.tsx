@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { getLevelProgress, type LevelProgress } from "@/lib/academy/progress";
+import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
 
 export default function LevelOverviewPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function LevelOverviewPage() {
 
   const [allowed, setAllowed] = useState(false);
   const [progress, setProgress] = useState<LevelProgress | null>(null);
+  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
 
   const curriculum = getLevelCurriculum(langSlug, level);
 
@@ -32,6 +34,14 @@ export default function LevelOverviewPage() {
       router.push("/login");
     }
   }, [router, langSlug, level]);
+
+  useEffect(() => {
+    if (!curriculum) return;
+    fetch(`/api/live-sessions?langCode=${curriculum.langCode}&level=${level}`)
+      .then((res) => res.json())
+      .then((data) => setLiveSession(data.session ?? null))
+      .catch(() => setLiveSession(null));
+  }, [curriculum, level]);
 
   if (!curriculum) {
     return (
@@ -82,15 +92,27 @@ export default function LevelOverviewPage() {
               <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
               <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelSubtitle}</p>
             </div>
-            <Link href={`${base}/live`}>
-              <button className="bg-black/40 hover:bg-black/60 border border-red-400/40 text-white font-bold px-5 py-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
-                </span>
-                Live Class
-              </button>
-            </Link>
+            {liveSession && isSessionJoinable(liveSession) ? (
+              <Link href={`${base}/live`}>
+                <button className="bg-black/40 hover:bg-black/60 border border-red-400/40 text-white font-bold px-5 py-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                  </span>
+                  Live Class — En direct
+                </button>
+              </Link>
+            ) : (
+              <div
+                className="bg-black/20 border border-white/10 text-white/60 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap cursor-not-allowed"
+                title={liveSession ? "Le cours n'a pas encore commencé" : "Aucun cours en direct programmé pour ce niveau"}
+              >
+                🔒{" "}
+                {liveSession
+                  ? `Live : ${new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`
+                  : "Aucun live programmé"}
+              </div>
+            )}
           </div>
 
           <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-8 mt-8">

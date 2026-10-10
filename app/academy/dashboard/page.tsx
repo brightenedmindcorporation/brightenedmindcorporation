@@ -6,6 +6,7 @@ import Image from "next/image";
 import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { getLevelProgress } from "@/lib/academy/progress";
+import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
 
 interface StudentData {
   name?: string;
@@ -31,6 +32,7 @@ export default function Dashboard() {
   const [student, setStudent] = useState<StudentData | null>(null);
   const [lastLesson, setLastLesson] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(true);
+  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -48,6 +50,14 @@ export default function Dashboard() {
       const langSlug = resolveLangSlug(parsedStudent.langCode);
       const level1 = getLevelCurriculum(langSlug, 1);
       const progress = getLevelProgress(langSlug, 1);
+      const studentLevelNum = Number((parsedStudent.level || "Level 1").slice(-1)) || 1;
+      const curriculumForLiveCheck = getLevelCurriculum(langSlug, studentLevelNum);
+      if (curriculumForLiveCheck) {
+        fetch(`/api/live-sessions?langCode=${curriculumForLiveCheck.langCode}&level=${studentLevelNum}`)
+          .then((res) => res.json())
+          .then((d) => setLiveSession(d.session ?? null))
+          .catch(() => setLiveSession(null));
+      }
       const totalLessons = level1?.lessons.length ?? 12;
 
       let completedCount = 0;
@@ -156,16 +166,28 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-              <button
-                onClick={() => router.push(`/academy/${langSlug}/level/${(student.level || "Level 1").slice(-1)}/live`)}
-                className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
-              >
-                <span className="relative flex h-2.5 w-2.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
-                </span>
-                Live Class
-              </button>
+              {liveSession && isSessionJoinable(liveSession) ? (
+                <button
+                  onClick={() => router.push(`/academy/${langSlug}/level/${(student.level || "Level 1").slice(-1)}/live`)}
+                  className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                  </span>
+                  Live Class — En direct
+                </button>
+              ) : (
+                <div
+                  className="border border-line text-ink-faint font-semibold px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-sm"
+                  title={liveSession ? "Le cours n'a pas encore commencé" : "Aucun cours en direct programmé"}
+                >
+                  🔒{" "}
+                  {liveSession
+                    ? new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })
+                    : "Pas de live programmé"}
+                </div>
+              )}
 
               <button
                 onClick={handleContinue}
