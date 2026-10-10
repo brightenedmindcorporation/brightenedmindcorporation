@@ -75,10 +75,13 @@ export default function VisuelPage() {
             >
               Discuter avec un conseiller
             </a>
-            <Link href="/devis" className="bg-surface text-ink font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-surface-alt transition border border-line">
+            <Link href="/register?program=VISUEL" className="bg-surface text-ink font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-surface-alt transition border border-line">
               S'inscrire à la formation
             </Link>
           </div>
+          <p className="mt-4 text-sm text-ink-faint">
+            Déjà inscrit(e) ? <Link href="/login" className="text-gold-400 font-semibold hover:underline">Se connecter</Link>
+          </p>
         </div>
       </section>
 
@@ -110,8 +113,11 @@ export default function VisuelPage() {
             WhatsApp pour réserver votre première session.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-lg transition hover:scale-105">
+            <Link href="/register?program=VISUEL" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-lg transition hover:scale-105">
               S'inscrire à la formation
+            </Link>
+            <Link href="/login" className="bg-surface text-ink font-bold px-8 py-4 rounded-full text-lg hover:bg-surface-alt transition border border-line">
+              Se connecter
             </Link>
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-full text-lg transition hover:scale-105 shadow-xl shadow-emerald-600/20">
               Écrire sur WhatsApp

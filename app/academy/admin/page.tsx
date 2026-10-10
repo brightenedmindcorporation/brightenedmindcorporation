@@ -2,10 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { auth, db } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
+import { getOtherProgramLabel, otherPrograms } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
+import PasswordInput from "@/components/academy/PasswordInput";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +21,12 @@ export default function AdminPage() {
   const [checking, setChecking] = useState(true);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
   const [tab, setTab] = useState<Tab>("students");
+
+  // --- Inline admin login (no detour through /login) ---
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [loginLoading, setLoginLoading] = useState(false);
 
   // --- Student list filters ---
   const [langFilter, setLangFilter] = useState<string>("all");
@@ -98,6 +106,29 @@ export default function AdminPage() {
       fetchStudents();
     }
   }, [authorized]);
+
+  const handleAdminLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    setLoginLoading(true);
+    try {
+      const cred = await signInWithEmailAndPassword(auth, loginEmail.trim(), loginPassword);
+      if (cred.user.email !== "brightenedmindcorporation@gmail.com") {
+        await signOut(auth);
+        setLoginError("Cet email n'est pas autorisé en tant qu'administrateur.");
+      }
+      // Sur succès, onAuthStateChanged ci-dessus détecte la session et
+      // bascule authorized à true automatiquement.
+    } catch (error: any) {
+      if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found"].includes(error.code)) {
+        setLoginError("Email ou mot de passe incorrect.");
+      } else {
+        setLoginError("Une erreur est survenue lors de la connexion.");
+      }
+    } finally {
+      setLoginLoading(false);
+    }
+  };
 
   const fetchLiveSessions = async () => {
     setLiveLoading(true);
@@ -384,7 +415,8 @@ export default function AdminPage() {
   };
 
   // --- Derived data ---
-  const languageLabel = (code?: string) => availableLanguages.find((l) => l.code === code)?.label ?? code ?? "EN (legacy)";
+  const languageLabel = (code?: string) =>
+    availableLanguages.find((l) => l.code === code)?.label ?? getOtherProgramLabel(code) ?? code ?? "EN (legacy)";
 
   const stats = useMemo(() => {
     const byLang: Record<string, number> = {};
@@ -439,8 +471,50 @@ export default function AdminPage() {
 
   if (!authorized) {
     return (
-      <main className="flex items-center justify-center min-h-screen bg-surface-sunken">
-        <h1 className="text-3xl font-bold text-red-600">Access Denied</h1>
+      <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
+        <div className="bg-surface-sunken border border-line p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-ink">
+          <h1 className="text-2xl font-bold text-center mb-1">Connexion Administrateur</h1>
+          <p className="text-sm text-ink-faint text-center mb-6">Accès réservé à l'administration BM Corporation</p>
+
+          {loginError && (
+            <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">
+              {loginError}
+            </div>
+          )}
+
+          <form onSubmit={handleAdminLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-ink-soft mb-1">Email administrateur</label>
+              <input
+                type="email"
+                required
+                placeholder="admin@exemple.com"
+                className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
+                value={loginEmail}
+                onChange={(e) => setLoginEmail(e.target.value)}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-ink-soft mb-1">Mot de passe</label>
+              <PasswordInput
+                required
+                autoComplete="current-password"
+                className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
+                value={loginPassword}
+                onChange={(e) => setLoginPassword(e.target.value)}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loginLoading}
+              className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
+            >
+              {loginLoading ? "Connexion..." : "Se connecter"}
+            </button>
+          </form>
+        </div>
       </main>
     );
   }
@@ -517,9 +591,12 @@ export default function AdminPage() {
                 onChange={(e) => setLangFilter(e.target.value)}
                 className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-gold-600/60"
               >
-                <option value="all">Toutes les langues</option>
+                <option value="all">Toutes les formations</option>
                 {availableLanguages.map((l) => (
                   <option key={l.code} value={l.code}>{l.label}</option>
+                ))}
+                {otherPrograms.map((p) => (
+                  <option key={p.code} value={p.code}>{p.label}</option>
                 ))}
               </select>
               <select

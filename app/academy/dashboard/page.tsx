@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
+import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
 
@@ -70,8 +71,10 @@ export default function Dashboard() {
   const activeEnrollment = approvedEnrollments.find((e) => e.langCode === student?.activeLangCode) ?? approvedEnrollments[0];
 
   // Recompute progress/live-session whenever the active language changes.
+  // Other programs (Bureautique, Visuel, Logiciels) have no curriculum to
+  // compute progress against, so there's nothing to fetch for them.
   useEffect(() => {
-    if (!activeEnrollment) return;
+    if (!activeEnrollment || isOtherProgramCode(activeEnrollment.langCode)) return;
 
     const langSlug = resolveLangSlug(activeEnrollment.langCode);
     const level1 = getLevelCurriculum(langSlug, 1);
@@ -128,8 +131,10 @@ export default function Dashboard() {
   const progressPercentage =
     totalQuizzes > 0 ? Math.round((completedQuizzes / totalQuizzes) * 100) : 0;
 
+  const isOtherProgram = isOtherProgramCode(activeEnrollment.langCode);
   const langSlug = resolveLangSlug(activeEnrollment.langCode);
   const langInfo = availableLanguages.find((l) => l.slug === langSlug) ?? availableLanguages[0];
+  const programLabel = isOtherProgram ? getOtherProgramLabel(activeEnrollment.langCode) ?? activeEnrollment.langCode : langInfo.label;
 
   const handleContinue = () => {
     const currentLevel = activeEnrollment.level || "Level 1";
@@ -167,7 +172,7 @@ export default function Dashboard() {
         {approvedEnrollments.length > 1 && (
           <div className="flex flex-wrap gap-2 bg-surface/80 border border-line p-3 rounded-2xl backdrop-blur-md">
             {approvedEnrollments.map((en) => {
-              const info = availableLanguages.find((l) => l.code === en.langCode);
+              const label = availableLanguages.find((l) => l.code === en.langCode)?.label ?? getOtherProgramLabel(en.langCode) ?? en.langCode;
               const isActive = en.langCode === activeEnrollment.langCode;
               return (
                 <button
@@ -179,13 +184,62 @@ export default function Dashboard() {
                       : "bg-surface-alt text-ink-soft hover:text-ink border border-line"
                   }`}
                 >
-                  {info?.label ?? en.langCode}
+                  {label}
                 </button>
               );
             })}
           </div>
         )}
 
+        {isOtherProgram ? (
+          /* Carte simplifiée : pas de leçons interactives pour ce programme */
+          <div className="bg-surface rounded-3xl border border-line p-8 relative overflow-hidden shadow-2xl">
+            <div className="absolute inset-0 radial-fade pointer-events-none" />
+            <div className="relative flex items-center gap-5 mb-8">
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-gold-600/30">
+                <Image
+                  src="/logo-bm.png"
+                  alt="Brightened Mind Academy Logo"
+                  width={56}
+                  height={56}
+                  className="object-cover rounded-[14px]"
+                  priority
+                  unoptimized
+                />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
+                  Bienvenue, {fullName} 👋
+                </h1>
+                <p className="text-ink-soft text-sm mt-1 font-sans">
+                  Votre inscription à <span className="text-gold-400 font-semibold">{programLabel}</span> est confirmée.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative">
+              <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+                <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">Email</span>
+                <p className="text-sm font-semibold text-ink mt-1 truncate">{student.email || "N/A"}</p>
+              </div>
+              <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+                <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">Matricule</span>
+                <p className="text-sm font-semibold text-ink mt-1">{activeEnrollment.matricule || "N/A"}</p>
+              </div>
+              <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
+                <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">Statut</span>
+                <p className="text-sm font-semibold text-emerald-400 mt-1 capitalize">{activeEnrollment.status || "Active"}</p>
+              </div>
+            </div>
+
+            <div className="mt-8 p-5 bg-surface-sunken/60 rounded-2xl border border-line relative text-sm text-ink-soft leading-relaxed">
+              Cette formation est dispensée en présentiel / sur rendez-vous. Notre équipe pédagogique vous
+              contactera prochainement pour planifier vos sessions. Pour toute question, contactez le secrétariat
+              au <span className="text-ink font-semibold">+243988830799</span>.
+            </div>
+          </div>
+        ) : (
+        <>
         {/* Carte de bienvenue */}
         <div className="bg-surface rounded-3xl border border-line p-8 relative overflow-hidden shadow-2xl">
           <div className="absolute inset-0 radial-fade pointer-events-none" />
@@ -383,6 +437,8 @@ export default function Dashboard() {
 
           </div>
         </div>
+        </>
+        )}
 
       </main>
     </div>

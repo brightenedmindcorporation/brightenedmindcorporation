@@ -1,25 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { availableLanguages } from "@/content/curriculum";
+import { otherPrograms, isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import PasswordInput from "@/components/academy/PasswordInput";
 
 export default function RegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <RegisterForm />
+    </Suspense>
+  );
+}
+
+function RegisterForm() {
+  const searchParams = useSearchParams();
+  const requestedProgram = searchParams.get("program");
+  const initialProgram =
+    availableLanguages.find((l) => l.code === requestedProgram)?.code ||
+    otherPrograms.find((p) => p.code === requestedProgram)?.code ||
+    availableLanguages[0].code;
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [level, setLevel] = useState("Level 1");
-  const [langCode, setLangCode] = useState(availableLanguages[0].code);
+  const [programCode, setProgramCode] = useState(initialProgram);
   const [studyDays, setStudyDays] = useState<3 | 5>(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
   const router = useRouter();
+  const isLanguageProgram = !isOtherProgramCode(programCode);
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,10 +62,11 @@ export default function RegisterPage() {
         return;
       }
 
-      // One email can hold several language enrollments, so a registration
-      // can either create a brand new account or, if this email already
-      // has one, add a new language to it (confirmed via the password just
-      // entered) instead of failing outright.
+      // One email can hold several enrollments (languages and/or other
+      // programs), so a registration can either create a brand new account
+      // or, if this email already has one, add a new program to it
+      // (confirmed via the password just entered) instead of failing
+      // outright.
       let idToken: string;
       try {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
@@ -60,7 +78,7 @@ export default function RegisterPage() {
             idToken = await cred.user.getIdToken();
           } catch {
             setError(
-              "Un compte existe déjà avec cet email. Pour ajouter une nouvelle langue, saisissez le mot de passe de ce compte existant (ou connectez-vous puis réessayez)."
+              "Un compte existe déjà avec cet email. Pour ajouter une nouvelle formation, saisissez le mot de passe de ce compte existant (ou connectez-vous puis réessayez)."
             );
             setLoading(false);
             return;
@@ -80,15 +98,24 @@ export default function RegisterPage() {
       const enrollResponse = await fetch("/api/academy/enroll", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, name, langCode, level, studyDays }),
+        body: JSON.stringify({
+          idToken,
+          name,
+          langCode: programCode,
+          level: isLanguageProgram ? level : "N/A",
+          studyDays: isLanguageProgram ? studyDays : undefined,
+        }),
       });
       const enrollResult = await enrollResponse.json();
 
       if (!enrollResponse.ok) {
         if (enrollResponse.status === 409) {
-          const langLabel = availableLanguages.find((l) => l.code === langCode)?.label ?? langCode;
+          const programLabel =
+            availableLanguages.find((l) => l.code === programCode)?.label ??
+            getOtherProgramLabel(programCode) ??
+            programCode;
           setError(
-            `Vous avez déjà une inscription en ${langLabel} (statut : ${enrollResult.status}). Choisissez une autre langue, ou contactez l'administration.`
+            `Vous avez déjà une inscription en ${programLabel} (statut : ${enrollResult.status}). Choisissez une autre formation, ou contactez l'administration.`
           );
         } else {
           setError(enrollResult.error || "Une erreur est survenue lors de l'inscription.");
@@ -112,16 +139,19 @@ export default function RegisterPage() {
         <div className="bg-surface-sunken border border-line p-8 rounded-2xl w-full max-w-md text-center text-ink">
           <h1 className="text-2xl font-bold mb-2">Inscription enregistrée !</h1>
           <p className="text-ink-soft text-sm mb-6">
-            Payez maintenant pour activer votre compte immédiatement et recevoir votre matricule tout de suite,
-            ou patientez pour une approbation manuelle par l'administration.
+            {isLanguageProgram
+              ? "Payez maintenant pour activer votre compte immédiatement et recevoir votre matricule tout de suite, ou patientez pour une approbation manuelle par l'administration."
+              : "Votre demande a été transmise à l'administration. Vous recevrez un email de confirmation une fois votre inscription approuvée."}
           </p>
           <div className="flex flex-col gap-3">
-            <button
-              onClick={() => router.push("/paiement")}
-              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-5 py-2.5 rounded-lg font-semibold transition"
-            >
-              Payer et activer mon compte
-            </button>
+            {isLanguageProgram && (
+              <button
+                onClick={() => router.push("/paiement")}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-5 py-2.5 rounded-lg font-semibold transition"
+              >
+                Payer et activer mon compte
+              </button>
+            )}
             <button
               onClick={() => router.push("/login")}
               className="text-ink-soft hover:text-ink text-sm font-medium transition"
@@ -140,7 +170,7 @@ export default function RegisterPage() {
         <h1 className="text-2xl font-bold text-center mb-1">Inscription</h1>
         <p className="text-sm text-ink-faint text-center mb-6">Espace Apprentissage — BM Corporation</p>
         <p className="text-xs text-ink-faint text-center mb-6">
-          Déjà inscrit(e) à une autre langue ? Utilisez le même email et mot de passe pour ajouter une nouvelle langue à votre compte.
+          Déjà inscrit(e) à une autre formation ? Utilisez le même email et mot de passe pour en ajouter une nouvelle à votre compte.
         </p>
 
         {error && (
@@ -186,47 +216,60 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-ink-soft mb-1">Langue</label>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Formation</label>
             <select
               className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
-              value={langCode}
-              onChange={(e) => setLangCode(e.target.value)}
+              value={programCode}
+              onChange={(e) => setProgramCode(e.target.value)}
             >
-              {availableLanguages.map((lang) => (
-                <option key={lang.code} value={lang.code}>
-                  {lang.label}
-                </option>
-              ))}
+              <optgroup label="Langues">
+                {availableLanguages.map((lang) => (
+                  <option key={lang.code} value={lang.code}>
+                    {lang.label}
+                  </option>
+                ))}
+              </optgroup>
+              <optgroup label="Autres formations">
+                {otherPrograms.map((p) => (
+                  <option key={p.code} value={p.code}>
+                    {p.label}
+                  </option>
+                ))}
+              </optgroup>
             </select>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-ink-soft mb-1">Niveau</label>
-            <select
-              className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
-              value={level}
-              onChange={(e) => setLevel(e.target.value)}
-            >
-              <option value="Level 1">Niveau 1</option>
-              <option value="Level 2">Niveau 2</option>
-              <option value="Level 3">Niveau 3</option>
-            </select>
-          </div>
+          {isLanguageProgram && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-ink-soft mb-1">Niveau</label>
+                <select
+                  className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
+                  value={level}
+                  onChange={(e) => setLevel(e.target.value)}
+                >
+                  <option value="Level 1">Niveau 1</option>
+                  <option value="Level 2">Niveau 2</option>
+                  <option value="Level 3">Niveau 3</option>
+                </select>
+              </div>
 
-          <div>
-            <label className="block text-sm font-medium text-ink-soft mb-1">Rythme d'étude</label>
-            <select
-              className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
-              value={studyDays}
-              onChange={(e) => setStudyDays(Number(e.target.value) as 3 | 5)}
-            >
-              <option value={3}>3 jours / semaine (1 à 2h/semaine)</option>
-              <option value={5}>5 jours / semaine (intensif)</option>
-            </select>
-            <p className="text-xs text-ink-faint mt-1">
-              Détermine le rythme de déverrouillage des chapitres de votre niveau.
-            </p>
-          </div>
+              <div>
+                <label className="block text-sm font-medium text-ink-soft mb-1">Rythme d'étude</label>
+                <select
+                  className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
+                  value={studyDays}
+                  onChange={(e) => setStudyDays(Number(e.target.value) as 3 | 5)}
+                >
+                  <option value={3}>3 jours / semaine (1 à 2h/semaine)</option>
+                  <option value={5}>5 jours / semaine (intensif)</option>
+                </select>
+                <p className="text-xs text-ink-faint mt-1">
+                  Détermine le rythme de déverrouillage des chapitres de votre niveau.
+                </p>
+              </div>
+            </>
+          )}
 
           <button
             type="submit"

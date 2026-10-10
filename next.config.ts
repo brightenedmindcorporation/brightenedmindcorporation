@@ -27,6 +27,13 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
+        // Accès rapide : taper juste "/admin" dans la barre d'adresse au
+        // lieu du chemin complet /academy/admin.
+        source: "/admin",
+        destination: "/academy/admin",
+        permanent: true,
+      },
+      {
         // Academia (page vitrine) et Espace Apprentissage (portail
         // interactif) ont fusionné en un seul onglet pour ne plus
         // dérouter les visiteurs. Seule la page d'accueil /academia est
