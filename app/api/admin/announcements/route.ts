@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "crypto";
-import { isAdminConfigured, getAdminAuth, getAdminDb, getAdminBucket } from "@/lib/firebase-admin";
+import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -8,28 +7,6 @@ async function requireAdmin(idToken: string | undefined) {
   if (!idToken) throw { status: 400, message: "idToken requis." };
   const decoded = await getAdminAuth().verifyIdToken(idToken);
   if (decoded.email !== ADMIN_EMAIL) throw { status: 403, message: "Non autorisé." };
-}
-
-async function uploadFile(file: File, folder: string): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ext = file.name.includes(".") ? file.name.split(".").pop() : "bin";
-  const path = `${folder}/${randomUUID()}.${ext}`;
-  const bucket = getAdminBucket();
-  const blob = bucket.file(path);
-  try {
-    await blob.save(buffer, { contentType: file.type || "application/octet-stream" });
-    await blob.makePublic();
-  } catch (error: any) {
-    if (error?.code === 404 || /bucket does not exist/i.test(error?.message || "")) {
-      throw {
-        status: 503,
-        message:
-          `Le bucket Firebase Storage "${bucket.name}" n'existe pas. Dans la console Firebase → Storage, clique sur "Get Started" pour l'activer, puis vérifie que NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET sur Render correspond exactement au nom du bucket affiché.`,
-      };
-    }
-    throw error;
-  }
-  return `https://storage.googleapis.com/${bucket.name}/${path}`;
 }
 
 // Lists every announcement (admin management view — includes inactive
@@ -53,46 +30,31 @@ export async function GET(request: Request) {
   }
 }
 
+// Images/videos are plain links (pasted by the admin) rather than
+// uploaded files — Firebase Storage needs the paid Blaze plan, which
+// this project isn't on, so file uploads are avoided entirely here.
 export async function POST(request: Request) {
   try {
     if (!isAdminConfigured()) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
 
-    const form = await request.formData();
-    const idToken = form.get("idToken")?.toString();
+    const body = await request.json();
+    const { idToken, title, description, type, details, imageUrl, videoUrl } = body;
     await requireAdmin(idToken);
 
-    const title = form.get("title")?.toString()?.trim();
-    const description = form.get("description")?.toString()?.trim();
-    const type = form.get("type")?.toString() === "job" ? "job" : "normal";
-    const details = form.get("details")?.toString()?.trim() || "";
-
-    if (!title || !description) {
+    if (!title?.trim() || !description?.trim()) {
       return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
-    }
-
-    const imageFile = form.get("image");
-    const videoFile = form.get("video");
-
-    let imageUrl: string | null = null;
-    let videoUrl: string | null = null;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      imageUrl = await uploadFile(imageFile, "announcements/images");
-    }
-    if (videoFile instanceof File && videoFile.size > 0) {
-      videoUrl = await uploadFile(videoFile, "announcements/videos");
     }
 
     const adminDb = getAdminDb();
     const docRef = await adminDb.collection("announcements").add({
-      title,
-      description,
-      type,
-      details,
-      imageUrl,
-      videoUrl,
+      title: title.trim(),
+      description: description.trim(),
+      type: type === "job" ? "job" : "normal",
+      details: details?.trim() || "",
+      imageUrl: imageUrl?.trim() || null,
+      videoUrl: videoUrl?.trim() || null,
       active: true,
       createdAt: new Date().toISOString(),
     });

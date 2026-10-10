@@ -54,8 +54,8 @@ export default function AdminPage() {
   const [annDescription, setAnnDescription] = useState("");
   const [annType, setAnnType] = useState<"normal" | "job">("normal");
   const [annDetails, setAnnDetails] = useState("");
-  const [annImage, setAnnImage] = useState<File | null>(null);
-  const [annVideo, setAnnVideo] = useState<File | null>(null);
+  const [annImageUrl, setAnnImageUrl] = useState("");
+  const [annVideoUrl, setAnnVideoUrl] = useState("");
   const [annSubmitting, setAnnSubmitting] = useState(false);
 
   // --- Job applications ---
@@ -192,16 +192,19 @@ export default function AdminPage() {
     setAnnSubmitting(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const form = new FormData();
-      form.append("idToken", idToken || "");
-      form.append("title", annTitle);
-      form.append("description", annDescription);
-      form.append("type", annType);
-      form.append("details", annDetails);
-      if (annImage) form.append("image", annImage);
-      if (annVideo) form.append("video", annVideo);
-
-      const response = await fetch("/api/admin/announcements", { method: "POST", body: form });
+      const response = await fetch("/api/admin/announcements", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          title: annTitle,
+          description: annDescription,
+          type: annType,
+          details: annDetails,
+          imageUrl: annImageUrl,
+          videoUrl: annVideoUrl,
+        }),
+      });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
 
@@ -209,8 +212,8 @@ export default function AdminPage() {
       setAnnDescription("");
       setAnnType("normal");
       setAnnDetails("");
-      setAnnImage(null);
-      setAnnVideo(null);
+      setAnnImageUrl("");
+      setAnnVideoUrl("");
       fetchAnnouncements();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -975,23 +978,28 @@ export default function AdminPage() {
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Photo (optionnel)</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Lien de la photo (optionnel)</label>
                 <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setAnnImage(e.target.files?.[0] ?? null)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-semibold"
+                  type="text"
+                  value={annImageUrl}
+                  onChange={(e) => setAnnImageUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Vidéo (optionnel)</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Lien de la vidéo (optionnel)</label>
                 <input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => setAnnVideo(e.target.files?.[0] ?? null)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface file:text-ink file:font-semibold"
+                  type="text"
+                  value={annVideoUrl}
+                  onChange={(e) => setAnnVideoUrl(e.target.value)}
+                  placeholder="https://..."
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
+              <p className="sm:col-span-2 text-xs text-ink-faint -mt-2">
+                Astuce : héberge d'abord ta photo/vidéo (ex. un lien partagé Google Drive, Imgur, YouTube...) puis colle le lien ici.
+              </p>
               <div className="sm:col-span-2">
                 <button
                   type="submit"
@@ -1073,21 +1081,10 @@ export default function AdminPage() {
                     <p className="text-ink font-bold">{app.name}</p>
                     <p className="text-ink-soft text-sm">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
                     {app.message && <p className="text-ink-soft text-sm mt-2">{app.message}</p>}
-                    <div className="flex flex-wrap gap-3 mt-3">
-                      <a href={app.cvUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-red-500 hover:text-red-400 bg-red-950/40 px-3 py-1.5 rounded-lg border border-red-800/40">
-                        📄 Voir le CV
-                      </a>
-                      {app.coverLetterUrl && (
-                        <a href={app.coverLetterUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-ink-soft hover:text-ink bg-surface-alt px-3 py-1.5 rounded-lg border border-line">
-                          Lettre de motivation
-                        </a>
-                      )}
-                      {app.referenceLetterUrl && (
-                        <a href={app.referenceLetterUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-ink-soft hover:text-ink bg-surface-alt px-3 py-1.5 rounded-lg border border-line">
-                          Lettre de référence
-                        </a>
-                      )}
-                    </div>
+                    <p className="text-xs text-ink-faint mt-3">
+                      📧 Fichiers envoyés par email à l'administration
+                      {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
+                    </p>
                   </div>
                 ))}
               </div>

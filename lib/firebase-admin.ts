@@ -1,7 +1,6 @@
 import { cert, getApps, getApp, initializeApp, type App } from "firebase-admin/app";
 import { getAuth, type Auth } from "firebase-admin/auth";
 import { getFirestore, type Firestore } from "firebase-admin/firestore";
-import { getStorage } from "firebase-admin/storage";
 
 /**
  * Server-only Firebase Admin singleton. Requires FIREBASE_SERVICE_ACCOUNT_KEY
@@ -37,10 +36,7 @@ function getAdminApp(): App {
     : Buffer.from(raw, "base64").toString("utf-8");
   const serviceAccount = JSON.parse(json);
 
-  cachedApp = initializeApp({
-    credential: cert(serviceAccount),
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  });
+  cachedApp = initializeApp({ credential: cert(serviceAccount) });
   return cachedApp;
 }
 
@@ -50,14 +46,4 @@ export function getAdminAuth(): Auth {
 
 export function getAdminDb(): Firestore {
   return getFirestore(getAdminApp());
-}
-
-/**
- * Admin-SDK Storage bucket — used for file uploads (announcement images/
- * videos, job application CVs/cover letters) via server routes, so uploads
- * never depend on Firebase Storage security rules being configured for
- * client-side writes.
- */
-export function getAdminBucket() {
-  return getStorage(getAdminApp()).bucket();
 }

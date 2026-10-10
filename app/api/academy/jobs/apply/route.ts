@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { randomUUID } from "crypto";
 import dns from "node:dns/promises";
 import { Resend } from "resend";
-import { isAdminConfigured, getAdminDb, getAdminBucket } from "@/lib/firebase-admin";
+import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
+const MAX_FILE_BYTES = 8 * 1024 * 1024; // 8MB per file — keeps the notification email well under common inbox attachment limits.
 
 async function isRealEmail(email: string): Promise<boolean> {
   if (!EMAIL_REGEX.test(email)) return false;
@@ -17,28 +17,31 @@ async function isRealEmail(email: string): Promise<boolean> {
   }
 }
 
-async function uploadFile(file: File, folder: string): Promise<string> {
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const ext = file.name.includes(".") ? file.name.split(".").pop() : "bin";
-  const path = `${folder}/${randomUUID()}.${ext}`;
-  const bucket = getAdminBucket();
-  const blob = bucket.file(path);
-  try {
-    await blob.save(buffer, { contentType: file.type || "application/octet-stream" });
-    await blob.makePublic();
-  } catch (error: any) {
-    if (error?.code === 404 || /bucket does not exist/i.test(error?.message || "")) {
-      throw { status: 503, message: "Le service de stockage de fichiers n'est pas encore configuré. Réessayez plus tard ou contactez l'administration." };
-    }
-    throw error;
+async function toAttachment(file: File) {
+  if (file.size > MAX_FILE_BYTES) {
+    throw { status: 400, message: `Le fichier "${file.name}" dépasse la taille maximale autorisée (8 Mo).` };
   }
-  return `https://storage.googleapis.com/${bucket.name}/${path}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  return { filename: file.name, content: buffer };
 }
 
+/**
+ * No Firebase Storage on this project (it requires the paid Blaze plan),
+ * so candidate files are never written to disk/cloud storage anywhere —
+ * they're read into memory and attached directly to the admin
+ * notification email via Resend, then discarded. The Firestore record
+ * kept for the admin "Candidatures" tab is metadata only (no file URLs).
+ */
 export async function POST(request: Request) {
   try {
     if (!isAdminConfigured()) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
+    }
+    if (!process.env.RESEND_API_KEY) {
+      return NextResponse.json(
+        { error: "L'envoi d'email n'est pas configuré côté serveur. Contactez l'administration directement." },
+        { status: 503 }
+      );
     }
 
     const form = await request.formData();
@@ -70,18 +73,38 @@ export async function POST(request: Request) {
     }
     const announcementTitle = announcementSnap.data()?.title || "Offre";
 
-    const cvUrl = await uploadFile(cvFile, "job-applications/cv");
-
     const coverLetterFile = form.get("coverLetter");
     const referenceLetterFile = form.get("referenceLetter");
-    const coverLetterUrl =
-      coverLetterFile instanceof File && coverLetterFile.size > 0
-        ? await uploadFile(coverLetterFile, "job-applications/cover-letters")
-        : null;
-    const referenceLetterUrl =
-      referenceLetterFile instanceof File && referenceLetterFile.size > 0
-        ? await uploadFile(referenceLetterFile, "job-applications/reference-letters")
-        : null;
+
+    const attachments = [await toAttachment(cvFile)];
+    if (coverLetterFile instanceof File && coverLetterFile.size > 0) {
+      attachments.push(await toAttachment(coverLetterFile));
+    }
+    if (referenceLetterFile instanceof File && referenceLetterFile.size > 0) {
+      attachments.push(await toAttachment(referenceLetterFile));
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+
+    // The admin email with the attached files is the only place these
+    // files end up — if it fails to send, the application must be
+    // treated as failed rather than silently lost.
+    await resend.emails.send({
+      from: "Brightened Mind <onboarding@resend.dev>",
+      to: ADMIN_EMAIL,
+      replyTo: email,
+      subject: `Nouvelle candidature — ${announcementTitle}`,
+      html: `
+        <h2>Nouvelle candidature</h2>
+        <p><b>Offre :</b> ${announcementTitle}</p>
+        <p><b>Nom :</b> ${name}</p>
+        <p><b>Email :</b> ${email}</p>
+        <p><b>Téléphone :</b> ${phone || "-"}</p>
+        <p><b>Message :</b> ${message || "-"}</p>
+        <p>Pièces jointes : ${attachments.map((a) => a.filename).join(", ")}</p>
+      `,
+      attachments,
+    });
 
     const docRef = await adminDb.collection("jobApplications").add({
       announcementId,
@@ -90,45 +113,25 @@ export async function POST(request: Request) {
       email,
       phone,
       message,
-      cvUrl,
-      coverLetterUrl,
-      referenceLetterUrl,
+      attachmentNames: attachments.map((a) => a.filename),
       status: "new",
       createdAt: new Date().toISOString(),
     });
 
-    if (process.env.RESEND_API_KEY) {
-      const resend = new Resend(process.env.RESEND_API_KEY);
-      try {
-        await resend.emails.send({
-          from: "Brightened Mind <onboarding@resend.dev>",
-          to: email,
-          subject: `Candidature reçue — ${announcementTitle}`,
-          html: `
-            <h2>Merci ${name} !</h2>
-            <p>Nous avons bien reçu votre candidature pour : <b>${announcementTitle}</b>.</p>
-            <p>Notre équipe va étudier votre dossier et reviendra vers vous à cette adresse email.</p>
-          `,
-        });
-        await resend.emails.send({
-          from: "Brightened Mind <onboarding@resend.dev>",
-          to: ADMIN_EMAIL,
-          subject: `Nouvelle candidature — ${announcementTitle}`,
-          html: `
-            <h2>Nouvelle candidature</h2>
-            <p><b>Offre :</b> ${announcementTitle}</p>
-            <p><b>Nom :</b> ${name}</p>
-            <p><b>Email :</b> ${email}</p>
-            <p><b>Téléphone :</b> ${phone || "-"}</p>
-            <p><b>Message :</b> ${message || "-"}</p>
-            <p><b>CV :</b> <a href="${cvUrl}">${cvUrl}</a></p>
-            ${coverLetterUrl ? `<p><b>Lettre de motivation :</b> <a href="${coverLetterUrl}">${coverLetterUrl}</a></p>` : ""}
-            ${referenceLetterUrl ? `<p><b>Lettre de référence :</b> <a href="${referenceLetterUrl}">${referenceLetterUrl}</a></p>` : ""}
-          `,
-        });
-      } catch (emailError) {
-        console.error("Error sending application emails (non-fatal):", emailError);
-      }
+    try {
+      await resend.emails.send({
+        from: "Brightened Mind <onboarding@resend.dev>",
+        to: email,
+        subject: `Candidature reçue — ${announcementTitle}`,
+        html: `
+          <h2>Merci ${name} !</h2>
+          <p>Nous avons bien reçu votre candidature pour : <b>${announcementTitle}</b>.</p>
+          <p>Notre équipe va étudier votre dossier et reviendra vers vous à cette adresse email.</p>
+        `,
+      });
+    } catch (confirmationError) {
+      // Non-fatal: the admin already has the application + files.
+      console.error("Error sending candidate confirmation email (non-fatal):", confirmationError);
     }
 
     return NextResponse.json({ status: "success", id: docRef.id });
