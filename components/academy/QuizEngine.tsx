@@ -85,7 +85,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
             className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl ${
               answers.includes("")
                 ? "bg-neutral-800 text-neutral-500 cursor-not-allowed border border-neutral-800"
-                : "bg-red-600 hover:bg-red-700 text-white shadow-red-950/60"
+                : "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white shadow-red-950/60"
             }`}
           >
             {answers.includes("") ? "Please answer all questions" : badge ? `Submit ${badge}` : "Submit Quiz"}

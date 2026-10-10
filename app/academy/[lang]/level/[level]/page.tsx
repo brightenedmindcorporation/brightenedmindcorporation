@@ -132,7 +132,7 @@ export default function LevelOverviewPage() {
                     {unlocked ? (
                       <>
                         <Link href={`${base}/lesson/${lesson.id}`}>
-                          <button className="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-md hover:shadow-red-900/40">
+                          <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-md hover:shadow-red-900/40">
                             📘 Lesson
                           </button>
                         </Link>
@@ -159,7 +159,7 @@ export default function LevelOverviewPage() {
             <div className="flex flex-col md:flex-row gap-4">
               {progressPct === 100 ? (
                 <Link href={`${base}/final-quiz`} className="w-full">
-                  <button className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60">
+                  <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60">
                     🎓 Final Quiz
                   </button>
                 </Link>

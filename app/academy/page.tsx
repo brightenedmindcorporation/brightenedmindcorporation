@@ -38,7 +38,7 @@ export default function Home() {
           <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
             <Link
               href="/academy/dashboard"
-              className="bg-red-600 hover:bg-red-700 text-white font-bold text-base px-8 py-4 rounded-xl shadow-lg shadow-red-950/50 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3"
+              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-base px-8 py-4 rounded-xl shadow-lg shadow-red-950/50 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3"
             >
               <span>Go to Student Portal</span>
               <span className="text-xl">➔</span>

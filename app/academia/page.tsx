@@ -39,32 +39,33 @@ export default function AcademiaPage() {
   const whatsappUrl = `https://wa.me/243988830799?text=${encodeURIComponent("Bonjour BM Academia, je souhaite me renseigner sur vos formations.")}`;
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans antialiased pt-28 pb-20">
-      
+    <main className="min-h-screen bg-background text-white font-sans antialiased pt-28 pb-20">
+
       {/* HERO SECTION */}
-      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800">
+      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800 overflow-hidden">
+        <div className="absolute inset-0 radial-fade pointer-events-none" />
         <div className="relative z-10 max-w-4xl">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/20 text-red-500 font-semibold text-sm mb-4 border border-red-600/30">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-gold-700/40">
             BM CORPORATION
           </span>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-            BM <span className="text-red-600">Academia</span>
+            BM <span className="text-gradient-gold">Academia</span>
           </h1>
           <p className="text-xl text-neutral-400 mb-8 leading-relaxed max-w-2xl mx-auto">
             Développez vos compétences professionnelles grâce à nos formations certifiantes en langues, bureautique, audiovisuel et logiciels de gestion.
           </p>
-          
+
           {/* NUMÉRO OFFICIEL D'ASSISTANCE */}
           <div className="mb-10 inline-flex items-center gap-2 bg-neutral-900 border border-neutral-800 px-4 py-2 rounded-xl text-neutral-300 text-sm">
             <IconPhone />
-            <span>Support & Info Officiel : <a href={`tel:${phoneOfficial}`} className="text-red-500 font-bold hover:underline">{phoneOfficial}</a></span>
+            <span>Support & Info Officiel : <a href={`tel:${phoneOfficial}`} className="text-gold-400 font-bold hover:underline">{phoneOfficial}</a></span>
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="#formations" className="bg-red-600 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-red-700 transition-all shadow-lg shadow-red-600/30">
+            <a href="#formations" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
               Explorer les Formations
             </a>
-            <Link href="/devis" className="bg-neutral-900 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-neutral-800 transition border border-neutral-700">
+            <Link href="/devis" className="bg-neutral-900 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-neutral-800 hover:border-gold-700/40 transition border border-neutral-700">
               S'inscrire / S'informer
             </Link>
           </div>
@@ -88,81 +89,81 @@ export default function AcademiaPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {/* ANGLAIS - AVEC LIEN INTERACTIF */}
-            <div className="relative group bg-neutral-900 p-6 rounded-2xl border border-red-600/50 hover:border-red-600 transition shadow-lg shadow-red-600/10">
+            <div className="relative group bg-neutral-900 p-6 rounded-2xl border border-gold-600/40 hover:border-gold-500/70 transition shadow-lg shadow-black/20">
               <div className="flex justify-between items-start mb-4">
                 <span className="text-2xl">🇬🇧 / 🇺🇸</span>
-                <span className="px-2.5 py-1 text-xs font-semibold bg-red-600 text-white rounded-full">Interactif</span>
+                <span className="px-2.5 py-1 text-xs font-semibold bg-gold-500/15 text-gold-300 border border-gold-600/40 rounded-full">Interactif</span>
               </div>
               <h3 className="text-xl font-bold text-white mb-2">Anglais</h3>
               <p className="text-neutral-400 text-sm mb-6">Accédez à notre plateforme interactive d'apprentissage pour progresser rapidement.</p>
-              <Link 
-                href="/academy" 
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+              <Link
+                href="/academy"
+                className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
               >
                 Ouvrir la plateforme d'Anglais →
               </Link>
             </div>
 
             {/* FRANÇAIS */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
+            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇫🇷</span>
               <h3 className="text-xl font-bold text-white mb-2">Français</h3>
               <p className="text-neutral-400 text-sm">Renforcement de la grammaire, rédaction professionnelle et expression orale.</p>
               <Link 
                 href="/academia/francais"
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+                className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
               >
                 Ouvrir la plateforme de Français →
               </Link>
             </div>
 
             {/* SWAHILI */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
+            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇨🇩</span>
               <h3 className="text-xl font-bold text-white mb-2">Swahili</h3>
               <p className="text-neutral-400 text-sm mb-6">Apprentissage complet de la langue parlée et écrite pour les affaires et le quotidien.</p>
               <Link
                 href="/academia/swahili"
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+                className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
               >
                 Ouvrir la plateforme de Swahili →
               </Link>
             </div>
 
             {/* ESPAGNOL */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
+            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇪🇸</span>
               <h3 className="text-xl font-bold text-white mb-2">Espagnol</h3>
               <p className="text-neutral-400 text-sm mb-6">Bases solides de communication et vocabulaire professionnel.</p>
               <Link
                 href="/academia/espagnol"
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+                className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
               >
                 Ouvrir la plateforme d'Espagnol →
               </Link>
             </div>
 
             {/* PORTUGAIS */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
+            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇵🇹</span>
               <h3 className="text-xl font-bold text-white mb-2">Portugais</h3>
               <p className="text-neutral-400 text-sm mb-6">Expression orale et écrite adaptées aux échanges régionaux et internationaux.</p>
               <Link
                 href="/academia/portugais"
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+                className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
               >
                 Ouvrir la plateforme de Portugais →
               </Link>
             </div>
 
             {/* CHINOIS */}
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-neutral-700 transition">
+            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 hover:border-gold-700/40 transition">
               <span className="text-2xl mb-4 block">🇨🇳</span>
               <h3 className="text-xl font-bold text-white mb-2">Chinois (Mandarin)</h3>
               <p className="text-neutral-400 text-sm mb-6">Initiation à la prononciation, aux caractères de base et au vocabulaire commercial.</p>
               <Link
                 href="/academia/chinois"
-                className="inline-flex items-center gap-2 text-red-500 font-bold hover:text-red-400 text-sm transition"
+                className="inline-flex items-center gap-2 text-gold-400 font-bold hover:text-gold-300 text-sm transition"
               >
                 Ouvrir la plateforme de Chinois →
               </Link>
@@ -298,7 +299,7 @@ export default function AcademiaPage() {
             Contactez l'équipe de BM Academia au <span className="text-white font-bold">{phoneOfficial}</span> pour réserver votre session de formation individuelle ou en groupe.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/devis" className="bg-red-600 text-white font-bold px-10 py-4 rounded-full text-lg hover:bg-red-700 transition hover:scale-105 shadow-xl shadow-red-600/30">
+            <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-lg transition hover:scale-105">
               S'inscrire à une formation
             </Link>
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-full text-lg transition hover:scale-105 shadow-xl shadow-emerald-600/20">

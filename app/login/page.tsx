@@ -169,7 +169,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
+            className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
           >
             {loading ? "Connexion..." : "Se connecter"}
           </button>
@@ -230,7 +230,7 @@ function LoginForm() {
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-semibold text-white glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 rounded-lg disabled:opacity-50"
                 >
                   {resetLoading ? "Envoi..." : "Envoyer le lien"}
                 </button>

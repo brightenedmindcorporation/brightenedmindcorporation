@@ -43,22 +43,22 @@ export default function DomesticaPage() {
   const whatsappUrl = `https://wa.me/243988830799?text=${encodeURIComponent("Bonjour BM Domestica, je souhaite en savoir plus sur vos services de personnel domestique.")}`;
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans antialiased pt-28">
+    <main className="min-h-screen bg-background text-white font-sans antialiased pt-28">
       {/* HERO SECTION */}
       <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800">
         <div className="relative z-10 max-w-4xl">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-red-600/20 text-red-500 font-semibold text-sm mb-4 border border-red-600/30">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-gold-500/5 text-gold-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-gold-700/40">
             BM CORPORATION
           </span>
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-            BM <span className="text-red-600">Domestica</span>
+            BM <span className="text-gradient-gold">Domestica</span>
           </h1>
           <p className="text-xl text-neutral-400 mb-10 leading-relaxed max-w-2xl mx-auto">
             Recrutement, formation et placement de personnel domestique qualifié, pour répondre aux besoins
             de votre foyer avec professionnalisme, confiance et efficacité.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/devis" className="bg-red-600 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-red-700 transition-all shadow-lg shadow-red-600/30">
+            <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
               Demander un Devis Gratuit
             </Link>
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-neutral-900 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-neutral-800 transition border border-neutral-700">
@@ -108,7 +108,7 @@ export default function DomesticaPage() {
             Contactez notre équipe pour décrire votre besoin et recevoir une proposition adaptée à votre foyer.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/devis" className="bg-red-600 text-white font-bold px-10 py-4 rounded-full text-lg hover:bg-red-700 transition hover:scale-105 shadow-xl shadow-red-600/30">
+            <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-lg transition hover:scale-105">
               Demander un Devis Gratuit
             </Link>
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-full text-lg transition hover:scale-105 shadow-xl shadow-emerald-600/20">

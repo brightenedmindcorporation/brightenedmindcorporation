@@ -122,9 +122,10 @@ export default function Dashboard() {
 
         {/* Carte de bienvenue */}
         <div className="bg-neutral-900 rounded-3xl border border-neutral-800 p-8 relative overflow-hidden shadow-2xl">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+          <div className="absolute inset-0 radial-fade pointer-events-none" />
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative">
             <div className="flex items-center gap-5">
-              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0">
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-gold-600/30">
                 <Image
                   src="/logo-bm.png"
                   alt="Brightened Mind Academy Logo"
@@ -139,33 +140,33 @@ export default function Dashboard() {
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-white">
                   Welcome back, {fullName} 👋
                 </h1>
-                <p className="text-neutral-400 text-sm mt-1">
-                  Ready to boost your English skills today at <span className="text-red-500 font-semibold">Brightened Mind Academy</span>?
+                <p className="text-neutral-400 text-sm mt-1 font-sans">
+                  Ready to boost your English skills today at <span className="text-gold-400 font-semibold">Brightened Mind Academy</span>?
                 </p>
               </div>
             </div>
 
             <button
               onClick={handleContinue}
-              className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-red-950/60 transition transform active:scale-95 flex items-center justify-center gap-2 shrink-0"
+              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3.5 rounded-xl transition transform active:scale-95 flex items-center justify-center gap-2 shrink-0"
             >
               <span>▶ Continue Lesson {lastLesson}</span>
             </button>
           </div>
 
           {/* Barre de progression */}
-          <div className="bg-neutral-950/80 border border-neutral-800 rounded-2xl p-5 mb-6">
+          <div className="bg-neutral-950/80 border border-neutral-800 rounded-2xl p-5 mb-6 relative">
             <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-bold text-neutral-300">
+              <span className="text-sm font-bold text-neutral-300 font-sans">
                 Course Progress ({student.level || "Level 1"})
               </span>
-              <span className="text-sm font-extrabold text-red-500">
+              <span className="text-sm font-extrabold text-gold-400">
                 {progressPercentage}%
               </span>
             </div>
             <div className="w-full bg-neutral-800 rounded-full h-3 overflow-hidden">
               <div
-                className="bg-red-600 h-full rounded-full transition-all duration-500 ease-out"
+                className="bg-gradient-to-r from-red-600 to-gold-500 h-full rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -219,19 +220,19 @@ export default function Dashboard() {
           <h2 className="text-xl font-black text-white mb-4">Your Courses</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             
-            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl flex flex-col justify-between hover:border-red-900/60 transition">
+            <div className="bg-neutral-900 p-6 rounded-2xl border border-neutral-800 shadow-xl flex flex-col justify-between hover:border-gold-700/40 transition">
               <div>
                 <span className="text-xs font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
                   Beginner
                 </span>
                 <h3 className="text-lg font-bold text-white mt-3">Level 1</h3>
-                <p className="text-neutral-400 text-xs mt-1">
+                <p className="text-neutral-400 text-xs mt-1 font-sans">
                   Basics, everyday vocabulary, and simple conversation.
                 </p>
               </div>
               <button
                 onClick={() => router.push(`/academy/${DEFAULT_LANG}/level/1`)}
-                className="mt-6 w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-xl text-sm transition shadow-lg shadow-red-950/40"
+                className="glow-accent mt-6 w-full bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-2.5 rounded-xl text-sm transition"
               >
                 Open Level 1
               </button>

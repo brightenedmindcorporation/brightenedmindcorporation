@@ -68,19 +68,19 @@ export default function FrenchCoursePage() {
   };
 
   return (
-    <main className="min-h-screen bg-black text-white font-sans antialiased pt-28 pb-20">
+    <main className="min-h-screen bg-background text-white font-sans antialiased pt-28 pb-20">
       
       {/* HERO SECTION */}
       <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-neutral-800">
         <div className="relative z-10 max-w-4xl">
-          <Link href="/academia" className="inline-flex items-center gap-2 text-red-500 font-semibold text-sm mb-6 hover:underline">
+          <Link href="/academia" className="inline-flex items-center gap-2 text-gold-400 font-semibold text-sm mb-6 hover:underline">
             ← Retour aux formations BM Academia
           </Link>
           <div className="flex justify-center mb-4">
             <span className="text-4xl">🇫🇷</span>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-white mb-6">
-            Apprendre le <span className="text-red-600">Français</span> en Ligne
+            Apprendre le <span className="text-gradient-gold">Français</span> en Ligne
           </h1>
           <p className="text-xl text-neutral-400 mb-8 leading-relaxed max-w-2xl mx-auto">
             Aperçu complet du programme : maîtrisez la rédaction professionnelle, perfectionnez votre grammaire et exprimez-vous avec aisance à l'oral.
@@ -91,7 +91,7 @@ export default function FrenchCoursePage() {
               href={whatsappUrl} 
               target="_blank" 
               rel="noopener noreferrer" 
-              className="bg-red-600 text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-red-700 transition-all shadow-lg shadow-red-600/30"
+              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all"
             >
               Passer un Test de Niveau Gratis
             </a>
@@ -221,7 +221,7 @@ export default function FrenchCoursePage() {
             Contactez notre équipe pédagogique au <span className="text-white font-bold">{phoneOfficial}</span> ou sur WhatsApp pour évaluer votre niveau et réserver votre première session.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <Link href="/devis" className="bg-red-600 text-white font-bold px-10 py-4 rounded-full text-lg hover:bg-red-700 transition hover:scale-105 shadow-xl shadow-red-600/30">
+            <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-lg transition hover:scale-105">
               S'inscrire à la formation
             </Link>
             <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-4 rounded-full text-lg transition hover:scale-105 shadow-xl shadow-emerald-600/20">

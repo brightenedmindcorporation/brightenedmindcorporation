@@ -22,9 +22,9 @@ export default function AcademyHeader() {
   const isDashboard = pathname === "/academy/dashboard";
 
   return (
-    <header className="bg-neutral-900 border-b border-neutral-800 sticky top-0 z-40 shadow-xl backdrop-blur-md">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        
+    <header className="bg-neutral-900/90 border-b border-neutral-800 sticky top-0 z-40 shadow-xl backdrop-blur-md">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between font-sans">
+
         {/* CÔTÉ GAUCHE */}
         <div className="flex items-center gap-4">
           <Link
@@ -40,7 +40,7 @@ export default function AcademyHeader() {
               <span className="text-neutral-700">|</span>
               <Link
                 href="/academy/dashboard"
-                className="text-sm font-semibold text-red-500 hover:text-red-400 transition flex items-center gap-1"
+                className="text-sm font-semibold text-gold-400 hover:text-gold-300 transition flex items-center gap-1"
               >
                 📊 Mon Dashboard
               </Link>

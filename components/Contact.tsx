@@ -107,7 +107,7 @@ export default function Contact() {
 
           <button
             type="submit"
-            className="glow-accent bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white font-semibold py-4 rounded-xl transition"
+            className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-semibold py-4 rounded-xl transition"
           >
             Envoyer
           </button>

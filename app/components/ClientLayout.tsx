@@ -67,7 +67,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div className="flex items-center gap-4">
               <Link
                 href="/devis"
-                className="hidden sm:inline-block glow-accent bg-gradient-to-br from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
+                className="hidden sm:inline-block glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
               >
                 Devis / Inscription
               </Link>

@@ -88,7 +88,7 @@ export default function PaymentPage() {
             Créez votre compte ou connectez-vous avant de procéder au paiement de votre formation.
           </p>
           <div className="flex flex-col gap-3">
-            <Link href="/register" className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition">
+            <Link href="/register" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition">
               Créer un compte
             </Link>
             <Link href="/login?next=/paiement" className="text-red-500 hover:text-red-400 font-semibold text-sm">
@@ -257,7 +257,7 @@ export default function PaymentPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg shadow-red-600/30"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg shadow-red-600/30"
               >
                 {loading ? "Traitement en cours..." : "Payer maintenant ↗"}
               </button>

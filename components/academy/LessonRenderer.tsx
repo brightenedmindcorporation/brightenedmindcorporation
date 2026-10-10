@@ -45,7 +45,7 @@ function SpeakButtons({ text, langSlug, label = "Listen" }: { text: string; lang
     <div className="mt-6 flex flex-wrap gap-4">
       <button
         onClick={() => speak(text, langSlug)}
-        className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50"
+        className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50"
       >
         🔊 {label}
       </button>

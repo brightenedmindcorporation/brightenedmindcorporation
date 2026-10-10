@@ -85,7 +85,7 @@ export default function RegisterPage() {
           <div className="flex flex-col gap-3">
             <button
               onClick={() => router.push("/paiement")}
-              className="bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 rounded-lg font-semibold transition"
+              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-5 py-2.5 rounded-lg font-semibold transition"
             >
               Payer et activer mon compte
             </button>
@@ -181,7 +181,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-red-600 hover:bg-red-700 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
+            className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
           >
             {loading ? "Inscription..." : "S'inscrire"}
           </button>

@@ -61,7 +61,7 @@ export default function Hero() {
 
             <Link
               href="#departments"
-              className="glow-accent bg-gradient-to-br from-red-500 to-red-700 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl hover:from-red-400 hover:to-red-600 transition duration-300 text-center font-semibold"
+              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl hover:from-red-500 hover:to-red-800 transition duration-300 text-center font-semibold"
             >
               Nos départements
             </Link>
