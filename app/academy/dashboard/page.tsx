@@ -196,7 +196,7 @@ export default function Dashboard() {
           <div className="bg-surface rounded-3xl border border-line p-8 relative overflow-hidden shadow-2xl">
             <div className="absolute inset-0 radial-fade pointer-events-none" />
             <div className="relative flex items-center gap-5 mb-8">
-              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-gold-600/30">
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
                 <Image
                   src="/logo-bm.png"
                   alt="Brightened Mind Academy Logo"
@@ -212,7 +212,7 @@ export default function Dashboard() {
                   Bienvenue, {fullName} 👋
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
-                  Votre inscription à <span className="text-gold-400 font-semibold">{programLabel}</span> est confirmée.
+                  Votre inscription à <span className="text-red-500 font-semibold">{programLabel}</span> est confirmée.
                 </p>
               </div>
             </div>
@@ -245,7 +245,7 @@ export default function Dashboard() {
           <div className="absolute inset-0 radial-fade pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative">
             <div className="flex items-center gap-5">
-              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-gold-600/30">
+              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
                 <Image
                   src="/logo-bm.png"
                   alt="Brightened Mind Academy Logo"
@@ -261,7 +261,7 @@ export default function Dashboard() {
                   Welcome back, {fullName} 👋
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
-                  Ready to continue your <span className="text-gold-400 font-semibold">{langInfo.label}</span> lessons today?
+                  Ready to continue your <span className="text-red-500 font-semibold">{langInfo.label}</span> lessons today?
                 </p>
               </div>
             </div>
@@ -305,13 +305,13 @@ export default function Dashboard() {
               <span className="text-sm font-bold text-ink-soft font-sans">
                 Course Progress ({activeEnrollment.level || "Level 1"})
               </span>
-              <span className="text-sm font-extrabold text-gold-400">
+              <span className="text-sm font-extrabold text-red-500">
                 {progressPercentage}%
               </span>
             </div>
             <div className="w-full bg-surface-alt rounded-full h-3 overflow-hidden">
               <div
-                className="bg-gradient-to-r from-red-600 to-gold-500 h-full rounded-full transition-all duration-500 ease-out"
+                className="bg-gradient-to-r from-red-600 to-red-800 h-full rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
@@ -365,7 +365,7 @@ export default function Dashboard() {
           <h2 className="text-xl font-black text-ink mb-4">Your {langInfo.label} Courses</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-            <div className="bg-surface p-6 rounded-2xl border border-line shadow-xl flex flex-col justify-between hover:border-gold-700/40 transition">
+            <div className="bg-surface p-6 rounded-2xl border border-line shadow-xl flex flex-col justify-between hover:border-red-600/40 transition">
               <div>
                 <span className="text-xs font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
                   Beginner

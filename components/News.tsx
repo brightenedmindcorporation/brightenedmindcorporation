@@ -20,7 +20,7 @@ export default function News() {
 
         <div className="grid lg:grid-cols-3 gap-10">
 
-          <div className="bg-surface/60 border border-line hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
+          <div className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
             <span className="text-xs uppercase tracking-widest text-red-500 font-sans font-semibold">Academia</span>
             <h3 className="text-2xl font-bold text-ink mt-2">
               BM Academy
@@ -31,7 +31,7 @@ export default function News() {
             </p>
           </div>
 
-          <div className="bg-surface/60 border border-line hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
+          <div className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
             <span className="text-xs uppercase tracking-widest text-red-500 font-sans font-semibold">Communication</span>
             <h3 className="text-2xl font-bold text-ink mt-2">
               BM Communication
@@ -42,7 +42,7 @@ export default function News() {
             </p>
           </div>
 
-          <div className="bg-surface/60 border border-line hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
+          <div className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
             <span className="text-xs uppercase tracking-widest text-red-500 font-sans font-semibold">Domestica</span>
             <h3 className="text-2xl font-bold text-ink mt-2">
               BM Domestica

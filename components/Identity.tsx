@@ -10,7 +10,7 @@ export default function Identity() {
         <div className="relative overflow-hidden bg-gradient-to-br from-red-800 via-red-900 to-neutral-950 text-white p-10 rounded-[30px] border border-red-800/40 shadow-2xl shadow-red-950/40">
           <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full bg-red-500/10 blur-3xl" />
 
-          <p className="uppercase tracking-[3px] text-gold-300/80 text-xs font-semibold mb-4 relative">Vision</p>
+          <p className="uppercase tracking-[3px] text-white/80 text-xs font-semibold mb-4 relative">Vision</p>
 
           <h2 className="text-4xl font-bold mb-6 relative">
             Notre Vision

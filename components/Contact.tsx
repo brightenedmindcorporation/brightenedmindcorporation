@@ -146,7 +146,7 @@ export default function Contact() {
           </button>
 
           {sent && (
-            <p className="text-gold-400 text-center font-medium font-sans">
+            <p className="text-emerald-500 text-center font-medium font-sans">
               Message envoyé avec succès.
             </p>
           )}

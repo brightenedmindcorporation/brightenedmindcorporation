@@ -53,7 +53,7 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-surface/60 border border-line hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
+            className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
           >
             <h3 className="text-3xl font-bold text-red-500">
               Innovation
@@ -67,7 +67,7 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-surface/60 border border-line hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
+            className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
           >
             <h3 className="text-3xl font-bold text-red-500">
               Excellence
@@ -81,7 +81,7 @@ export default function Vision() {
 
           <motion.div
             whileHover={{ y: -10 }}
-            className="bg-surface/60 border border-line hover:border-gold-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
+            className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors"
           >
             <h3 className="text-3xl font-bold text-red-500">
               Impact

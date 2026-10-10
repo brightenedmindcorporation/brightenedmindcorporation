@@ -98,7 +98,7 @@ export default function LogicielsPage() {
             </Link>
           </div>
           <p className="mt-4 text-sm text-ink-faint">
-            Déjà inscrit(e) ? <Link href="/login" className="text-gold-400 font-semibold hover:underline">Se connecter</Link>
+            Déjà inscrit(e) ? <Link href="/login" className="text-red-500 font-semibold hover:underline">Se connecter</Link>
           </p>
         </div>
       </section>
@@ -128,7 +128,7 @@ export default function LogicielsPage() {
 
           <div className="bg-surface p-8 rounded-2xl border border-line max-w-3xl mx-auto">
             <h3 className="text-2xl font-bold text-ink mb-1">{software[activeSoft].title}</h3>
-            <p className="text-gold-400 text-sm font-semibold mb-3">{software[activeSoft].subtitle}</p>
+            <p className="text-red-500 text-sm font-semibold mb-3">{software[activeSoft].subtitle}</p>
             <p className="text-ink-soft text-sm mb-6">{software[activeSoft].description}</p>
             <ul className="space-y-3">
               {software[activeSoft].features.map((feat, idx) => (

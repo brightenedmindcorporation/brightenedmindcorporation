@@ -167,7 +167,7 @@ body {
 
 ::selection {
   background: var(--color-red-600);
-  color: var(--color-gold-100);
+  color: white;
 }
 
 /* Scrollbar */
@@ -186,7 +186,7 @@ body {
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-gold-600);
+  background: var(--color-red-500);
 }
 
 /* Loader animation */

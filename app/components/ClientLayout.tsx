@@ -58,7 +58,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
             <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-ink-soft font-sans">
               {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="hover:text-gold-500 transition">
+                <Link key={link.href} href={link.href} className="hover:text-red-500 transition">
                   {link.label}
                 </Link>
               ))}
@@ -87,11 +87,14 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           {menuOpen && (
             <nav className="md:hidden bg-page border-t border-line px-6 py-6 flex flex-col gap-5 text-ink-soft font-sans">
               {NAV_LINKS.map((link) => (
-                <Link key={link.href} href={link.href} className="hover:text-gold-500 transition">
+                <Link key={link.href} href={link.href} className="hover:text-red-500 transition">
                   {link.label}
                 </Link>
               ))}
-              <Link href="/devis" className="text-gold-500 font-semibold hover:text-gold-400 transition">
+              <Link
+                href="/devis"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-center transition"
+              >
                 Devis / Inscription
               </Link>
               <div className="pt-2 border-t border-line">

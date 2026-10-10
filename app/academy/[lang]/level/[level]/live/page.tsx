@@ -117,7 +117,7 @@ export default function LiveClassPage() {
               <p className="text-xl font-bold text-ink">Le cours n'a pas encore commencé</p>
               <p className="text-ink-soft text-sm max-w-md mx-auto">
                 Prochaine session {liveSession.title ? `« ${liveSession.title} » ` : ""}:{" "}
-                <span className="text-gold-400 font-semibold">
+                <span className="text-red-500 font-semibold">
                   {new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })}
                 </span>
                 <br />

@@ -591,7 +591,7 @@ export default function AdminPage() {
             <div className="flex flex-wrap gap-2 mb-6">
               {Object.entries(stats.byLang).map(([code, count]) => (
                 <span key={code} className="text-xs font-semibold px-3 py-1.5 rounded-full bg-surface border border-line text-ink-soft">
-                  {languageLabel(code)} : <span className="text-gold-500">{count}</span>
+                  {languageLabel(code)} : <span className="text-red-500">{count}</span>
                 </span>
               ))}
             </div>
@@ -1008,13 +1008,13 @@ export default function AdminPage() {
                       <div>
                         <p className="font-bold text-ink">
                           {a.title}
-                          <span className="ml-2 text-xs font-semibold text-gold-500">
+                          <span className="ml-2 text-xs font-semibold text-ink-faint">
                             {a.type === "job" ? "· Offre d'emploi" : "· Annonce"}
                           </span>
                           {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
                         </p>
                         <p className="text-xs text-ink-soft mt-1">{a.description}</p>
-                        <Link href={`/annonces/${a.id}`} className="text-xs text-gold-500 hover:underline mt-1 inline-block">
+                        <Link href={`/annonces/${a.id}`} className="text-xs text-red-500 hover:text-red-400 hover:underline mt-1 inline-block">
                           Voir la page publique →
                         </Link>
                       </div>
@@ -1053,7 +1053,7 @@ export default function AdminPage() {
               <div className="space-y-3">
                 {jobApplications.map((app) => (
                   <div key={app.id} className="p-5 rounded-2xl border border-line bg-surface">
-                    <p className="text-xs text-gold-500 font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
+                    <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
                     <p className="text-ink font-bold">{app.name}</p>
                     <p className="text-ink-soft text-sm">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
                     {app.message && <p className="text-ink-soft text-sm mt-2">{app.message}</p>}

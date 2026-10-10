@@ -41,7 +41,7 @@ export default function AcademyHeader() {
               <span className="text-ink-faint">|</span>
               <Link
                 href="/academy/dashboard"
-                className="text-sm font-semibold text-gold-400 hover:text-gold-300 transition flex items-center gap-1"
+                className="text-sm font-semibold text-red-500 hover:text-red-400 transition flex items-center gap-1"
               >
                 📊 Mon Dashboard
               </Link>

@@ -100,7 +100,7 @@ export default function FrenchCoursePage() {
             </Link>
           </div>
           <p className="mt-4 text-sm text-ink-faint">
-            Déjà inscrit(e) ? <Link href="/login" className="text-gold-400 font-semibold hover:underline">Se connecter</Link>
+            Déjà inscrit(e) ? <Link href="/login" className="text-red-500 font-semibold hover:underline">Se connecter</Link>
           </p>
         </div>
       </section>

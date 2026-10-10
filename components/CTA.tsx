@@ -58,7 +58,7 @@ export default function CTA() {
 
             <Link
               href="#departments"
-              className="border border-line px-10 py-5 rounded-2xl hover:border-gold-500/60 hover:text-gold-300 transition duration-300"
+              className="border border-line px-10 py-5 rounded-2xl hover:border-red-500/60 hover:text-red-400 transition duration-300"
             >
               Explorer nos branches
             </Link>

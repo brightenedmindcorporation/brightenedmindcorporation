@@ -68,7 +68,7 @@ export default function Hero() {
 
             <Link
               href="#contact-form"
-              className="border border-line text-ink px-6 md:px-8 py-3 md:py-4 rounded-xl hover:border-gold-500/60 hover:text-gold-300 transition text-center font-semibold"
+              className="border border-line text-ink px-6 md:px-8 py-3 md:py-4 rounded-xl hover:border-red-500/60 hover:text-red-400 transition text-center font-semibold"
             >
               Contact
             </Link>
