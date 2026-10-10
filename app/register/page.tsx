@@ -15,6 +15,7 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [level, setLevel] = useState("Level 1");
   const [langCode, setLangCode] = useState(availableLanguages[0].code);
+  const [studyDays, setStudyDays] = useState<3 | 5>(3);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -54,6 +55,7 @@ export default function RegisterPage() {
         email: email.trim(),
         level,
         langCode,
+        studyDays,
         status: "Pending",
         matricule: "",
         createdAt: new Date(),
@@ -176,6 +178,21 @@ export default function RegisterPage() {
               <option value="Level 2">Niveau 2</option>
               <option value="Level 3">Niveau 3</option>
             </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Rythme d'étude</label>
+            <select
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
+              value={studyDays}
+              onChange={(e) => setStudyDays(Number(e.target.value) as 3 | 5)}
+            >
+              <option value={3}>3 jours / semaine (1 à 2h/semaine)</option>
+              <option value={5}>5 jours / semaine (intensif)</option>
+            </select>
+            <p className="text-xs text-ink-faint mt-1">
+              Détermine le rythme de déverrouillage des chapitres de votre niveau.
+            </p>
           </div>
 
           <button

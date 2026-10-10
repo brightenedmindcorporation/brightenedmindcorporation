@@ -11,6 +11,8 @@ export default function Contact() {
   });
 
   const [sent, setSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -23,8 +25,27 @@ export default function Contact() {
 
   const sendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
+    setEmailError(null);
 
     try {
+      setChecking(true);
+      const checkResponse = await fetch("/api/validate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: form.email.trim() }),
+      });
+      const check = await checkResponse.json();
+      setChecking(false);
+
+      if (!check.valid) {
+        setEmailError(
+          check.reason === "format"
+            ? "Le format de l'adresse email n'est pas valide."
+            : "Cette adresse email semble invalide : son domaine ne peut pas recevoir d'emails. Vérifiez qu'il n'y a pas de faute de frappe."
+        );
+        return;
+      }
+
       await emailjs.send(
         "service_m7rwnia",
         "template_slt7mce",
@@ -54,6 +75,8 @@ export default function Contact() {
       console.error("EmailJS error:", error);
       const detail = error?.text || error?.message || JSON.stringify(error);
       alert(`Erreur lors de l'envoi : ${detail}`);
+    } finally {
+      setChecking(false);
     }
   };
 
@@ -108,11 +131,18 @@ export default function Contact() {
             className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-600/60 focus:border-gold-600/60"
           />
 
+          {emailError && (
+            <p className="text-red-500 text-sm text-center font-medium font-sans">
+              {emailError}
+            </p>
+          )}
+
           <button
             type="submit"
-            className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-semibold py-4 rounded-xl transition"
+            disabled={checking}
+            className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-semibold py-4 rounded-xl transition disabled:opacity-50"
           >
-            Envoyer
+            {checking ? "Vérification..." : "Envoyer"}
           </button>
 
           {sent && (

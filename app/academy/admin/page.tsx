@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
+import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
+import JitsiEmbed from "@/components/academy/JitsiEmbed";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +34,7 @@ export default function AdminPage() {
   const [sessionTime, setSessionTime] = useState("");
   const [sessionDuration, setSessionDuration] = useState("60");
   const [sessionTitle, setSessionTitle] = useState("");
+  const [hostingSession, setHostingSession] = useState<{ langCode: string; level: number; title?: string } | null>(null);
 
   // --- Payments ---
   const [payments, setPayments] = useState<any[]>([]);
@@ -107,11 +110,11 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
-  const sendEmail = async (email: string, name: string, matricule: string) => {
+  const sendEmail = async (email: string, name: string, matricule: string, langLabel: string, level: string, studyDays?: number) => {
     const response = await fetch("/api/send-email", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, name, matricule }),
+      body: JSON.stringify({ email, name, matricule, langLabel, level, studyDays }),
     });
 
     const result = await response.json();
@@ -150,7 +153,7 @@ export default function AdminPage() {
       }
 
       try {
-        await sendEmail(student.email, student.name, result.matricule);
+        await sendEmail(student.email, student.name, result.matricule, languageLabel(student.langCode), student.level, student.studyDays);
         alert("Approved + Email sent!");
       } catch (emailError) {
         console.error("EMAIL ERROR:", emailError);
@@ -565,15 +568,57 @@ export default function AdminPage() {
                           {isPast && " · Terminée"}
                         </p>
                       </div>
-                      <button
-                        onClick={() => deleteLiveSession(session.id)}
-                        className="text-red-500 hover:text-red-400 text-sm font-semibold self-start sm:self-center"
-                      >
-                        Supprimer
-                      </button>
+                      <div className="flex items-center gap-4 self-start sm:self-center">
+                        <button
+                          onClick={() => setHostingSession({ langCode: session.langCode || "EN", level: session.level, title: session.title })}
+                          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition"
+                        >
+                          🎥 Rejoindre en tant qu'enseignant
+                        </button>
+                        <button
+                          onClick={() => deleteLiveSession(session.id)}
+                          className="text-red-500 hover:text-red-400 text-sm font-semibold"
+                        >
+                          Supprimer
+                        </button>
+                      </div>
                     </div>
                   );
                 })}
+              </div>
+            )}
+
+            {hostingSession && (
+              <div className="mt-8 bg-surface border border-line rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <p className="font-bold text-ink">
+                      Salle en direct — {languageLabel(hostingSession.langCode)} — Niveau {hostingSession.level}
+                      {hostingSession.title ? ` · ${hostingSession.title}` : ""}
+                    </p>
+                    <p className="text-xs text-ink-soft mt-1">
+                      Vous rejoignez en tant qu'enseignant/modérateur. Contrôle total de la session : micro, caméra, partage d'écran, mise en sourdine et exclusion des participants.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setHostingSession(null)}
+                    className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition whitespace-nowrap"
+                  >
+                    Quitter
+                  </button>
+                </div>
+
+                {isJitsiConfigured() && getJaasAppId() ? (
+                  <JitsiEmbed
+                    appId={getJaasAppId()!}
+                    roomName={getLiveRoomName(hostingSession.langCode, hostingSession.level)}
+                    displayName="Enseignant — BM Academy"
+                  />
+                ) : (
+                  <div className="p-6 rounded-2xl border border-line bg-surface-sunken text-ink-soft text-center">
+                    Le service de visioconférence n'est pas encore configuré (variable NEXT_PUBLIC_JAAS_APP_ID manquante).
+                  </div>
+                )}
               </div>
             )}
           </div>
