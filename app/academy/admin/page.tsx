@@ -89,6 +89,11 @@ export default function AdminPage() {
   const [mailDetailLoading, setMailDetailLoading] = useState(false);
   const [mailReplyBody, setMailReplyBody] = useState("");
   const [mailReplySending, setMailReplySending] = useState(false);
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [composeTo, setComposeTo] = useState("");
+  const [composeSubject, setComposeSubject] = useState("");
+  const [composeBody, setComposeBody] = useState("");
+  const [composeSending, setComposeSending] = useState(false);
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -546,6 +551,48 @@ export default function AdminPage() {
     }
   };
 
+  const openCompose = (prefillTo = "", prefillSubject = "") => {
+    setComposeTo(prefillTo);
+    setComposeSubject(prefillSubject);
+    setComposeBody("");
+    setComposeOpen(true);
+  };
+
+  const sendCompose = async () => {
+    if (!composeTo.trim() || !composeSubject.trim() || !composeBody.trim()) return;
+    setComposeSending(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/gmail/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, to: composeTo, subject: composeSubject, body: composeBody }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setComposeOpen(false);
+      alert("Message envoyé !");
+      fetchMailMessages();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setComposeSending(false);
+    }
+  };
+
+  // Mail notification templates (EmailJS, form providers…) often put the
+  // real person's address as plain text inside the body rather than as
+  // the Gmail "From" header, which belongs to the sending service instead
+  // — surfacing addresses found in the body lets the admin start a message
+  // to the actual person with one click.
+  const detectedAddresses = useMemo(() => {
+    if (!selectedMail) return [];
+    const text = String(selectedMail.body || selectedMail.snippet || "").replace(/<[^>]*>/g, " ");
+    const matches = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g) || [];
+    const fromAddress = selectedMail.from?.match(/<(.+)>/)?.[1] || selectedMail.from;
+    return Array.from(new Set(matches)).filter((addr) => addr.toLowerCase() !== fromAddress?.toLowerCase());
+  }, [selectedMail]);
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const gmailStatus = params.get("gmail");
@@ -769,6 +816,30 @@ export default function AdminPage() {
     else if (t === "projects") fetchProjectRequests();
     else if (t === "devis") fetchDevisRequests();
     else if (t === "mail") fetchMailMessages();
+  };
+
+  const parseFromHeader = (from?: string) => {
+    if (!from) return { name: "Inconnu", email: "" };
+    const match = from.match(/^"?([^"<]*)"?\s*<(.+)>$/);
+    if (match) {
+      const name = match[1].trim();
+      return { name: name || match[2], email: match[2] };
+    }
+    return { name: from, email: from };
+  };
+
+  const formatMailDate = (date?: string) => {
+    if (!date) return "";
+    const parsed = new Date(date);
+    if (isNaN(parsed.getTime())) return date;
+    return parsed.toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+  };
+
+  const avatarColor = (seed: string) => {
+    const palette = ["bg-red-600", "bg-amber-600", "bg-emerald-600", "bg-sky-600", "bg-violet-600", "bg-pink-600"];
+    let hash = 0;
+    for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) % palette.length;
+    return palette[Math.abs(hash) % palette.length];
   };
 
   // --- Derived data ---
@@ -1648,78 +1719,177 @@ export default function AdminPage() {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-                <div className="lg:col-span-2 space-y-2 max-h-[70vh] overflow-y-auto">
-                  {mailLoading ? (
-                    <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
-                  ) : mailMessages.length === 0 ? (
-                    <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Boîte de réception vide.</div>
-                  ) : (
-                    mailMessages.map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => openMail(m.id)}
-                        className={`w-full text-left p-4 rounded-xl border transition ${
-                          selectedMail?.id === m.id ? "border-red-600 bg-red-950/10" : "border-line bg-surface hover:bg-surface-alt"
-                        }`}
-                      >
-                        <p className={`text-sm truncate ${m.unread ? "font-black text-ink" : "font-semibold text-ink-soft"}`}>{m.from}</p>
-                        <p className={`text-sm truncate ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject}</p>
-                        <p className="text-xs text-ink-faint truncate mt-0.5">{m.snippet}</p>
-                      </button>
-                    ))
-                  )}
+              <div className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-line bg-surface-alt/50">
+                  <div>
+                    <p className="font-black text-ink">📬 brightenedmindcorporation@gmail.com</p>
+                    <p className="text-xs text-ink-soft mt-0.5">
+                      {mailMessages.filter((m) => m.unread).length} non lu(s) · {mailMessages.length} affiché(s)
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => openCompose()}
+                    className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shrink-0"
+                  >
+                    ✏️ Nouveau message
+                  </button>
                 </div>
 
-                <div className="lg:col-span-3">
-                  {mailDetailLoading ? (
-                    <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
-                  ) : !selectedMail ? (
-                    <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft text-center">
-                      Sélectionne un email à gauche pour le lire.
-                    </div>
-                  ) : (
-                    <div className="p-6 rounded-2xl border border-line bg-surface">
-                      <p className="text-lg font-bold text-ink">{selectedMail.subject}</p>
-                      <p className="text-xs text-ink-soft mt-1">
-                        De <span className="text-ink font-semibold">{selectedMail.from}</span> · {selectedMail.date}
-                      </p>
-                      <div className="mt-4 pt-4 border-t border-line">
-                        {/* Email HTML comes from arbitrary senders — never trusted, so it
-                            renders in a fully sandboxed iframe (no scripts, no same-origin
-                            access) instead of dangerouslySetInnerHTML on the page itself. */}
-                        <iframe
-                          sandbox=""
-                          srcDoc={selectedMail.body || selectedMail.snippet}
-                          className="w-full h-64 rounded-lg bg-white"
-                          title="Contenu de l'email"
-                        />
+                <div className="grid grid-cols-1 lg:grid-cols-5">
+                  <div className="lg:col-span-2 lg:border-r border-line max-h-[65vh] overflow-y-auto">
+                    {mailLoading ? (
+                      <div className="p-6 text-ink-soft text-sm">Chargement…</div>
+                    ) : mailMessages.length === 0 ? (
+                      <div className="p-6 text-ink-soft text-sm">Boîte de réception vide.</div>
+                    ) : (
+                      mailMessages.map((m) => {
+                        const { name } = parseFromHeader(m.from);
+                        return (
+                          <button
+                            key={m.id}
+                            onClick={() => openMail(m.id)}
+                            className={`w-full text-left px-4 py-3.5 border-b border-line/60 transition flex gap-3 items-start ${
+                              selectedMail?.id === m.id ? "bg-red-950/10" : "hover:bg-surface-alt"
+                            }`}
+                          >
+                            <span className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black shrink-0 ${avatarColor(name)}`}>
+                              {name.trim().charAt(0).toUpperCase() || "?"}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center justify-between gap-2">
+                                <span className={`text-sm truncate ${m.unread ? "font-black text-ink" : "font-semibold text-ink-soft"}`}>{name}</span>
+                                {m.unread && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />}
+                              </span>
+                              <span className={`block text-sm truncate ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject}</span>
+                              <span className="block text-xs text-ink-faint truncate mt-0.5">{m.snippet}</span>
+                            </span>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  <div className="lg:col-span-3 max-h-[65vh] overflow-y-auto">
+                    {mailDetailLoading ? (
+                      <div className="p-6 text-ink-soft text-sm">Chargement…</div>
+                    ) : !selectedMail ? (
+                      <div className="p-10 text-ink-soft text-sm text-center">
+                        Sélectionne un email à gauche pour le lire.
                       </div>
-                      <div className="mt-6 pt-4 border-t border-line">
-                        <label className="block text-xs font-semibold text-ink-soft mb-1.5">Répondre</label>
-                        <textarea
-                          value={mailReplyBody}
-                          onChange={(e) => setMailReplyBody(e.target.value)}
-                          rows={5}
-                          placeholder="Écrivez votre réponse…"
-                          className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-                        />
-                        <button
-                          onClick={sendMailReply}
-                          disabled={mailReplySending || !mailReplyBody.trim()}
-                          className="mt-3 glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
-                        >
-                          {mailReplySending ? "Envoi…" : "Envoyer"}
-                        </button>
+                    ) : (
+                      <div className="p-6">
+                        <p className="text-xl font-bold text-ink">{selectedMail.subject}</p>
+                        <div className="flex items-center gap-3 mt-3">
+                          <span className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 ${avatarColor(parseFromHeader(selectedMail.from).name)}`}>
+                            {parseFromHeader(selectedMail.from).name.trim().charAt(0).toUpperCase() || "?"}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-ink truncate">{parseFromHeader(selectedMail.from).name}</p>
+                            <p className="text-xs text-ink-faint truncate">{parseFromHeader(selectedMail.from).email}</p>
+                          </div>
+                          <span className="text-xs text-ink-faint ml-auto shrink-0">{formatMailDate(selectedMail.date)}</span>
+                        </div>
+
+                        {detectedAddresses.length > 0 && (
+                          <div className="flex flex-wrap items-center gap-2 mt-4 p-3 bg-surface-alt/60 border border-line rounded-xl">
+                            <span className="text-xs text-ink-soft font-semibold shrink-0">Adresses détectées dans le message :</span>
+                            {detectedAddresses.map((addr) => (
+                              <button
+                                key={addr}
+                                onClick={() => openCompose(addr, selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`)}
+                                className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition"
+                              >
+                                ✉️ {addr}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="mt-4 pt-4 border-t border-line">
+                          {/* Email HTML comes from arbitrary senders — never trusted, so it
+                              renders in a fully sandboxed iframe (no scripts, no same-origin
+                              access) instead of dangerouslySetInnerHTML on the page itself. */}
+                          <iframe
+                            sandbox=""
+                            srcDoc={selectedMail.body || selectedMail.snippet}
+                            className="w-full h-64 rounded-xl bg-white border border-line"
+                            title="Contenu de l'email"
+                          />
+                        </div>
+
+                        <div className="mt-6 pt-4 border-t border-line">
+                          <label className="block text-xs font-semibold text-ink-soft mb-1.5">Répondre à {parseFromHeader(selectedMail.from).name}</label>
+                          <textarea
+                            value={mailReplyBody}
+                            onChange={(e) => setMailReplyBody(e.target.value)}
+                            rows={5}
+                            placeholder="Écrivez votre réponse…"
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                          />
+                          <button
+                            onClick={sendMailReply}
+                            disabled={mailReplySending || !mailReplyBody.trim()}
+                            className="mt-3 glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                          >
+                            {mailReplySending ? "Envoi…" : "Envoyer"}
+                          </button>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* ================= COMPOSE MODAL ================= */}
+      {composeOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 className="text-lg font-bold text-ink mb-4">✏️ Nouveau message</h3>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">À</label>
+            <input
+              type="email"
+              value={composeTo}
+              onChange={(e) => setComposeTo(e.target.value)}
+              placeholder="destinataire@email.com"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <input
+              type="text"
+              value={composeSubject}
+              onChange={(e) => setComposeSubject(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <textarea
+              value={composeBody}
+              onChange={(e) => setComposeBody(e.target.value)}
+              rows={6}
+              placeholder="Écrivez votre message…"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setComposeOpen(false)}
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={sendCompose}
+                disabled={composeSending || !composeTo.trim() || !composeSubject.trim() || !composeBody.trim()}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+              >
+                {composeSending ? "Envoi…" : "Envoyer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= REPLY MODAL ================= */}
       {replyTarget && (
