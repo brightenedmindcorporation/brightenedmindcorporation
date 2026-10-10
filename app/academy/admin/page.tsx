@@ -125,6 +125,14 @@ export default function AdminPage() {
 
   const rejectStudent = async (student: any) => {
     if (processingIds.has(student.id)) return;
+
+    if (student.status === "Approved") {
+      const confirmed = confirm(
+        `${student.name} est actuellement approuvé(e) et a accès à la plateforme. Retirer son accès (ex. frais non payés) ?`
+      );
+      if (!confirmed) return;
+    }
+
     setProcessingIds((prev) => new Set(prev).add(student.id));
 
     try {
@@ -140,7 +148,7 @@ export default function AdminPage() {
         throw new Error(result.error || "Erreur serveur inconnue");
       }
 
-      alert("Rejected!");
+      alert(student.status === "Approved" ? "Accès retiré." : "Rejected!");
       fetchStudents();
     } catch (error: any) {
       console.error(error);
@@ -208,10 +216,10 @@ export default function AdminPage() {
 
                 <button
                   onClick={() => rejectStudent(s)}
-                  disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Rejected"}
+                  disabled={processingIds.has(s.id) || s.status === "Rejected"}
                   className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Reject
+                  {s.status === "Approved" ? "Remove / Revoke" : "Reject"}
                 </button>
               </div>
             </div>

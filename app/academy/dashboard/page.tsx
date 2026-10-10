@@ -4,13 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import AcademyHeader from "../components/AcademyHeader";
-import { getLevelCurriculum } from "@/content/curriculum";
+import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { getLevelProgress } from "@/lib/academy/progress";
-
-// Seule l'anglais a du contenu publié pour le moment (Phase 4 du plan
-// ajoutera les autres langues) ; le dashboard affiche donc ce parcours par
-// défaut tant que l'inscription multi-langue n'existe pas encore.
-const DEFAULT_LANG = "english";
 
 interface StudentData {
   name?: string;
@@ -18,8 +13,18 @@ interface StudentData {
   matricule?: string;
   level?: string;
   status?: string;
+  langCode?: string;
   completedQuizzes?: number;
   totalQuizzes?: number;
+}
+
+// Registration stores langCode ("ZH", "PT", ...) while the curriculum/URLs
+// key on the slug ("chinese", "portuguese", ...). Legacy accounts created
+// before langCode existed fall back to English, which was the only
+// language the platform had at the time.
+function resolveLangSlug(langCode?: string): string {
+  const match = availableLanguages.find((l) => l.code === langCode);
+  return match?.slug ?? "english";
 }
 
 export default function Dashboard() {
@@ -40,8 +45,9 @@ export default function Dashboard() {
       const parsedStudent: StudentData = JSON.parse(data);
       setStudent(parsedStudent);
 
-      const level1 = getLevelCurriculum(DEFAULT_LANG, 1);
-      const progress = getLevelProgress(DEFAULT_LANG, 1);
+      const langSlug = resolveLangSlug(parsedStudent.langCode);
+      const level1 = getLevelCurriculum(langSlug, 1);
+      const progress = getLevelProgress(langSlug, 1);
       const totalLessons = level1?.lessons.length ?? 12;
 
       let completedCount = 0;
@@ -88,12 +94,15 @@ export default function Dashboard() {
   const progressPercentage =
     totalQuizzes > 0 ? Math.round((completedQuizzes / totalQuizzes) * 100) : 0;
 
+  const langSlug = resolveLangSlug(student.langCode);
+  const langInfo = availableLanguages.find((l) => l.slug === langSlug) ?? availableLanguages[0];
+
   const handleContinue = () => {
     const currentLevel = student.level || "Level 1";
-    if (currentLevel === "Level 1") router.push(`/academy/${DEFAULT_LANG}/level/1/lesson/${lastLesson}`);
-    else if (currentLevel === "Level 2") router.push(`/academy/${DEFAULT_LANG}/level/2`);
-    else if (currentLevel === "Level 3") router.push(`/academy/${DEFAULT_LANG}/level/3`);
-    else router.push(`/academy/${DEFAULT_LANG}/level/1`);
+    if (currentLevel === "Level 1") router.push(`/academy/${langSlug}/level/1/lesson/${lastLesson}`);
+    else if (currentLevel === "Level 2") router.push(`/academy/${langSlug}/level/2`);
+    else if (currentLevel === "Level 3") router.push(`/academy/${langSlug}/level/3`);
+    else router.push(`/academy/${langSlug}/level/1`);
   };
 
   return (
@@ -141,17 +150,30 @@ export default function Dashboard() {
                   Welcome back, {fullName} 👋
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
-                  Ready to boost your English skills today at <span className="text-gold-400 font-semibold">Brightened Mind Academy</span>?
+                  Ready to continue your <span className="text-gold-400 font-semibold">{langInfo.label}</span> lessons today?
                 </p>
               </div>
             </div>
 
-            <button
-              onClick={handleContinue}
-              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3.5 rounded-xl transition transform active:scale-95 flex items-center justify-center gap-2 shrink-0"
-            >
-              <span>▶ Continue Lesson {lastLesson}</span>
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+              <button
+                onClick={() => router.push(`/academy/${langSlug}/level/${(student.level || "Level 1").slice(-1)}/live`)}
+                className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+              >
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                </span>
+                Live Class
+              </button>
+
+              <button
+                onClick={handleContinue}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3.5 rounded-xl transition transform active:scale-95 flex items-center justify-center gap-2"
+              >
+                <span>▶ Continue Lesson {lastLesson}</span>
+              </button>
+            </div>
           </div>
 
           {/* Barre de progression */}
@@ -217,9 +239,9 @@ export default function Dashboard() {
 
         {/* Sections des cours */}
         <div>
-          <h2 className="text-xl font-black text-ink mb-4">Your Courses</h2>
+          <h2 className="text-xl font-black text-ink mb-4">Your {langInfo.label} Courses</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
+
             <div className="bg-surface p-6 rounded-2xl border border-line shadow-xl flex flex-col justify-between hover:border-gold-700/40 transition">
               <div>
                 <span className="text-xs font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
@@ -231,7 +253,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <button
-                onClick={() => router.push(`/academy/${DEFAULT_LANG}/level/1`)}
+                onClick={() => router.push(`/academy/${langSlug}/level/1`)}
                 className="glow-accent mt-6 w-full bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-2.5 rounded-xl text-sm transition"
               >
                 Open Level 1
@@ -251,7 +273,7 @@ export default function Dashboard() {
               <button
                 onClick={() => {
                   if (student.level === "Level 2" || student.level === "Level 3") {
-                    router.push(`/academy/${DEFAULT_LANG}/level/2`);
+                    router.push(`/academy/${langSlug}/level/2`);
                   }
                 }}
                 disabled={student.level === "Level 1"}
@@ -268,7 +290,7 @@ export default function Dashboard() {
             <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-purple-400 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800/40">
-                  Business English
+                  Advanced / Pro
                 </span>
                 <h3 className="text-lg font-bold text-ink mt-3">Level 3</h3>
                 <p className="text-ink-soft text-xs mt-1">
@@ -277,7 +299,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (student.level === "Level 3") router.push(`/academy/${DEFAULT_LANG}/level/3`);
+                  if (student.level === "Level 3") router.push(`/academy/${langSlug}/level/3`);
                 }}
                 disabled={student.level !== "Level 3"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
