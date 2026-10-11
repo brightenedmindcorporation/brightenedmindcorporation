@@ -13,6 +13,8 @@ import {
   Inbox,
   SquarePen,
   Paperclip,
+  ArrowLeft,
+  Forward,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -566,12 +568,19 @@ export default function AdminPage() {
     }
   };
 
-  const openCompose = (prefillTo = "", prefillSubject = "") => {
+  const openCompose = (prefillTo = "", prefillSubject = "", prefillBody = "") => {
     setComposeTo(prefillTo);
     setComposeSubject(prefillSubject);
-    setComposeBody("");
+    setComposeBody(prefillBody);
     setComposeAttachments([]);
     setComposeOpen(true);
+  };
+
+  const forwardMail = () => {
+    if (!selectedMail) return;
+    const plainBody = String(selectedMail.body || selectedMail.snippet || "").replace(/<[^>]*>/g, " ").trim();
+    const quoted = `\n\n---------- Message transféré ----------\nDe : ${selectedMail.from}\nDate : ${selectedMail.date}\nSujet : ${selectedMail.subject}\n\n${plainBody}`;
+    openCompose("", selectedMail.subject.startsWith("Fwd:") ? selectedMail.subject : `Fwd: ${selectedMail.subject}`, quoted);
   };
 
   const sendCompose = async () => {
@@ -1838,6 +1847,20 @@ export default function AdminPage() {
                       </div>
                     ) : (
                       <div className="p-6">
+                        <div className="flex items-center justify-between mb-4">
+                          <button
+                            onClick={() => setSelectedMail(null)}
+                            className="text-xs font-semibold text-ink-soft hover:text-ink inline-flex items-center gap-1.5"
+                          >
+                            <ArrowLeft size={14} /> Retour
+                          </button>
+                          <button
+                            onClick={forwardMail}
+                            className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                          >
+                            <Forward size={14} /> Transférer
+                          </button>
+                        </div>
                         <p className="text-xl font-bold text-ink">{selectedMail.subject}</p>
                         <div className="flex items-center gap-3 mt-3">
                           <span className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 ${avatarColor(parseFromHeader(selectedMail.from).name)}`}>

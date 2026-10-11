@@ -57,7 +57,7 @@ export default function VisuelPage() {
             ← Retour aux formations BM Academia
           </Link>
           <div className="flex justify-center mb-4">
-            <span className="text-4xl">🎬</span>
+            <svg className="w-9 h-9 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M2 7l3-3h14l3 3M2 7v13a1 1 0 0 0 1 1h18a1 1 0 0 0 1-1V7M2 7h20M7 4l2 3M13 4l2 3M18 4l2 3"/></svg>
           </div>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             Formation <span className="text-gradient-red">Visuel & Audiovisuel</span>

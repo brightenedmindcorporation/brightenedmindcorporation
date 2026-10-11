@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { GraduationCap } from "lucide-react";
 import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
@@ -90,8 +91,8 @@ export default function FinalQuizPage() {
             <span className="text-xs font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
               Final Assessment
             </span>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50 mt-3">
-              🎓 {curriculum.finalQuiz.title}
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50 mt-3 flex items-center gap-3">
+              <GraduationCap size={38} /> {curriculum.finalQuiz.title}
             </h1>
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.finalQuiz.subtitle}</p>
           </div>

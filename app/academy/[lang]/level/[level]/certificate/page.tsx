@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
+import { Trophy, XCircle, CheckCircle2 } from "lucide-react";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { getLevelProgress, getOrCreateCertificateId } from "@/lib/academy/progress";
 import CertificateButton from "@/components/academy/CertificateButton";
@@ -92,11 +93,11 @@ export default function CertificatePage() {
           </div>
 
           <div className="bg-surface rounded-3xl p-8 border border-line shadow-2xl">
-            <h1 className="text-3xl md:text-4xl font-black text-center text-ink mb-8">🏆 Certificate</h1>
+            <h1 className="text-3xl md:text-4xl font-black text-center text-ink mb-8 flex items-center justify-center gap-3"><Trophy size={32} /> Certificate</h1>
 
             {!eligible ? (
               <div className="text-center">
-                <h2 className="text-2xl font-bold text-red-500">❌ Access Denied</h2>
+                <h2 className="text-2xl font-bold text-red-500 flex items-center justify-center gap-2"><XCircle size={22} /> Access Denied</h2>
                 <p className="mt-3 text-ink-soft">Pass the Final Quiz first.</p>
               </div>
             ) : (
@@ -107,7 +108,7 @@ export default function CertificatePage() {
                   <p><strong className="text-ink">Level:</strong> {curriculum?.levelTitle}</p>
                   <p><strong className="text-ink">Final Average:</strong> {average}%</p>
                   <p><strong className="text-ink">Certificate ID:</strong> {certificateId}</p>
-                  <p className="text-emerald-400 font-bold mt-3">✅ Eligible for Certificate</p>
+                  <p className="text-emerald-400 font-bold mt-3 flex items-center gap-2"><CheckCircle2 size={16} /> Eligible for Certificate</p>
                 </div>
 
                 <div className="text-center mt-8">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import type { Quiz, FinalQuiz } from "@/content/curriculum/types";
 
 interface QuizEngineProps {
@@ -68,8 +69,8 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
                   className={`w-full text-left px-5 py-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${buttonStyle}`}
                 >
                   <span>{option}</span>
-                  {submitted && isCorrect && <span className="text-emerald-400 font-bold ml-2">✓</span>}
-                  {submitted && isSelected && !isCorrect && <span className="text-red-400 font-bold ml-2">✗</span>}
+                  {submitted && isCorrect && <CheckCircle2 size={16} className="inline text-emerald-400 ml-2" />}
+                  {submitted && isSelected && !isCorrect && <XCircle size={16} className="inline text-red-400 ml-2" />}
                 </button>
               );
             })}
@@ -100,9 +101,9 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
               </h2>
               <p className="mt-1 font-semibold text-sm">
                 {passed ? (
-                  <span className="text-emerald-400">✅ Passed! Great job.</span>
+                  <span className="text-emerald-400 inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> Passed! Great job.</span>
                 ) : (
-                  <span className="text-red-400">❌ Failed. You need at least {quiz.passingScore}/{quiz.questions.length} to pass.</span>
+                  <span className="text-red-400 inline-flex items-center gap-1.5"><XCircle size={16} /> Failed. You need at least {quiz.passingScore}/{quiz.questions.length} to pass.</span>
                 )}
               </p>
             </div>
@@ -112,9 +113,9 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
                 setAnswers(Array(quiz.questions.length).fill(""));
                 setSubmitted(false);
               }}
-              className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto"
+              className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto inline-flex items-center gap-2"
             >
-              🔄 Retake (practice only)
+              <RefreshCw size={15} /> Retake (practice only)
             </button>
           </div>
 

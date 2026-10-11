@@ -1,6 +1,7 @@
 "use client";
 
 import type { Lesson } from "@/content/curriculum/types";
+import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle } from "lucide-react";
 
 // Maps our URL language slugs to BCP-47 tags for the Web Speech API.
 // Without this, every language's "Listen" buttons were reading the text
@@ -87,10 +88,10 @@ function Card({ children }: { children: React.ReactNode }) {
   return <div className="bg-surface rounded-3xl p-8 border border-line shadow-xl">{children}</div>;
 }
 
-function CardTitle({ icon, children }: { icon: string; children: React.ReactNode }) {
+function CardTitle({ icon: Icon, children }: { icon: React.ComponentType<{ size?: number }>; children: React.ReactNode }) {
   return (
     <h2 className="text-2xl font-bold text-red-500 flex items-center gap-2">
-      <span>{icon}</span> {children}
+      <Icon size={22} /> {children}
     </h2>
   );
 }
@@ -100,9 +101,9 @@ function SpeakButtons({ text, langSlug, label = "Listen" }: { text: string; lang
     <div className="mt-6 flex flex-wrap gap-4">
       <button
         onClick={() => speak(text, langSlug)}
-        className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50"
+        className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50 inline-flex items-center gap-2"
       >
-        🔊 {label}
+        <Volume2 size={16} /> {label}
       </button>
       <button
         onClick={stopSpeaking}
@@ -120,9 +121,9 @@ function SpeakIconButton({ text, langSlug }: { text: string; langSlug: string })
       onClick={() => speak(text, langSlug)}
       aria-label="Écouter cette phrase"
       title="Écouter cette phrase"
-      className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition text-sm mt-0.5"
+      className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition mt-0.5"
     >
-      🔊
+      <Volume2 size={13} />
     </button>
   );
 }
@@ -141,7 +142,7 @@ function VideoCard({ lesson }: { lesson: Lesson }) {
 
   return (
     <Card>
-      <CardTitle icon="▶">Video</CardTitle>
+      <CardTitle icon={PlayCircle}>Video</CardTitle>
       {embedUrl ? (
         <div className="mt-4 aspect-video rounded-2xl overflow-hidden border border-line bg-black">
           <iframe
@@ -163,7 +164,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
   return (
     <div className="space-y-8">
       <Card>
-        <CardTitle icon="📘">Lesson</CardTitle>
+        <CardTitle icon={BookOpen}>Lesson</CardTitle>
         <div className="text-ink-soft mt-4 space-y-4">
           {lesson.sections.map((section, i) => (
             <div key={i}>
@@ -182,7 +183,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
       <VideoCard lesson={lesson} />
 
       <Card>
-        <CardTitle icon="📄">Reading Text</CardTitle>
+        <CardTitle icon={FileText}>Reading Text</CardTitle>
         <div className="text-ink-soft mt-4 space-y-3">
           <p className="font-bold text-ink">{lesson.readingTitle}</p>
           {lesson.reading.map((p, i) => (
@@ -193,7 +194,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
       </Card>
 
       <Card>
-        <CardTitle icon="🎤">Exercises</CardTitle>
+        <CardTitle icon={Mic}>Exercises</CardTitle>
         <p className="text-ink-soft mt-4">Complete the sentences:</p>
         <ul className="list-disc ml-6 text-ink-soft mt-4 space-y-1">
           {lesson.exercises.map((ex, i) => (
@@ -203,7 +204,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
       </Card>
 
       <Card>
-        <CardTitle icon="🗣">Speaking Topic</CardTitle>
+        <CardTitle icon={MessageSquare}>Speaking Topic</CardTitle>
         <p className="text-ink-soft mt-4">{lesson.speakingTopic}</p>
       </Card>
     </div>

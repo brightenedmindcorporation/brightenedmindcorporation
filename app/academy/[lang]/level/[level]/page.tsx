@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy } from "lucide-react";
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
@@ -117,7 +118,7 @@ export default function LevelOverviewPage() {
                 className="bg-black/20 border border-white/10 text-white/60 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap cursor-not-allowed"
                 title={liveSession ? "Le cours n'a pas encore commencé" : "Aucun cours en direct programmé pour ce niveau"}
               >
-                🔒{" "}
+                <Lock size={13} className="inline -mt-0.5" />{" "}
                 {liveSession
                   ? `Live : ${new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}`
                   : "Aucun live programmé"}
@@ -127,7 +128,7 @@ export default function LevelOverviewPage() {
 
           <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-8 mt-8">
             <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
-              <span>📈</span> Course Progress
+<TrendingUp size={20} /> Course Progress
             </h2>
             <div className="w-full bg-surface-sunken rounded-full h-7 overflow-hidden border border-line p-1">
               <div
@@ -167,20 +168,20 @@ export default function LevelOverviewPage() {
                     {unlocked ? (
                       <>
                         <Link href={`${base}/lesson/${lesson.id}`}>
-                          <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-md hover:shadow-red-900/40">
-                            📘 Lesson
+                          <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-md hover:shadow-red-900/40 inline-flex items-center gap-2">
+                            <BookOpen size={16} /> Lesson
                           </button>
                         </Link>
                         <Link href={`${base}/quiz/${lesson.id}`}>
-                          <button className="bg-neutral-100 hover:bg-white text-black font-bold px-5 py-3 rounded-xl transition-all shadow-md">
-                            📝 Quiz
+                          <button className="bg-neutral-100 hover:bg-white text-black font-bold px-5 py-3 rounded-xl transition-all shadow-md inline-flex items-center gap-2">
+                            <PenLine size={16} /> Quiz
                           </button>
                         </Link>
                       </>
                     ) : (
                       <>
-                        <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line">
-                          🔒 Locked
+                        <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line inline-flex items-center gap-2">
+                          <Lock size={14} /> Locked
                         </button>
                         {unlockDate && (
                           <p className="text-xs text-ink-faint">
@@ -196,30 +197,30 @@ export default function LevelOverviewPage() {
           </div>
 
           <div className="bg-surface rounded-3xl shadow-2xl border border-line p-8 mt-10">
-            <h2 className="text-2xl font-bold text-center text-ink mb-6">🎓 Level Completion</h2>
+            <h2 className="text-2xl font-bold text-center text-ink mb-6 flex items-center justify-center gap-2"><GraduationCap size={24} /> Level Completion</h2>
 
             <div className="flex flex-col md:flex-row gap-4">
               {progressPct === 100 ? (
                 <Link href={`${base}/final-quiz`} className="w-full">
-                  <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60">
-                    🎓 Final Quiz
+                  <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60 inline-flex items-center justify-center gap-2">
+                    <GraduationCap size={18} /> Final Quiz
                   </button>
                 </Link>
               ) : (
-                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line">
-                  🔒 Complete 100% Course First
+                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
+                  <Lock size={16} /> Complete 100% Course First
                 </button>
               )}
 
               {progress.finalQuizPassed ? (
                 <Link href={`${base}/certificate`} className="w-full">
-                  <button className="bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg">
-                    🏆 Request Certificate
+                  <button className="bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg inline-flex items-center justify-center gap-2">
+                    <Trophy size={18} /> Request Certificate
                   </button>
                 </Link>
               ) : (
-                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line">
-                  🔒 Pass Final Quiz First
+                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
+                  <Lock size={16} /> Pass Final Quiz First
                 </button>
               )}
             </div>

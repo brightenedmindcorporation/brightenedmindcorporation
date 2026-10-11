@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { Lock } from "lucide-react";
 import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
@@ -209,7 +210,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
-                  Bienvenue, {fullName} 👋
+                  Bienvenue, {fullName}
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
                   Votre inscription à <span className="text-red-500 font-semibold">{programLabel}</span> est confirmée.
@@ -258,7 +259,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
-                  Welcome back, {fullName} 👋
+                  Welcome back, {fullName}
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
                   Ready to continue your <span className="text-red-500 font-semibold">{langInfo.label}</span> lessons today?
@@ -283,7 +284,7 @@ export default function Dashboard() {
                   className="border border-line text-ink-faint font-semibold px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-sm"
                   title={liveSession ? "Le cours n'a pas encore commencé" : "Aucun cours en direct programmé"}
                 >
-                  🔒{" "}
+                  <Lock size={13} className="inline -mt-0.5" />{" "}
                   {liveSession
                     ? new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })
                     : "Pas de live programmé"}
@@ -406,7 +407,7 @@ export default function Dashboard() {
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
-                {activeEnrollment.level === "Level 1" ? "🔒 Locked" : "Open Level 2"}
+                {activeEnrollment.level === "Level 1" ? (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> Locked</span>) : "Open Level 2"}
               </button>
             </div>
 
@@ -431,7 +432,7 @@ export default function Dashboard() {
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >
-                {activeEnrollment.level !== "Level 3" ? "🔒 Locked" : "Open Level 3"}
+                {activeEnrollment.level !== "Level 3" ? (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> Locked</span>) : "Open Level 3"}
               </button>
             </div>
 

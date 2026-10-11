@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Mic } from "lucide-react";
 
 interface SpeakingExerciseProps {
   phrase?: string;
@@ -58,7 +59,7 @@ export default function SpeakingExercise({
           isListening ? "bg-red-500 animate-pulse" : "bg-primary hover:bg-primary/90"
         }`}
       >
-        {isListening ? "Écoute en cours..." : "🎤 Parler"}
+        {isListening ? "Écoute en cours..." : (<span className="inline-flex items-center gap-2"><Mic size={15} /> Parler</span>)}
       </button>
 
       {transcript && (

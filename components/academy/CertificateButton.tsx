@@ -1,6 +1,7 @@
 "use client";
 
 import jsPDF from "jspdf";
+import { Trophy } from "lucide-react";
 
 interface CertificateButtonProps {
   studentName: string;
@@ -77,9 +78,9 @@ export default function CertificateButton({ studentName, levelTitle, average, ce
   return (
     <button
       onClick={generate}
-      className={className ?? "bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-2xl font-bold transition-all shadow-lg"}
+      className={className ?? "bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-2xl font-bold transition-all shadow-lg inline-flex items-center justify-center gap-2"}
     >
-      🏆 Download Certificate
+      <Trophy size={18} /> Download Certificate
     </button>
   );
 }

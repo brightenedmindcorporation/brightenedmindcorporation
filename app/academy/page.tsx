@@ -2,29 +2,30 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { Languages, Laptop, Clapperboard, Receipt, Target, TrendingUp, Smartphone, ArrowRight } from "lucide-react";
 import { availableLanguages } from "@/content/curriculum";
 
 const DEPARTMENTS = [
   {
-    icon: "🗣",
+    icon: Languages,
     title: "Langues",
     description: "Plateforme interactive : leçons, quiz, suivi de progression et cours en direct.",
     href: "#langues",
   },
   {
-    icon: "💻",
+    icon: Laptop,
     title: "Bureautique",
     description: "Word, Excel, PowerPoint et la gestion de votre environnement Windows.",
     href: "/academia/bureautique",
   },
   {
-    icon: "🎬",
+    icon: Clapperboard,
     title: "Visuel & Audiovisuel",
     description: "Design graphique, montage vidéo professionnel et diffusion en direct.",
     href: "/academia/visuel",
   },
   {
-    icon: "🧾",
+    icon: Receipt,
     title: "Logiciels de Gestion",
     description: "ODOO, SAGE, Dolibarr et les logiciels comptables/douaniers.",
     href: "/academia/logiciels",
@@ -78,7 +79,7 @@ export default function Home() {
               className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-base px-8 py-4 rounded-xl shadow-lg shadow-red-950/50 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3"
             >
               <span>Go to Student Portal</span>
-              <span className="text-xl">➔</span>
+              <ArrowRight size={18} />
             </Link>
 
             <Link
@@ -138,7 +139,7 @@ export default function Home() {
               href={dept.href}
               className="group bg-surface rounded-2xl p-6 border border-line hover:border-red-600/40 flex flex-col shadow-md transition"
             >
-              <div className="text-3xl mb-4">{dept.icon}</div>
+              <div className="mb-4 text-red-500"><dept.icon size={30} strokeWidth={1.8} /></div>
               <h4 className="text-lg font-bold text-ink mb-2 group-hover:text-red-500 transition-colors">
                 {dept.title}
               </h4>
@@ -206,7 +207,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             <div className="p-6 rounded-2xl bg-surface border border-line">
-              <div className="text-3xl mb-4">🎯</div>
+              <div className="mb-4 text-red-500"><Target size={28} strokeWidth={1.8} /></div>
               <h4 className="text-lg font-bold text-ink mb-2">Interactive Quizzes</h4>
               <p className="text-ink-soft text-sm">
                 Test your knowledge at the end of every lesson with instant feedback and score tracking.
@@ -214,7 +215,7 @@ export default function Home() {
             </div>
 
             <div className="p-6 rounded-2xl bg-surface border border-line">
-              <div className="text-3xl mb-4">📈</div>
+              <div className="mb-4 text-red-500"><TrendingUp size={28} strokeWidth={1.8} /></div>
               <h4 className="text-lg font-bold text-ink mb-2">Personal Progress Bar</h4>
               <p className="text-ink-soft text-sm">
                 Keep track of your completed modules and pick up exactly where you left off.
@@ -222,7 +223,7 @@ export default function Home() {
             </div>
 
             <div className="p-6 rounded-2xl bg-surface border border-line">
-              <div className="text-3xl mb-4">📱</div>
+              <div className="mb-4 text-red-500"><Smartphone size={28} strokeWidth={1.8} /></div>
               <h4 className="text-lg font-bold text-ink mb-2">Mobile Friendly</h4>
               <p className="text-ink-soft text-sm">
                 Fully responsive design allows you to practice on your phone, tablet, or desktop anywhere.
