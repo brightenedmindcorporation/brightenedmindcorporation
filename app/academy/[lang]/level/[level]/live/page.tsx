@@ -37,7 +37,7 @@ export default function LiveClassPage() {
         (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
       );
       if (!enrollment) {
-        router.push("/academy/dashboard");
+        router.push(`/login?program=${curriculum?.langCode ?? ""}`);
         return;
       }
       setStudentName(parsed.name || parsed.email || "Élève");

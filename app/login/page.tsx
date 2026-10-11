@@ -165,7 +165,11 @@ function LoginForm() {
     <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
       <div className="bg-surface-sunken border border-line p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-ink relative">
         <h1 className="text-2xl font-bold text-center mb-1">Connexion</h1>
-        <p className="text-sm text-ink-faint text-center mb-6">Espace Apprentissage — BM Corporation</p>
+        <p className="text-sm text-ink-faint text-center mb-6">
+          {requiredProgram
+            ? `Connectez-vous à votre compte inscrit en ${programLabel(requiredProgram)}`
+            : "Espace Apprentissage — BM Corporation"}
+        </p>
 
         {loginError && (
           <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">

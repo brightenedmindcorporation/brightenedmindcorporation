@@ -34,7 +34,10 @@ export default function LevelOverviewPage() {
         (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
       );
       if (!enrollment) {
-        router.push("/academy/dashboard");
+        // La session active (ex. anglais) n'a pas cette langue (ex. français) :
+        // on redemande une connexion spécifique à cette langue, plutôt que de
+        // silencieusement renvoyer l'étudiant vers son ancien tableau de bord.
+        router.push(`/login?program=${curriculum?.langCode ?? ""}`);
         return;
       }
       setAllowed(true);

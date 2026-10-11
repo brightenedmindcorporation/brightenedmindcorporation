@@ -34,7 +34,7 @@ export default function LessonPage() {
         (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
       );
       if (!enrollment) {
-        router.push("/academy/dashboard");
+        router.push(`/login?program=${curriculum?.langCode ?? ""}`);
         return;
       }
       const progress = getLevelProgress(langSlug, level);
