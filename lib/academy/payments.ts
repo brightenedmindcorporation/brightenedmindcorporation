@@ -19,7 +19,10 @@ export type ConfirmPaymentResult =
   | { ok: false; reason: "admin-not-configured" | "not-found" | "gateway-rejected" };
 
 function isGatewaySuccess(status: string): boolean {
-  return status === "SUCCESS" || status === "APPROVED" || status === "00";
+  const normalized = String(status).toUpperCase();
+  // "0"/0 covers FlexPay's own success code, in addition to the more
+  // generic gateway status strings already handled.
+  return normalized === "SUCCESS" || normalized === "APPROVED" || normalized === "00" || normalized === "0";
 }
 
 async function sendMatriculeEmail(email: string, amount: number | undefined, currency: string | undefined, matricule: string) {

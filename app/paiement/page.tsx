@@ -17,7 +17,7 @@ export default function PaymentPage() {
   const [operator, setOperator] = useState<"mpesa" | "orange" | "airtel" | "afrimoney">("mpesa");
   const [phone, setPhone] = useState("");
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<"idle" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "pending" | "success" | "error">("idle");
   const [matricule, setMatricule] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -51,6 +51,7 @@ export default function PaymentPage() {
           uid: user.uid,
           langCode,
           level: 1,
+          method: selectedMethod,
         }),
       });
 
@@ -60,15 +61,58 @@ export default function PaymentPage() {
         throw new Error(result.error || "Le paiement a échoué.");
       }
 
+      if (result.status === "pending") {
+        // Real FlexPay Mobile Money flow: the customer approves a USSD
+        // prompt on their phone, confirmation arrives asynchronously on
+        // /api/payment/webhook — poll until that lands.
+        setStatus("pending");
+        pollPaymentStatus(result.reference);
+        return;
+      }
+
       setMatricule(result.matricule ?? null);
       setStatus("success");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Erreur paiement:", error);
-      setErrorMessage("Une erreur est survenue lors du paiement. Veuillez réessayer.");
+      setErrorMessage(error.message || "Une erreur est survenue lors du paiement. Veuillez réessayer.");
       setStatus("error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const pollPaymentStatus = (reference: string) => {
+    const startedAt = Date.now();
+    const timeoutMs = 3 * 60 * 1000; // Mobile Money USSD prompts expire after a few minutes anyway.
+
+    const check = async () => {
+      try {
+        const response = await fetch(`/api/payment/status?reference=${encodeURIComponent(reference)}`);
+        const result = await response.json();
+
+        if (result.status === "paid") {
+          setMatricule(result.matricule ?? null);
+          setStatus("success");
+          return;
+        }
+        if (result.status === "failed") {
+          setErrorMessage("Le paiement a été refusé ou annulé sur votre téléphone. Réessayez.");
+          setStatus("error");
+          return;
+        }
+      } catch (error) {
+        console.error("Erreur de vérification du paiement:", error);
+      }
+
+      if (Date.now() - startedAt > timeoutMs) {
+        setErrorMessage("Nous n'avons pas reçu de confirmation à temps. Si l'argent a été débité, contactez l'administration ; sinon réessayez.");
+        setStatus("error");
+        return;
+      }
+      setTimeout(check, 5000);
+    };
+
+    setTimeout(check, 5000);
   };
 
   if (checkingAuth) {
@@ -109,7 +153,15 @@ export default function PaymentPage() {
           Choisissez votre langue et votre mode de paiement sécurisé pour valider votre formation.
         </p>
 
-        {status === "success" ? (
+        {status === "pending" ? (
+          <div className="bg-surface-alt border border-line rounded-xl p-6 text-center space-y-4">
+            <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
+            <h2 className="text-xl font-bold text-ink">En attente de confirmation…</h2>
+            <p className="text-ink-soft text-sm max-w-sm mx-auto">
+              Vérifiez votre téléphone : une demande de confirmation Mobile Money a été envoyée au numéro {phone}. Approuvez-la pour activer votre compte.
+            </p>
+          </div>
+        ) : status === "success" ? (
           <div className="bg-emerald-950/80 border border-emerald-600/50 rounded-xl p-6 text-center space-y-4">
             <div className="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mx-auto text-2xl font-bold">
               ✓

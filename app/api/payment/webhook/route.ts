@@ -12,15 +12,15 @@ export async function POST(request: Request) {
     const body = await request.json();
     console.log("PAYMENT WEBHOOK RECEIVED:", body);
 
-    const { reference, transactionId, status, amount, currency, customerPhone, customerEmail } = body;
-    const paymentRef = reference || transactionId;
+    const { reference, transactionId, orderNumber, status, code, amount, currency, customerPhone, customerEmail } = body;
+    const paymentRef = reference || orderNumber || transactionId;
 
     if (!paymentRef) {
       return NextResponse.json({ error: "Missing reference/transactionId" }, { status: 400 });
     }
 
     const result = await confirmPayment(paymentRef, {
-      status,
+      status: status ?? code,
       transactionId,
       amount,
       currency,

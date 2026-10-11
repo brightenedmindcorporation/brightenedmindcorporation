@@ -1,37 +1,18 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { confirmPayment } from "@/lib/academy/payments";
+import { isFlexPayConfigured, initiateFlexPayPayment } from "@/lib/academy/flexpay";
 
 export async function POST(request: Request) {
   try {
-    const { amount, currency, phone, studentName, studentEmail, courseName, uid, langCode, level } =
+    const { amount, currency, phone, studentName, studentEmail, courseName, uid, langCode, level, method } =
       await request.json();
 
     if (!uid || !langCode) {
       return NextResponse.json({ error: "uid et langCode sont requis" }, { status: 400 });
     }
 
-    // Identifiants fournis par ta passerelle (FlexPay / CinetPay / MaxiCash)
-    // À placer idéalement dans un fichier .env.local
-    const API_TOKEN = process.env.FLEXPAY_API_TOKEN || "TON_TOKEN_DE_TEST";
-    const MERCHANT_ID = process.env.FLEXPAY_MERCHANT_ID || "TON_MERCHANT_ID";
-
-    // Référence unique pour cette transaction
     const reference = `BM-${Date.now()}`;
-
-    // Payload envoyé à la passerelle de paiement
-    const paymentPayload = {
-      merchant: MERCHANT_ID,
-      type: "1", // 1 pour Mobile Money, 2 pour Carte Bancaire
-      reference: reference,
-      amount: amount,
-      currency: currency || "USD",
-      phone: phone, // ex: "243988830799"
-      callbackUrl: `${process.env.NEXT_PUBLIC_BASE_URL || "https://pursuit-anthem-gorged.ngrok-free.dev"}/api/payment/webhook`,
-      description: `Paiement Formation ${courseName} - ${studentName}`,
-    };
-
-    console.log("Initiating payment request:", paymentPayload);
 
     if (isAdminConfigured()) {
       const adminDb = getAdminDb();
@@ -48,27 +29,44 @@ export async function POST(request: Request) {
       });
     }
 
-    /*
-    // APPEL RÉEL À L'API FLEXPAY — une fois activé, retirer le bloc
-    // "simulation" ci-dessous : la confirmation arrivera alors de façon
-    // asynchrone sur /api/payment/webhook (déjà branché sur la même
-    // logique confirmPayment), pas ici.
-    const response = await fetch("https://backend.flexpay.cd/api/rest/v1/paymentService", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${API_TOKEN}`,
-      },
-      body: JSON.stringify(paymentPayload),
-    });
+    if (isFlexPayConfigured()) {
+      // Real gateway: confirmation is asynchronous (the customer approves
+      // a USSD prompt on their phone, or completes a card page), so this
+      // only ever reports "pending" — /api/payment/webhook is what
+      // actually confirms the payment once FlexPay calls back.
+      const callbackUrl = `${new URL(request.url).origin}/api/payment/webhook`;
+      try {
+        const result = await initiateFlexPayPayment({
+          reference,
+          amount,
+          currency: currency || "USD",
+          phone,
+          description: `Paiement Formation ${courseName} - ${studentName}`,
+          callbackUrl,
+          type: method === "card" ? "2" : "1",
+        });
 
-    const data = await response.json();
-    */
+        if (!result.ok) {
+          if (isAdminConfigured()) {
+            await getAdminDb().collection("payments").doc(reference).update({ status: "failed", failedAt: new Date() });
+          }
+          return NextResponse.json(
+            { error: result.message || "La passerelle de paiement a refusé la demande." },
+            { status: 502 }
+          );
+        }
 
-    // Simulation de la confirmation de paiement (pas encore de passerelle
-    // réelle branchée) : on confirme immédiatement via le même chemin que
-    // le webhook utiliserait, pour que la persistance Firestore et le
-    // matricule soient réels dès aujourd'hui.
+        return NextResponse.json({ status: "pending", reference });
+      } catch (gatewayError: any) {
+        console.error("Error calling FlexPay:", gatewayError);
+        return NextResponse.json({ error: gatewayError.message || "Erreur de la passerelle de paiement." }, { status: 502 });
+      }
+    }
+
+    // FlexPay not configured yet: simulate an immediate confirmation
+    // (same Firestore/matricule path the webhook would use for a real
+    // payment) so the rest of the flow stays testable while the gateway
+    // account is being set up.
     const confirmation = await confirmPayment(reference, {
       status: "SUCCESS",
       amount,
@@ -80,15 +78,12 @@ export async function POST(request: Request) {
     if (confirmation.ok) {
       return NextResponse.json({
         status: "success",
-        message: "Paiement confirmé",
+        message: "Paiement confirmé (mode simulation — FlexPay pas encore configuré)",
         reference,
         matricule: confirmation.matricule,
       });
     }
 
-    // Admin non configuré ou doc introuvable : on répond quand même succès
-    // côté passerelle (la demande a bien été envoyée) mais sans matricule
-    // réel — l'utilisateur devra être approuvé manuellement par un admin.
     return NextResponse.json({
       status: "success",
       message: "Demande de paiement envoyée, en attente de validation manuelle",
