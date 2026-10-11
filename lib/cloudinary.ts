@@ -24,8 +24,18 @@ function ensureConfigured() {
   configured = true;
 }
 
-export async function uploadToCloudinary(
-  file: File,
+/**
+ * Core uploader taking an already-read Buffer. Callers that also need the
+ * file's bytes for something else (e.g. emailing it as an attachment)
+ * should read `file.arrayBuffer()` ONCE and pass that buffer here, rather
+ * than letting this function read the `File` a second time — some runtimes'
+ * `File`/`Blob` implementations don't reliably support re-reading the same
+ * instance, which silently produced an empty/corrupt upload before this was
+ * split out.
+ */
+export async function uploadBufferToCloudinary(
+  buffer: Buffer,
+  filename: string,
   folder: string,
   resourceType: "image" | "video" | "raw" = "image"
 ): Promise<string> {
@@ -33,8 +43,6 @@ export async function uploadToCloudinary(
     throw { status: 503, message: "Le service d'hébergement de fichiers n'est pas configuré côté serveur." };
   }
   ensureConfigured();
-
-  const buffer = Buffer.from(await file.arrayBuffer());
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
@@ -44,7 +52,7 @@ export async function uploadToCloudinary(
         // "raw" is for non-image/video files (PDF, DOCX...) — keeping the
         // original filename/extension means the stored URL downloads with
         // a sensible name instead of a bare Cloudinary id.
-        ...(resourceType === "raw" ? { use_filename: true, unique_filename: true, filename_override: file.name } : {}),
+        ...(resourceType === "raw" ? { use_filename: true, unique_filename: true, filename_override: filename } : {}),
       },
       (error, result) => {
         if (error || !result) {
@@ -56,4 +64,13 @@ export async function uploadToCloudinary(
     );
     uploadStream.end(buffer);
   });
+}
+
+export async function uploadToCloudinary(
+  file: File,
+  folder: string,
+  resourceType: "image" | "video" | "raw" = "image"
+): Promise<string> {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  return uploadBufferToCloudinary(buffer, file.name, folder, resourceType);
 }
