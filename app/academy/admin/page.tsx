@@ -2,6 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import {
+  RefreshCw,
+  LogOut,
+  Video,
+  Mail,
+  CheckCircle2,
+  X,
+  Link2,
+  Inbox,
+  SquarePen,
+  Paperclip,
+} from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
@@ -977,13 +989,13 @@ export default function AdminPage() {
               onClick={() => refreshTab(tab)}
               className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all duration-200 bg-surface"
             >
-              🔄 Actualiser
+              <RefreshCw size={15} /> Actualiser
             </button>
             <button
               onClick={handleAdminLogout}
               className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
             >
-              🚪 Déconnexion
+              <LogOut size={15} /> Déconnexion
             </button>
           </div>
         </div>
@@ -1232,9 +1244,9 @@ export default function AdminPage() {
                       <div className="flex items-center gap-4 self-start sm:self-center">
                         <button
                           onClick={() => setHostingSession({ langCode: session.langCode || "EN", level: session.level, title: session.title })}
-                          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition"
+                          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition inline-flex items-center gap-2"
                         >
-                          🎥 Rejoindre en tant qu'enseignant
+                          <Video size={15} /> Rejoindre en tant qu'enseignant
                         </button>
                         <button
                           onClick={() => deleteLiveSession(session.id)}
@@ -1527,43 +1539,43 @@ export default function AdminPage() {
                     </div>
                     <p className="text-ink-soft text-sm mt-1">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
                     {app.message && <p className="text-ink-soft text-sm mt-2">{app.message}</p>}
-                    <p className="text-xs text-ink-faint mt-3">
-                      📧 Fichiers envoyés par email à l'administration
+                    <p className="text-xs text-ink-faint mt-3 flex items-center gap-1.5">
+                      <Mail size={12} /> Fichiers envoyés par email à l'administration
                       {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
                     </p>
                     <div className="flex flex-wrap gap-2 mt-4">
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "reviewing")}
                         disabled={app.status === "reviewing"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           app.status === "reviewing" ? "bg-amber-600 border-amber-600 text-white" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
-                        {app.status === "reviewing" ? "✓ En étude" : "En étude"}
+                        {app.status === "reviewing" ? (<><CheckCircle2 size={13} /> En étude</>) : "En étude"}
                       </button>
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "accepted")}
                         disabled={app.status === "accepted"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           app.status === "accepted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
-                        {app.status === "accepted" ? "✓ Accepté" : "Accepter"}
+                        {app.status === "accepted" ? (<><CheckCircle2 size={13} /> Accepté</>) : "Accepter"}
                       </button>
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "rejected")}
                         disabled={app.status === "rejected"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           app.status === "rejected" ? "bg-red-900 text-white/80" : "bg-red-600 hover:bg-red-700 text-white"
                         }`}
                       >
-                        {app.status === "rejected" ? "✓ Rejeté" : "Rejeter"}
+                        {app.status === "rejected" ? (<><CheckCircle2 size={13} /> Rejeté</>) : "Rejeter"}
                       </button>
                       <button
                         onClick={() => openReply("jobApplications", app.id, app.email, `Votre candidature — ${app.announcementTitle}`)}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center"
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
-                        ✉️ Répondre sur le site
+                        <Mail size={13} /> Répondre sur le site
                       </button>
                       <a href={`mailto:${app.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
                     </div>
@@ -1606,26 +1618,26 @@ export default function AdminPage() {
                       <button
                         onClick={() => updateProjectRequestStatus(req.id, "contacted")}
                         disabled={req.status === "contacted"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "contacted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
-                        {req.status === "contacted" ? "✓ Contacté" : "Marquer contacté"}
+                        {req.status === "contacted" ? (<><CheckCircle2 size={13} /> Contacté</>) : "Marquer contacté"}
                       </button>
                       <button
                         onClick={() => updateProjectRequestStatus(req.id, "closed")}
                         disabled={req.status === "closed"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "closed" ? "bg-surface text-ink-faint border-line" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
-                        {req.status === "closed" ? "✓ Clôturé" : "Clôturer"}
+                        {req.status === "closed" ? (<><CheckCircle2 size={13} /> Clôturé</>) : "Clôturer"}
                       </button>
                       <button
                         onClick={() => openReply("projectRequests", req.id, req.email, "Votre demande — BM Corporation")}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center"
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
-                        ✉️ Répondre sur le site
+                        <Mail size={13} /> Répondre sur le site
                       </button>
                       <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
                       <button onClick={() => deleteProjectRequest(req.id)} className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5 self-center">Supprimer</button>
@@ -1672,26 +1684,26 @@ export default function AdminPage() {
                       <button
                         onClick={() => updateDevisRequestStatus(req.id, "contacted")}
                         disabled={req.status === "contacted"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "contacted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
-                        {req.status === "contacted" ? "✓ Contacté" : "Marquer contacté"}
+                        {req.status === "contacted" ? (<><CheckCircle2 size={13} /> Contacté</>) : "Marquer contacté"}
                       </button>
                       <button
                         onClick={() => updateDevisRequestStatus(req.id, "closed")}
                         disabled={req.status === "closed"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default ${
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "closed" ? "bg-surface text-ink-faint border-line" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
-                        {req.status === "closed" ? "✓ Clôturé" : "Clôturer"}
+                        {req.status === "closed" ? (<><CheckCircle2 size={13} /> Clôturé</>) : "Clôturer"}
                       </button>
                       <button
                         onClick={() => openReply("devisRequests", req.id, req.email, `Votre demande de devis — ${req.service}`)}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center"
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
-                        ✉️ Répondre sur le site
+                        <Mail size={13} /> Répondre sur le site
                       </button>
                       <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
                       {req.phone && (
@@ -1719,7 +1731,7 @@ export default function AdminPage() {
             {mailNotice && (
               <div className="p-3 mb-6 bg-surface border border-line rounded-xl text-sm text-ink flex items-center justify-between">
                 {mailNotice}
-                <button onClick={() => setMailNotice(null)} className="text-ink-faint hover:text-ink ml-4">✕</button>
+                <button onClick={() => setMailNotice(null)} className="text-ink-faint hover:text-ink ml-4"><X size={15} /></button>
               </div>
             )}
 
@@ -1733,25 +1745,25 @@ export default function AdminPage() {
                 <button
                   onClick={connectGmail}
                   disabled={mailConnecting}
-                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl transition"
+                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl transition inline-flex items-center gap-2"
                 >
-                  {mailConnecting ? "Redirection…" : "🔗 Connecter Gmail"}
+                  <Link2 size={16} /> {mailConnecting ? "Redirection…" : "Connecter Gmail"}
                 </button>
               </div>
             ) : (
               <div className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-line bg-surface-alt/50">
                   <div>
-                    <p className="font-black text-ink">📬 brightenedmindcorporation@gmail.com</p>
+                    <p className="font-black text-ink flex items-center gap-2"><Inbox size={16} /> brightenedmindcorporation@gmail.com</p>
                     <p className="text-xs text-ink-soft mt-0.5">
                       {mailMessages.filter((m) => m.unread).length} non lu(s) · {mailMessages.length} affiché(s)
                     </p>
                   </div>
                   <button
                     onClick={() => openCompose()}
-                    className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shrink-0"
+                    className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shrink-0 inline-flex items-center gap-2"
                   >
-                    ✏️ Nouveau message
+                    <SquarePen size={15} /> Nouveau message
                   </button>
                 </div>
 
@@ -1845,9 +1857,9 @@ export default function AdminPage() {
                               <button
                                 key={addr}
                                 onClick={() => openCompose(addr, selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`)}
-                                className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition"
+                                className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition inline-flex items-center gap-1.5"
                               >
-                                ✉️ {addr}
+                                <Mail size={12} /> {addr}
                               </button>
                             ))}
                           </div>
@@ -1878,15 +1890,15 @@ export default function AdminPage() {
                             <div className="flex flex-wrap gap-2 mt-2">
                               {mailReplyAttachments.map((file, i) => (
                                 <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
-                                  📎 {file.name}
-                                  <button onClick={() => setMailReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500">✕</button>
+                                  <Paperclip size={12} /> {file.name}
+                                  <button onClick={() => setMailReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
                                 </span>
                               ))}
                             </div>
                           )}
                           <div className="flex items-center gap-3 mt-3">
-                            <label className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt">
-                              📎 Joindre un fichier
+                            <label className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt inline-flex items-center gap-1.5">
+                              <Paperclip size={13} /> Joindre un fichier
                               <input
                                 type="file"
                                 multiple
@@ -1917,7 +1929,7 @@ export default function AdminPage() {
       {composeOpen && (
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
-            <h3 className="text-lg font-bold text-ink mb-4">✏️ Nouveau message</h3>
+            <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Nouveau message</h3>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">À</label>
             <input
               type="email"
@@ -1945,14 +1957,14 @@ export default function AdminPage() {
               <div className="flex flex-wrap gap-2 mb-3">
                 {composeAttachments.map((file, i) => (
                   <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
-                    📎 {file.name}
-                    <button onClick={() => setComposeAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500">✕</button>
+                    <Paperclip size={12} /> {file.name}
+                    <button onClick={() => setComposeAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
                   </span>
                 ))}
               </div>
             )}
-            <label className="inline-block text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
-              📎 Joindre un fichier
+            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+              <Paperclip size={13} /> Joindre un fichier
               <input
                 type="file"
                 multiple

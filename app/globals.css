@@ -29,26 +29,31 @@ html {
    to keep working on both a white and a near-black page.
    ============================================================ */
 
+/* Premium Éditorial palette — warm ivory + oxblood red, chosen from
+   three design directions presented to and picked by the client. Dark
+   mode is a complementary warm-charcoal variant of the same palette
+   (not a separate theme), so both modes read as the same brand. */
+
 :root {
-  --color-bg-page: #ffffff;
-  --color-bg-surface: #f6f6f7;
-  --color-bg-surface-alt: #ececee;
-  --color-bg-surface-sunken: #f0f0f2;
-  --color-ink: #17161b;
-  --color-ink-soft: #55545c;
-  --color-ink-faint: #85848b;
-  --color-line: #e1e0e4;
+  --color-bg-page: #f7f3ee;
+  --color-bg-surface: #ffffff;
+  --color-bg-surface-alt: #f0ebe3;
+  --color-bg-surface-sunken: #efe8dd;
+  --color-ink: #231f1d;
+  --color-ink-soft: #5c564e;
+  --color-ink-faint: #8a8377;
+  --color-line: #e6ded4;
 }
 
 :root.dark {
-  --color-bg-page: #09080a;
-  --color-bg-surface: #151418;
-  --color-bg-surface-alt: #1c1b20;
-  --color-bg-surface-sunken: #050506;
-  --color-ink: #f6f3ee;
-  --color-ink-soft: #a3a2a8;
-  --color-ink-faint: #6f6e75;
-  --color-line: #232227;
+  --color-bg-page: #1a1613;
+  --color-bg-surface: #231f1c;
+  --color-bg-surface-alt: #2c2621;
+  --color-bg-surface-sunken: #141110;
+  --color-ink: #f2ede5;
+  --color-ink-soft: #b5aca0;
+  --color-ink-faint: #8a8178;
+  --color-line: #3a332c;
 }
 
 @theme {
@@ -61,24 +66,43 @@ html {
   --color-ink-faint: var(--color-ink-faint);
   --color-line: var(--color-line);
 
-  /* Garnet/crimson — replaces Tailwind's default `red` palette */
-  --color-red-50: #fdf2f3;
-  --color-red-100: #fce4e6;
-  --color-red-200: #f9cad0;
-  --color-red-300: #f2a2ac;
-  --color-red-400: #e5707e;
-  --color-red-500: #d1455a;
-  --color-red-600: #b32e44;
-  --color-red-700: #8f2237;
-  --color-red-800: #701c2e;
-  --color-red-900: #5c1a29;
-  --color-red-950: #330a14;
+  /* Oxblood — replaces Tailwind's default `red` palette */
+  --color-red-50: #fbf0ef;
+  --color-red-100: #f4dbda;
+  --color-red-200: #e8c9cc;
+  --color-red-300: #d9a3a8;
+  --color-red-400: #b06670;
+  --color-red-500: #96374a;
+  --color-red-600: #7a1f2b;
+  --color-red-700: #5c1721;
+  --color-red-800: #4a121a;
+  --color-red-900: #3a0e14;
+  --color-red-950: #220810;
+
+  /* Sharper, more architectural corners than Tailwind's defaults —
+     the editorial direction uses near-flat edges, not bubbly rounding. */
+  --radius-lg: 4px;
+  --radius-xl: 6px;
+  --radius-2xl: 8px;
+  --radius-3xl: 10px;
 }
 
 @theme inline {
   --color-background: var(--color-bg-page);
   --color-foreground: var(--color-ink);
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), Georgia, "Times New Roman", serif;
+}
+
+/* Headings use the serif display face everywhere, site-wide, without
+   needing a font class on every <h1>/<h2>/<h3> in every component —
+   existing font-weight utilities on individual headings still win
+   (class selectors beat this element selector), so hero/CTA weight
+   choices are untouched; only the typeface changes. */
+h1,
+h2,
+h3 {
+  font-family: var(--font-serif), Georgia, "Times New Roman", serif;
 }
 
 body {
@@ -86,38 +110,33 @@ body {
   color: var(--color-ink);
 }
 
-/* Premium utility classes, used selectively on hero/CTA sections */
+/* Premium utility classes, used selectively on hero/CTA sections.
+   Editorial restraint over the previous neon/glass treatment: flat
+   oxblood instead of a rainbow text-gradient, a crisp hairline border
+   instead of a glow, a barely-there wash instead of a soft blur halo. */
 
 .text-gradient-red {
-  background: linear-gradient(135deg, var(--color-red-700) 0%, var(--color-red-500) 50%, var(--color-red-800) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-red-600);
+  font-style: italic;
 }
 
 :root.dark .text-gradient-red {
-  background: linear-gradient(135deg, var(--color-red-300) 0%, var(--color-red-500) 50%, var(--color-red-200) 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+  color: var(--color-red-300);
 }
 
 .glass-panel {
-  background: color-mix(in srgb, var(--color-bg-surface) 55%, transparent);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid color-mix(in srgb, var(--color-red-500) 18%, var(--color-line));
+  background: var(--color-bg-surface);
+  border: 1px solid var(--color-line);
 }
 
 .glow-accent {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-red-600) 35%, transparent),
-    0 20px 60px -15px color-mix(in srgb, var(--color-red-700) 55%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-red-900) 25%, transparent);
 }
 
 .radial-fade {
   background: radial-gradient(
     ellipse 70% 55% at 50% 0%,
-    color-mix(in srgb, var(--color-red-900) 38%, transparent) 0%,
+    color-mix(in srgb, var(--color-red-900) 10%, transparent) 0%,
     transparent 70%
   );
 }
@@ -125,15 +144,14 @@ body {
 :root:not(.dark) .radial-fade {
   background: radial-gradient(
     ellipse 70% 55% at 50% 0%,
-    color-mix(in srgb, var(--color-red-200) 55%, transparent) 0%,
+    color-mix(in srgb, var(--color-red-200) 20%, transparent) 0%,
     transparent 70%
   );
 }
 
 .divider-red {
   height: 1px;
-  background: linear-gradient(90deg, transparent, var(--color-red-500), transparent);
-  opacity: 0.6;
+  background: var(--color-line);
 }
 
 /* Smooth transitions for interactive/stateful properties only —

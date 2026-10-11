@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { LayoutDashboard, LogOut } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 
@@ -40,9 +41,9 @@ export default function AcademyHeader() {
               <span className="text-ink-faint">|</span>
               <Link
                 href="/academy/dashboard"
-                className="text-sm font-semibold text-red-500 hover:text-red-400 transition flex items-center gap-1"
+                className="text-sm font-semibold text-red-500 hover:text-red-400 transition flex items-center gap-1.5"
               >
-                📊 Mon Dashboard
+                <LayoutDashboard size={15} /> Mon Dashboard
               </Link>
             </>
           )}
@@ -54,7 +55,7 @@ export default function AcademyHeader() {
             onClick={handleLogout}
             className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
           >
-            🚪 Déconnexion
+            <LogOut size={15} /> Déconnexion
           </button>
         </div>
 

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 
 const NAV_LINKS = [
@@ -77,10 +78,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="md:hidden text-ink text-2xl leading-none"
+                className="md:hidden text-ink"
                 aria-label="Menu"
               >
-                {menuOpen ? "✕" : "☰"}
+                {menuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
             </div>
           </div>

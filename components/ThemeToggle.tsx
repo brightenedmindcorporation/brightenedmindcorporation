@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Monitor, Sun, Moon } from "lucide-react";
 
 type Theme = "system" | "light" | "dark";
 
@@ -14,10 +15,10 @@ function applyTheme(theme: Theme) {
   document.documentElement.classList.toggle("dark", resolveIsDark(theme));
 }
 
-const OPTIONS: { value: Theme; label: string; icon: string }[] = [
-  { value: "system", label: "Système", icon: "💻" },
-  { value: "light", label: "Clair", icon: "☀️" },
-  { value: "dark", label: "Sombre", icon: "🌙" },
+const OPTIONS: { value: Theme; label: string; Icon: typeof Monitor }[] = [
+  { value: "system", label: "Système", Icon: Monitor },
+  { value: "light", label: "Clair", Icon: Sun },
+  { value: "dark", label: "Sombre", Icon: Moon },
 ];
 
 export default function ThemeToggle({ className = "" }: { className?: string }) {
@@ -73,13 +74,13 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
           onClick={() => choose(opt.value)}
           aria-pressed={theme === opt.value}
           title={opt.label}
-          className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold transition ${
+          className={`p-1.5 rounded-lg transition ${
             theme === opt.value
-              ? "bg-gradient-to-br from-red-600 to-red-900 text-white shadow"
+              ? "bg-red-600 text-white shadow"
               : "text-ink-soft hover:text-ink"
           }`}
         >
-          <span aria-hidden="true">{opt.icon}</span>
+          <opt.Icon size={14} strokeWidth={2} aria-hidden="true" />
           <span className="sr-only">{opt.label}</span>
         </button>
       ))}
