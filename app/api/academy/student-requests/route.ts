@@ -42,6 +42,20 @@ export async function POST(request: Request) {
     const decoded = await getAdminAuth().verifyIdToken(idToken);
     const adminDb = getAdminDb();
 
+    // The Firebase Auth ID token's "name" claim is never set on this
+    // project (registration stores the student's name in Firestore, not
+    // on the Auth profile), so it always fell back to the email address
+    // here. Look up the real name from students/enrollments instead.
+    let realName: string | null = null;
+    const legacySnap = await adminDb.collection("students").doc(decoded.uid).get();
+    if (legacySnap.exists && legacySnap.data()?.name) {
+      realName = legacySnap.data()!.name;
+    } else {
+      const enrollSnap = await adminDb.collection("enrollments").where("uid", "==", decoded.uid).limit(1).get();
+      if (!enrollSnap.empty) realName = enrollSnap.docs[0].data().name || null;
+    }
+    const studentName = realName || decoded.name || decoded.email || "Étudiant";
+
     const attachments: { filename: string; content: Buffer }[] = [];
     for (const file of form.getAll("attachments")) {
       if (!(file instanceof File) || file.size === 0) continue;
@@ -53,7 +67,7 @@ export async function POST(request: Request) {
 
     const docRef = await adminDb.collection("studentRequests").add({
       uid: decoded.uid,
-      name: decoded.name || decoded.email || "Étudiant",
+      name: studentName,
       email: decoded.email || "",
       type: requestType,
       subject: String(subject).trim(),
@@ -66,20 +80,25 @@ export async function POST(request: Request) {
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        await resend.emails.send({
+        const { error: sendError } = await resend.emails.send({
           from: "Brightened Mind <onboarding@resend.dev>",
           to: ADMIN_EMAIL,
           replyTo: decoded.email || undefined,
           subject: `${TYPE_LABELS[requestType]} — ${subject}`,
           html: `
             <h2>${TYPE_LABELS[requestType]} d'un étudiant</h2>
-            <p><b>Nom :</b> ${decoded.name || decoded.email}</p>
+            <p><b>Nom :</b> ${studentName}</p>
             <p><b>Email :</b> ${decoded.email}</p>
             <p><b>Sujet :</b> ${subject}</p>
             <p><b>Message :</b><br/>${String(message).replace(/\n/g, "<br/>")}</p>
           `,
           attachments: attachments.length ? attachments : undefined,
         });
+        // The Resend SDK returns an {error} field on an API-level rejection
+        // instead of throwing — not checking it meant a silently-dropped
+        // email looked identical to a successful one everywhere this
+        // pattern was used in this project.
+        if (sendError) console.error("Resend rejected student request email (non-fatal):", sendError);
       } catch (emailError) {
         console.error("Error emailing student request (non-fatal):", emailError);
       }
@@ -90,7 +109,7 @@ export async function POST(request: Request) {
         audience: "admin",
         type: "student-request",
         title: `${TYPE_LABELS[requestType]} d'un étudiant`,
-        message: `${decoded.name || decoded.email} — ${subject}`,
+        message: `${studentName} — ${subject}`,
         link: "/academy/admin",
       });
     } catch (notifError) {

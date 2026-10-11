@@ -28,7 +28,7 @@ import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
 import NotificationBell from "@/components/academy/NotificationBell";
-import { generateCertificatePdf } from "@/lib/academy/certificatePdf";
+import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
 
 export const dynamic = "force-dynamic";
 
@@ -126,12 +126,18 @@ export default function AdminPage() {
   const [certSending, setCertSending] = useState(false);
   const [certEditingId, setCertEditingId] = useState<string | null>(null);
   const [certEditName, setCertEditName] = useState("");
+  const [certEditEmail, setCertEditEmail] = useState("");
+  const [certEditLangCode, setCertEditLangCode] = useState("");
+  const [certEditLevel, setCertEditLevel] = useState("1");
+  const [certEditLevelTitle, setCertEditLevelTitle] = useState("");
   const [certEditAverage, setCertEditAverage] = useState("");
+  const [certPreviewUrl, setCertPreviewUrl] = useState<string | null>(null);
 
   // --- Inline reply (Projets / Devis / Candidatures) ---
   const [replyTarget, setReplyTarget] = useState<{ collection: string; docId: string; to: string } | null>(null);
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
+  const [replyAttachments, setReplyAttachments] = useState<File[]>([]);
   const [replySending, setReplySending] = useState(false);
 
   // --- Gmail inbox tab ---
@@ -587,7 +593,15 @@ export default function AdminPage() {
       const response = await fetch(`/api/admin/certificates/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, studentName: certEditName, average: Number(certEditAverage) || 0 }),
+        body: JSON.stringify({
+          idToken,
+          studentName: certEditName,
+          studentEmail: certEditEmail || null,
+          langCode: certEditLangCode,
+          level: certEditLevel,
+          levelTitle: certEditLevelTitle,
+          average: Number(certEditAverage) || 0,
+        }),
       });
       if (!response.ok) {
         const result = await response.json();
@@ -598,6 +612,16 @@ export default function AdminPage() {
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
     }
+  };
+
+  const openCertificatePreview = (opts: { studentName: string; levelTitle: string; average: number; certificateId: string }) => {
+    if (certPreviewUrl) URL.revokeObjectURL(certPreviewUrl);
+    setCertPreviewUrl(getCertificatePreviewUrl(opts));
+  };
+
+  const closeCertificatePreview = () => {
+    if (certPreviewUrl) URL.revokeObjectURL(certPreviewUrl);
+    setCertPreviewUrl(null);
   };
 
   const deleteCertificate = async (id: string) => {
@@ -711,6 +735,7 @@ export default function AdminPage() {
     setReplyTarget({ collection, docId, to });
     setReplySubject(subject);
     setReplyMessage("");
+    setReplyAttachments([]);
   };
 
   const sendReply = async () => {
@@ -718,26 +743,26 @@ export default function AdminPage() {
     setReplySending(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/send-reply", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          idToken,
-          to: replyTarget.to,
-          subject: replySubject,
-          message: replyMessage,
-          collection: replyTarget.collection,
-          docId: replyTarget.docId,
-        }),
-      });
+      const form = new FormData();
+      form.append("idToken", idToken || "");
+      form.append("to", replyTarget.to);
+      form.append("subject", replySubject);
+      form.append("message", replyMessage);
+      form.append("collection", replyTarget.collection);
+      form.append("docId", replyTarget.docId);
+      replyAttachments.forEach((file) => form.append("attachments", file));
+
+      const response = await fetch("/api/admin/send-reply", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
 
       setReplyTarget(null);
       setReplyMessage("");
+      setReplyAttachments([]);
       if (replyTarget.collection === "projectRequests") fetchProjectRequests();
       if (replyTarget.collection === "devisRequests") fetchDevisRequests();
       if (replyTarget.collection === "jobApplications") fetchJobApplications();
+      if (replyTarget.collection === "studentRequests") fetchStudentRequests();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
     } finally {
@@ -1361,7 +1386,7 @@ export default function AdminPage() {
             { id: "projects", label: "Projets", badge: projectRequests.filter((r) => r.status === "new").length },
             { id: "devis", label: "Devis", badge: devisRequests.filter((r) => r.status === "new").length },
             { id: "mail", label: "Mail", badge: mailMessages.filter((m) => m.unread).length },
-            { id: "requests", label: "Plaintes", badge: studentRequests.filter((r) => r.status === "new").length },
+            { id: "requests", label: "Messages Étudiants", badge: studentRequests.filter((r) => r.status === "new").length },
             { id: "progress", label: "Progression", badge: 0 },
             { id: "certificates", label: "Certificats", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
@@ -2319,19 +2344,80 @@ export default function AdminPage() {
                   <div key={cert.id} className={`p-5 rounded-2xl border bg-surface ${cert.revoked ? "border-red-800/50 opacity-60" : "border-line"}`}>
                     {certEditingId === cert.id ? (
                       <div className="space-y-3">
-                        <input
-                          value={certEditName}
-                          onChange={(e) => setCertEditName(e.target.value)}
-                          className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                        />
-                        <input
-                          type="number"
-                          value={certEditAverage}
-                          onChange={(e) => setCertEditAverage(e.target.value)}
-                          className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                        />
-                        <div className="flex gap-2">
+                        <div>
+                          <label className="block text-xs font-semibold text-ink-soft mb-1">Nom de l'étudiant</label>
+                          <input
+                            value={certEditName}
+                            onChange={(e) => setCertEditName(e.target.value)}
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-ink-soft mb-1">Email</label>
+                          <input
+                            value={certEditEmail}
+                            onChange={(e) => setCertEditEmail(e.target.value)}
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-ink-soft mb-1">Langue</label>
+                            <select
+                              value={certEditLangCode}
+                              onChange={(e) => setCertEditLangCode(e.target.value)}
+                              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            >
+                              {availableLanguages.map((l) => (
+                                <option key={l.code} value={l.code}>{l.label}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-ink-soft mb-1">Niveau</label>
+                            <select
+                              value={certEditLevel}
+                              onChange={(e) => setCertEditLevel(e.target.value)}
+                              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            >
+                              <option value="1">Niveau 1</option>
+                              <option value="2">Niveau 2</option>
+                              <option value="3">Niveau 3</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-ink-soft mb-1">Titre du niveau</label>
+                          <input
+                            value={certEditLevelTitle}
+                            onChange={(e) => setCertEditLevelTitle(e.target.value)}
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-ink-soft mb-1">Moyenne (%)</label>
+                          <input
+                            type="number"
+                            value={certEditAverage}
+                            onChange={(e) => setCertEditAverage(e.target.value)}
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                          />
+                        </div>
+                        <div className="flex flex-wrap gap-2">
                           <button onClick={() => saveCertificateEdit(cert.id)} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Enregistrer</button>
+                          <button
+                            onClick={() =>
+                              openCertificatePreview({
+                                studentName: certEditName,
+                                levelTitle: certEditLevelTitle || `${languageLabel(certEditLangCode)} — Niveau ${certEditLevel}`,
+                                average: Number(certEditAverage) || 0,
+                                certificateId: cert.certificateId,
+                              })
+                            }
+                            className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
+                          >
+                            Aperçu
+                          </button>
                           <button onClick={() => setCertEditingId(null)} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Annuler</button>
                         </div>
                       </div>
@@ -2355,6 +2441,10 @@ export default function AdminPage() {
                             onClick={() => {
                               setCertEditingId(cert.id);
                               setCertEditName(cert.studentName || "");
+                              setCertEditEmail(cert.studentEmail || "");
+                              setCertEditLangCode(cert.langCode || availableLanguages[0].code);
+                              setCertEditLevel(String(cert.level || "1"));
+                              setCertEditLevelTitle(cert.levelTitle || "");
                               setCertEditAverage(String(cert.average ?? ""));
                             }}
                             className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
@@ -2626,6 +2716,19 @@ export default function AdminPage() {
         )}
       </div>
 
+      {/* ================= CERTIFICATE PREVIEW MODAL ================= */}
+      {certPreviewUrl && (
+        <div className="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-4 w-full max-w-4xl shadow-2xl">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-bold text-ink">Aperçu du certificat</p>
+              <button onClick={closeCertificatePreview} className="text-ink-soft hover:text-ink"><X size={18} /></button>
+            </div>
+            <iframe src={certPreviewUrl} title="Aperçu du certificat" className="w-full rounded-xl border border-line" style={{ aspectRatio: "297 / 210" }} />
+          </div>
+        </div>
+      )}
+
       {/* ================= GENERATE CERTIFICATE MODAL ================= */}
       {certGenerateOpen && (
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
@@ -2695,6 +2798,19 @@ export default function AdminPage() {
                 className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
               >
                 Annuler
+              </button>
+              <button
+                onClick={() =>
+                  openCertificatePreview({
+                    studentName: certName.trim() || "Nom de l'étudiant",
+                    levelTitle: certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`,
+                    average: Number(certAverage) || 0,
+                    certificateId: "APERÇU",
+                  })
+                }
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Aperçu
               </button>
               <button
                 onClick={generateCertificateManually}
@@ -2864,8 +2980,27 @@ export default function AdminPage() {
               onChange={(e) => setReplyMessage(e.target.value)}
               rows={6}
               placeholder="Écrivez votre réponse…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
             />
+            {replyAttachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {replyAttachments.map((file, i) => (
+                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                    <Paperclip size={12} /> {file.name}
+                    <button onClick={() => setReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+              <Paperclip size={13} /> Joindre un fichier
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => setReplyAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
+              />
+            </label>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setReplyTarget(null)}

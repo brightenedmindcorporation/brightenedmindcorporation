@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth } from "@/lib/firebase-admin";
 import { isGmailOAuthConfigured, isGmailConnected, listInboxMessages } from "@/lib/gmail";
 
+// GET routes are cached by Next.js by default unless marked dynamic — this
+// serves live admin data and must never be stale.
+export const dynamic = "force-dynamic";
+
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
 export async function GET(request: Request) {

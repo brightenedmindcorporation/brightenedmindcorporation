@@ -1,15 +1,15 @@
 import jsPDF from "jspdf";
 
-/** Shared certificate PDF renderer — used by the student-facing
- * CertificateButton and by the admin panel's manual-issuance tool, so both
- * produce an identical document. Runs entirely client-side (jsPDF needs a
- * browser), so this is only ever called from "use client" code. */
-export function generateCertificatePdf(opts: {
+export interface CertificateOpts {
   studentName: string;
   levelTitle: string;
   average: number;
   certificateId: string;
-}) {
+}
+
+/** Builds (but does not save or output) the certificate PDF — shared by
+ * download, preview and anything else that needs the raw jsPDF document. */
+function buildCertificateDoc(opts: CertificateOpts): jsPDF {
   const { studentName, levelTitle, average, certificateId } = opts;
   const doc = new jsPDF("landscape", "mm", "a4");
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -37,7 +37,7 @@ export function generateCertificatePdf(opts: {
   doc.setFont("times", "bold");
   doc.setFontSize(30);
   doc.setTextColor(180, 0, 0);
-  doc.text(studentName.toUpperCase(), 148, 88, { align: "center" });
+  doc.text((studentName || "").toUpperCase(), 148, 88, { align: "center" });
 
   doc.setFont("times", "normal");
   doc.setFontSize(16);
@@ -46,7 +46,7 @@ export function generateCertificatePdf(opts: {
 
   doc.setFont("times", "bold");
   doc.setFontSize(22);
-  doc.text(levelTitle.toUpperCase(), 148, 118, { align: "center" });
+  doc.text((levelTitle || "").toUpperCase(), 148, 118, { align: "center" });
 
   doc.setFont("times", "normal");
   doc.setFontSize(15);
@@ -70,5 +70,23 @@ export function generateCertificatePdf(opts: {
   doc.text("Director", 67, 186);
   doc.text("Academic Supervisor", 205, 186);
 
-  doc.save(`${studentName}-certificate.pdf`);
+  return doc;
+}
+
+/** Shared certificate PDF renderer — used by the student-facing
+ * CertificateButton and by the admin panel's manual-issuance tool, so both
+ * produce an identical document. Runs entirely client-side (jsPDF needs a
+ * browser), so this is only ever called from "use client" code. */
+export function generateCertificatePdf(opts: CertificateOpts) {
+  const doc = buildCertificateDoc(opts);
+  doc.save(`${opts.studentName}-certificate.pdf`);
+}
+
+/** Renders the certificate to an in-memory blob URL for an <iframe> preview
+ * — lets the admin see the exact PDF before downloading it, without
+ * triggering a download. Caller is responsible for revoking the URL
+ * (URL.revokeObjectURL) once it's no longer shown. */
+export function getCertificatePreviewUrl(opts: CertificateOpts): string {
+  const doc = buildCertificateDoc(opts);
+  return doc.output("bloburl") as unknown as string;
 }
