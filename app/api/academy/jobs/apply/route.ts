@@ -53,8 +53,8 @@ export async function POST(request: Request) {
     const message = form.get("message")?.toString()?.trim() || "";
     const cvFile = form.get("cv");
 
-    if (!announcementId || !name || !email) {
-      return NextResponse.json({ error: "Nom, email et offre sont requis." }, { status: 400 });
+    if (!announcementId || !name || !email || !phone) {
+      return NextResponse.json({ error: "Nom, email, téléphone et offre sont requis." }, { status: 400 });
     }
     if (!(cvFile instanceof File) || cvFile.size === 0) {
       return NextResponse.json({ error: "Le CV est obligatoire." }, { status: 400 });

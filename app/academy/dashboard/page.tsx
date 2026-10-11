@@ -91,11 +91,18 @@ export default function Dashboard() {
     const progress = getLevelProgress(langSlug, 1);
     const studentLevelNum = Number((activeEnrollment.level || "Level 1").slice(-1)) || 1;
     const curriculumForLiveCheck = getLevelCurriculum(langSlug, studentLevelNum);
+    let interval: ReturnType<typeof setInterval> | undefined;
     if (curriculumForLiveCheck) {
-      fetch(`/api/live-sessions?langCode=${curriculumForLiveCheck.langCode}&level=${studentLevelNum}`)
-        .then((res) => res.json())
-        .then((d) => setLiveSession(d.session ?? null))
-        .catch(() => setLiveSession(null));
+      const loadLiveSession = () => {
+        fetch(`/api/live-sessions?langCode=${curriculumForLiveCheck.langCode}&level=${studentLevelNum}`)
+          .then((res) => res.json())
+          .then((d) => setLiveSession(d.session ?? null))
+          .catch(() => setLiveSession(null));
+      };
+      loadLiveSession();
+      // Poll so the "Rejoindre" button appears/disappears on its own when
+      // the admin starts or ends a live session, without a page reload.
+      interval = setInterval(loadLiveSession, 30_000);
     }
     const totalLessons = level1?.lessons.length ?? 12;
 
@@ -113,6 +120,10 @@ export default function Dashboard() {
 
     setLastLesson(currentLesson);
     setProgressStats({ completed: completedCount, total: totalLessons });
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
   }, [activeEnrollment?.langCode, activeEnrollment?.level]);
 
   const switchLanguage = (langCode: string) => {
@@ -126,9 +137,12 @@ export default function Dashboard() {
   // rehydrated the session (auth.currentUser is unreliable right at
   // mount), shown in their own card on the dashboard rather than only in
   // the notification bell, since that's where students look for this.
+  // Polled in the background so a new message from the admin appears
+  // without the student having to reload the page.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
+    let interval: ReturnType<typeof setInterval> | undefined;
+
+    const fetchAdminMessages = async (user: NonNullable<typeof auth.currentUser>) => {
       try {
         const idToken = await user.getIdToken();
         const response = await fetch("/api/academy/notifications", {
@@ -141,8 +155,18 @@ export default function Dashboard() {
       } catch (error) {
         console.error("Error fetching admin messages:", error);
       }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (!user) return;
+      fetchAdminMessages(user);
+      if (!interval) interval = setInterval(() => fetchAdminMessages(user), 30_000);
     });
-    return unsubscribe;
+
+    return () => {
+      unsubscribe();
+      if (interval) clearInterval(interval);
+    };
   }, []);
 
   const handleLogout = () => {

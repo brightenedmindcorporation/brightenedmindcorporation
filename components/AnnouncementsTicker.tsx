@@ -19,10 +19,15 @@ export default function AnnouncementsTicker() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
 
   useEffect(() => {
-    fetch("/api/announcements")
-      .then((res) => res.json())
-      .then((data) => setAnnouncements(data.announcements || []))
-      .catch(() => setAnnouncements([]));
+    const load = () => {
+      fetch("/api/announcements")
+        .then((res) => res.json())
+        .then((data) => setAnnouncements(data.announcements || []))
+        .catch(() => setAnnouncements([]));
+    };
+    load();
+    const interval = setInterval(load, 60_000);
+    return () => clearInterval(interval);
   }, []);
 
   if (announcements.length === 0) return null;

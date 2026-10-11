@@ -179,8 +179,9 @@ export default function JobApplyPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink-soft mb-1">Téléphone (optionnel)</label>
+              <label className="block text-sm font-medium text-ink-soft mb-1">Téléphone</label>
               <input
+                required
                 className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}

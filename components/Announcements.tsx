@@ -40,11 +40,22 @@ export default function Announcements() {
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    fetch("/api/announcements")
-      .then((res) => res.json())
-      .then((data) => setAnnouncements(data.announcements || []))
-      .catch(() => setAnnouncements([]));
+    const load = () => {
+      fetch("/api/announcements")
+        .then((res) => res.json())
+        .then((data) => setAnnouncements(data.announcements || []))
+        .catch(() => setAnnouncements([]));
+    };
+    load();
+    const refresh = setInterval(load, 60_000);
+    return () => clearInterval(refresh);
   }, []);
+
+  // Une annonce peut disparaître (expirée/masquée) entre deux rafraîchissements
+  // automatiques — on recale l'index affiché si jamais il déborde désormais.
+  useEffect(() => {
+    setIndex((i) => (announcements.length === 0 ? 0 : i % announcements.length));
+  }, [announcements.length]);
 
   useEffect(() => {
     if (announcements.length < 2) return;

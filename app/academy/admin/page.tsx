@@ -245,8 +245,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchLiveSessions = async () => {
-    setLiveLoading(true);
+  const fetchLiveSessions = async (silent = false) => {
+    if (!silent) setLiveLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/live-sessions", {
@@ -257,12 +257,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching live sessions:", error);
     } finally {
-      setLiveLoading(false);
+      if (!silent) setLiveLoading(false);
     }
   };
 
-  const fetchPayments = async () => {
-    setPaymentsLoading(true);
+  const fetchPayments = async (silent = false) => {
+    if (!silent) setPaymentsLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/payments", {
@@ -273,12 +273,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching payments:", error);
     } finally {
-      setPaymentsLoading(false);
+      if (!silent) setPaymentsLoading(false);
     }
   };
 
-  const fetchAnnouncements = async () => {
-    setAnnouncementsLoading(true);
+  const fetchAnnouncements = async (silent = false) => {
+    if (!silent) setAnnouncementsLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/announcements", {
@@ -289,7 +289,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching announcements:", error);
     } finally {
-      setAnnouncementsLoading(false);
+      if (!silent) setAnnouncementsLoading(false);
     }
   };
 
@@ -378,8 +378,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchJobApplications = async () => {
-    setJobApplicationsLoading(true);
+  const fetchJobApplications = async (silent = false) => {
+    if (!silent) setJobApplicationsLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/job-applications", {
@@ -390,7 +390,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching job applications:", error);
     } finally {
-      setJobApplicationsLoading(false);
+      if (!silent) setJobApplicationsLoading(false);
     }
   };
 
@@ -430,8 +430,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchProjectRequests = async () => {
-    setProjectRequestsLoading(true);
+  const fetchProjectRequests = async (silent = false) => {
+    if (!silent) setProjectRequestsLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/project-requests", {
@@ -442,12 +442,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching project requests:", error);
     } finally {
-      setProjectRequestsLoading(false);
+      if (!silent) setProjectRequestsLoading(false);
     }
   };
 
-  const fetchDevisRequests = async () => {
-    setDevisRequestsLoading(true);
+  const fetchDevisRequests = async (silent = false) => {
+    if (!silent) setDevisRequestsLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/devis-requests", {
@@ -458,7 +458,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching devis requests:", error);
     } finally {
-      setDevisRequestsLoading(false);
+      if (!silent) setDevisRequestsLoading(false);
     }
   };
 
@@ -564,8 +564,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchProgress = async () => {
-    setProgressLoading(true);
+  const fetchProgress = async (silent = false) => {
+    if (!silent) setProgressLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/progress", {
@@ -576,12 +576,12 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching progress:", error);
     } finally {
-      setProgressLoading(false);
+      if (!silent) setProgressLoading(false);
     }
   };
 
-  const fetchCertificates = async () => {
-    setCertificatesLoading(true);
+  const fetchCertificates = async (silent = false) => {
+    if (!silent) setCertificatesLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/certificates", {
@@ -592,7 +592,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching certificates:", error);
     } finally {
-      setCertificatesLoading(false);
+      if (!silent) setCertificatesLoading(false);
     }
   };
 
@@ -730,8 +730,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchStudentRequests = async () => {
-    setStudentRequestsLoading(true);
+  const fetchStudentRequests = async (silent = false) => {
+    if (!silent) setStudentRequestsLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/student-requests", {
@@ -742,7 +742,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching student requests:", error);
     } finally {
-      setStudentRequestsLoading(false);
+      if (!silent) setStudentRequestsLoading(false);
     }
   };
 
@@ -839,8 +839,8 @@ export default function AdminPage() {
     }
   };
 
-  const fetchMailMessages = async () => {
-    setMailLoading(true);
+  const fetchMailMessages = async (silent = false) => {
+    if (!silent) setMailLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/gmail/messages", {
@@ -855,7 +855,7 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Error fetching Gmail messages:", error);
     } finally {
-      setMailLoading(false);
+      if (!silent) setMailLoading(false);
     }
   };
 
@@ -1070,6 +1070,32 @@ export default function AdminPage() {
     if (tab === "requests" && studentRequests.length === 0) fetchStudentRequests();
     if (tab === "progress" && progressList.length === 0) fetchProgress();
     if (tab === "certificates" && certificates.length === 0) fetchCertificates();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authorized, tab]);
+
+  // Actualisation automatique : la liste du tableau actuellement affiché se
+  // remet à jour toute seule en arrière-plan, sans que l'admin ait besoin de
+  // cliquer sur "Actualiser" ou de changer d'onglet. "silent" évite de
+  // réafficher le spinner "Chargement…" par-dessus des données déjà là.
+  useEffect(() => {
+    if (!authorized) return;
+    const fetchForTab: Partial<Record<Tab, () => void>> = {
+      students: fetchStudents,
+      live: () => fetchLiveSessions(true),
+      payments: () => fetchPayments(true),
+      announcements: () => fetchAnnouncements(true),
+      applications: () => fetchJobApplications(true),
+      projects: () => fetchProjectRequests(true),
+      devis: () => fetchDevisRequests(true),
+      mail: () => fetchMailMessages(true),
+      requests: () => fetchStudentRequests(true),
+      progress: () => fetchProgress(true),
+      certificates: () => fetchCertificates(true),
+    };
+    const interval = setInterval(() => {
+      fetchForTab[tab]?.();
+    }, 30_000);
+    return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
