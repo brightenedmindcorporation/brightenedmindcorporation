@@ -51,7 +51,7 @@ export default function CTA() {
 
             <Link
               href="mailto:brightenedmindcorporation@gmail.com"
-              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 px-10 py-5 rounded-2xl font-semibold transition duration-300"
+              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-10 py-5 rounded-2xl font-semibold transition duration-300"
             >
               Nous contacter
             </Link>

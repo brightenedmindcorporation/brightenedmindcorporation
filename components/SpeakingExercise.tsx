@@ -55,8 +55,8 @@ export default function SpeakingExercise({
       <button
         onClick={handleListen}
         disabled={isListening}
-        className={`px-4 py-2 rounded-md font-medium text-ink transition-colors ${
-          isListening ? "bg-red-500 animate-pulse" : "bg-primary hover:bg-primary/90"
+        className={`px-4 py-2 rounded-md font-medium transition-colors ${
+          isListening ? "bg-red-500 text-white animate-pulse" : "bg-primary text-ink hover:bg-primary/90"
         }`}
       >
         {isListening ? "Écoute en cours..." : (<span className="inline-flex items-center gap-2"><Mic size={15} /> Parler</span>)}

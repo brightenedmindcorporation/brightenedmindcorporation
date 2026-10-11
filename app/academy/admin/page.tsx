@@ -50,6 +50,11 @@ export default function AdminPage() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
 
+  // --- Account diagnostic (check if a Firebase Auth user exists) ---
+  const [checkEmail, setCheckEmail] = useState("");
+  const [checkLoading, setCheckLoading] = useState(false);
+  const [checkResult, setCheckResult] = useState<any>(null);
+
   // --- Live sessions ---
   const [liveSessions, setLiveSessions] = useState<any[]>([]);
   const [liveLoading, setLiveLoading] = useState(false);
@@ -413,6 +418,25 @@ export default function AdminPage() {
       fetchProjectRequests();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const checkAccount = async () => {
+    if (!checkEmail.trim()) return;
+    setCheckLoading(true);
+    setCheckResult(null);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/check-account?email=${encodeURIComponent(checkEmail.trim())}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setCheckResult(result);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setCheckLoading(false);
     }
   };
 
@@ -1158,6 +1182,57 @@ export default function AdminPage() {
                   {languageLabel(code)} : <span className="text-red-500">{count}</span>
                 </span>
               ))}
+            </div>
+
+            {/* VÉRIFICATION DE COMPTE FIREBASE — diagnostic pour "mot de passe incorrect" */}
+            <div className="bg-surface border border-line rounded-2xl p-5 mb-8">
+              <p className="text-sm font-bold text-ink mb-1">Vérifier un compte (connexion impossible)</p>
+              <p className="text-xs text-ink-soft mb-3">
+                Si un étudiant dit que son mot de passe est refusé, vérifie d'abord ici si un compte existe vraiment pour son email —
+                ça distingue "mauvais mot de passe" de "ce compte n'a jamais été créé".
+              </p>
+              <div className="flex flex-col sm:flex-row gap-2">
+                <input
+                  type="email"
+                  value={checkEmail}
+                  onChange={(e) => setCheckEmail(e.target.value)}
+                  placeholder="email@exemple.com"
+                  className="flex-1 bg-surface-alt border border-line rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                />
+                <button
+                  onClick={checkAccount}
+                  disabled={checkLoading || !checkEmail.trim()}
+                  className="bg-surface-alt hover:bg-surface text-ink font-bold px-5 py-2.5 rounded-xl border border-line transition disabled:opacity-50 whitespace-nowrap"
+                >
+                  {checkLoading ? "Vérification…" : "Vérifier"}
+                </button>
+              </div>
+              {checkResult && (
+                <div className={`mt-4 p-4 rounded-xl text-sm border ${
+                  checkResult.exists ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-200" : "bg-red-950/30 border-red-800/50 text-red-200"
+                }`}>
+                  {checkResult.exists ? (
+                    <>
+                      <p className="font-bold">✓ Ce compte existe bien dans Firebase.</p>
+                      <p className="mt-1 text-xs opacity-80">
+                        Créé le {checkResult.createdAt ? new Date(checkResult.createdAt).toLocaleString("fr-FR") : "?"}
+                        {checkResult.lastSignInAt ? ` · Dernière connexion réussie : ${new Date(checkResult.lastSignInAt).toLocaleString("fr-FR")}` : " · Jamais connecté avec succès"}
+                        {checkResult.disabled ? " · ⚠ Compte désactivé" : ""}
+                      </p>
+                      <p className="mt-2 text-xs opacity-80">
+                        Le compte existe donc le souci vient du mot de passe saisi : demande à l'étudiant d'utiliser "Mot de passe oublié ?" sur la page de connexion.
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-bold">✗ Aucun compte Firebase pour cet email.</p>
+                      <p className="mt-1 text-xs opacity-80">
+                        L'inscription n'a jamais abouti côté authentification (ou l'email est différent de celui réellement utilisé). L'étudiant doit se réinscrire via /register avec cet email.
+                      </p>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* FILTERS */}
