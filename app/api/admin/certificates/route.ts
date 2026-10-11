@@ -74,7 +74,7 @@ export async function POST(request: Request) {
           type: "certificate-issued",
           title: "Certificat émis manuellement",
           message: `${studentName} — ${levelTitle || certificateId}`,
-          link: "/academy/admin?tab=certificates",
+          link: "/admin?tab=certificates",
         });
       } catch {}
     }

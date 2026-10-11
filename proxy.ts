@@ -32,7 +32,7 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // /academy/admin is deliberately NOT gated here: the admin account is
+  // /admin is deliberately NOT gated here: the admin account is
   // not a student, so it never goes through the login page's student
   // approval flow that sets this session cookie — gating it here would
   // permanently lock the admin out (exactly what happened). The admin

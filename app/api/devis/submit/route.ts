@@ -60,7 +60,7 @@ export async function POST(request: Request) {
           type: "devis-request",
           title: "Nouvelle demande de devis",
           message: `${String(name).trim()} — ${service || "Autre"}`,
-          link: "/academy/admin?tab=devis",
+          link: "/admin?tab=devis",
         });
       } catch (notifError) {
         console.error("Error creating devis notification (non-fatal):", notifError);

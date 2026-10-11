@@ -83,7 +83,7 @@ export async function POST(request: Request) {
         type: "enrollment",
         title: "Nouvelle inscription",
         message: `${name} s'est inscrit(e) — ${langCode}`,
-        link: "/academy/admin?tab=students",
+        link: "/admin?tab=students",
       });
     } catch (notifError) {
       console.error("Error creating enrollment notification (non-fatal):", notifError);

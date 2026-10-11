@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     ?.split("=")[1];
 
   const redirect = (status: "success" | "error", message?: string) => {
-    const dest = new URL("/academy/admin", url.origin);
+    const dest = new URL("/admin", url.origin);
     dest.searchParams.set("gmail", status);
     if (message) dest.searchParams.set("gmail_error", message);
     const response = NextResponse.redirect(dest);

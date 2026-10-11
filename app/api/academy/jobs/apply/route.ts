@@ -144,7 +144,7 @@ export async function POST(request: Request) {
         type: "job-application",
         title: "Nouvelle candidature",
         message: `${name} a postulé — ${announcementTitle}`,
-        link: "/academy/admin?tab=applications",
+        link: "/admin?tab=applications",
       });
     } catch (notifError) {
       console.error("Error creating job application notification (non-fatal):", notifError);

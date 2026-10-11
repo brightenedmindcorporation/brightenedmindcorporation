@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         type: "certificate-issued",
         title: "Certificat généré",
         message: `${studentName || decoded.email} a obtenu son certificat — ${levelTitle || ""}`,
-        link: "/academy/admin?tab=certificates",
+        link: "/admin?tab=certificates",
       });
     } catch (notifError) {
       console.error("Error creating certificate notification (non-fatal):", notifError);

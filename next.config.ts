@@ -27,10 +27,11 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        // Accès rapide : taper juste "/admin" dans la barre d'adresse au
-        // lieu du chemin complet /academy/admin.
-        source: "/admin",
-        destination: "/academy/admin",
+        // Le panneau admin vivait à /academy/admin ; il vit maintenant à
+        // /admin directement (adresse plus professionnelle). Redirection
+        // gardée pour les anciens liens/favoris déjà en circulation.
+        source: "/academy/admin",
+        destination: "/admin",
         permanent: true,
       },
       {
