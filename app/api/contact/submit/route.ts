@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/notifications";
 
 /**
  * Persists a copy of a homepage Contact form submission to Firestore so it
@@ -26,6 +27,18 @@ export async function POST(request: Request) {
       status: "new",
       createdAt: new Date().toISOString(),
     });
+
+    try {
+      await createNotification({
+        audience: "admin",
+        type: "project-request",
+        title: "Nouveau message « Parlons de votre projet »",
+        message: `${String(name).trim()} a envoyé un message depuis le site`,
+        link: "/academy/admin",
+      });
+    } catch (notifError) {
+      console.error("Error creating project request notification (non-fatal):", notifError);
+    }
 
     return NextResponse.json({ status: "success", id: docRef.id });
   } catch (error: any) {

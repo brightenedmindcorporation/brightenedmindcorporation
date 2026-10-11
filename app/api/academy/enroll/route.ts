@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/notifications";
 
 /**
  * Self-service enrollment request, used both for a student's very first
@@ -74,6 +75,18 @@ export async function POST(request: Request) {
         { error: "Vous avez déjà une inscription pour cette langue.", status: result.status },
         { status: 409 }
       );
+    }
+
+    try {
+      await createNotification({
+        audience: "admin",
+        type: "enrollment",
+        title: "Nouvelle inscription",
+        message: `${name} s'est inscrit(e) — ${langCode}`,
+        link: "/academy/admin",
+      });
+    } catch (notifError) {
+      console.error("Error creating enrollment notification (non-fatal):", notifError);
     }
 
     return NextResponse.json({ status: "success" });

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import FadeIn from "./FadeIn";
+import BmLogo from "./BmLogo";
 
 export default function Hero() {
   return (
@@ -29,13 +30,7 @@ export default function Hero() {
           transition={{ duration: 1 }}
         >
 
-          <Image
-            src="/logo-bm.png"
-            alt="BM Logo"
-            width={90}
-            height={90}
-            className="md:w-[110px] md:h-[110px]"
-          />
+          <BmLogo size={100} />
 
           <span className="mt-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-700/40 bg-red-500/5 text-red-400 text-xs font-semibold tracking-[0.2em] uppercase">
             Groupe multidisciplinaire

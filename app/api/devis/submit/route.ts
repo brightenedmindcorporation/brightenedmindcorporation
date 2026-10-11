@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/notifications";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -30,6 +31,18 @@ export async function POST(request: Request) {
         createdAt: new Date().toISOString(),
       });
       docId = docRef.id;
+
+      try {
+        await createNotification({
+          audience: "admin",
+          type: "devis-request",
+          title: "Nouvelle demande de devis",
+          message: `${String(name).trim()} — ${service || "Autre"}`,
+          link: "/academy/admin",
+        });
+      } catch (notifError) {
+        console.error("Error creating devis notification (non-fatal):", notifError);
+      }
     }
 
     if (process.env.RESEND_API_KEY) {

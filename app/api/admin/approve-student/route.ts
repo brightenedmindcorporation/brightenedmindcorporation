@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { generateMatriculeAdmin } from "@/lib/academy/matricule-admin";
+import { createNotification } from "@/lib/notifications";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -59,6 +60,17 @@ export async function POST(request: Request) {
     try {
       const matricule = await generateMatriculeAdmin(langCode);
       await studentRef.update({ status: "Approved", matricule });
+      try {
+        await createNotification({
+          audience: studentId,
+          type: "enrollment-approved",
+          title: "Inscription approuvée",
+          message: `Votre inscription a été approuvée — matricule ${matricule}.`,
+          link: "/academy/dashboard",
+        });
+      } catch (notifError) {
+        console.error("Error creating approval notification (non-fatal):", notifError);
+      }
       return NextResponse.json({ status: "success", matricule });
     } catch (innerError) {
       // Roll back to "Pending" so the row is immediately retryable.

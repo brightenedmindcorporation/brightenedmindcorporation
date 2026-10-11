@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/notifications";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -24,6 +25,18 @@ export async function POST(request: Request) {
 
     const adminDb = getAdminDb();
     await adminDb.collection("students").doc(studentId).update({ status: "Rejected" });
+
+    try {
+      await createNotification({
+        audience: studentId,
+        type: "enrollment-rejected",
+        title: "Inscription non approuvée",
+        message: "Votre demande d'inscription n'a pas été approuvée. Contactez l'administration pour plus de détails.",
+        link: "/academy/dashboard",
+      });
+    } catch (notifError) {
+      console.error("Error creating rejection notification (non-fatal):", notifError);
+    }
 
     return NextResponse.json({ status: "success" });
   } catch (error: any) {

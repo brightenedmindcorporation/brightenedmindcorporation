@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { Languages, Laptop, Clapperboard, Receipt, Target, TrendingUp, Smartphone, ArrowRight } from "lucide-react";
+import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
 
 const DEPARTMENTS = [
@@ -239,14 +239,7 @@ export default function Home() {
 
           <div className="flex items-center gap-3">
             <div className="relative w-8 h-8 flex items-center justify-center overflow-hidden">
-              <Image
-                src="/logo-bm.png"
-                alt="Brightened Mind Academy"
-                width={32}
-                height={32}
-                className="object-contain"
-                unoptimized
-              />
+              <BmLogo size={32} />
             </div>
             <span className="font-extrabold text-ink text-sm">
               Brightened Mind <span className="text-red-500">Academy</span>

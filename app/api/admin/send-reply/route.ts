@@ -3,7 +3,7 @@ import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
-const ALLOWED_COLLECTIONS = ["projectRequests", "devisRequests", "jobApplications"];
+const ALLOWED_COLLECTIONS = ["projectRequests", "devisRequests", "jobApplications", "studentRequests"];
 
 /**
  * Lets the admin reply to a project/devis/candidature submitter directly

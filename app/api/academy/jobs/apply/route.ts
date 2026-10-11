@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import dns from "node:dns/promises";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { createNotification } from "@/lib/notifications";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
@@ -117,6 +118,18 @@ export async function POST(request: Request) {
       status: "new",
       createdAt: new Date().toISOString(),
     });
+
+    try {
+      await createNotification({
+        audience: "admin",
+        type: "job-application",
+        title: "Nouvelle candidature",
+        message: `${name} a postulé — ${announcementTitle}`,
+        link: "/academy/admin",
+      });
+    } catch (notifError) {
+      console.error("Error creating job application notification (non-fatal):", notifError);
+    }
 
     try {
       await resend.emails.send({

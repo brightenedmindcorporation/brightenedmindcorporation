@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Lock } from "lucide-react";
+import BmLogo from "@/components/BmLogo";
+import { Lock, MessageSquarePlus } from "lucide-react";
+import { auth } from "@/lib/firebase";
 import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
@@ -42,6 +43,11 @@ export default function Dashboard() {
   const [progressStats, setProgressStats] = useState({ completed: 0, total: 12 });
   const [loading, setLoading] = useState<boolean>(true);
   const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
+  const [requestOpen, setRequestOpen] = useState(false);
+  const [requestType, setRequestType] = useState("complaint");
+  const [requestSubject, setRequestSubject] = useState("");
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestSending, setRequestSending] = useState(false);
   const router = useRouter();
 
   // Load the logged-in student once on mount.
@@ -118,6 +124,30 @@ export default function Dashboard() {
     router.replace("/login");
   };
 
+  const submitRequest = async () => {
+    if (!requestSubject.trim() || !requestMessage.trim()) return;
+    setRequestSending(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/academy/student-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, type: requestType, subject: requestSubject, message: requestMessage }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setRequestOpen(false);
+      setRequestSubject("");
+      setRequestMessage("");
+      setRequestType("complaint");
+      alert("Votre message a bien été envoyé à l'administration.");
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setRequestSending(false);
+    }
+  };
+
   if (loading || !student || !activeEnrollment) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft font-medium">
@@ -161,12 +191,20 @@ export default function Dashboard() {
             ← Back / Retour
           </button>
 
-          <button 
-            onClick={handleLogout}
-            className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-800/40 text-sm font-semibold rounded-xl transition"
-          >
-            Logout / Déconnexion
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setRequestOpen(true)}
+              className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line"
+            >
+              <MessageSquarePlus size={15} /> Plainte / Demande
+            </button>
+            <button
+              onClick={handleLogout}
+              className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-800/40 text-sm font-semibold rounded-xl transition"
+            >
+              Logout / Déconnexion
+            </button>
+          </div>
         </div>
 
         {/* Sélecteur de langue (si inscrit à plusieurs langues) */}
@@ -198,15 +236,7 @@ export default function Dashboard() {
             <div className="absolute inset-0 radial-fade pointer-events-none" />
             <div className="relative flex items-center gap-5 mb-8">
               <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
-                <Image
-                  src="/logo-bm.png"
-                  alt="Brightened Mind Academy Logo"
-                  width={56}
-                  height={56}
-                  className="object-cover rounded-[14px]"
-                  priority
-                  unoptimized
-                />
+                <BmLogo size={56} className="rounded-[14px]" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
@@ -247,15 +277,7 @@ export default function Dashboard() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative">
             <div className="flex items-center gap-5">
               <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
-                <Image
-                  src="/logo-bm.png"
-                  alt="Brightened Mind Academy Logo"
-                  width={56}
-                  height={56}
-                  className="object-cover rounded-[14px]"
-                  priority
-                  unoptimized
-                />
+                <BmLogo size={56} className="rounded-[14px]" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
@@ -442,6 +464,58 @@ export default function Dashboard() {
         )}
 
       </main>
+
+      {requestOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2">
+              <MessageSquarePlus size={18} /> Soumettre une plainte / demande
+            </h3>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Type</label>
+            <select
+              value={requestType}
+              onChange={(e) => setRequestType(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            >
+              <option value="complaint">Plainte</option>
+              <option value="concern">Inquiétude</option>
+              <option value="request">Demande particulière</option>
+              <option value="other">Autre</option>
+            </select>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <input
+              type="text"
+              value={requestSubject}
+              onChange={(e) => setRequestSubject(e.target.value)}
+              placeholder="Résumez votre message en quelques mots"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <textarea
+              value={requestMessage}
+              onChange={(e) => setRequestMessage(e.target.value)}
+              rows={6}
+              placeholder="Décrivez votre plainte, inquiétude ou demande en détail…"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setRequestOpen(false)}
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={submitRequest}
+                disabled={requestSending || !requestSubject.trim() || !requestMessage.trim()}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+              >
+                {requestSending ? "Envoi…" : "Envoyer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

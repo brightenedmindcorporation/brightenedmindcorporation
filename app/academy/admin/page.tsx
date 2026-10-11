@@ -15,6 +15,9 @@ import {
   Paperclip,
   ArrowLeft,
   Forward,
+  Printer,
+  Share2,
+  BellRing,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -23,10 +26,11 @@ import { getOtherProgramLabel, otherPrograms } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
+import NotificationBell from "@/components/academy/NotificationBell";
 
 export const dynamic = "force-dynamic";
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -85,6 +89,10 @@ export default function AdminPage() {
   // --- Devis requests ---
   const [devisRequests, setDevisRequests] = useState<any[]>([]);
   const [devisRequestsLoading, setDevisRequestsLoading] = useState(false);
+
+  // --- Student requests (plaintes / inquiétudes / demandes) ---
+  const [studentRequests, setStudentRequests] = useState<any[]>([]);
+  const [studentRequestsLoading, setStudentRequestsLoading] = useState(false);
 
   // --- Inline reply (Projets / Devis / Candidatures) ---
   const [replyTarget, setReplyTarget] = useState<{ collection: string; docId: string; to: string } | null>(null);
@@ -408,6 +416,40 @@ export default function AdminPage() {
     }
   };
 
+  const fetchStudentRequests = async () => {
+    setStudentRequestsLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/student-requests", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setStudentRequests(result.requests || []);
+    } catch (error) {
+      console.error("Error fetching student requests:", error);
+    } finally {
+      setStudentRequestsLoading(false);
+    }
+  };
+
+  const updateStudentRequestStatus = async (id: string, status: string) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/student-requests/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, status }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchStudentRequests();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   const updateDevisRequestStatus = async (id: string, status: string) => {
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -583,6 +625,49 @@ export default function AdminPage() {
     openCompose("", selectedMail.subject.startsWith("Fwd:") ? selectedMail.subject : `Fwd: ${selectedMail.subject}`, quoted);
   };
 
+  const printMail = () => {
+    if (!selectedMail) return;
+    const win = window.open("", "_blank");
+    if (!win) return;
+    win.document.write(`
+      <html>
+        <head>
+          <title>${selectedMail.subject}</title>
+          <meta charset="utf-8" />
+          <style>
+            body { font-family: system-ui, sans-serif; padding: 32px; color: #1a1a1a; max-width: 720px; margin: 0 auto; }
+            h1 { font-size: 20px; margin-bottom: 4px; }
+            .meta { color: #666; font-size: 13px; margin-bottom: 24px; }
+            .body { border-top: 1px solid #ddd; padding-top: 16px; white-space: pre-wrap; }
+          </style>
+        </head>
+        <body>
+          <h1>${selectedMail.subject}</h1>
+          <div class="meta">De : ${selectedMail.from}<br/>Date : ${selectedMail.date}</div>
+          <div class="body">${selectedMail.body || selectedMail.snippet}</div>
+        </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
+  const shareMail = async () => {
+    if (!selectedMail) return;
+    const plainBody = String(selectedMail.body || selectedMail.snippet || "").replace(/<[^>]*>/g, " ").trim();
+    const text = `${selectedMail.subject}\n\nDe : ${selectedMail.from}\n\n${plainBody}`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: selectedMail.subject, text });
+        return;
+      } catch {
+        // User cancelled or share failed — fall through to WhatsApp link.
+      }
+    }
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
   const sendCompose = async () => {
     if (!composeTo.trim() || !composeSubject.trim() || !composeBody.trim()) return;
     setComposeSending(true);
@@ -657,6 +742,7 @@ export default function AdminPage() {
     if (tab === "projects" && projectRequests.length === 0) fetchProjectRequests();
     if (tab === "devis" && devisRequests.length === 0) fetchDevisRequests();
     if (tab === "mail" && mailMessages.length === 0) fetchMailMessages();
+    if (tab === "requests" && studentRequests.length === 0) fetchStudentRequests();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -857,6 +943,7 @@ export default function AdminPage() {
     else if (t === "projects") fetchProjectRequests();
     else if (t === "devis") fetchDevisRequests();
     else if (t === "mail") fetchMailMessages();
+    else if (t === "requests") fetchStudentRequests();
   };
 
   const parseFromHeader = (from?: string) => {
@@ -994,6 +1081,7 @@ export default function AdminPage() {
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
           <div className="flex items-center gap-3">
+            <NotificationBell scope="admin" />
             <button
               onClick={() => refreshTab(tab)}
               className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all duration-200 bg-surface"
@@ -1010,27 +1098,33 @@ export default function AdminPage() {
         </div>
 
         {/* TABS */}
-        <div className="flex gap-2 mb-8 border-b border-line">
+        <div className="flex gap-2 mb-8 border-b border-line flex-wrap">
           {([
-            { id: "students", label: "Étudiants" },
-            { id: "live", label: "Cours en direct" },
-            { id: "payments", label: "Paiements" },
-            { id: "announcements", label: "Publicité" },
-            { id: "applications", label: "Candidatures" },
-            { id: "projects", label: "Projets" },
-            { id: "devis", label: "Devis" },
-            { id: "mail", label: "Mail" },
-          ] as { id: Tab; label: string }[]).map((t) => (
+            { id: "students", label: "Étudiants", badge: stats.pending },
+            { id: "live", label: "Cours en direct", badge: 0 },
+            { id: "payments", label: "Paiements", badge: 0 },
+            { id: "announcements", label: "Publicité", badge: 0 },
+            { id: "applications", label: "Candidatures", badge: jobApplications.filter((a) => a.status === "new").length },
+            { id: "projects", label: "Projets", badge: projectRequests.filter((r) => r.status === "new").length },
+            { id: "devis", label: "Devis", badge: devisRequests.filter((r) => r.status === "new").length },
+            { id: "mail", label: "Mail", badge: mailMessages.filter((m) => m.unread).length },
+            { id: "requests", label: "Plaintes", badge: studentRequests.filter((r) => r.status === "new").length },
+          ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
-              className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px ${
+              className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px inline-flex items-center gap-1.5 ${
                 tab === t.id
                   ? "border-red-600 text-red-500"
                   : "border-transparent text-ink-soft hover:text-ink"
               }`}
             >
               {t.label}
+              {t.badge > 0 && (
+                <span className="text-[10px] font-black bg-red-600 text-white rounded-full min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center">
+                  {t.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
@@ -1734,6 +1828,73 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* ================= STUDENT REQUESTS (PLAINTES) TAB ================= */}
+        {tab === "requests" && (
+          <div>
+            <p className="text-xs text-ink-soft mb-6">
+              Plaintes, inquiétudes et demandes particulières soumises par les étudiants depuis leur dashboard.
+            </p>
+            {studentRequestsLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : studentRequests.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucune plainte ou demande pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {studentRequests.map((req) => (
+                  <div key={req.id} className="p-5 rounded-2xl border border-line bg-surface">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">
+                          {req.type === "complaint" ? "Plainte" : req.type === "concern" ? "Inquiétude" : req.type === "request" ? "Demande particulière" : "Autre"}
+                        </p>
+                        <p className="text-ink font-bold">{req.subject}</p>
+                        <p className="text-xs text-ink-soft mt-0.5">{req.name} · {req.email}</p>
+                      </div>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                        req.status === "resolved" ? "bg-emerald-950/60 text-emerald-400" :
+                        req.status === "reviewing" ? "bg-amber-950/60 text-amber-400" :
+                        "bg-surface-alt text-ink-soft"
+                      }`}>
+                        {req.status === "resolved" ? "Résolu" : req.status === "reviewing" ? "En étude" : "Nouveau"}
+                      </span>
+                    </div>
+                    {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
+                    <div className="flex flex-wrap gap-2 mt-4">
+                      <button
+                        onClick={() => updateStudentRequestStatus(req.id, "reviewing")}
+                        disabled={req.status === "reviewing"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                          req.status === "reviewing" ? "bg-amber-600 border-amber-600 text-white" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
+                        }`}
+                      >
+                        {req.status === "reviewing" ? (<><CheckCircle2 size={13} /> En étude</>) : "En étude"}
+                      </button>
+                      <button
+                        onClick={() => updateStudentRequestStatus(req.id, "resolved")}
+                        disabled={req.status === "resolved"}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                          req.status === "resolved" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
+                        }`}
+                      >
+                        {req.status === "resolved" ? (<><CheckCircle2 size={13} /> Résolu</>) : "Marquer résolu"}
+                      </button>
+                      <button
+                        onClick={() => openReply("studentRequests", req.id, req.email, `Re: ${req.subject}`)}
+                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
+                      >
+                        <Mail size={13} /> Répondre sur le site
+                      </button>
+                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ================= MAIL TAB ================= */}
         {tab === "mail" && (
           <div>
@@ -1847,19 +2008,35 @@ export default function AdminPage() {
                       </div>
                     ) : (
                       <div className="p-6">
-                        <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                           <button
                             onClick={() => setSelectedMail(null)}
                             className="text-xs font-semibold text-ink-soft hover:text-ink inline-flex items-center gap-1.5"
                           >
                             <ArrowLeft size={14} /> Retour
                           </button>
-                          <button
-                            onClick={forwardMail}
-                            className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
-                          >
-                            <Forward size={14} /> Transférer
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={printMail}
+                              title="Imprimer"
+                              className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                            >
+                              <Printer size={14} /> Imprimer
+                            </button>
+                            <button
+                              onClick={shareMail}
+                              title="Partager"
+                              className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                            >
+                              <Share2 size={14} /> Partager
+                            </button>
+                            <button
+                              onClick={forwardMail}
+                              className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                            >
+                              <Forward size={14} /> Transférer
+                            </button>
+                          </div>
                         </div>
                         <p className="text-xl font-bold text-ink">{selectedMail.subject}</p>
                         <div className="flex items-center gap-3 mt-3">

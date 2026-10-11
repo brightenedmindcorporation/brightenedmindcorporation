@@ -2,10 +2,10 @@
 
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import BmLogo from "@/components/BmLogo";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
@@ -54,7 +54,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
         >
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-ink">
-              <Image src="/logo-bm.png" alt="BM Logo" width={40} height={40} style={{ width: "auto", height: "40px" }} priority />
+              <BmLogo size={40} />
               BM <span className="text-gradient-red">Corporation</span>
             </Link>
 
@@ -160,7 +160,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
           <div className="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row justify-between items-center text-xs text-ink-faint">
             <p>© 2026 BM Corporation. Tous droits réservés.</p>
-            <p className="mt-2 sm:mt-0">Propulsé par BM Academia</p>
+            <p className="mt-2 sm:mt-0">Propulsé par BM Corporation</p>
           </div>
         </footer>
       )}
