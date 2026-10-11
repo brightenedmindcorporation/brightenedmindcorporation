@@ -196,7 +196,7 @@ export default function Dashboard() {
               onClick={() => setRequestOpen(true)}
               className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line"
             >
-              <MessageSquarePlus size={15} /> Plainte / Demande
+              <MessageSquarePlus size={15} /> Contacter l'administration
             </button>
             <button
               onClick={handleLogout}
@@ -469,7 +469,7 @@ export default function Dashboard() {
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2">
-              <MessageSquarePlus size={18} /> Soumettre une plainte / demande
+              <MessageSquarePlus size={18} /> Contacter l'administration
             </h3>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">Type</label>
             <select
