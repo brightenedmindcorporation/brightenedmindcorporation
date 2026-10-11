@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BmLogo from "@/components/BmLogo";
-import { Lock, MessageSquarePlus } from "lucide-react";
+import { Lock, MessageSquarePlus, Paperclip, X } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
@@ -48,6 +48,7 @@ export default function Dashboard() {
   const [requestSubject, setRequestSubject] = useState("");
   const [requestMessage, setRequestMessage] = useState("");
   const [requestSending, setRequestSending] = useState(false);
+  const [requestAttachments, setRequestAttachments] = useState<File[]>([]);
   const router = useRouter();
 
   // Load the logged-in student once on mount.
@@ -124,25 +125,49 @@ export default function Dashboard() {
     router.replace("/login");
   };
 
+  const doSubmitRequest = async () => {
+    const idToken = await auth.currentUser?.getIdToken();
+    const form = new FormData();
+    form.append("idToken", idToken || "");
+    form.append("type", requestType);
+    form.append("subject", requestSubject);
+    form.append("message", requestMessage);
+    requestAttachments.forEach((file) => form.append("attachments", file));
+    const response = await fetch("/api/academy/student-requests", { method: "POST", body: form });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Erreur serveur");
+  };
+
   const submitRequest = async () => {
     if (!requestSubject.trim() || !requestMessage.trim()) return;
     setRequestSending(true);
     try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/academy/student-requests", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, type: requestType, subject: requestSubject, message: requestMessage }),
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      try {
+        await doSubmitRequest();
+      } catch (firstError: any) {
+        // "Failed to fetch" means the request never reached the server —
+        // most often the Render free-tier instance was asleep and woke up
+        // mid-request. One silent retry after a short pause covers that
+        // case instead of showing a raw network error on the first try.
+        if (firstError instanceof TypeError) {
+          await new Promise((resolve) => setTimeout(resolve, 4000));
+          await doSubmitRequest();
+        } else {
+          throw firstError;
+        }
+      }
       setRequestOpen(false);
       setRequestSubject("");
       setRequestMessage("");
       setRequestType("complaint");
+      setRequestAttachments([]);
       alert("Votre message a bien été envoyé à l'administration.");
     } catch (error: any) {
-      alert(`Erreur : ${error.message || error}`);
+      const message =
+        error instanceof TypeError
+          ? "Le serveur était en train de démarrer et n'a pas répondu à temps. Réessayez dans quelques secondes."
+          : error.message || error;
+      alert(`Erreur : ${message}`);
     } finally {
       setRequestSending(false);
     }
@@ -496,8 +521,27 @@ export default function Dashboard() {
               onChange={(e) => setRequestMessage(e.target.value)}
               rows={6}
               placeholder="Décrivez votre plainte, inquiétude ou demande en détail…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
             />
+            {requestAttachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {requestAttachments.map((file, i) => (
+                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                    {file.name}
+                    <button onClick={() => setRequestAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+              <Paperclip size={13} /> Joindre un fichier
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => setRequestAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
+              />
+            </label>
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setRequestOpen(false)}

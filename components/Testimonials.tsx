@@ -4,18 +4,28 @@ import { motion } from "framer-motion";
 
 const testimonials = [
   {
-    name: "Étudiant BM Academia",
+    name: "Étudiant BM Academia — Anglais",
     text: "Grâce à BM Academia, j’ai amélioré mes compétences linguistiques et gagné plus de confiance dans mon parcours professionnel.",
   },
-
   {
     name: "Client BM Communication",
     text: "Un service professionnel, une excellente qualité visuelle et un accompagnement sérieux pour notre communication digitale.",
   },
-
   {
     name: "Famille BM Domestica",
     text: "Nous avons trouvé un personnel fiable et bien formé. Le processus a été transparent et très professionnel.",
+  },
+  {
+    name: "Étudiante BM Academia — Bureautique",
+    text: "Les classes en direct m'ont permis de vraiment maîtriser Excel et Word. Le rythme d'étude flexible s'adaptait parfaitement à mon emploi du temps.",
+  },
+  {
+    name: "Entreprise cliente — BM Communication",
+    text: "De l'identité visuelle au site web, toute notre communication a été repensée avec sérieux. Un vrai partenaire de confiance pour notre croissance.",
+  },
+  {
+    name: "Ménage — BM Domestica",
+    text: "Le suivi après placement fait toute la différence. On sent un vrai accompagnement, pas juste une mise en relation.",
   },
 ];
 
@@ -43,7 +53,7 @@ export default function Testimonials() {
 
           {testimonials.map((item, index) => (
             <motion.div
-              key={item.name}
+              key={index}
               initial={{ opacity: 0, y: 40 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

@@ -55,6 +55,14 @@ export default function AdminPage() {
   const [checkLoading, setCheckLoading] = useState(false);
   const [checkResult, setCheckResult] = useState<any>(null);
 
+  // --- Message to students ---
+  const [messageOpen, setMessageOpen] = useState(false);
+  const [messageRecipient, setMessageRecipient] = useState("__all__");
+  const [messageSubject, setMessageSubject] = useState("");
+  const [messageBody, setMessageBody] = useState("");
+  const [messageAttachments, setMessageAttachments] = useState<File[]>([]);
+  const [messageSending, setMessageSending] = useState(false);
+
   // --- Live sessions ---
   const [liveSessions, setLiveSessions] = useState<any[]>([]);
   const [liveLoading, setLiveLoading] = useState(false);
@@ -418,6 +426,45 @@ export default function AdminPage() {
       fetchProjectRequests();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const sendStudentMessage = async () => {
+    if (!messageSubject.trim() || !messageBody.trim()) return;
+    setMessageSending(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const recipients =
+        messageRecipient === "__all__"
+          ? Array.from(new Set(students.filter((s) => s.status === "Approved" && s.email).map((s) => s.email)))
+          : [messageRecipient];
+
+      if (recipients.length === 0) {
+        alert("Aucun destinataire approuvé trouvé.");
+        return;
+      }
+
+      const form = new FormData();
+      form.append("idToken", idToken || "");
+      form.append("subject", messageSubject);
+      form.append("body", messageBody);
+      recipients.forEach((r) => form.append("recipients", r));
+      messageAttachments.forEach((file) => form.append("attachments", file));
+
+      const response = await fetch("/api/admin/message-students", { method: "POST", body: form });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+
+      setMessageOpen(false);
+      setMessageSubject("");
+      setMessageBody("");
+      setMessageAttachments([]);
+      setMessageRecipient("__all__");
+      alert(`Message envoyé à ${result.sentTo} destinataire(s).`);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setMessageSending(false);
     }
   };
 
@@ -843,10 +890,10 @@ export default function AdminPage() {
 
       try {
         await sendEmail(student.email, student.name, result.matricule, languageLabel(student.langCode), student.level, student.studyDays);
-        alert("Approved + Email sent!");
+        alert("Approuvé + Email envoyé !");
       } catch (emailError) {
         console.error("EMAIL ERROR:", emailError);
-        alert("Student approved but email failed");
+        alert("Étudiant approuvé mais l'envoi de l'email a échoué.");
       }
 
       fetchStudents();
@@ -868,7 +915,7 @@ export default function AdminPage() {
 
     if (student.status === "Approved") {
       const confirmed = confirm(
-        `${student.name} est actuellement approuvé(e) et a accès à la plateforme. Retirer son accès (ex. frais non payés) ?`
+        `${student.name} est actuellement approuvé(e) et a accès à la plateforme. Révoquer son accès (ex. frais non payés) ?`
       );
       if (!confirmed) return;
     }
@@ -889,12 +936,40 @@ export default function AdminPage() {
         throw new Error(result.error || "Erreur serveur inconnue");
       }
 
-      alert(student.status === "Approved" ? "Accès retiré." : "Rejected!");
+      alert(student.status === "Approved" ? "Accès révoqué." : "Rejeté !");
       fetchStudents();
     } catch (error: any) {
       console.error(error);
-      alert(`Error rejecting student: ${error.message || error}`);
+      alert(`Erreur lors du rejet : ${error.message || error}`);
       fetchStudents();
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(student.id);
+        return next;
+      });
+    }
+  };
+
+  const removeStudent = async (student: any) => {
+    if (processingIds.has(student.id)) return;
+    if (!confirm(`Supprimer définitivement le dossier de ${student.name} ? Cette action est irréversible.`)) return;
+
+    setProcessingIds((prev) => new Set(prev).add(student.id));
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const isEnrollment = student.kind === "enrollment";
+      const response = await fetch(isEnrollment ? "/api/admin/remove-enrollment" : "/api/admin/remove-student", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(isEnrollment ? { idToken, enrollmentId: student.id } : { idToken, studentId: student.id }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur inconnue");
+      fetchStudents();
+    } catch (error: any) {
+      console.error(error);
+      alert(`Erreur lors de la suppression : ${error.message || error}`);
     } finally {
       setProcessingIds((prev) => {
         const next = new Set(prev);
@@ -1184,6 +1259,15 @@ export default function AdminPage() {
               ))}
             </div>
 
+            <div className="mb-6">
+              <button
+                onClick={() => setMessageOpen(true)}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+              >
+                <Mail size={15} /> Message aux étudiants
+              </button>
+            </div>
+
             {/* VÉRIFICATION DE COMPTE FIREBASE — diagnostic pour "mot de passe incorrect" */}
             <div className="bg-surface border border-line rounded-2xl p-5 mb-8">
               <p className="text-sm font-bold text-ink mb-1">Vérifier un compte (connexion impossible)</p>
@@ -1276,28 +1360,49 @@ export default function AdminPage() {
             ) : (
               filteredStudents.map((s) => (
                 <div key={s.id} className="p-5 mb-4 rounded-2xl border border-line bg-surface shadow-xl">
-                  <p className="text-ink"><b className="text-ink">Name:</b> {s.name}</p>
-                  <p className="text-ink"><b className="text-ink">Email:</b> {s.email}</p>
-                  <p className="text-ink"><b className="text-ink">Language:</b> {languageLabel(s.langCode)}</p>
-                  <p className="text-ink"><b className="text-ink">Level:</b> {s.level}</p>
-                  <p className="text-ink"><b className="text-ink">Status:</b> {s.status}</p>
-                  <p className="text-ink"><b className="text-ink">Matricule:</b> {s.matricule || "-"}</p>
+                  <p className="text-ink"><b className="text-ink">Nom :</b> {s.name}</p>
+                  <p className="text-ink"><b className="text-ink">Email :</b> {s.email}</p>
+                  <p className="text-ink"><b className="text-ink">Formation :</b> {languageLabel(s.langCode)}</p>
+                  <p className="text-ink"><b className="text-ink">Niveau :</b> {s.level}</p>
+                  <p className="text-ink">
+                    <b className="text-ink">Statut :</b>{" "}
+                    {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
+                  </p>
+                  <p className="text-ink"><b className="text-ink">Matricule :</b> {s.matricule || "-"}</p>
 
-                  <div className="flex gap-3 mt-4">
+                  <div className="flex flex-wrap gap-3 mt-4">
                     <button
                       onClick={() => approveStudent(s)}
                       disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Rejected"}
                       className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      {processingIds.has(s.id) ? "Processing..." : "Approve"}
+                      {processingIds.has(s.id) ? "Traitement..." : "Approuver"}
                     </button>
 
+                    {s.status === "Approved" ? (
+                      <button
+                        onClick={() => rejectStudent(s)}
+                        disabled={processingIds.has(s.id)}
+                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Révoquer
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => rejectStudent(s)}
+                        disabled={processingIds.has(s.id) || s.status === "Rejected"}
+                        className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Rejeter
+                      </button>
+                    )}
+
                     <button
-                      onClick={() => rejectStudent(s)}
-                      disabled={processingIds.has(s.id) || s.status === "Rejected"}
-                      className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      onClick={() => removeStudent(s)}
+                      disabled={processingIds.has(s.id)}
+                      className="bg-surface-alt hover:bg-surface text-ink-soft hover:text-red-500 font-bold px-4 py-2 rounded-xl border border-line transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      {s.status === "Approved" ? "Remove / Revoke" : "Reject"}
+                      Supprimer
                     </button>
                   </div>
                 </div>
@@ -1936,6 +2041,11 @@ export default function AdminPage() {
                       </span>
                     </div>
                     {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
+                    {req.attachmentNames?.length > 0 && (
+                      <p className="text-xs text-ink-faint mt-2 flex items-center gap-1.5">
+                        <Paperclip size={12} /> Envoyé par email avec : {req.attachmentNames.join(", ")}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-4">
                       <button
                         onClick={() => updateStudentRequestStatus(req.id, "reviewing")}
@@ -2199,6 +2309,75 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* ================= MESSAGE TO STUDENTS MODAL ================= */}
+      {messageOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><Mail size={18} /> Message aux étudiants</h3>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Destinataire(s)</label>
+            <select
+              value={messageRecipient}
+              onChange={(e) => setMessageRecipient(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            >
+              <option value="__all__">Tous les étudiants approuvés</option>
+              {students.filter((s) => s.email).map((s) => (
+                <option key={s.id} value={s.email}>{s.name} — {s.email}</option>
+              ))}
+            </select>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <input
+              type="text"
+              value={messageSubject}
+              onChange={(e) => setMessageSubject(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <textarea
+              value={messageBody}
+              onChange={(e) => setMessageBody(e.target.value)}
+              rows={6}
+              placeholder="Écrivez votre message…"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
+            />
+            {messageAttachments.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {messageAttachments.map((file, i) => (
+                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                    <Paperclip size={12} /> {file.name}
+                    <button onClick={() => setMessageAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+              <Paperclip size={13} /> Joindre un fichier
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                onChange={(e) => setMessageAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
+              />
+            </label>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setMessageOpen(false)}
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={sendStudentMessage}
+                disabled={messageSending || !messageSubject.trim() || !messageBody.trim()}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+              >
+                {messageSending ? "Envoi…" : "Envoyer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= COMPOSE MODAL ================= */}
       {composeOpen && (
