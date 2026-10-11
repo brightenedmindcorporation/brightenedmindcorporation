@@ -7,6 +7,7 @@ import { GraduationCap } from "lucide-react";
 import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
+import { syncProgress } from "@/lib/academy/progressSync";
 
 export default function FinalQuizPage() {
   const router = useRouter();
@@ -101,7 +102,10 @@ export default function FinalQuizPage() {
             quiz={curriculum.finalQuiz}
             badge="Final Quiz"
             alreadyScore={alreadyScore}
-            onSubmit={(score) => recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore)}
+            onSubmit={(score) => {
+              const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore);
+              if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
+            }}
           />
         </div>
       </main>

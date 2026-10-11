@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
+import { syncProgress } from "@/lib/academy/progressSync";
 import { useEffect, useState } from "react";
 
 export default function QuizPage() {
@@ -95,7 +96,10 @@ export default function QuizPage() {
           <QuizEngine
             quiz={quiz}
             alreadyScore={alreadyScore}
-            onSubmit={(score) => recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore)}
+            onSubmit={(score) => {
+              const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore);
+              if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
+            }}
           />
         </div>
       </main>

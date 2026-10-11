@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Trophy, XCircle, CheckCircle2 } from "lucide-react";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { getLevelProgress, getOrCreateCertificateId } from "@/lib/academy/progress";
+import { syncCertificateIssued } from "@/lib/academy/progressSync";
 import CertificateButton from "@/components/academy/CertificateButton";
 
 export default function CertificatePage() {
@@ -117,6 +118,16 @@ export default function CertificatePage() {
                     levelTitle={curriculum?.levelTitle ?? ""}
                     average={average}
                     certificateId={certificateId}
+                    onGenerated={() =>
+                      syncCertificateIssued({
+                        langCode,
+                        level,
+                        levelTitle: curriculum?.levelTitle ?? "",
+                        studentName,
+                        average,
+                        certificateId,
+                      })
+                    }
                   />
                 </div>
               </>

@@ -18,6 +18,7 @@ import {
   Printer,
   Share2,
   BellRing,
+  Trophy,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -27,10 +28,11 @@ import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
 import NotificationBell from "@/components/academy/NotificationBell";
+import { generateCertificatePdf } from "@/lib/academy/certificatePdf";
 
 export const dynamic = "force-dynamic";
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -106,6 +108,25 @@ export default function AdminPage() {
   // --- Student requests (plaintes / inquiétudes / demandes) ---
   const [studentRequests, setStudentRequests] = useState<any[]>([]);
   const [studentRequestsLoading, setStudentRequestsLoading] = useState(false);
+
+  // --- Progress tracking ---
+  const [progressList, setProgressList] = useState<any[]>([]);
+  const [progressLoading, setProgressLoading] = useState(false);
+
+  // --- Certificates ---
+  const [certificates, setCertificates] = useState<any[]>([]);
+  const [certificatesLoading, setCertificatesLoading] = useState(false);
+  const [certGenerateOpen, setCertGenerateOpen] = useState(false);
+  const [certName, setCertName] = useState("");
+  const [certEmail, setCertEmail] = useState("");
+  const [certLangCode, setCertLangCode] = useState(availableLanguages[0].code);
+  const [certLevel, setCertLevel] = useState("1");
+  const [certLevelTitle, setCertLevelTitle] = useState("");
+  const [certAverage, setCertAverage] = useState("100");
+  const [certSending, setCertSending] = useState(false);
+  const [certEditingId, setCertEditingId] = useState<string | null>(null);
+  const [certEditName, setCertEditName] = useState("");
+  const [certEditAverage, setCertEditAverage] = useState("");
 
   // --- Inline reply (Projets / Devis / Candidatures) ---
   const [replyTarget, setReplyTarget] = useState<{ collection: string; docId: string; to: string } | null>(null);
@@ -468,6 +489,135 @@ export default function AdminPage() {
     }
   };
 
+  const fetchProgress = async () => {
+    setProgressLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/progress", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setProgressList(result.progress || []);
+    } catch (error) {
+      console.error("Error fetching progress:", error);
+    } finally {
+      setProgressLoading(false);
+    }
+  };
+
+  const fetchCertificates = async () => {
+    setCertificatesLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/certificates", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setCertificates(result.certificates || []);
+    } catch (error) {
+      console.error("Error fetching certificates:", error);
+    } finally {
+      setCertificatesLoading(false);
+    }
+  };
+
+  const generateCertificateManually = async () => {
+    if (!certName.trim()) return;
+    setCertSending(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const year = new Date().getFullYear();
+      const certificateId = `BMCA-${certLangCode}-L${certLevel}-${year}-${Math.floor(Math.random() * 100000)}`;
+      const average = Number(certAverage) || 0;
+      const levelTitle = certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`;
+
+      generateCertificatePdf({ studentName: certName.trim(), levelTitle, average, certificateId });
+
+      const response = await fetch("/api/admin/certificates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idToken,
+          studentName: certName.trim(),
+          studentEmail: certEmail.trim() || null,
+          langCode: certLangCode,
+          level: certLevel,
+          levelTitle,
+          average,
+          certificateId,
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+
+      setCertGenerateOpen(false);
+      setCertName("");
+      setCertEmail("");
+      setCertLevelTitle("");
+      setCertAverage("100");
+      fetchCertificates();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setCertSending(false);
+    }
+  };
+
+  const toggleCertificateRevoked = async (cert: any) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/certificates/${cert.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, revoked: !cert.revoked }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchCertificates();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const saveCertificateEdit = async (id: string) => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/certificates/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, studentName: certEditName, average: Number(certEditAverage) || 0 }),
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      setCertEditingId(null);
+      fetchCertificates();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  const deleteCertificate = async (id: string) => {
+    if (!confirm("Supprimer définitivement ce certificat ?")) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/certificates/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      fetchCertificates();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   const checkAccount = async () => {
     if (!checkEmail.trim()) return;
     setCheckLoading(true);
@@ -814,6 +964,8 @@ export default function AdminPage() {
     if (tab === "devis" && devisRequests.length === 0) fetchDevisRequests();
     if (tab === "mail" && mailMessages.length === 0) fetchMailMessages();
     if (tab === "requests" && studentRequests.length === 0) fetchStudentRequests();
+    if (tab === "progress" && progressList.length === 0) fetchProgress();
+    if (tab === "certificates" && certificates.length === 0) fetchCertificates();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -1043,6 +1195,8 @@ export default function AdminPage() {
     else if (t === "devis") fetchDevisRequests();
     else if (t === "mail") fetchMailMessages();
     else if (t === "requests") fetchStudentRequests();
+    else if (t === "progress") fetchProgress();
+    else if (t === "certificates") fetchCertificates();
   };
 
   const parseFromHeader = (from?: string) => {
@@ -1208,6 +1362,8 @@ export default function AdminPage() {
             { id: "devis", label: "Devis", badge: devisRequests.filter((r) => r.status === "new").length },
             { id: "mail", label: "Mail", badge: mailMessages.filter((m) => m.unread).length },
             { id: "requests", label: "Plaintes", badge: studentRequests.filter((r) => r.status === "new").length },
+            { id: "progress", label: "Progression", badge: 0 },
+            { id: "certificates", label: "Certificats", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
               key={t.id}
@@ -2080,6 +2236,166 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* ================= PROGRESS TAB ================= */}
+        {tab === "progress" && (
+          <div>
+            <p className="text-xs text-ink-soft mb-6">
+              Évolution des étudiants : leçons complétées, résultats de quiz et quiz final, par langue et par niveau.
+              Synchronisé automatiquement à chaque quiz réussi — les étudiants qui n'ont pas encore passé de quiz depuis
+              ce déploiement n'apparaîtront qu'après leur prochain quiz.
+            </p>
+            {progressLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : progressList.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucune donnée de progression pour le moment.
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm border-collapse">
+                  <thead>
+                    <tr className="text-left text-ink-soft border-b border-line">
+                      <th className="py-2 pr-4">Étudiant</th>
+                      <th className="py-2 pr-4">Langue</th>
+                      <th className="py-2 pr-4">Niveau</th>
+                      <th className="py-2 pr-4">Leçons terminées</th>
+                      <th className="py-2 pr-4">Quiz final</th>
+                      <th className="py-2 pr-4">Certificat</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {progressList.map((p) => {
+                      const owner = students.find((s) => s.uid === p.uid);
+                      return (
+                        <tr key={p.id} className="border-b border-line/60">
+                          <td className="py-2 pr-4 text-ink">{owner?.name || p.uid}</td>
+                          <td className="py-2 pr-4 text-ink-soft">{languageLabel(p.langCode)}</td>
+                          <td className="py-2 pr-4 text-ink-soft">{p.level}</td>
+                          <td className="py-2 pr-4 text-ink-soft">{(p.completedQuizzes || []).length}</td>
+                          <td className="py-2 pr-4">
+                            {p.finalQuizPassed ? (
+                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-950/60 text-emerald-400">Réussi ({p.finalQuizScore})</span>
+                            ) : p.finalQuizScore != null ? (
+                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-red-950/60 text-red-400">Échoué ({p.finalQuizScore})</span>
+                            ) : (
+                              <span className="text-xs text-ink-faint">—</span>
+                            )}
+                          </td>
+                          <td className="py-2 pr-4 text-ink-faint font-mono text-xs">{p.certificateId || "—"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ================= CERTIFICATES TAB ================= */}
+        {tab === "certificates" && (
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <p className="text-xs text-ink-soft max-w-xl">
+                Certificats auto-générés en fin de niveau, et certificats émis manuellement ici (sans passer par le parcours d'apprentissage).
+              </p>
+              <button
+                onClick={() => setCertGenerateOpen(true)}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2 shrink-0"
+              >
+                <Trophy size={15} /> Générer un certificat
+              </button>
+            </div>
+
+            {certificatesLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+            ) : certificates.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+                Aucun certificat émis pour le moment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {certificates.map((cert) => (
+                  <div key={cert.id} className={`p-5 rounded-2xl border bg-surface ${cert.revoked ? "border-red-800/50 opacity-60" : "border-line"}`}>
+                    {certEditingId === cert.id ? (
+                      <div className="space-y-3">
+                        <input
+                          value={certEditName}
+                          onChange={(e) => setCertEditName(e.target.value)}
+                          className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        />
+                        <input
+                          type="number"
+                          value={certEditAverage}
+                          onChange={(e) => setCertEditAverage(e.target.value)}
+                          className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        />
+                        <div className="flex gap-2">
+                          <button onClick={() => saveCertificateEdit(cert.id)} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Enregistrer</button>
+                          <button onClick={() => setCertEditingId(null)} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Annuler</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-ink font-bold">{cert.studentName}</p>
+                            <p className="text-xs text-ink-soft mt-0.5">{cert.levelTitle || `${languageLabel(cert.langCode)} — Niveau ${cert.level}`}</p>
+                            <p className="text-xs text-ink-faint font-mono mt-1">{cert.certificateId}</p>
+                          </div>
+                          <div className="text-right shrink-0">
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cert.issuedBy === "admin" ? "bg-amber-950/60 text-amber-400" : "bg-surface-alt text-ink-soft"}`}>
+                              {cert.issuedBy === "admin" ? "Émis par admin" : "Auto-généré"}
+                            </span>
+                            <p className="text-xs text-ink-faint mt-1">{cert.average != null ? `${cert.average}%` : ""}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-2 mt-4">
+                          <button
+                            onClick={() => {
+                              setCertEditingId(cert.id);
+                              setCertEditName(cert.studentName || "");
+                              setCertEditAverage(String(cert.average ?? ""));
+                            }}
+                            className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            onClick={() =>
+                              generateCertificatePdf({
+                                studentName: cert.studentName,
+                                levelTitle: cert.levelTitle || `${languageLabel(cert.langCode)} — Niveau ${cert.level}`,
+                                average: cert.average || 0,
+                                certificateId: cert.certificateId,
+                              })
+                            }
+                            className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
+                          >
+                            Télécharger
+                          </button>
+                          <button
+                            onClick={() => toggleCertificateRevoked(cert)}
+                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${cert.revoked ? "bg-green-600 hover:bg-green-700 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"}`}
+                          >
+                            {cert.revoked ? "Réactiver" : "Révoquer"}
+                          </button>
+                          <button
+                            onClick={() => deleteCertificate(cert.id)}
+                            className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* ================= MAIL TAB ================= */}
         {tab === "mail" && (
           <div>
@@ -2309,6 +2625,88 @@ export default function AdminPage() {
           </div>
         )}
       </div>
+
+      {/* ================= GENERATE CERTIFICATE MODAL ================= */}
+      {certGenerateOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
+            <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><Trophy size={18} /> Générer un certificat</h3>
+            <p className="text-xs text-ink-soft mb-4">
+              Génère un certificat PDF directement (téléchargé dans ce navigateur) sans que l'étudiant ait besoin de passer par le parcours d'apprentissage.
+            </p>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nom de l'étudiant</label>
+            <input
+              value={certName}
+              onChange={(e) => setCertName(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Email (optionnel)</label>
+            <input
+              type="email"
+              value={certEmail}
+              onChange={(e) => setCertEmail(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <div className="grid grid-cols-2 gap-3 mb-4">
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Langue</label>
+                <select
+                  value={certLangCode}
+                  onChange={(e) => setCertLangCode(e.target.value)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                >
+                  {availableLanguages.map((l) => (
+                    <option key={l.code} value={l.code}>{l.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Niveau</label>
+                <select
+                  value={certLevel}
+                  onChange={(e) => setCertLevel(e.target.value)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                >
+                  <option value="1">Niveau 1</option>
+                  <option value="2">Niveau 2</option>
+                  <option value="3">Niveau 3</option>
+                </select>
+              </div>
+            </div>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre du niveau (optionnel)</label>
+            <input
+              value={certLevelTitle}
+              onChange={(e) => setCertLevelTitle(e.target.value)}
+              placeholder={`${languageLabel(certLangCode)} — Niveau ${certLevel}`}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Moyenne (%)</label>
+            <input
+              type="number"
+              min="0"
+              max="100"
+              value={certAverage}
+              onChange={(e) => setCertAverage(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setCertGenerateOpen(false)}
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={generateCertificateManually}
+                disabled={certSending || !certName.trim()}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+              >
+                {certSending ? "Génération…" : "Générer et télécharger"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ================= MESSAGE TO STUDENTS MODAL ================= */}
       {messageOpen && (
