@@ -11,8 +11,10 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 
     const { id } = await params;
     const snap = await getAdminDb().collection("announcements").doc(id).get();
+    const data = snap.data();
+    const expired = data?.expiresAt && data.expiresAt <= new Date().toISOString();
 
-    if (!snap.exists || !snap.data()?.active) {
+    if (!snap.exists || !data?.active || expired) {
       return NextResponse.json({ error: "Annonce introuvable." }, { status: 404 });
     }
 

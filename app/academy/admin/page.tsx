@@ -89,6 +89,7 @@ export default function AdminPage() {
   const [annDescription, setAnnDescription] = useState("");
   const [annType, setAnnType] = useState<"normal" | "job">("normal");
   const [annDetails, setAnnDetails] = useState("");
+  const [annDuration, setAnnDuration] = useState("");
   const [annImage, setAnnImage] = useState<File | null>(null);
   const [annVideo, setAnnVideo] = useState<File | null>(null);
   const [annSubmitting, setAnnSubmitting] = useState(false);
@@ -297,6 +298,7 @@ export default function AdminPage() {
       form.append("description", annDescription);
       form.append("type", annType);
       form.append("details", annDetails);
+      if (annDuration) form.append("durationDays", annDuration);
       if (annImage) form.append("image", annImage);
       if (annVideo) form.append("video", annVideo);
 
@@ -308,6 +310,7 @@ export default function AdminPage() {
       setAnnDescription("");
       setAnnType("normal");
       setAnnDetails("");
+      setAnnDuration("");
       setAnnImage(null);
       setAnnVideo(null);
       fetchAnnouncements();
@@ -1911,6 +1914,23 @@ export default function AdminPage() {
                   className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
+              <div className="sm:col-span-2">
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Durée de publication</label>
+                <select
+                  value={annDuration}
+                  onChange={(e) => setAnnDuration(e.target.value)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                >
+                  <option value="">Illimitée (jusqu'à masquage manuel)</option>
+                  <option value="3">3 jours</option>
+                  <option value="7">7 jours</option>
+                  <option value="14">14 jours</option>
+                  <option value="30">30 jours</option>
+                  <option value="60">60 jours</option>
+                  <option value="90">90 jours</option>
+                </select>
+                <p className="text-xs text-ink-faint mt-1">L'annonce se masque automatiquement du site public à la fin de cette durée.</p>
+              </div>
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Photo (optionnel)</label>
                 <input
@@ -1967,6 +1987,13 @@ export default function AdminPage() {
                           {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
                         </p>
                         <p className="text-xs text-ink-soft mt-1">{a.description}</p>
+                        {a.expiresAt && (
+                          <p className="text-xs text-ink-faint mt-1">
+                            {a.expiresAt > new Date().toISOString()
+                              ? `Expire le ${new Date(a.expiresAt).toLocaleDateString("fr-FR")}`
+                              : `Expirée le ${new Date(a.expiresAt).toLocaleDateString("fr-FR")}`}
+                          </p>
+                        )}
                         <Link href={`/annonces/${a.id}`} className="text-xs text-red-500 hover:text-red-400 hover:underline mt-1 inline-block">
                           Voir la page publique →
                         </Link>

@@ -52,9 +52,18 @@ export async function POST(request: Request) {
     const description = form.get("description")?.toString()?.trim();
     const type = form.get("type")?.toString() === "job" ? "job" : "normal";
     const details = form.get("details")?.toString()?.trim() || "";
+    const durationDaysRaw = form.get("durationDays")?.toString();
+    const durationDays = durationDaysRaw ? Number(durationDaysRaw) : null;
 
     if (!title || !description) {
       return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
+    }
+
+    let expiresAt: string | null = null;
+    if (durationDays && durationDays > 0) {
+      const expiry = new Date();
+      expiry.setDate(expiry.getDate() + durationDays);
+      expiresAt = expiry.toISOString();
     }
 
     const imageFile = form.get("image");
@@ -79,6 +88,7 @@ export async function POST(request: Request) {
       imageUrl,
       videoUrl,
       active: true,
+      expiresAt,
       createdAt: new Date().toISOString(),
     });
 

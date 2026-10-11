@@ -15,8 +15,13 @@ export async function GET() {
 
     const adminDb = getAdminDb();
     const snap = await adminDb.collection("announcements").where("active", "==", true).get();
+    const now = new Date().toISOString();
     const announcements = snap.docs
       .map((doc) => ({ id: doc.id, ...doc.data() }))
+      // A scheduled duration (expiresAt) that has passed hides the
+      // announcement from the public site without the admin having to
+      // remember to come back and deactivate it manually.
+      .filter((a: any) => !a.expiresAt || a.expiresAt > now)
       .sort((a: any, b: any) => (b.createdAt > a.createdAt ? 1 : -1));
 
     return NextResponse.json({ announcements });
