@@ -90,6 +90,7 @@ export default function AdminPage() {
   const [annType, setAnnType] = useState<"normal" | "job">("normal");
   const [annDetails, setAnnDetails] = useState("");
   const [annDuration, setAnnDuration] = useState("");
+  const [annDurationCustom, setAnnDurationCustom] = useState("");
   const [annImage, setAnnImage] = useState<File | null>(null);
   const [annVideo, setAnnVideo] = useState<File | null>(null);
   const [annSubmitting, setAnnSubmitting] = useState(false);
@@ -100,6 +101,7 @@ export default function AdminPage() {
   const [editAnnType, setEditAnnType] = useState<"normal" | "job">("normal");
   const [editAnnDetails, setEditAnnDetails] = useState("");
   const [editAnnDuration, setEditAnnDuration] = useState("");
+  const [editAnnDurationCustom, setEditAnnDurationCustom] = useState("");
   const [editAnnImage, setEditAnnImage] = useState<File | null>(null);
   const [editAnnVideo, setEditAnnVideo] = useState<File | null>(null);
   const [editAnnSubmitting, setEditAnnSubmitting] = useState(false);
@@ -299,6 +301,11 @@ export default function AdminPage() {
       alert("Titre et description requis.");
       return;
     }
+    const resolvedDuration = annDuration === "custom" ? annDurationCustom : annDuration;
+    if (annDuration === "custom" && (!resolvedDuration || Number(resolvedDuration) <= 0)) {
+      alert("Indiquez un nombre de jours valide pour la durée personnalisée.");
+      return;
+    }
     setAnnSubmitting(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -308,7 +315,7 @@ export default function AdminPage() {
       form.append("description", annDescription);
       form.append("type", annType);
       form.append("details", annDetails);
-      if (annDuration) form.append("durationDays", annDuration);
+      if (resolvedDuration) form.append("durationDays", resolvedDuration);
       if (annImage) form.append("image", annImage);
       if (annVideo) form.append("video", annVideo);
 
@@ -321,6 +328,7 @@ export default function AdminPage() {
       setAnnType("normal");
       setAnnDetails("");
       setAnnDuration("");
+      setAnnDurationCustom("");
       setAnnImage(null);
       setAnnVideo(null);
       fetchAnnouncements();
@@ -338,6 +346,7 @@ export default function AdminPage() {
     setEditAnnType(a.type === "job" ? "job" : "normal");
     setEditAnnDetails(a.details || "");
     setEditAnnDuration("");
+    setEditAnnDurationCustom("");
     setEditAnnImage(null);
     setEditAnnVideo(null);
   };
@@ -349,6 +358,11 @@ export default function AdminPage() {
       alert("Titre et description requis.");
       return;
     }
+    const resolvedEditDuration = editAnnDuration === "custom" ? editAnnDurationCustom : editAnnDuration;
+    if (editAnnDuration === "custom" && (!resolvedEditDuration || Number(resolvedEditDuration) <= 0)) {
+      alert("Indiquez un nombre de jours valide pour la durée personnalisée.");
+      return;
+    }
     setEditAnnSubmitting(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -357,7 +371,7 @@ export default function AdminPage() {
       form.append("description", editAnnDescription);
       form.append("type", editAnnType);
       form.append("details", editAnnDetails);
-      if (editAnnDuration) form.append("durationDays", editAnnDuration);
+      if (resolvedEditDuration) form.append("durationDays", resolvedEditDuration);
       if (editAnnImage) form.append("image", editAnnImage);
       if (editAnnVideo) form.append("video", editAnnVideo);
 
@@ -2011,7 +2025,18 @@ export default function AdminPage() {
                   <option value="30">30 jours</option>
                   <option value="60">60 jours</option>
                   <option value="90">90 jours</option>
+                  <option value="custom">Personnalisée…</option>
                 </select>
+                {annDuration === "custom" && (
+                  <input
+                    type="number"
+                    min={1}
+                    value={annDurationCustom}
+                    onChange={(e) => setAnnDurationCustom(e.target.value)}
+                    placeholder="Nombre de jours"
+                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 mt-2"
+                  />
+                )}
                 <p className="text-xs text-ink-faint mt-1">L'annonce se masque automatiquement du site public à la fin de cette durée.</p>
               </div>
               <div>
@@ -3209,7 +3234,18 @@ export default function AdminPage() {
               <option value="30">30 jours à partir d'aujourd'hui</option>
               <option value="60">60 jours à partir d'aujourd'hui</option>
               <option value="90">90 jours à partir d'aujourd'hui</option>
+              <option value="custom">Personnalisée…</option>
             </select>
+            {editAnnDuration === "custom" && (
+              <input
+                type="number"
+                min={1}
+                value={editAnnDurationCustom}
+                onChange={(e) => setEditAnnDurationCustom(e.target.value)}
+                placeholder="Nombre de jours, à partir d'aujourd'hui"
+                className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 mt-2 mb-1"
+              />
+            )}
             <p className="text-xs text-ink-faint mb-4">
               {editingAnnouncement.expiresAt
                 ? `Actuellement : ${editingAnnouncement.expiresAt > new Date().toISOString() ? "expire" : "expirée"} le ${new Date(editingAnnouncement.expiresAt).toLocaleDateString("fr-FR")}.`
