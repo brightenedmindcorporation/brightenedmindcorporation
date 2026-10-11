@@ -62,7 +62,7 @@ export default function DevisPage() {
   const [attachment, setAttachment] = useState<File | null>(null);
 
   // Renseigne ici le vrai numéro WhatsApp de ton entreprise (au format international sans le +)
-  const whatsappNumber = "+243970874852";
+  const whatsappNumber = "243988830799";
   const whatsappMessage = encodeURIComponent("Bonjour BM Corporation, je souhaite obtenir un devis pour mes projets de communication.");
 
   const handleSubmit = async (e: React.FormEvent) => {

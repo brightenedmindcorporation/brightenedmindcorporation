@@ -5,7 +5,7 @@ export default function Whatsapp() {
     <div className="fixed bottom-6 right-6 z-50">
 
       <Link
-        href="https://wa.me/243000000000"
+        href="https://wa.me/243988830799"
         target="_blank"
         className="bg-green-500 text-white px-5 py-4 rounded-full shadow-2xl hover:scale-110 transition duration-300"
       >
