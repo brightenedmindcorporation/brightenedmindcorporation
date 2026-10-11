@@ -19,6 +19,7 @@ import {
   Share2,
   BellRing,
   Trophy,
+  Download,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -870,6 +871,36 @@ export default function AdminPage() {
       console.error("Error fetching Gmail messages:", error);
     } finally {
       if (!silent) setMailLoading(false);
+    }
+  };
+
+  const [downloadingAttachmentId, setDownloadingAttachmentId] = useState<string | null>(null);
+
+  const downloadGmailAttachment = async (messageId: string, att: { attachmentId: string; filename: string; mimeType: string }) => {
+    setDownloadingAttachmentId(att.attachmentId);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const params = new URLSearchParams({ filename: att.filename, mimeType: att.mimeType });
+      const response = await fetch(`/api/admin/gmail/messages/${messageId}/attachments/${att.attachmentId}?${params}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || "Erreur serveur");
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = att.filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setDownloadingAttachmentId(null);
     }
   };
 
@@ -2163,10 +2194,26 @@ export default function AdminPage() {
                     </div>
                     <p className="text-ink-soft text-sm mt-1">{app.email}{app.phone ? ` · ${app.phone}` : ""}</p>
                     {app.message && <p className="text-ink-soft text-sm mt-2">{app.message}</p>}
-                    <p className="text-xs text-ink-faint mt-3 flex items-center gap-1.5">
-                      <Mail size={12} /> Fichiers envoyés par email à l'administration
-                      {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
-                    </p>
+                    {app.attachments?.some((a: any) => a.url) ? (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {app.attachments.filter((a: any) => a.url).map((a: any, i: number) => (
+                          <a
+                            key={i}
+                            href={a.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg"
+                          >
+                            <Paperclip size={12} /> {a.name}
+                          </a>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-ink-faint mt-3 flex items-center gap-1.5">
+                        <Mail size={12} /> Fichiers envoyés par email à l'administration
+                        {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
+                      </p>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-4">
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "reviewing")}
@@ -2238,6 +2285,16 @@ export default function AdminPage() {
                     </div>
                     <p className="text-ink-soft text-sm mt-1">{req.email}</p>
                     {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
+                    {req.attachmentUrl && (
+                      <a
+                        href={req.attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg mt-3"
+                      >
+                        <Paperclip size={12} /> {req.attachmentName || "Pièce jointe"}
+                      </a>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-4">
                       <button
                         onClick={() => updateProjectRequestStatus(req.id, "contacted")}
@@ -2304,6 +2361,16 @@ export default function AdminPage() {
                     </div>
                     <p className="text-ink-soft text-sm mt-1">{req.email}{req.phone ? ` · ${req.phone}` : ""}</p>
                     {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
+                    {req.attachmentUrl && (
+                      <a
+                        href={req.attachmentUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg mt-3"
+                      >
+                        <Paperclip size={12} /> {req.attachmentName || "Pièce jointe"}
+                      </a>
+                    )}
                     <div className="flex flex-wrap gap-2 mt-4">
                       <button
                         onClick={() => updateDevisRequestStatus(req.id, "contacted")}
@@ -2827,6 +2894,30 @@ export default function AdminPage() {
                             title="Contenu de l'email"
                           />
                         </div>
+
+                        {selectedMail.attachments?.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-line">
+                            <p className="text-xs font-semibold text-ink-soft mb-2">Pièces jointes</p>
+                            <div className="flex flex-wrap gap-2">
+                              {selectedMail.attachments.map((att: any) => (
+                                <button
+                                  key={att.attachmentId}
+                                  onClick={() => downloadGmailAttachment(selectedMail.id, att)}
+                                  disabled={downloadingAttachmentId === att.attachmentId}
+                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1.5 rounded-lg disabled:opacity-50"
+                                >
+                                  {downloadingAttachmentId === att.attachmentId ? (
+                                    "Téléchargement…"
+                                  ) : (
+                                    <>
+                                      <Download size={12} /> {att.filename}
+                                    </>
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        )}
 
                         <div className="mt-6 pt-4 border-t border-line">
                           <label className="block text-xs font-semibold text-ink-soft mb-1.5">Répondre à {parseFromHeader(selectedMail.from).name}</label>

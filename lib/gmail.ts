@@ -86,6 +86,31 @@ function headerValue(headers: any[], name: string): string {
   return headers?.find((h) => h.name.toLowerCase() === name.toLowerCase())?.value || "";
 }
 
+export interface GmailAttachmentMeta {
+  attachmentId: string;
+  filename: string;
+  mimeType: string;
+  size: number;
+}
+
+function extractAttachmentMeta(payload: any): GmailAttachmentMeta[] {
+  if (!payload) return [];
+  const found: GmailAttachmentMeta[] = [];
+  const walk = (part: any) => {
+    if (part.filename && part.body?.attachmentId) {
+      found.push({
+        attachmentId: part.body.attachmentId,
+        filename: part.filename,
+        mimeType: part.mimeType || "application/octet-stream",
+        size: part.body.size || 0,
+      });
+    }
+    if (part.parts) part.parts.forEach(walk);
+  };
+  walk(payload);
+  return found;
+}
+
 export interface GmailMessageSummary {
   id: string;
   threadId: string;
@@ -133,6 +158,7 @@ export async function listInboxMessages(maxResults = 25): Promise<GmailMessageSu
 export interface GmailMessageDetail extends GmailMessageSummary {
   to: string;
   body: string;
+  attachments: GmailAttachmentMeta[];
 }
 
 export async function getMessageDetail(id: string): Promise<GmailMessageDetail> {
@@ -155,7 +181,17 @@ export async function getMessageDetail(id: string): Promise<GmailMessageDetail> 
     date: headerValue(headers, "Date"),
     unread: false,
     body: extractBody(res.data.payload),
+    attachments: extractAttachmentMeta(res.data.payload),
   };
+}
+
+/** Downloads one attachment's raw bytes for a message, by attachment id
+ * (from `GmailMessageDetail.attachments`, via `getMessageDetail`). */
+export async function getAttachmentData(messageId: string, attachmentId: string): Promise<Buffer> {
+  const gmail = await getGmailClient();
+  const res = await gmail.users.messages.attachments.get({ userId: "me", messageId, id: attachmentId });
+  if (!res.data.data) throw new Error("Pièce jointe introuvable.");
+  return Buffer.from(res.data.data, "base64url");
 }
 
 export interface GmailAttachment {

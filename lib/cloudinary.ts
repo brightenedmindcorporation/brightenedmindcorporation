@@ -27,7 +27,7 @@ function ensureConfigured() {
 export async function uploadToCloudinary(
   file: File,
   folder: string,
-  resourceType: "image" | "video" = "image"
+  resourceType: "image" | "video" | "raw" = "image"
 ): Promise<string> {
   if (!isCloudinaryConfigured()) {
     throw { status: 503, message: "Le service d'hébergement de fichiers n'est pas configuré côté serveur." };
@@ -38,7 +38,14 @@ export async function uploadToCloudinary(
 
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
-      { folder, resource_type: resourceType },
+      {
+        folder,
+        resource_type: resourceType,
+        // "raw" is for non-image/video files (PDF, DOCX...) — keeping the
+        // original filename/extension means the stored URL downloads with
+        // a sensible name instead of a bare Cloudinary id.
+        ...(resourceType === "raw" ? { use_filename: true, unique_filename: true, filename_override: file.name } : {}),
+      },
       (error, result) => {
         if (error || !result) {
           reject(error || new Error("Échec de l'upload Cloudinary."));

@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
+
+const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 /**
  * Persists a copy of a homepage Contact form submission to Firestore so it
@@ -15,15 +18,33 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
 
-    const { name, email, message } = await request.json();
+    const form = await request.formData();
+    const name = form.get("name")?.toString()?.trim();
+    const email = form.get("email")?.toString()?.trim();
+    const message = form.get("message")?.toString()?.trim();
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Nom, email et message sont requis." }, { status: 400 });
     }
 
+    let attachmentUrl: string | null = null;
+    let attachmentName: string | null = null;
+    const attachmentFile = form.get("attachment");
+    if (attachmentFile instanceof File && attachmentFile.size > 0) {
+      if (attachmentFile.size > MAX_FILE_BYTES) {
+        return NextResponse.json({ error: "Le fichier dépasse la taille maximale autorisée (8 Mo)." }, { status: 400 });
+      }
+      if (isCloudinaryConfigured()) {
+        attachmentUrl = await uploadToCloudinary(attachmentFile, "project-requests", "raw");
+        attachmentName = attachmentFile.name;
+      }
+    }
+
     const docRef = await getAdminDb().collection("projectRequests").add({
-      name: String(name).trim(),
-      email: String(email).trim(),
-      message: String(message).trim(),
+      name,
+      email,
+      message,
+      attachmentUrl,
+      attachmentName,
       status: "new",
       createdAt: new Date().toISOString(),
     });

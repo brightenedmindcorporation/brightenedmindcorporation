@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
+import { Paperclip, X } from "lucide-react";
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -10,6 +11,7 @@ export default function Contact() {
     message: "",
   });
 
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [sent, setSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
@@ -61,17 +63,22 @@ export default function Contact() {
 
       setSent(true);
 
-      fetch("/api/contact/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: form.name, email: form.email, message: form.message }),
-      }).catch((err) => console.error("Project request persistence failed (non-fatal):", err));
+      const persistForm = new FormData();
+      persistForm.append("name", form.name);
+      persistForm.append("email", form.email);
+      persistForm.append("message", form.message);
+      if (attachment) persistForm.append("attachment", attachment);
+
+      fetch("/api/contact/submit", { method: "POST", body: persistForm }).catch((err) =>
+        console.error("Project request persistence failed (non-fatal):", err)
+      );
 
       setForm({
         name: "",
         email: "",
         message: "",
       });
+      setAttachment(null);
 
       setTimeout(() => {
         setSent(false);
@@ -136,6 +143,31 @@ export default function Contact() {
             rows={6}
             className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60"
           />
+
+          {attachment ? (
+            <span className="inline-flex items-center gap-2 self-start text-sm font-sans bg-surface-sunken/60 border border-line rounded-xl px-4 py-2.5 text-ink-soft">
+              <Paperclip size={15} className="shrink-0" />
+              <span className="truncate max-w-[240px]">{attachment.name}</span>
+              <button
+                type="button"
+                onClick={() => setAttachment(null)}
+                aria-label="Retirer la pièce jointe"
+                className="text-ink-faint hover:text-red-500"
+              >
+                <X size={14} />
+              </button>
+            </span>
+          ) : (
+            <label className="inline-flex items-center gap-2 self-start cursor-pointer text-sm font-sans font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2.5 transition bg-surface-sunken/60">
+              <Paperclip size={15} />
+              Joindre un fichier (optionnel)
+              <input
+                type="file"
+                className="hidden"
+                onChange={(e) => setAttachment(e.target.files?.[0] ?? null)}
+              />
+            </label>
+          )}
 
           {emailError && (
             <p className="text-red-500 text-sm text-center font-medium font-sans">

@@ -3,6 +3,7 @@ import dns from "node:dns/promises";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
@@ -23,15 +24,25 @@ async function toAttachment(file: File) {
     throw { status: 400, message: `Le fichier "${file.name}" dépasse la taille maximale autorisée (8 Mo).` };
   }
   const buffer = Buffer.from(await file.arrayBuffer());
-  return { filename: file.name, content: buffer };
+
+  let url: string | null = null;
+  if (isCloudinaryConfigured()) {
+    try {
+      url = await uploadToCloudinary(file, "job-applications", "raw");
+    } catch (uploadError) {
+      console.error("Error uploading candidate file to Cloudinary (non-fatal):", uploadError);
+    }
+  }
+
+  return { filename: file.name, content: buffer, url };
 }
 
 /**
- * No Firebase Storage on this project (it requires the paid Blaze plan),
- * so candidate files are never written to disk/cloud storage anywhere —
- * they're read into memory and attached directly to the admin
- * notification email via Resend, then discarded. The Firestore record
- * kept for the admin "Candidatures" tab is metadata only (no file URLs).
+ * No Firebase Storage on this project (it requires the paid Blaze plan), so
+ * candidate files are read into memory, attached directly to the admin
+ * notification email via Resend, AND (when Cloudinary is configured)
+ * uploaded there too so the admin can still open them from the
+ * "Candidatures" tab after the email is long gone.
  */
 export async function POST(request: Request) {
   try {
@@ -104,7 +115,7 @@ export async function POST(request: Request) {
         <p><b>Message :</b> ${message || "-"}</p>
         <p>Pièces jointes : ${attachments.map((a) => a.filename).join(", ")}</p>
       `,
-      attachments,
+      attachments: attachments.map(({ filename, content }) => ({ filename, content })),
     });
 
     const docRef = await adminDb.collection("jobApplications").add({
@@ -115,6 +126,7 @@ export async function POST(request: Request) {
       phone,
       message,
       attachmentNames: attachments.map((a) => a.filename),
+      attachments: attachments.map((a) => ({ name: a.filename, url: a.url })),
       status: "new",
       createdAt: new Date().toISOString(),
     });

@@ -2,8 +2,10 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
+const MAX_FILE_BYTES = 8 * 1024 * 1024;
 
 /**
  * Central landing point for every "Demander un devis" submission, across
@@ -14,19 +16,39 @@ const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
  */
 export async function POST(request: Request) {
   try {
-    const { name, email, phone, service, message } = await request.json();
+    const form = await request.formData();
+    const name = form.get("name")?.toString()?.trim();
+    const email = form.get("email")?.toString()?.trim();
+    const phone = form.get("phone")?.toString()?.trim() || "";
+    const service = form.get("service")?.toString() || "Autre";
+    const message = form.get("message")?.toString()?.trim();
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Nom, email et message sont requis." }, { status: 400 });
+    }
+
+    let attachmentUrl: string | null = null;
+    let attachmentName: string | null = null;
+    const attachmentFile = form.get("attachment");
+    if (attachmentFile instanceof File && attachmentFile.size > 0) {
+      if (attachmentFile.size > MAX_FILE_BYTES) {
+        return NextResponse.json({ error: "Le fichier dépasse la taille maximale autorisée (8 Mo)." }, { status: 400 });
+      }
+      if (isCloudinaryConfigured()) {
+        attachmentUrl = await uploadToCloudinary(attachmentFile, "devis-requests", "raw");
+        attachmentName = attachmentFile.name;
+      }
     }
 
     let docId: string | null = null;
     if (isAdminConfigured()) {
       const docRef = await getAdminDb().collection("devisRequests").add({
-        name: String(name).trim(),
-        email: String(email).trim(),
-        phone: phone ? String(phone).trim() : "",
-        service: service || "Autre",
-        message: String(message).trim(),
+        name,
+        email,
+        phone,
+        service,
+        message,
+        attachmentUrl,
+        attachmentName,
         status: "new",
         createdAt: new Date().toISOString(),
       });

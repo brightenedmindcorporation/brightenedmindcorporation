@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { Paperclip, X } from 'lucide-react';
 import { availableLanguages } from '@/content/curriculum';
 import { otherPrograms } from '@/content/programs';
 
@@ -58,6 +59,7 @@ export default function DevisPage() {
   const [email, setEmail] = useState("");
   const [service, setService] = useState("Photographie");
   const [message, setMessage] = useState("");
+  const [attachment, setAttachment] = useState<File | null>(null);
 
   // Renseigne ici le vrai numéro WhatsApp de ton entreprise (au format international sans le +)
   const whatsappNumber = "+243970874852";
@@ -68,20 +70,19 @@ export default function DevisPage() {
     setSubmitError(null);
     setSubmitting(true);
     try {
-      const response = await fetch("/api/devis/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          email,
-          phone: `${selectedCode} ${phoneNumber}`,
-          service,
-          message,
-        }),
-      });
+      const form = new FormData();
+      form.append("name", name);
+      form.append("email", email);
+      form.append("phone", `${selectedCode} ${phoneNumber}`);
+      form.append("service", service);
+      form.append("message", message);
+      if (attachment) form.append("attachment", attachment);
+
+      const response = await fetch("/api/devis/submit", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
       setSubmitted(true);
+      setAttachment(null);
     } catch (error: any) {
       setSubmitError(error.message || "Une erreur est survenue. Réessayez ou contactez-nous sur WhatsApp.");
     } finally {
@@ -244,6 +245,34 @@ export default function DevisPage() {
                 onChange={(e) => setMessage(e.target.value)}
                 className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
               ></textarea>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-ink-soft mb-2">Pièce jointe (optionnel)</label>
+              {attachment ? (
+                <span className="inline-flex items-center gap-2 text-sm bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink-soft">
+                  <Paperclip size={15} className="shrink-0" />
+                  <span className="truncate max-w-[240px]">{attachment.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setAttachment(null)}
+                    aria-label="Retirer la pièce jointe"
+                    className="text-ink-faint hover:text-red-500"
+                  >
+                    <X size={14} />
+                  </button>
+                </span>
+              ) : (
+                <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-3 transition bg-surface-sunken/60">
+                  <Paperclip size={15} />
+                  Joindre un fichier (cahier des charges, plan, document...)
+                  <input
+                    type="file"
+                    className="hidden"
+                    onChange={(e) => setAttachment(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+              )}
             </div>
 
             <button
