@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 
 interface Announcement {
@@ -17,7 +16,16 @@ interface Announcement {
 
 export default function AnnouncementDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
   const [announcement, setAnnouncement] = useState<Announcement | null | undefined>(undefined);
+
+  const handleBack = () => {
+    if (typeof window !== "undefined" && window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
 
   useEffect(() => {
     fetch(`/api/announcements/${params.id}`)
@@ -39,9 +47,9 @@ export default function AnnouncementDetailPage() {
       <main className="min-h-screen flex items-center justify-center bg-page text-ink-soft pt-28 px-4 text-center">
         <div>
           <p className="text-2xl font-bold text-ink mb-2">Annonce introuvable</p>
-          <Link href="/" className="text-red-500 hover:text-red-400 font-semibold">
-            ← Retour à l'accueil
-          </Link>
+          <button onClick={handleBack} className="text-red-500 hover:text-red-400 font-semibold">
+            ← Retour
+          </button>
         </div>
       </main>
     );
@@ -50,9 +58,9 @@ export default function AnnouncementDetailPage() {
   return (
     <main className="min-h-screen bg-page text-ink pt-28 pb-20 px-4">
       <div className="max-w-3xl mx-auto">
-        <Link href="/" className="inline-block mb-6 text-sm font-bold text-ink-soft hover:text-ink transition">
-          ← Retour à l'accueil
-        </Link>
+        <button onClick={handleBack} className="inline-block mb-6 text-sm font-bold text-ink-soft hover:text-ink transition">
+          ← Retour
+        </button>
 
         <div className="bg-surface-sunken border border-line rounded-3xl overflow-hidden shadow-xl">
           {announcement.imageUrl && (

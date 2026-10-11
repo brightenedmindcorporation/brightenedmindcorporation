@@ -6,6 +6,12 @@ import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import PasswordInput from "@/components/academy/PasswordInput";
+import { availableLanguages } from "@/content/curriculum";
+import { getOtherProgramLabel } from "@/content/programs";
+
+function programLabel(code: string): string {
+  return availableLanguages.find((l) => l.code === code)?.label ?? getOtherProgramLabel(code) ?? code;
+}
 
 export default function LoginPage() {
   return (
@@ -29,6 +35,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/academy/dashboard";
+  const requiredProgram = searchParams.get("program");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,6 +74,23 @@ function LoginForm() {
         return;
       }
 
+      // Une connexion lancée depuis l'onglet d'une formation précise
+      // (?program=XX, ex. l'espagnol) ne doit réussir que si l'étudiant a
+      // bien une inscription approuvée pour CETTE formation — même s'il en
+      // a une autre, approuvée, dans une autre langue.
+      let activeEnrollment = approved[0];
+      if (requiredProgram) {
+        const matching = approved.find((en: any) => en.langCode === requiredProgram);
+        if (!matching) {
+          await auth.signOut();
+          setLoginError(
+            `Ce compte n'a pas d'inscription approuvée en ${programLabel(requiredProgram)}. Connectez-vous depuis la page de la formation à laquelle vous êtes inscrit(e).`
+          );
+          return;
+        }
+        activeEnrollment = matching;
+      }
+
       localStorage.setItem(
         "loggedStudent",
         JSON.stringify({
@@ -74,7 +98,7 @@ function LoginForm() {
           name: data.name,
           email: data.email,
           enrollments,
-          activeLangCode: (approved[0] as any).langCode,
+          activeLangCode: (activeEnrollment as any).langCode,
         })
       );
 

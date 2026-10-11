@@ -94,6 +94,16 @@ export default function AdminPage() {
   const [annVideo, setAnnVideo] = useState<File | null>(null);
   const [annSubmitting, setAnnSubmitting] = useState(false);
 
+  const [editingAnnouncement, setEditingAnnouncement] = useState<any | null>(null);
+  const [editAnnTitle, setEditAnnTitle] = useState("");
+  const [editAnnDescription, setEditAnnDescription] = useState("");
+  const [editAnnType, setEditAnnType] = useState<"normal" | "job">("normal");
+  const [editAnnDetails, setEditAnnDetails] = useState("");
+  const [editAnnDuration, setEditAnnDuration] = useState("");
+  const [editAnnImage, setEditAnnImage] = useState<File | null>(null);
+  const [editAnnVideo, setEditAnnVideo] = useState<File | null>(null);
+  const [editAnnSubmitting, setEditAnnSubmitting] = useState(false);
+
   // --- Job applications ---
   const [jobApplications, setJobApplications] = useState<any[]>([]);
   const [jobApplicationsLoading, setJobApplicationsLoading] = useState(false);
@@ -321,6 +331,53 @@ export default function AdminPage() {
     }
   };
 
+  const openEditAnnouncement = (a: any) => {
+    setEditingAnnouncement(a);
+    setEditAnnTitle(a.title || "");
+    setEditAnnDescription(a.description || "");
+    setEditAnnType(a.type === "job" ? "job" : "normal");
+    setEditAnnDetails(a.details || "");
+    setEditAnnDuration("");
+    setEditAnnImage(null);
+    setEditAnnVideo(null);
+  };
+
+  const updateAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAnnouncement) return;
+    if (!editAnnTitle.trim() || !editAnnDescription.trim()) {
+      alert("Titre et description requis.");
+      return;
+    }
+    setEditAnnSubmitting(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const form = new FormData();
+      form.append("title", editAnnTitle);
+      form.append("description", editAnnDescription);
+      form.append("type", editAnnType);
+      form.append("details", editAnnDetails);
+      if (editAnnDuration) form.append("durationDays", editAnnDuration);
+      if (editAnnImage) form.append("image", editAnnImage);
+      if (editAnnVideo) form.append("video", editAnnVideo);
+
+      const response = await fetch(`/api/admin/announcements/${editingAnnouncement.id}`, {
+        method: "PUT",
+        headers: { Authorization: `Bearer ${idToken}` },
+        body: form,
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+
+      setEditingAnnouncement(null);
+      fetchAnnouncements();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setEditAnnSubmitting(false);
+    }
+  };
+
   const fetchJobApplications = async () => {
     setJobApplicationsLoading(true);
     try {
@@ -342,8 +399,8 @@ export default function AdminPage() {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch(`/api/admin/announcements/${id}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken, active }),
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ active }),
       });
       if (!response.ok) {
         const result = await response.json();
@@ -2001,6 +2058,12 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-4 self-start sm:self-center">
                       <button
+                        onClick={() => openEditAnnouncement(a)}
+                        className="flex items-center gap-1.5 bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-4 py-2 rounded-xl border border-line transition"
+                      >
+                        <SquarePen size={14} /> Modifier
+                      </button>
+                      <button
                         onClick={() => toggleAnnouncement(a.id, !a.active)}
                         className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-4 py-2 rounded-xl border border-line transition"
                       >
@@ -3060,6 +3123,108 @@ export default function AdminPage() {
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
               >
                 {replySending ? "Envoi…" : "Envoyer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= EDIT ANNOUNCEMENT MODAL ================= */}
+      {editingAnnouncement && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Modifier l'annonce</h3>
+
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Type</label>
+            <select
+              value={editAnnType}
+              onChange={(e) => setEditAnnType(e.target.value as "normal" | "job")}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            >
+              <option value="normal">Annonce normale (bouton "Voir le détail")</option>
+              <option value="job">Offre d'emploi (bouton "Postuler")</option>
+            </select>
+
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre</label>
+            <input
+              type="text"
+              value={editAnnTitle}
+              onChange={(e) => setEditAnnTitle(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Description courte</label>
+            <textarea
+              value={editAnnDescription}
+              onChange={(e) => setEditAnnDescription(e.target.value)}
+              rows={2}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Détails complets</label>
+            <textarea
+              value={editAnnDetails}
+              onChange={(e) => setEditAnnDetails(e.target.value)}
+              rows={5}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            />
+
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Durée de publication</label>
+            <select
+              value={editAnnDuration}
+              onChange={(e) => setEditAnnDuration(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-1 focus:outline-none focus:border-red-600/60"
+            >
+              <option value="">Ne pas changer</option>
+              <option value="0">Illimitée (retirer l'expiration)</option>
+              <option value="3">3 jours à partir d'aujourd'hui</option>
+              <option value="7">7 jours à partir d'aujourd'hui</option>
+              <option value="14">14 jours à partir d'aujourd'hui</option>
+              <option value="30">30 jours à partir d'aujourd'hui</option>
+              <option value="60">60 jours à partir d'aujourd'hui</option>
+              <option value="90">90 jours à partir d'aujourd'hui</option>
+            </select>
+            <p className="text-xs text-ink-faint mb-4">
+              {editingAnnouncement.expiresAt
+                ? `Actuellement : ${editingAnnouncement.expiresAt > new Date().toISOString() ? "expire" : "expirée"} le ${new Date(editingAnnouncement.expiresAt).toLocaleDateString("fr-FR")}.`
+                : "Actuellement : illimitée."}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nouvelle photo (optionnel)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setEditAnnImage(e.target.files?.[0] ?? null)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-semibold"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nouvelle vidéo (optionnel)</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => setEditAnnVideo(e.target.files?.[0] ?? null)}
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface file:text-ink file:font-semibold"
+                />
+              </div>
+            </div>
+            <p className="text-xs text-ink-faint mb-4">Laissez vide pour garder la photo/vidéo actuelle.</p>
+
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setEditingAnnouncement(null)}
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={updateAnnouncement}
+                disabled={editAnnSubmitting || !editAnnTitle.trim() || !editAnnDescription.trim()}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+              >
+                {editAnnSubmitting ? "Enregistrement…" : "Enregistrer"}
               </button>
             </div>
           </div>
