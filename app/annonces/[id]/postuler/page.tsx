@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
+import { Paperclip, X } from "lucide-react";
 
 interface Announcement {
   id: string;
@@ -27,6 +28,7 @@ export default function JobApplyPage() {
   const [cv, setCv] = useState<File | null>(null);
   const [coverLetter, setCoverLetter] = useState<File | null>(null);
   const [referenceLetter, setReferenceLetter] = useState<File | null>(null);
+  const [otherDocuments, setOtherDocuments] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -58,6 +60,7 @@ export default function JobApplyPage() {
       form.append("cv", cv);
       if (coverLetter) form.append("coverLetter", coverLetter);
       if (referenceLetter) form.append("referenceLetter", referenceLetter);
+      otherDocuments.forEach((file) => form.append("otherDocuments", file));
 
       const response = await fetch("/api/academy/jobs/apply", { method: "POST", body: form });
       const result = await response.json();
@@ -225,6 +228,37 @@ export default function JobApplyPage() {
                 type="file"
                 accept=".pdf,.doc,.docx"
                 onChange={(e) => setReferenceLetter(e.target.files?.[0] ?? null)}
+                className="w-full border border-line bg-surface p-3 rounded-lg text-ink text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface-alt file:text-ink file:font-semibold"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-ink-soft mb-1">Autres documents (optionnel)</label>
+              <p className="text-xs text-ink-faint mb-1.5">Certificats, diplômes, attestations ou tout autre document utile à votre candidature.</p>
+              {otherDocuments.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {otherDocuments.map((file, i) => (
+                    <span key={i} className="inline-flex items-center gap-1.5 text-xs bg-surface border border-line rounded-full px-3 py-1 text-ink-soft">
+                      <Paperclip size={12} /> {file.name}
+                      <button
+                        type="button"
+                        onClick={() => setOtherDocuments((prev) => prev.filter((_, idx) => idx !== i))}
+                        className="text-ink-faint hover:text-red-500"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+              <input
+                type="file"
+                multiple
+                accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                onChange={(e) => {
+                  setOtherDocuments((prev) => [...prev, ...Array.from(e.target.files || [])]);
+                  e.target.value = "";
+                }}
                 className="w-full border border-line bg-surface p-3 rounded-lg text-ink text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface-alt file:text-ink file:font-semibold"
               />
             </div>

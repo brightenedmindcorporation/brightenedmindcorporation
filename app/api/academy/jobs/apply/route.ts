@@ -87,6 +87,7 @@ export async function POST(request: Request) {
 
     const coverLetterFile = form.get("coverLetter");
     const referenceLetterFile = form.get("referenceLetter");
+    const otherFiles = form.getAll("otherDocuments").filter((f): f is File => f instanceof File && f.size > 0).slice(0, 5);
 
     const attachments = [await toAttachment(cvFile)];
     if (coverLetterFile instanceof File && coverLetterFile.size > 0) {
@@ -94,6 +95,9 @@ export async function POST(request: Request) {
     }
     if (referenceLetterFile instanceof File && referenceLetterFile.size > 0) {
       attachments.push(await toAttachment(referenceLetterFile));
+    }
+    for (const file of otherFiles) {
+      attachments.push(await toAttachment(file));
     }
 
     const resend = new Resend(process.env.RESEND_API_KEY);
