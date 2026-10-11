@@ -461,10 +461,15 @@ export default function AdminPage() {
     setMessageSending(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const recipients =
+      const pool = students.filter((s) => s.status === "Approved" && s.email && s.uid);
+      const targets =
         messageRecipient === "__all__"
-          ? Array.from(new Set(students.filter((s) => s.status === "Approved" && s.email).map((s) => s.email)))
-          : [messageRecipient];
+          ? pool
+          : pool.filter((s) => s.uid === messageRecipient);
+
+      // Dedupe by uid — the same student can have several approved
+      // enrollment rows (one per language/program).
+      const recipients = Array.from(new Map(targets.map((s) => [s.uid, { uid: s.uid, email: s.email }])).values());
 
       if (recipients.length === 0) {
         alert("Aucun destinataire approuvé trouvé.");
@@ -475,7 +480,7 @@ export default function AdminPage() {
       form.append("idToken", idToken || "");
       form.append("subject", messageSubject);
       form.append("body", messageBody);
-      recipients.forEach((r) => form.append("recipients", r));
+      form.append("recipients", JSON.stringify(recipients));
       messageAttachments.forEach((file) => form.append("attachments", file));
 
       const response = await fetch("/api/admin/message-students", { method: "POST", body: form });
@@ -487,7 +492,11 @@ export default function AdminPage() {
       setMessageBody("");
       setMessageAttachments([]);
       setMessageRecipient("__all__");
-      alert(`Message envoyé à ${result.sentTo} destinataire(s).`);
+      alert(
+        result.emailWarning
+          ? `Notification envoyée à ${result.sentTo} étudiant(s) (visible dans leur tableau de bord).\n\n⚠️ Email : ${result.emailWarning}`
+          : `Message envoyé à ${result.sentTo} destinataire(s), par notification et par email.`
+      );
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
     } finally {
@@ -976,6 +985,16 @@ export default function AdminPage() {
       const newUrl = window.location.pathname + (params.toString() ? `?${params}` : "");
       window.history.replaceState({}, "", newUrl);
       setTab("mail");
+      return;
+    }
+
+    // Deep-links from notifications (?tab=…) — e.g. a new candidature's
+    // notification should open straight on the Candidatures tab, not
+    // always land on the default Students tab.
+    const requestedTab = params.get("tab");
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates"];
+    if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
+      setTab(requestedTab as Tab);
     }
   }, []);
 
@@ -1473,8 +1492,8 @@ export default function AdminPage() {
                 </button>
               </div>
               {checkResult && (
-                <div className={`mt-4 p-4 rounded-xl text-sm border ${
-                  checkResult.exists ? "bg-emerald-950/30 border-emerald-800/50 text-emerald-200" : "bg-red-950/30 border-red-800/50 text-red-200"
+                <div className={`mt-4 p-4 rounded-xl text-sm border text-white ${
+                  checkResult.exists ? "bg-emerald-700 border-emerald-600" : "bg-red-700 border-red-600"
                 }`}>
                   {checkResult.exists ? (
                     <>
@@ -1819,9 +1838,9 @@ export default function AdminPage() {
                         <td className="py-2 pr-4 text-ink">{p.amount} {p.currency || "USD"}</td>
                         <td className="py-2 pr-4">
                           <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                            p.status === "paid" ? "bg-emerald-950/60 text-emerald-400" :
-                            p.status === "failed" ? "bg-red-950/60 text-red-400" :
-                            "bg-amber-950/60 text-amber-400"
+                            p.status === "paid" ? "bg-emerald-700 text-white" :
+                            p.status === "failed" ? "bg-red-700 text-white" :
+                            "bg-amber-700 text-white"
                           }`}>
                             {p.status}
                           </span>
@@ -1993,9 +2012,9 @@ export default function AdminPage() {
                         <p className="text-ink font-bold">{app.name}</p>
                       </div>
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                        app.status === "accepted" ? "bg-emerald-950/60 text-emerald-400" :
-                        app.status === "rejected" ? "bg-red-950/60 text-red-400" :
-                        app.status === "reviewing" ? "bg-amber-950/60 text-amber-400" :
+                        app.status === "accepted" ? "bg-emerald-700 text-white" :
+                        app.status === "rejected" ? "bg-red-700 text-white" :
+                        app.status === "reviewing" ? "bg-amber-700 text-white" :
                         "bg-surface-alt text-ink-soft"
                       }`}>
                         {app.status === "accepted" ? "Accepté" : app.status === "rejected" ? "Rejeté" : app.status === "reviewing" ? "En étude" : "Nouveau"}
@@ -2069,9 +2088,9 @@ export default function AdminPage() {
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-ink font-bold">{req.name}</p>
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                        req.status === "contacted" ? "bg-emerald-950/60 text-emerald-400" :
+                        req.status === "contacted" ? "bg-emerald-700 text-white" :
                         req.status === "closed" ? "bg-surface-alt text-ink-faint" :
-                        "bg-amber-950/60 text-amber-400"
+                        "bg-amber-700 text-white"
                       }`}>
                         {req.status === "contacted" ? "Contacté" : req.status === "closed" ? "Clôturé" : "Nouveau"}
                       </span>
@@ -2135,9 +2154,9 @@ export default function AdminPage() {
                         <p className="text-ink font-bold">{req.name}</p>
                       </div>
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                        req.status === "contacted" ? "bg-emerald-950/60 text-emerald-400" :
+                        req.status === "contacted" ? "bg-emerald-700 text-white" :
                         req.status === "closed" ? "bg-surface-alt text-ink-faint" :
-                        "bg-amber-950/60 text-amber-400"
+                        "bg-amber-700 text-white"
                       }`}>
                         {req.status === "contacted" ? "Contacté" : req.status === "closed" ? "Clôturé" : "Nouveau"}
                       </span>
@@ -2214,8 +2233,8 @@ export default function AdminPage() {
                         <p className="text-xs text-ink-soft mt-0.5">{req.name} · {req.email}</p>
                       </div>
                       <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
-                        req.status === "resolved" ? "bg-emerald-950/60 text-emerald-400" :
-                        req.status === "reviewing" ? "bg-amber-950/60 text-amber-400" :
+                        req.status === "resolved" ? "bg-emerald-700 text-white" :
+                        req.status === "reviewing" ? "bg-amber-700 text-white" :
                         "bg-surface-alt text-ink-soft"
                       }`}>
                         {req.status === "resolved" ? "Résolu" : req.status === "reviewing" ? "En étude" : "Nouveau"}
@@ -2299,9 +2318,9 @@ export default function AdminPage() {
                           <td className="py-2 pr-4 text-ink-soft">{(p.completedQuizzes || []).length}</td>
                           <td className="py-2 pr-4">
                             {p.finalQuizPassed ? (
-                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-950/60 text-emerald-400">Réussi ({p.finalQuizScore})</span>
+                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-700 text-white">Réussi ({p.finalQuizScore})</span>
                             ) : p.finalQuizScore != null ? (
-                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-red-950/60 text-red-400">Échoué ({p.finalQuizScore})</span>
+                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-red-700 text-white">Échoué ({p.finalQuizScore})</span>
                             ) : (
                               <span className="text-xs text-ink-faint">—</span>
                             )}
@@ -2430,7 +2449,7 @@ export default function AdminPage() {
                             <p className="text-xs text-ink-faint font-mono mt-1">{cert.certificateId}</p>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cert.issuedBy === "admin" ? "bg-amber-950/60 text-amber-400" : "bg-surface-alt text-ink-soft"}`}>
+                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cert.issuedBy === "admin" ? "bg-amber-700 text-white" : "bg-surface-alt text-ink-soft"}`}>
                               {cert.issuedBy === "admin" ? "Émis par admin" : "Auto-généré"}
                             </span>
                             <p className="text-xs text-ink-faint mt-1">{cert.average != null ? `${cert.average}%` : ""}</p>
@@ -2836,8 +2855,8 @@ export default function AdminPage() {
               className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
             >
               <option value="__all__">Tous les étudiants approuvés</option>
-              {students.filter((s) => s.email).map((s) => (
-                <option key={s.id} value={s.email}>{s.name} — {s.email}</option>
+              {students.filter((s) => s.email && s.uid).map((s) => (
+                <option key={s.id} value={s.uid}>{s.name} — {s.email}</option>
               ))}
             </select>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>

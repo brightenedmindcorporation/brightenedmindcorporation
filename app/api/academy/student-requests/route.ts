@@ -110,7 +110,7 @@ export async function POST(request: Request) {
         type: "student-request",
         title: `${TYPE_LABELS[requestType]} d'un étudiant`,
         message: `${studentName} — ${subject}`,
-        link: "/academy/admin",
+        link: "/academy/admin?tab=requests",
       });
     } catch (notifError) {
       console.error("Error creating student request notification (non-fatal):", notifError);

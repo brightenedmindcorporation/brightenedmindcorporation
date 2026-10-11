@@ -69,7 +69,18 @@ export default function NotificationBell({ scope }: { scope: "admin" | "student"
       }
     }
     setOpen(false);
-    if (n.link) router.push(n.link);
+    if (!n.link) return;
+
+    // A full navigation (not router.push) on purpose: the admin bell is
+    // rendered on the admin page itself, so clicking a notification while
+    // already there is the common case — a Next.js client-side push to
+    // the same route with a different ?tab= doesn't remount the page, so
+    // the tab never actually switched. A full load always picks it up.
+    if (window.location.pathname === n.link.split("?")[0]) {
+      window.location.href = n.link;
+    } else {
+      router.push(n.link);
+    }
   };
 
   const markAllRead = async () => {

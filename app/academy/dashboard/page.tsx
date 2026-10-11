@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import BmLogo from "@/components/BmLogo";
 import { Lock, MessageSquarePlus, Paperclip, X } from "lucide-react";
 import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
@@ -49,6 +50,7 @@ export default function Dashboard() {
   const [requestMessage, setRequestMessage] = useState("");
   const [requestSending, setRequestSending] = useState(false);
   const [requestAttachments, setRequestAttachments] = useState<File[]>([]);
+  const [adminMessages, setAdminMessages] = useState<any[]>([]);
   const router = useRouter();
 
   // Load the logged-in student once on mount.
@@ -119,6 +121,29 @@ export default function Dashboard() {
     setStudent(updated);
     localStorage.setItem("loggedStudent", JSON.stringify(updated));
   };
+
+  // Admin broadcast/direct messages — fetched once Firebase has
+  // rehydrated the session (auth.currentUser is unreliable right at
+  // mount), shown in their own card on the dashboard rather than only in
+  // the notification bell, since that's where students look for this.
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (!user) return;
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch("/api/academy/notifications", {
+          headers: { Authorization: `Bearer ${idToken}` },
+        });
+        const result = await response.json();
+        if (response.ok) {
+          setAdminMessages((result.notifications || []).filter((n: any) => n.type === "admin-message"));
+        }
+      } catch (error) {
+        console.error("Error fetching admin messages:", error);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("loggedStudent");
@@ -231,6 +256,24 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+
+        {/* Messages de l'administration */}
+        {adminMessages.length > 0 && (
+          <div className="bg-surface border border-line rounded-2xl p-5 space-y-3">
+            <p className="text-sm font-bold text-ink flex items-center gap-2">
+              <MessageSquarePlus size={16} /> Messages de l'administration
+            </p>
+            {adminMessages.slice(0, 5).map((m) => (
+              <div key={m.id} className="bg-surface-alt border border-line rounded-xl p-4">
+                <p className="text-sm font-bold text-ink">{m.title}</p>
+                <p className="text-sm text-ink-soft mt-1 whitespace-pre-wrap">{m.message}</p>
+                <p className="text-xs text-ink-faint mt-2">
+                  {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" }) : ""}
+                </p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Sélecteur de langue (si inscrit à plusieurs langues) */}
         {approvedEnrollments.length > 1 && (

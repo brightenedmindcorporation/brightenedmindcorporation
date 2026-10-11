@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         type: "project-request",
         title: "Nouveau message « Parlons de votre projet »",
         message: `${String(name).trim()} a envoyé un message depuis le site`,
-        link: "/academy/admin",
+        link: "/academy/admin?tab=projects",
       });
     } catch (notifError) {
       console.error("Error creating project request notification (non-fatal):", notifError);
