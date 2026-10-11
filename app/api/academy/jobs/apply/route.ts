@@ -23,26 +23,21 @@ async function toAttachment(file: File) {
   if (file.size > MAX_FILE_BYTES) {
     throw { status: 400, message: `Le fichier "${file.name}" dépasse la taille maximale autorisée (8 Mo).` };
   }
-  // Read the file's bytes ONCE and reuse the same buffer for both the email
-  // attachment and the Cloudinary upload — re-reading the same `File` via a
-  // second `arrayBuffer()` call is what silently broke the Cloudinary
-  // upload before (empty/corrupt read on the second access).
+  // Read the file's bytes once and reuse the same buffer for both the email
+  // attachment and the Cloudinary upload, instead of letting Cloudinary
+  // re-read the same File a second time.
   const buffer = Buffer.from(await file.arrayBuffer());
 
   let url: string | null = null;
-  let uploadErrorDetail: string | null = null;
   if (isCloudinaryConfigured()) {
     try {
       url = await uploadBufferToCloudinary(buffer, file.name, "job-applications", "raw");
-    } catch (uploadError: any) {
-      uploadErrorDetail = uploadError?.message || JSON.stringify(uploadError) || String(uploadError);
+    } catch (uploadError) {
       console.error("Error uploading candidate file to Cloudinary (non-fatal):", uploadError);
     }
-  } else {
-    uploadErrorDetail = "cloudinary-not-configured";
   }
 
-  return { filename: file.name, content: buffer, url, uploadErrorDetail };
+  return { filename: file.name, content: buffer, url };
 }
 
 /**
@@ -171,11 +166,7 @@ export async function POST(request: Request) {
       console.error("Error sending candidate confirmation email (non-fatal):", confirmationError);
     }
 
-    return NextResponse.json({
-      status: "success",
-      id: docRef.id,
-      _debugAttachments: attachments.map((a) => ({ filename: a.filename, url: a.url, error: a.uploadErrorDetail })),
-    });
+    return NextResponse.json({ status: "success", id: docRef.id });
   } catch (error: any) {
     console.error("Error submitting job application:", error);
     const status = error?.status ?? 500;
