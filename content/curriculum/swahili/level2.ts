@@ -40,6 +40,7 @@ Ngeli za nomino. Nomino za Kiswahili zina ngeli tofauti. M wa: mtu, watu. Ki vi:
 
 Makosa ya kawaida. Si sahihi: Mtoto wanasoma. Sahihi: Mtoto anasoma.`,
       videoTopic: "Pitia muundo wa sentensi na ngeli za nomino kwa mifano.",
+      videoUrl: "https://www.youtube.com/watch?v=Vqoi8fZExkE",
       readingTitle: "Jina langu ni Grace.",
       reading: [
         "Ninasoma Kiswahili cha kati sasa.",
@@ -75,6 +76,7 @@ Wakati uliopo unatumia kiambishi na. Ninasoma sasa hivi.
 
 Wakati ujao unatumia kiambishi ta. Nitakwenda shuleni kesho. Nadhani kutanyesha mvua kesho.`,
       videoTopic: "Linganisha wakati uliopita, uliopo, na ujao.",
+      videoUrl: "https://www.youtube.com/watch?v=aAU_t0to-c0",
       readingTitle: "Mwaka jana, Thomas alisafiri Lubumbashi kwa mara ya kwanza.",
       reading: [
         "Alipokuwa akisubiri basi, alikutana na rafiki yake wa zamani wa shule.",
@@ -101,6 +103,7 @@ Kuendeleza mazungumzo. Onyesha hamu: kweli? Inavutia! Niambie zaidi.
 
 Kukubaliana na kutokubaliana kwa heshima. Nakubaliana nawe. Hilo ni jambo zuri, lakini nadhani...`,
       videoTopic: "Jizoeze maswali ya ziada katika mazungumzo halisi.",
+      videoUrl: "https://www.youtube.com/watch?v=F059_aQXmYc",
       readingTitle: "Ijumaa iliyopita, Paulo alikutana na mfanyakazi mwenzake mpya aitwaye Clara kazini.",
       reading: [
         "Alimuuliza, “Unatoka wapi?” naye akasema alitoka Goma.",
@@ -152,6 +155,7 @@ Ni sawa kumuomba mtu arudie: unaweza kusema tena, tafadhali?
 
 Kufuata maelekezo. Pinda kushoto. Pinda kulia. Nenda moja kwa moja.`,
       videoTopic: "Jizoeze kufuata maelekezo ya mdomo mjini.",
+      videoUrl: "https://www.youtube.com/watch?v=h181rN3ioro",
       readingTitle: "Marie alimuuliza mgeni njia ya kuelekea posta.",
       reading: [
         "Mwanaume alisema, “Nenda moja kwa moja, kisha pinda kushoto sokoni.”",
@@ -177,6 +181,7 @@ Kutafuta kunamaanisha kutafuta haraka taarifa maalum, kama tarehe au jina.
 
 Kutumia vidokezo vya muktadha. Si lazima kuelewa kila neno ili kuelewa maandiko.`,
       videoTopic: "Jizoeze kusoma kwa haraka makala fupi kutafuta wazo kuu.",
+      videoUrl: "https://www.youtube.com/watch?v=I5gR64eg3RA",
       readingTitle: "Soko la Kolwezi",
       reading: [
         "Kila Jumamosi, mamia ya watu hukusanyika katika soko kuu la Kolwezi.",
@@ -204,6 +209,7 @@ Vinyume, maneno yenye maana kinyume. Moto na baridi. Rahisi na gumu. Mapema na k
 
 Familia za maneno. Fanikiwa, mafanikio, -enye mafanikio.`,
       videoTopic: "Jenga msamiati kupitia visawe, vinyume, na jozi za maneno.",
+      videoUrl: "https://www.youtube.com/watch?v=tuD6GNOmshQ",
       readingTitle: "Kujenga Msamiati Mkubwa",
       reading: [
         "Kujifunza maneno mapya kila siku ni mojawapo ya njia bora za kuboresha Kiswahili chako haraka.",
@@ -230,6 +236,7 @@ Toni ya sauti. Maswali ya ndiyo au hapana mara nyingi hupanda mwishoni: unakuja?
 
 Sauti zinazochanganywa mara kwa mara. Chakula dhidi ya shule.`,
       videoTopic: "Sikia tofauti kati ya toni inayopanda na inayoshuka.",
+      videoUrl: "https://www.youtube.com/watch?v=eZjpFtfN3aE",
       readingTitle: "Kwa Nini Matamshi ni Muhimu",
       reading: [
         "Sarufi nzuri ni muhimu, lakini matamshi wazi husaidia watu kukuelewa mara moja.",
@@ -256,6 +263,7 @@ Uwanja wa ndege. Kaunta ya kujisajili iko wapi? Ningependa kiti cha dirishani.
 
 Mahojiano ya kazi. Niambie kuhusu wewe mwenyewe. Nguvu zako ni zipi?`,
       videoTopic: "Jizoeze mazungumzo halisi mkahawani, uwanja wa ndege, na mahojiano ya kazi.",
+      videoUrl: "https://www.youtube.com/watch?v=NV3_eOyKwuE",
       readingTitle: "Mahojiano ya Kazi ya Anna",
       reading: [
         "Anna alifika mapema kwa mahojiano yake ya kazi na kumsalimia meneja kwa heshima.",
@@ -282,6 +290,7 @@ Maneno muhimu ya mkutano. Tuanze. Unaweza kufafanua hilo? Ningependa kuongeza ja
 
 Msamiati wa kikazi. Mwisho wa muda ni tarehe ambayo kitu lazima kimalizike.`,
       videoTopic: "Ona jinsi barua pepe ya kikazi na mazungumzo ya mkutano yanavyopangwa.",
+      videoUrl: "https://www.youtube.com/watch?v=-t5LeZ6fBmo",
       readingTitle: "Wiki ya Kwanza ya David Kazini Mpya",
       reading: [
         "Katika mkutano wake wa kwanza, David alimsikia meneja wake akisema, “Tuanze.”",
@@ -359,6 +368,7 @@ Mfano wa mazungumzo ya maisha halisi.
 Habari, nilisikia umeanza kazi mpya. Inaendeleaje?
 Inaenda vizuri, asante! Nilikuwa na wasiwasi mwanzoni, lakini wenzangu wa kazi ni rafiki sana.`,
       videoTopic: "Pitia mada zote za Kiwango cha 2 kupitia mazungumzo marefu moja.",
+      videoUrl: "https://www.youtube.com/watch?v=xnmPiEKN_3Y",
       readingTitle: "Mwaka Mmoja wa Maendeleo",
       reading: [
         "Mwaka mmoja uliopita, Patrick hakuweza hata kujitambulisha kwa Kiswahili vizuri.",

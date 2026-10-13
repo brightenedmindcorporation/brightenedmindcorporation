@@ -26,6 +26,7 @@ Sharti la pili, kwa jambo lisilowezekana au la kudhani. Kama ningekuwa na muda z
 
 Matumizi ya kibiashara. Masharti ni ya kawaida katika mazungumzo na mipango. Kama mkipunguza bei, tutatia saini mkataba.`,
       videoTopic: "Linganisha sharti la kwanza na la pili katika mazungumzo ya kibiashara.",
+      videoUrl: "https://www.youtube.com/watch?v=rAici_jRgY0",
       readingTitle: "Mazungumzo katika Shirika la Brightened Mind",
       reading: [
         "Wakati wa mkutano, msambazaji alisema, “Kama mkiagiza vitu vingi zaidi, tutatoa punguzo.”",
@@ -81,6 +82,7 @@ Kujibu na kukubaliana kati. Hilo linaonekana la busara, lakini unaweza pia... Tu
 
 Kukamilisha mkataba. Nadhani tumefikia makubaliano. Tuandike hili kwa maandishi.`,
       videoTopic: "Tazama majadiliano kamili kuanzia mwanzo hadi kukamilika kwa mkataba.",
+      videoUrl: "https://www.youtube.com/watch?v=VI7j9Sr64ic",
       readingTitle: "Kukamilisha Mkataba",
       reading: [
         "Makampuni mawili yalijadiliana kwa karibu saa mbili kuhusu bei ya vifaa vipya.",
@@ -107,6 +109,7 @@ Kupanga mambo yako. Kwanza, nitaeleza... Kisha, nitaendelea na... Mwishowe, nita
 
 Kumalizia mawasilisho. Kwa muhtasari, mambo makuu ni... Asante kwa umakini wenu. Kuna maswali yoyote?`,
       videoTopic: "Tazama mawasilisho mafupi na yaliyopangwa vizuri ya kitaalamu.",
+      videoUrl: "https://www.youtube.com/watch?v=RCQFm5scVIU",
       readingTitle: "Mawasilisho ya Kwanza ya Linda",
       reading: [
         "Linda alikuwa na wasiwasi kabla ya mawasilisho yake ya kwanza kwa timu ya uongozi.",
@@ -134,6 +137,7 @@ Kuomba nafasi ya kuzungumza. Naweza kusema jambo? Kama naweza kuongeza... Samaha
 
 Kuandika kumbukumbu za mkutano. Kumbukumbu zinaandika yaliyojadiliwa na kuamuliwa.`,
       videoTopic: "Ona jinsi mkutano rasmi unavyoendeshwa kutoka mwanzo hadi mwisho.",
+      videoUrl: "https://www.youtube.com/watch?v=LJK8x23Vkus",
       readingTitle: "Mkutano wa Jumatatu",
       reading: [
         "Saa tatu asubuhi, kiongozi wa timu alisema, “Tuanze?” na kila mtu alikubaliana.",
@@ -157,6 +161,7 @@ Kuandika kumbukumbu za mkutano. Kumbukumbu zinaandika yaliyojadiliwa na kuamuliw
 
 Maneno ya muhimu. Lengo la ripoti hii ni... Takwimu zinaonyesha kuwa... Kutokana na matokeo haya, tunapendekeza...`,
       videoTopic: "Ona jinsi ripoti ya kibiashara inavyopangwa kuanzia utangulizi hadi mapendekezo.",
+      videoUrl: "https://www.youtube.com/watch?v=7j71KF6osi8",
       readingTitle: "Ripoti Kuhusu Kuridhika kwa Wateja",
       reading: [
         "Lengo la ripoti hii ni kutathmini kuridhika kwa wateja katika robo iliyopita.",
@@ -338,6 +343,7 @@ Mfano wa mazungumzo halisi.
 Habari za asubuhi. Asante kwa kujiunga na simu hii.
 Habari za asubuhi, nina furaha kuwepo. Ninapiga simu kuhusu pendekezo ulilotuma.`,
       videoTopic: "Pitia mada zote za Kiwango cha 3 kupitia mazungumzo kamili ya kibiashara.",
+      videoUrl: "https://www.youtube.com/watch?v=lIzE9GG4ueU",
       readingTitle: "Kukamilisha Mpango",
       reading: [
         "Baada ya kumaliza Viwango vya 1, 2, na 3, Chantal sasa anaweza kuongoza mikutano, kuandika ripoti za kitaalamu, na kujadiliana na wateja wa kimataifa kwa kujiamini.",

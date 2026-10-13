@@ -71,6 +71,7 @@ Correct: He goes to school every day.
 Wrong: The children plays outside.
 Correct: The children play outside.`,
       videoTopic: "Review sentence structure and subject-verb agreement with examples.",
+      videoUrl: "https://www.youtube.com/watch?v=zhg7uyLgB6k",
       readingTitle: "My name is Grace.",
       reading: [
         "I am studying English at an intermediate level now.",
@@ -152,6 +153,7 @@ Going to is used for plans already decided: I am going to visit Paris next year.
 
 Will is used for quick decisions or predictions: I think it will rain tomorrow. I will help you with your homework.`,
       videoTopic: "Compare past simple, past continuous, and the two future forms.",
+      videoUrl: "https://www.youtube.com/watch?v=uXmD4sg8YE8",
       readingTitle: "Last year, Thomas traveled to Lubumbashi for the first time.",
       reading: [
         "While he was waiting for the bus, he met an old friend from school.",
@@ -231,6 +233,7 @@ That's a good point, but I think...
 
 I'm not sure I agree. In my opinion...`,
       videoTopic: "Practice natural follow-up questions in a real conversation.",
+      videoUrl: "https://www.youtube.com/watch?v=LZADKrccu-8",
       readingTitle: "Last Friday, Paul met a new colleague named Clara at work.",
       reading: [
         "He asked her, “Where are you from?” and she said she was from Goma.",
@@ -300,6 +303,7 @@ Example paragraph.
 
 I love learning English because it opens many opportunities. First, I can communicate with more people. Also, I can understand movies and songs better. However, learning a new language takes time and patience. Therefore, I practice every single day.`,
       videoTopic: "See how connecting words link ideas together in a paragraph.",
+      videoUrl: "https://www.youtube.com/watch?v=_FuyIUiWB_o",
       readingTitle: "Why I Enjoy Reading",
       reading: [
         "I enjoy reading because it helps me relax after a long day.",
@@ -372,6 +376,7 @@ Following directions.
 
 Turn left. Turn right. Go straight ahead. It's on your left. Take the second street on the right.`,
       videoTopic: "Practice following spoken directions around a town.",
+      videoUrl: "https://www.youtube.com/watch?v=2JFqKRUB2vc",
       readingTitle: "Marie asked a stranger for directions to the post office.",
       reading: [
         "The man said, “Go straight ahead, then turn left at the market.”",
@@ -430,6 +435,7 @@ You don't need to understand every word to understand a text. Use the words arou
 
 Example: the weather was frigid, so everyone wore heavy coats. Frigid probably means very cold.`,
       videoTopic: "Practice skimming a short article to find its main idea.",
+      videoUrl: "https://www.youtube.com/watch?v=2no6V9hWDiI",
       readingTitle: "The Market of Kolwezi",
       reading: [
         "Every Saturday, hundreds of people gather at the central market of Kolwezi.",
@@ -500,6 +506,7 @@ Collocations are words that go together.
 
 Make a decision. Take a photo. Do homework. Have breakfast.`,
       videoTopic: "Build vocabulary through synonyms, antonyms, and common word pairs.",
+      videoUrl: "https://www.youtube.com/watch?v=rM7HMp38GEI",
       readingTitle: "Building a Bigger Vocabulary",
       reading: [
         "Learning new words every day is one of the best ways to improve your English quickly.",
@@ -572,6 +579,7 @@ Commonly confused sounds.
 
 Ship versus sheep. This versus dis. Right versus light.`,
       videoTopic: "Hear the difference between rising and falling intonation.",
+      videoUrl: "https://www.youtube.com/watch?v=hPnWDKwTaA8",
       readingTitle: "Why Pronunciation Matters",
       reading: [
         "Good grammar is important, but clear pronunciation helps people understand you immediately.",
@@ -641,6 +649,7 @@ At a job interview.
 
 Tell me about yourself. What are your strengths? Why do you want to work here? I am a hard-working and reliable person.`,
       videoTopic: "Practice real dialogues at a restaurant, airport, and job interview.",
+      videoUrl: "https://www.youtube.com/watch?v=zdausZjTN6U",
       readingTitle: "Anna's Job Interview",
       reading: [
         "Anna arrived early for her job interview and greeted the manager politely.",
@@ -709,6 +718,7 @@ Professional vocabulary.
 
 Deadline means the date something must be finished. Colleague means a person you work with. Client means a customer or company you provide a service to. Report means a written summary of information.`,
       videoTopic: "See how a professional email and a meeting conversation are structured.",
+      videoUrl: "https://www.youtube.com/watch?v=YjJEiWZw3_w",
       readingTitle: "David's First Week at a New Job",
       reading: [
         "During his first meeting, David heard his manager say, “Let's get started.”",
@@ -778,6 +788,7 @@ Supporting an argument.
 
 For example... This is supported by the fact that... Research shows that... In conclusion, I believe that...`,
       videoTopic: "Watch a short, respectful debate using opinion and argument phrases.",
+      videoUrl: "https://www.youtube.com/watch?v=-VVFwNo_29I",
       readingTitle: "A Classroom Debate",
       reading: [
         "In class, the students debated whether phones should be allowed in school.",
@@ -846,6 +857,7 @@ I write reports and answer client emails. It's challenging, but I'm learning a l
 In my opinion, that's a very useful skill to have.
 I agree. I will keep improving my English for work too.`,
       videoTopic: "Review all Level 2 topics through one extended conversation.",
+      videoUrl: "https://www.youtube.com/watch?v=ukD5vAqBHRA",
       readingTitle: "One Year of Progress",
       reading: [
         "A year ago, Patrick could barely introduce himself in English.",

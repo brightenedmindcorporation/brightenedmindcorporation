@@ -27,6 +27,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我叫·我今年十二岁。我住在科尔韦西。我是学生。很高兴认识你。`,
       videoTopic: "Comment se présenter en chinois mandarin.",
+      videoUrl: "https://www.youtube.com/watch?v=K94mY0cUH_U",
       readingTitle: "你好！(Nǐ hǎo ! - Bonjour !)",
       reading: [
         "我叫苏菲亚。我十二岁。我住在科尔韦西。我是学生。 (Je m'appelle Sofia. J'ai 12 ans. J'habite à Kolwezi. Je suis élève.)",
@@ -52,6 +53,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 声调非常重要。不同的声调有不同的意思。`,
       videoTopic: "Écouter et répéter les quatre tons du mandarin.",
+      videoUrl: "https://www.youtube.com/watch?v=TnwOEBISYqU",
       readingTitle: "你好，我叫安娜。(Bonjour, je m'appelle Anna.)",
       reading: [
         "我在学校学中文。 (J'apprends le chinois à l'école.)",
@@ -77,6 +79,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我叫大卫。我十五岁。我住在金沙萨。`,
       videoTopic: "Apprendre les nombres et se présenter en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=fnFcglvSOI4",
       readingTitle: "你好，我叫萨拉。(Bonjour, je m'appelle Sara.)",
       reading: ["我十四岁。(J'ai 14 ans.)", "我住在金沙萨。(J'habite à Kinshasa.)"],
       readingSpeakText: `你好，我叫萨拉。我十四岁。我住在金沙萨。`,
@@ -95,6 +98,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 这是我爸爸。我妈妈很温柔。我有一个哥哥和两个姐姐。我爱我的家人。`,
       videoTopic: "Apprendre le vocabulaire de la famille en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=KHNmtGuxy34",
       readingTitle: "我叫杰恩。(Je m'appelle Jean.)",
       reading: ["我和爸母、姐姐住在一起。(Je vis avec mes parents et ma sœur.)", "我爸爸是医生。(Mon papa est médecin.)", "我妈妈很关心我。(Ma maman est très attentionnée.)"],
       readingSpeakText: `我叫杰恩。我和爸母、姐姐住在一起。我爸爸是医生。`,
@@ -113,6 +117,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 这是我的书。我用笔写字。我的手机在桌子上。`,
       videoTopic: "Apprendre les objets du quotidien et leur prononciation.",
+      videoUrl: "https://www.youtube.com/watch?v=xgu4a2we1OE",
       readingTitle: "我叫彼得。(Je m'appelle Pierre.)",
       reading: ["每天我背着包去学校。(Chaque jour, je vais à l'école avec mon sac.)", "我用笔在书上写字。(J'écris avec mon stylo dans mon livre.)", "我的手机在包里。(Mon téléphone est dans mon sac.)"],
       readingSpeakText: `我叫彼得。每天我背着包去学校。我的手机在包里。`,
@@ -132,6 +137,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我的包是红色的。手机是黑色的。她很高。他很强壮。`,
       videoTopic: "Apprendre les couleurs et les descriptions en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=0kdHeucTq38",
       readingTitle: "我叫莉莎。(Je m'appelle Lisa.)",
       reading: ["我有一个蓝色的书包。(J'ai un sac d'école bleu.)", "我的手机是黑色的。(Mon téléphone est noir.)", "我很开心。(Je suis heureuse.)"],
       readingSpeakText: `我叫莉莎。我有一个蓝色的书包。我的手机是黑色的。`,
@@ -153,6 +159,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 今天是星期一。我的生日在七月。`,
       videoTopic: "Apprendre les jours, les mois et comment dire les dates en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=aqw0aGjl_4Q",
       readingTitle: "我叫凯文。(Je m'appelle Kevin.)",
       reading: ["今天是星期五，六月十二号。(Aujourd'hui, c'est vendredi 12 juin.)", "我每天早上很早起床。(Je me lève tôt chaque matin.)", "我最喜欢的月份是七月。(Mon mois préféré est juillet.)"],
       readingSpeakText: `我叫凯文。今天是星期五，六月十二号。我每天早上很早起床。`,
@@ -171,6 +178,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我六点起床。我七点去学校。`,
       videoTopic: "Apprendre le vocabulaire des routines quotidiennes en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=zlQK5ahofpc",
       readingTitle: "我叫丹尼尔。(Je m'appelle Daniel.)",
       reading: ["我每天六点起床。(Je me réveille à 6 heures chaque jour.)", "我刷牙，然后洗澡。(Je me brosse les dents, puis je me douche.)", "我七点去学校。(Je vais à l'école à 7 heures.)"],
       readingSpeakText: `我叫丹尼尔。我每天六点起床。我刷牙，然后洗澡。`,
@@ -190,6 +198,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我每天喝水。我最喜欢的食物是米饭。`,
       videoTopic: "Apprendre le vocabulaire des aliments et boissons en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=cKFSY5uUImI",
       readingTitle: "我叫艾玛。(Je m'appelle Emma.)",
       reading: ["每天早上我吃面包和鸡蛋。(Chaque matin, je mange du pain et des œufs.)", "我最喜欢的食物是米饭和鸡肉。(Mon plat préféré est le riz avec du poulet.)"],
       readingSpeakText: `我叫艾玛。每天早上我吃面包和鸡蛋。我最喜欢的食物是米饭和鸡肉。`,
@@ -208,6 +217,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我每天早上去学校。市场在教堂附近。`,
       videoTopic: "Apprendre le vocabulaire des lieux et des directions en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=i-bFgaqPCbA",
       readingTitle: "上个星期三，迈克和爸爸去市中心。(Mercredi dernier, Michael est allé au centre-ville avec son père.)",
       reading: ["他们先去银行取钱。(Ils sont d'abord allés retirer de l'argent à la banque.)", "然后他们去市场买蔬菜。(Puis ils sont allés acheter des légumes au marché.)", "迈克在警局附近看到了一家大医院。(Michael a vu un grand hôpital près du commissariat.)"],
       readingSpeakText: `上个星期三，迈克和爸爸去市中心。他们先去银行取钱。`,
@@ -227,6 +237,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 我最喜欢的爱好是看书。你喜欢做什么？`,
       videoTopic: "Apprendre le vocabulaire des loisirs en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=CJL_NfSJ7l0",
       readingTitle: "星期六下午，詹姆斯去看表弟丹尼尔。(Samedi après-midi, James a rendu visite à son cousin Daniel.)",
       reading: ["丹尼尔正在看一本关于动物的书。(Daniel était en train de lire un livre sur les animaux.)", "他们决定去公园踢足球。(Ils ont décidé d'aller jouer au football au parc.)"],
       readingSpeakText: `星期六下午，詹姆斯去看表弟丹尼尔。丹尼尔正在看一本关于动物的书。`,
@@ -267,6 +278,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 你好！我叫大卫。你叫什么名字？你好大卫，我叫萨拉。很高兴认识你。`,
       videoTopic: "Réviser le vocabulaire et la conversation de base du Niveau 1 en chinois.",
+      videoUrl: "https://www.youtube.com/watch?v=hiycDDB4T5c",
       readingTitle: "上个星期日，凯文和家人去城里看叔叔。(Dimanche dernier, Kevin est allé en ville voir son oncle avec sa famille.)",
       reading: ["出门前，他吃了面包和茶。(Avant de partir, il a mangé du pain et bu du thé.)", "到了以后，凯文礼貌地问候了所有人。(En arrivant, Kevin a salué tout le monde poliment.)"],
       readingSpeakText: `上个星期日，凯文和家人去城里看叔叔。出门前，他吃了面包和茶。`,

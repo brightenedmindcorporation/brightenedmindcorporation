@@ -54,6 +54,7 @@ Business uses.
 
 Conditionals are common in negotiations and planning. If you reduce the price, we will sign the contract.`,
       videoTopic: "Compare first and second conditional sentences in a business negotiation.",
+      videoUrl: "https://www.youtube.com/watch?v=7Iu0z-LC-Es",
       readingTitle: "A Negotiation at Brightened Mind Corporation",
       reading: [
         "During the meeting, the supplier said, “If you order more units, we will offer a discount.”",
@@ -120,6 +121,7 @@ Possibility.
 
 Might, could, and may show something is possible but not certain. The deadline might change next week.`,
       videoTopic: "Hear the difference between obligation, advice, and possibility in a workplace context.",
+      videoUrl: "https://www.youtube.com/watch?v=v8ub9s7hxaQ",
       readingTitle: "Preparing for the Audit",
       reading: [
         "The finance manager said, “We must finish the audit documents by Monday.”",
@@ -197,6 +199,7 @@ Closing a deal.
 
 I think we have an agreement. Let's put this in writing.`,
       videoTopic: "Watch a full negotiation from opening to closing the deal.",
+      videoUrl: "https://www.youtube.com/watch?v=lPinxUDxhVs",
       readingTitle: "Closing the Deal",
       reading: [
         "The two companies negotiated for almost two hours about the price of the new equipment.",
@@ -263,6 +266,7 @@ Closing a presentation.
 
 To summarize, the key points are... Thank you for your attention. Are there any questions?`,
       videoTopic: "Watch a short, well-structured professional presentation.",
+      videoUrl: "https://www.youtube.com/watch?v=bgFNTuRYtKE",
       readingTitle: "Linda's First Presentation",
       reading: [
         "Linda was nervous before her first presentation to the management team.",
@@ -334,6 +338,7 @@ Writing meeting minutes.
 
 Minutes record what was discussed and decided in a meeting. Attendees means who was present. Agenda means the list of topics discussed. Action items are tasks assigned, with who is responsible and the deadline.`,
       videoTopic: "See how a formal meeting is run from start to finish.",
+      videoUrl: "https://www.youtube.com/watch?v=QOUOsneeB-w",
       readingTitle: "The Monday Meeting",
       reading: [
         "At 9 a.m., the team leader said, “Shall we begin?” and everyone agreed.",
@@ -390,6 +395,7 @@ Useful phrases.
 
 The purpose of this report is to... The data shows that... Based on these findings, we recommend... In conclusion...`,
       videoTopic: "See how a business report is organized from introduction to recommendations.",
+      videoUrl: "https://www.youtube.com/watch?v=zf7HyxcpfLw",
       readingTitle: "A Report on Customer Satisfaction",
       reading: [
         "The purpose of this report is to evaluate customer satisfaction over the last quarter.",
@@ -460,6 +466,7 @@ Ending a call.
 
 Thank you for your time. I'll send you an email to confirm. Talk to you soon. Goodbye.`,
       videoTopic: "Listen to a professional phone call from start to finish.",
+      videoUrl: "https://www.youtube.com/watch?v=8az2C76BQ5Q",
       readingTitle: "A Client Phone Call",
       reading: [
         "“Hello, this is Sarah from Brightened Mind Corporation. I'm calling about your recent order.”",

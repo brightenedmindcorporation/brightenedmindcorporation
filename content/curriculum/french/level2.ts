@@ -33,6 +33,7 @@ L'accord sujet-verbe. Un sujet singulier prend un verbe au singulier : elle trav
 
 Erreurs courantes. Incorrect : les enfants joue dehors. Correct : les enfants jouent dehors.`,
       videoTopic: "Réviser la structure de la phrase et l'accord sujet-verbe avec des exemples.",
+      videoUrl: "https://www.youtube.com/watch?v=k93o98SdZDc",
       readingTitle: "Je m'appelle Grace.",
       reading: [
         "J'étudie maintenant le français de niveau intermédiaire.",
@@ -59,6 +60,7 @@ L'imparfait est utilisé pour une action en cours dans le passé. À vingt heure
 
 Le futur proche et le futur simple. Je vais visiter Paris l'année prochaine. Je pense qu'il pleuvra demain.`,
       videoTopic: "Comparer le passé composé, l'imparfait et les deux formes de futur.",
+      videoUrl: "https://www.youtube.com/watch?v=toxtIsVP9GM",
       readingTitle: "L'année dernière, Thomas a voyagé à Lubumbashi pour la première fois.",
       reading: [
         "Pendant qu'il attendait le bus, il a rencontré un vieil ami de l'école.",
@@ -85,6 +87,7 @@ Faire durer une conversation. Montrez de l'intérêt : vraiment ? Raconte-moi.
 
 Être d'accord et pas d'accord poliment. Je suis d'accord avec toi. C'est un bon point, mais je pense que...`,
       videoTopic: "Pratiquer les questions de suivi dans une vraie conversation.",
+      videoUrl: "https://www.youtube.com/watch?v=ogBJ1EeQTSM",
       readingTitle: "Vendredi dernier, Paul a rencontré une nouvelle collègue appelée Clara au travail.",
       reading: [
         "Il lui a demandé, « D'où viens-tu ? » et elle a dit qu'elle venait de Goma.",
@@ -111,6 +114,7 @@ Mots de liaison. Addition : et, aussi. Contraste : mais, cependant. Cause et con
 
 Structure d'un e-mail formel. Madame, Monsieur. Je vous écris afin de... Cordialement.`,
       videoTopic: "Voir comment les mots de liaison relient les idées dans un paragraphe.",
+      videoUrl: "https://www.youtube.com/watch?v=6XsOGbPfguM",
       readingTitle: "Pourquoi j'Aime Lire",
       reading: [
         "J'aime lire parce que ça m'aide à me détendre après une longue journée.",
@@ -138,6 +142,7 @@ C'est normal de demander à quelqu'un de répéter : tu peux répéter, s'il te 
 
 Suivre des directions. Tourne à gauche. Tourne à droite. Continue tout droit.`,
       videoTopic: "Pratiquer suivre des directions parlées en ville.",
+      videoUrl: "https://www.youtube.com/watch?v=INoRYq_bbjw",
       readingTitle: "Marie a demandé à un inconnu le chemin de la poste.",
       reading: [
         "L'homme a dit, « Continue tout droit, puis tourne à gauche au marché. »",
@@ -163,6 +168,7 @@ La lecture ciblée signifie chercher rapidement une information précise, comme 
 
 Utiliser les indices du contexte. Vous n'avez pas besoin de comprendre chaque mot pour comprendre un texte.`,
       videoTopic: "Pratiquer la lecture rapide d'un article court pour trouver l'idée principale.",
+      videoUrl: "https://www.youtube.com/watch?v=nJDh41k11Fo",
       readingTitle: "Le Marché de Kolwezi",
       reading: [
         "Chaque samedi, des centaines de personnes se rassemblent au marché central de Kolwezi.",
@@ -193,6 +199,7 @@ Familles de mots. Réussir, réussite, réussi.
 
 Les expressions figées sont des mots qui vont ensemble. Prendre une décision. Prendre une photo.`,
       videoTopic: "Enrichir son vocabulaire grâce aux synonymes, antonymes et expressions figées.",
+      videoUrl: "https://www.youtube.com/watch?v=RGKqstvTHX8",
       readingTitle: "Enrichir son Vocabulaire",
       reading: [
         "Apprendre des mots nouveaux chaque jour est l'une des meilleures façons d'améliorer rapidement son français.",
@@ -219,6 +226,7 @@ Les liaisons. En français, on relie souvent la consonne finale d'un mot à la v
 
 Sons souvent confondus. Rue versus roue. Pain versus bain.`,
       videoTopic: "Entendre la différence entre l'intonation montante et descendante.",
+      videoUrl: "https://www.youtube.com/watch?v=PNdrwBGlYho",
       readingTitle: "Pourquoi la Prononciation est Importante",
       reading: [
         "Une bonne grammaire est importante, mais une prononciation claire aide les gens à vous comprendre immédiatement.",
@@ -245,6 +253,7 @@ Sons souvent confondus. Rue versus roue. Pain versus bain.`,
 
 En entretien d'embauche. Parlez-moi de vous. Quels sont vos points forts ?`,
       videoTopic: "Pratiquer des dialogues réels au restaurant, à l'aéroport et en entretien.",
+      videoUrl: "https://www.youtube.com/watch?v=MZ8XpKpvJxw",
       readingTitle: "L'Entretien d'Embauche d'Anna",
       reading: [
         "Anna est arrivée tôt pour son entretien d'embauche et a salué le responsable poliment.",
@@ -272,6 +281,7 @@ Phrases utiles pour les réunions. Commençons. Pourriez-vous clarifier ce point
 
 Vocabulaire professionnel. Délai signifie la date à laquelle quelque chose doit être terminé.`,
       videoTopic: "Voir comment un e-mail professionnel et une réunion sont structurés.",
+      videoUrl: "https://www.youtube.com/watch?v=zP3GV5wckWQ",
       readingTitle: "La Première Semaine de David dans un Nouveau Travail",
       reading: [
         "Pendant sa première réunion, David a entendu sa responsable dire, « Commençons. »",
@@ -298,6 +308,7 @@ Vocabulaire professionnel. Délai signifie la date à laquelle quelque chose doi
 
 Appuyer un argument. Par exemple... Les études montrent que... En conclusion, je pense que...`,
       videoTopic: "Regarder un débat court et respectueux utilisant des phrases d'opinion et d'argument.",
+      videoUrl: "https://www.youtube.com/watch?v=vx6ITjUaD94",
       readingTitle: "Un Débat en Classe",
       reading: [
         "En classe, les élèves ont débattu de savoir si les téléphones devaient être autorisés à l'école.",
@@ -349,6 +360,7 @@ Exemple de conversation réelle.
 Salut, j'ai entendu dire que tu avais commencé un nouveau travail. Comment ça se passe ?
 Ça se passe bien, merci ! J'étais nerveuse au début, mais mes collègues sont très sympas.`,
       videoTopic: "Réviser tous les sujets du Niveau 2 à travers une conversation étendue.",
+      videoUrl: "https://www.youtube.com/watch?v=IouDPhAibrY",
       readingTitle: "Un An de Progrès",
       reading: [
         "Il y a un an, Patrick pouvait à peine se présenter en français.",

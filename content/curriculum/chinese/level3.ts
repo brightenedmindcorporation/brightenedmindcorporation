@@ -27,6 +27,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 如果我知道，我就会告诉你。`,
       videoTopic: "汉语假设句的三种用法。",
+      videoUrl: "https://www.youtube.com/watch?v=Ot0Z5tuFV0A",
       readingTitle: "文德正在准备面试。(Winfred se prépare pour un entretien.)",
       reading: [
         "他的朋友说：«如果你准备得好，你就一定会成功。» (Son ami a dit : « Si tu te prépares bien, tu réussiras sûrement. »)",
@@ -52,6 +53,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 他可能会迟到。`,
       videoTopic: "能态动词在工作场合的使用。",
+      videoUrl: "https://www.youtube.com/watch?v=Ivg92WvmQ84",
       readingTitle: "会议前，经理对团队说话。(Avant la réunion, le manager a parlé à l'équipe.)",
       reading: [
         "«我们必须在星期五前完成这个项目。» (« Nous devons terminer ce projet avant vendredi. »)",
@@ -77,6 +79,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 好，我们成交了。`,
       videoTopic: "观察一场商业谈判。",
+      videoUrl: "https://www.youtube.com/watch?v=vSbKbh-mV8U",
       readingTitle: "李经理和一家工厂谈判价格。(Mme Li a négocié le prix avec une usine.)",
       reading: [
         "工厂的报价比预算高。(L'offre de l'usine était plus élevée que le budget.)",
@@ -102,6 +105,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 总结一下。谢谢大家，有什么问题吗？`,
       videoTopic: "观察一个结构化的商业演讲。",
+      videoUrl: "https://www.youtube.com/watch?v=LXMSjugP4Jk",
       readingTitle: "李白第一次在公司做演讲。(C'était la première fois que Li Bai faisait une présentation dans son entreprise.)",
       reading: [
         "他很焦虑，但他认真准备了每个部分。(Il était nerveux, mais il avait soigneusement préparé chaque partie.)",
@@ -127,6 +131,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 我们下次会议再讨论。谢谢大家的参与。`,
       videoTopic: "观察一场商业会议。",
+      videoUrl: "https://www.youtube.com/watch?v=ikib5kEnHfk",
       readingTitle: "周一早上，团队开了一个会。(Lundi matin, l'équipe a eu une réunion.)",
       reading: [
         "经理说：«我们开始吧。今天的议题是新项目。» (Le manager a dit : « Commençons. L'ordre du jour est le nouveau projet. »)",
@@ -173,6 +178,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 谢谢您的来电。再见。`,
       videoTopic: "观察一个商业电话对话。",
+      videoUrl: "https://www.youtube.com/watch?v=aCPHICLeJR4",
       readingTitle: "秘书每天接很多电话。(La secrétaire reçoit beaucoup d'appels chaque jour.)",
       reading: [
         "有一天，一位客户打电话来找经理。(Un jour, un client a appelé pour parler au manager.)",
@@ -198,6 +204,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 我很感兴趣听听你的项目。`,
       videoTopic: "观察一场商业社交活动中的对话。",
+      videoUrl: "https://www.youtube.com/watch?v=k_kABOwJxXk",
       readingTitle: "在一个商业论坛上，玛丽认识了一个新合作伙伴。(Lors d'un forum d'affaires, Marie a rencontré un nouveau partenaire potentiel.)",
       reading: [
         "她说：«我是进出口公司的，我主要负责市场营销。» (Elle a dit : « Je travaille dans une entreprise d'import-export, je suis responsable du marketing. »)",
@@ -248,6 +255,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 直接拒绝可能被视为不礼貌。`,
       videoTopic: "中国商业文化的基本习俱。",
+      videoUrl: "https://www.youtube.com/watch?v=nK0l1xoaupQ",
       readingTitle: "活德和中国合作伙伴第一次合作。(Harold travaillait pour la première fois avec un partenaire chinois.)",
       reading: [
         "他不理解为什么合作伙伴从不直接说«不»。(Il ne comprenait pas pourquoi son partenaire ne disait jamais directement « non ».)",
@@ -313,6 +321,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 我们的报价是五万元。这个价格有点高。我们可以谈谈吗？好，我们成交了。`,
       videoTopic: "复习第三级的商业汉语技能。",
+      videoUrl: "https://www.youtube.com/watch?v=y1AixywOYcg",
       readingTitle: "莱论已经学了三年汉语。(Léon apprend le chinois depuis trois ans.)",
       reading: [
         "现在他可以自在地谈判、开会和做演讲。(Maintenant il peut négocier, animer des réunions et faire des présentations avec aisance.)",

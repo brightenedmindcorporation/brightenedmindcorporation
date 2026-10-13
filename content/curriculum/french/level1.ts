@@ -34,6 +34,7 @@ Se présenter.
 
 Je m'appelle... J'ai... ans. J'habite à... Je suis élève. Enchanté.`,
       videoTopic: "Comment se présenter en français.",
+      videoUrl: "https://www.youtube.com/watch?v=Nv2RIgLcX_U",
       readingTitle: "Bonjour !",
       reading: [
         "Je m'appelle Chantal. J'ai 13 ans. J'habite à Kolwezi. Je suis élève.",
@@ -67,6 +68,7 @@ On utilise les lettres pour épeler les noms et les mots.
 
 Exemple : mon nom est David. D, A, V, I, D.`,
       videoTopic: "Réciter l'alphabet français de A à Z.",
+      videoUrl: "https://www.youtube.com/watch?v=mOaJwzvWTp4",
       readingTitle: "Bonjour, je m'appelle Anna.",
       reading: [
         "J'apprends le français à l'école.",
@@ -104,6 +106,7 @@ Comment tu t'appelles ? Quel âge as-tu ? Où habites-tu ? Quel est ton numéro 
 
 Exemple de réponses : je m'appelle David. J'ai quinze ans. J'habite à Kinshasa.`,
       videoTopic: "Apprendre les nombres et se présenter.",
+      videoUrl: "https://www.youtube.com/watch?v=Ss031Bo5Uhs",
       readingTitle: "Bonjour, je m'appelle Sarah.",
       reading: ["J'ai 14 ans.", "J'habite à Kinshasa.", "Mon numéro de téléphone est le 987654321."],
       readingSpeakText: `Bonjour, je m'appelle Sarah. J'ai quatorze ans. J'habite à Kinshasa. Mon numéro de téléphone est le neuf huit sept six cinq quatre trois deux un.`,
@@ -128,6 +131,7 @@ Phrases utiles : c'est mon père. Ma mère est très gentille. J'ai un frère et
 
 Exemple : j'habite avec ma famille. Mon père travaille dans un bureau. Ma mère est enseignante.`,
       videoTopic: "Apprendre le vocabulaire de la famille.",
+      videoUrl: "https://www.youtube.com/watch?v=8rOj0ccPhiY",
       readingTitle: "Je m'appelle Jean.",
       reading: ["J'habite avec mes parents et ma sœur.", "Mon père est médecin.", "Ma mère est très attentionnée.", "J'aime passer du temps avec ma famille."],
       readingSpeakText: `Je m'appelle Jean. J'habite avec mes parents et ma sœur. Mon père est médecin. Ma mère est très attentionnée. J'aime passer du temps avec ma famille.`,
@@ -149,6 +153,7 @@ Phrases utiles : c'est mon livre. J'écris avec un stylo. La chaise est bleue.
 
 Décrire les objets : le livre est petit. L'ordinateur est neuf. Le sac est lourd.`,
       videoTopic: "Apprendre les objets courants et leur prononciation.",
+      videoUrl: "https://www.youtube.com/watch?v=LHILn-NQMwY",
       readingTitle: "Je m'appelle Pierre.",
       reading: ["Chaque jour, je vais à l'école avec mon sac et mon cahier.", "J'utilise un stylo pour écrire dans mon livre.", "Mon téléphone est dans mon sac.", "Je m'assois sur une chaise et j'étudie chaque matin."],
       readingSpeakText: `Je m'appelle Pierre. Chaque jour, je vais à l'école avec mon sac et mon cahier. J'utilise un stylo pour écrire dans mon livre. Mon téléphone est dans mon sac.`,
@@ -170,6 +175,7 @@ Décrire les objets : le sac est rouge. Le téléphone est noir. La chaise est b
 
 Décrire les personnes : elle est grande. Il est petit. Elle est heureuse. Il est fort.`,
       videoTopic: "Apprendre les couleurs et pratiquer les descriptions.",
+      videoUrl: "https://www.youtube.com/watch?v=xfcnf7vZ7mA",
       readingTitle: "Je m'appelle Lisa.",
       reading: ["J'ai un sac d'école bleu.", "Mon cahier est vert et mon téléphone est noir.", "Je suis heureuse et gentille.", "Mon petit frère est petit mais très fort."],
       readingSpeakText: `Je m'appelle Lisa. J'ai un sac d'école bleu. Mon cahier est vert et mon téléphone est noir. Je suis heureuse et gentille.`,
@@ -191,6 +197,7 @@ Les mois de l'année : janvier, février, mars, avril, mai, juin, juillet, août
 
 Phrases utiles : aujourd'hui, c'est lundi. Mon anniversaire est en juillet.`,
       videoTopic: "Apprendre les jours, les mois et comment dire les dates.",
+      videoUrl: "https://www.youtube.com/watch?v=q-wjUX3GSnk",
       readingTitle: "Je m'appelle Kevin.",
       reading: [
         "Aujourd'hui, c'est vendredi 12 juin. Je me réveille tôt chaque matin.",
@@ -214,6 +221,7 @@ Phrases utiles : aujourd'hui, c'est lundi. Mon anniversaire est en juillet.`,
 
 Phrases utiles : je me réveille à six heures. Je vais à l'école à sept heures. Je fais mes devoirs le soir.`,
       videoTopic: "Apprendre le vocabulaire des routines quotidiennes.",
+      videoUrl: "https://www.youtube.com/watch?v=ukklE6c-DD4",
       readingTitle: "Je m'appelle Daniel.",
       reading: [
         "Chaque jour, je me réveille à 6 heures du matin.",
@@ -241,6 +249,7 @@ Boissons courantes : eau, lait, jus, thé, café.
 
 Phrases utiles : je bois de l'eau chaque jour. Mon aliment préféré est le riz. Je mange du pain au petit-déjeuner.`,
       videoTopic: "Apprendre le vocabulaire de la nourriture et des boissons.",
+      videoUrl: "https://www.youtube.com/watch?v=ptT-wTW14yM",
       readingTitle: "Je m'appelle Emma.",
       reading: [
         "Chaque matin, je mange du pain et des œufs au petit-déjeuner.",
@@ -265,6 +274,7 @@ Phrases utiles : je bois de l'eau chaque jour. Mon aliment préféré est le riz
 
 Demander son chemin : où est l'hôpital ? Comment aller à la banque ? Le marché est près de l'église.`,
       videoTopic: "Apprendre le vocabulaire des lieux et des directions.",
+      videoUrl: "https://www.youtube.com/watch?v=1AuJcIR6M40",
       readingTitle: "Mercredi dernier, Michaël est allé au centre-ville avec son père.",
       reading: [
         "D'abord, ils se sont arrêtés à la banque car son père devait retirer de l'argent.",
@@ -291,6 +301,7 @@ Phrases utiles : mon loisir préféré est la lecture. J'aime jouer au football.
 
 Qu'est-ce que tu aimes faire ? Mon loisir m'aide à me relaxer.`,
       videoTopic: "Apprendre le vocabulaire des loisirs et du temps libre.",
+      videoUrl: "https://www.youtube.com/watch?v=-0YM3EFcl2A",
       readingTitle: "Samedi après-midi, James a rendu visite à son cousin Daniel.",
       reading: [
         "Quand il est arrivé, Daniel était assis dehors et lisait un livre sur les animaux.",
@@ -346,6 +357,7 @@ Salut David, je m'appelle Sarah. Enchantée.
 Enchanté aussi. Quel âge as-tu ?
 J'ai quinze ans. J'habite près du marché de la ville.`,
       videoTopic: "Réviser la conversation de base et le vocabulaire du Niveau 1.",
+      videoUrl: "https://www.youtube.com/watch?v=c-S1vghfIbo",
       readingTitle: "Dimanche dernier, Kevin a voyagé avec sa famille pour rendre visite à son oncle en ville.",
       reading: [
         "Avant de partir, il a mangé du pain et bu du thé au petit-déjeuner.",

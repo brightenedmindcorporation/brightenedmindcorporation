@@ -26,6 +26,7 @@ Salamu za kawaida: Habari. Jambo. Habari za asubuhi. Habari za mchana. Habari za
 
 Kujitambulisha: Jina langu ni... Nina miaka... Ninaishi... Mimi ni mwanafunzi. Nimefurahi kukutana nawe.`,
       videoTopic: "Jinsi ya kujitambulisha kwa Kiswahili.",
+      videoUrl: "https://www.youtube.com/watch?v=RZ44FiPxkww",
       readingTitle: "Habari!",
       reading: [
         "Jina langu ni Amani. Nina miaka 12. Ninaishi Kolwezi. Mimi ni mwanafunzi.",
@@ -55,6 +56,7 @@ Irabu ni: A, E, I, O, U.
 
 Tunatumia herufi kuandika majina na maneno. Mfano: jina langu ni Juma. J, U, M, A.`,
       videoTopic: "Kusoma alfabeti ya Kiswahili kuanzia A hadi Z.",
+      videoUrl: "https://www.youtube.com/watch?v=SA8Wm0hBdZ0",
       readingTitle: "Habari, jina langu ni Neema.",
       reading: [
         "Ninajifunza Kiswahili shuleni.",
@@ -81,6 +83,7 @@ Taarifa binafsi: Jina lako nani? Una miaka mingapi? Unaishi wapi?
 
 Mfano wa majibu: Jina langu ni Juma. Nina miaka kumi na tano. Ninaishi Kinshasa.`,
       videoTopic: "Kujifunza namba na kujitambulisha.",
+      videoUrl: "https://www.youtube.com/watch?v=in9m9Techm0",
       readingTitle: "Habari, jina langu ni Furaha.",
       reading: ["Nina miaka 14.", "Ninaishi Kinshasa.", "Namba yangu ya simu ni 987654321."],
       readingSpeakText: `Habari, jina langu ni Furaha. Nina miaka kumi na nne. Ninaishi Kinshasa.`,
@@ -102,6 +105,7 @@ Sentensi za muhimu: Huyu ni baba yangu. Mama yangu ni mpole sana. Nina kaka mmoj
 
 Mfano: Ninaishi na familia yangu. Baba yangu anafanya kazi ofisini.`,
       videoTopic: "Kujifunza msamiati wa familia.",
+      videoUrl: "https://www.youtube.com/watch?v=w2lxdB6U3ao",
       readingTitle: "Jina langu ni Yosefu.",
       reading: ["Ninaishi na wazazi wangu na dada yangu.", "Baba yangu ni daktari.", "Mama yangu ni mpole sana.", "Ninapenda kutumia muda na familia yangu."],
       readingSpeakText: `Jina langu ni Yosefu. Ninaishi na wazazi wangu na dada yangu. Baba yangu ni daktari.`,
@@ -121,6 +125,7 @@ Mfano: Ninaishi na familia yangu. Baba yangu anafanya kazi ofisini.`,
 
 Sentensi za muhimu: Hiki ni kitabu changu. Ninaandika kwa kalamu. Kiti ni cha bluu.`,
       videoTopic: "Kujifunza vitu vya kawaida na matamshi yake.",
+      videoUrl: "https://www.youtube.com/watch?v=4_Q3crhH5bU",
       readingTitle: "Jina langu ni Petro.",
       reading: ["Kila siku ninakwenda shuleni na mkoba na daftari langu.", "Ninatumia kalamu kuandika kwenye kitabu changu.", "Simu yangu iko mkobani.", "Ninakaa kwenye kiti na kusoma kila asubuhi."],
       readingSpeakText: `Jina langu ni Petro. Kila siku ninakwenda shuleni na mkoba na daftari langu.`,
@@ -142,6 +147,7 @@ Kueleza vitu: Mkoba ni mwekundu. Simu ni nyeusi. Kiti ni cha bluu.
 
 Kueleza watu: Yeye ni mrefu. Yeye ni mfupi. Yeye ana furaha.`,
       videoTopic: "Kujifunza rangi na kufanya mazoezi ya maelezo.",
+      videoUrl: "https://www.youtube.com/watch?v=fRiniWIw1gU",
       readingTitle: "Jina langu ni Zawadi.",
       reading: ["Nina mkoba wa shule wa bluu.", "Daftari langu ni kijani na simu yangu ni nyeusi.", "Nina furaha na ni mkarimu.", "Kaka yangu mdogo ni mfupi lakini mwenye nguvu sana."],
       readingSpeakText: `Jina langu ni Zawadi. Nina mkoba wa shule wa bluu. Daftari langu ni kijani na simu yangu ni nyeusi.`,
@@ -163,6 +169,7 @@ Miezi ya mwaka: Januari, Februari, Machi, Aprili, Mei, Juni, Julai, Agosti, Sept
 
 Sentensi za muhimu: Leo ni Jumatatu. Siku yangu ya kuzaliwa ni Julai.`,
       videoTopic: "Kujifunza siku, miezi, na jinsi ya kusema tarehe.",
+      videoUrl: "https://www.youtube.com/watch?v=Gmif9ZHoDWw",
       readingTitle: "Jina langu ni Kevin.",
       reading: [
         "Leo ni Ijumaa, tarehe 12 Juni. Ninaamka mapema kila asubuhi.",
@@ -186,6 +193,7 @@ Sentensi za muhimu: Leo ni Jumatatu. Siku yangu ya kuzaliwa ni Julai.`,
 
 Sentensi za muhimu: Ninaamka saa kumi na mbili asubuhi. Ninakwenda shuleni saa moja asubuhi.`,
       videoTopic: "Kujifunza msamiati wa shughuli za kila siku.",
+      videoUrl: "https://www.youtube.com/watch?v=Lky1Bzub1Zk",
       readingTitle: "Jina langu ni Danieli.",
       reading: [
         "Kila siku ninaamka saa kumi na mbili asubuhi.",
@@ -213,6 +221,7 @@ Vinywaji vya kawaida: Maji, Maziwa, Juisi, Chai, Kahawa.
 
 Sentensi za muhimu: Ninakunywa maji kila siku. Chakula ninachopenda zaidi ni wali.`,
       videoTopic: "Kujifunza msamiati wa chakula na vinywaji.",
+      videoUrl: "https://www.youtube.com/watch?v=ssHk20DEf5c",
       readingTitle: "Jina langu ni Esta.",
       reading: [
         "Kila asubuhi ninakula mkate na mayai kifungua kinywa.",
@@ -237,6 +246,7 @@ Sentensi za muhimu: Ninakunywa maji kila siku. Chakula ninachopenda zaidi ni wal
 
 Kuuliza njia: Hospitali iko wapi? Nifikeje benki? Soko liko karibu na kanisa.`,
       videoTopic: "Kujifunza msamiati wa maeneo na njia.",
+      videoUrl: "https://www.youtube.com/watch?v=cXDmmqB807g",
       readingTitle: "Jumatano iliyopita, Michael alikwenda mjini na baba yake.",
       reading: [
         "Kwanza, walisimama benki kwa sababu baba yake alihitaji kutoa pesa.",
@@ -260,6 +270,7 @@ Kuuliza njia: Hospitali iko wapi? Nifikeje benki? Soko liko karibu na kanisa.`,
 
 Sentensi za muhimu: Burudani ninayopenda zaidi ni kusoma. Ninapenda kucheza mpira wa miguu.`,
       videoTopic: "Kujifunza msamiati wa burudani na muda wa mapumziko.",
+      videoUrl: "https://www.youtube.com/watch?v=_gj821unoOI",
       readingTitle: "Jumamosi mchana, James alimtembelea binamu yake Danieli.",
       reading: [
         "Alipofika, Danieli alikuwa amekaa nje akisoma kitabu kuhusu wanyama.",
@@ -313,6 +324,7 @@ Mfano wa mazungumzo halisi.
 Habari, jina langu ni David. Jina lako nani?
 Habari David, jina langu ni Sara. Nimefurahi kukutana nawe.`,
       videoTopic: "Kupitia mazungumzo ya msingi na msamiati wa Kiwango cha 1.",
+      videoUrl: "https://www.youtube.com/watch?v=H0X150rDpcM",
       readingTitle: "Jumapili iliyopita, Kevin alisafiri na familia yake kumtembelea mjomba wake mjini.",
       reading: [
         "Kabla ya kuondoka, alikula mkate na kunywa chai kifungua kinywa.",

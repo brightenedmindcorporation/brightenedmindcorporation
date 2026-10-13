@@ -28,6 +28,7 @@ Hypothèse peu probable. Si j'avais plus de temps, je relirais la proposition.
 
 Usage en entreprise. Le conditionnel est fréquent dans les négociations et la planification.`,
       videoTopic: "Comparer les différentes formes de conditionnel dans une négociation d'entreprise.",
+      videoUrl: "https://www.youtube.com/watch?v=F7ST4x7Iqw4",
       readingTitle: "Une Négociation à l'Entreprise Brightened Mind",
       reading: [
         "Pendant la réunion, le fournisseur a dit, « Si vous commandez plus d'unités, nous vous offrirons une remise. »",
@@ -54,6 +55,7 @@ Conseil et suggestion. Devrait et il faudrait servent à donner un conseil. Vous
 
 Possibilité. Pourrait et il se peut que montrent que quelque chose est possible mais pas certain.`,
       videoTopic: "Entendre la différence entre obligation, conseil et possibilité au travail.",
+      videoUrl: "https://www.youtube.com/watch?v=n3kpJKwEFEs",
       readingTitle: "Préparatifs pour l'Audit",
       reading: [
         "La directrice financière a dit, « Nous devons terminer les documents de l'audit avant lundi. »",
@@ -83,6 +85,7 @@ Répondre et trouver un compromis. Cela semble raisonnable, mais pourriez-vous a
 
 Conclure un accord. Je pense que nous avons un accord. Mettons cela par écrit.`,
       videoTopic: "Voir une négociation complète du début à la conclusion de l'accord.",
+      videoUrl: "https://www.youtube.com/watch?v=30jTgihGZts",
       readingTitle: "Conclure l'Accord",
       reading: [
         "Deux entreprises ont négocié pendant presque deux heures le prix du nouvel équipement.",
@@ -109,6 +112,7 @@ Organiser ses points. D'abord, j'expliquerai... Ensuite, je passerai à... Enfin
 
 Clôturer une présentation. Pour résumer, les points clés sont... Merci de votre attention. Avez-vous des questions ?`,
       videoTopic: "Voir une présentation professionnelle courte et bien structurée.",
+      videoUrl: "https://www.youtube.com/watch?v=N2V4iJWZrOs",
       readingTitle: "La Première Présentation de Linda",
       reading: [
         "Linda était nerveuse avant sa première présentation devant l'équipe de direction.",
@@ -136,6 +140,7 @@ Demander la parole. Puis-je dire quelque chose ? Si je peux ajouter... Désolé 
 
 Rédiger un compte-rendu de réunion. Le compte-rendu enregistre ce qui a été discuté et décidé.`,
       videoTopic: "Voir comment se déroule une réunion formelle du début à la fin.",
+      videoUrl: "https://www.youtube.com/watch?v=b93rWTrmse4",
       readingTitle: "La Réunion du Lundi",
       reading: [
         "À 9 heures, le chef d'équipe a dit, « Pouvons-nous commencer ? » et tout le monde a été d'accord.",
@@ -159,6 +164,7 @@ Rédiger un compte-rendu de réunion. Le compte-rendu enregistre ce qui a été 
 
 Phrases utiles. L'objectif de ce rapport est de... Les données montrent que... Sur la base de ces résultats, nous recommandons...`,
       videoTopic: "Voir comment un rapport professionnel est organisé de l'introduction aux recommandations.",
+      videoUrl: "https://www.youtube.com/watch?v=lqlwr_YOKik",
       readingTitle: "Un Rapport sur la Satisfaction Client",
       reading: [
         "L'objectif de ce rapport est d'évaluer la satisfaction client au cours du dernier trimestre.",
@@ -186,6 +192,7 @@ Pendant l'appel. Pourriez-vous répéter cela, s'il vous plaît ? Désolé, la l
 
 Terminer un appel. Merci pour votre temps. Je vais vous envoyer un e-mail pour confirmer.`,
       videoTopic: "Écouter un appel professionnel du début à la fin.",
+      videoUrl: "https://www.youtube.com/watch?v=iS5GC3-VGRs",
       readingTitle: "Un Appel à un Client",
       reading: [
         "« Bonjour, c'est Sara de l'entreprise Brightened Mind. Je vous appelle au sujet de votre commande récente. »",
@@ -212,6 +219,7 @@ Terminer un appel. Merci pour votre temps. Je vais vous envoyer un e-mail pour c
 
 Sujets sûrs versus sujets à éviter. Sûrs : le travail, les tendances du secteur. À éviter : le salaire, la politique.`,
       videoTopic: "Voir une conversation informelle naturelle lors d'un événement professionnel.",
+      videoUrl: "https://www.youtube.com/watch?v=zo1hErohSr8",
       readingTitle: "Rencontrer Quelqu'un de Nouveau à une Conférence",
       reading: [
         "À la conférence, Michel s'est présenté à un inconnu qui se tenait près de la table à café.",
@@ -238,6 +246,7 @@ Proposer des solutions. Une option serait de... Nous pourrions essayer... Et si 
 
 Prendre une décision. Allons-y avec cette option. Nous avons décidé d'aller de l'avant avec...`,
       videoTopic: "Voir une équipe identifier un problème et s'accorder sur une solution ensemble.",
+      videoUrl: "https://www.youtube.com/watch?v=FI07mViKURw",
       readingTitle: "Un Problème de Livraison",
       reading: [
         "L'équipe logistique a dit, « Nous avons rencontré un problème avec le camion de livraison. Le problème principal semble être une panne mécanique. »",
@@ -264,6 +273,7 @@ Phrases utiles. Pourriez-vous m'aider à comprendre comment cela se fait habitue
 
 Conseils pour une communication claire. Parlez clairement et évitez les expressions idiomatiques compliquées.`,
       videoTopic: "Voir comment une équipe internationale communique clairement entre les cultures.",
+      videoUrl: "https://www.youtube.com/watch?v=U60-5cDKnmg",
       readingTitle: "Travailler avec une Équipe Internationale",
       reading: [
         "Quand l'entreprise Brightened Mind a commencé à travailler avec des partenaires à l'étranger, l'équipe a remarqué des différences culturelles.",
@@ -290,6 +300,7 @@ Donner du feedback. J'apprécie vraiment l'effort que vous avez mis dans ce trav
 
 Diriger une équipe. J'aimerais vous déléguer cette tâche.`,
       videoTopic: "Voir un manager donner un feedback clair et respectueux à un membre de l'équipe.",
+      videoUrl: "https://www.youtube.com/watch?v=0uNHcbQKT2M",
       readingTitle: "Un Nouveau Chef d'Équipe",
       reading: [
         "Quand Joseph est devenu chef d'équipe, il a appris à déléguer des tâches au lieu de tout faire lui-même.",
@@ -340,6 +351,7 @@ Exemple de conversation professionnelle réelle.
 Bonjour. Merci de vous joindre à cet appel.
 Bonjour, ravi d'être là. Je vous appelle au sujet de la proposition que vous avez envoyée.`,
       videoTopic: "Réviser tous les sujets du Niveau 3 à travers une conversation professionnelle complète.",
+      videoUrl: "https://www.youtube.com/watch?v=8rTiYD4pEg8",
       readingTitle: "Terminer le Programme",
       reading: [
         "Après avoir terminé les Niveaux 1, 2 et 3, Chantal peut maintenant diriger des réunions, rédiger des rapports professionnels et négocier avec des clients internationaux en toute confiance.",
