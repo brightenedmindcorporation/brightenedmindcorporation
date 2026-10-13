@@ -20,8 +20,10 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Le département apprentissage a sa propre coquille (AcademyHeader /
-  // future LearningShell) : le header/footer public ne s'y affiche pas.
-  const hideLayoutElements = pathname?.startsWith("/academy") ?? false;
+  // future LearningShell), et le panneau admin (/admin) a son propre
+  // en-tête : le header/footer public ne s'y affiche pas, sinon les deux
+  // en-têtes se superposent.
+  const hideLayoutElements = pathname === "/admin" || (pathname?.startsWith("/academy") ?? false);
   const isHome = pathname === "/";
   const phoneOfficial = "+243988830799";
 
