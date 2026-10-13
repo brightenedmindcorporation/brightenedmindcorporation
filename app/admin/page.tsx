@@ -752,16 +752,12 @@ export default function AdminPage() {
     setCertSending(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const year = new Date().getFullYear();
-      // Utilise le vrai matricule de l'étudiant quand il est connu — un
-      // certificat doit porter le même identifiant que son inscription,
-      // pas un numéro distinct inventé pour l'occasion.
-      const certificateId = certMatricule.trim() || `BMCA-${certLangCode}-L${certLevel}-${year}-${Math.floor(Math.random() * 100000)}`;
       const average = Number(certAverage) || 0;
       const levelTitle = certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`;
+      const studentId = certMatricule.trim();
 
-      await generateCertificatePdf({ studentName: certName.trim(), levelTitle, average, certificateId });
-
+      // The server attributes the certificate its own number (CERT-…),
+      // distinct from the Student ID; the PDF is then built with it.
       const response = await fetch("/api/admin/certificates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -773,11 +769,13 @@ export default function AdminPage() {
           level: certLevel,
           levelTitle,
           average,
-          certificateId,
+          studentId: studentId || null,
         }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
+
+      await generateCertificatePdf({ studentName: certName.trim(), levelTitle, average, certificateId: result.certificateId, studentId: studentId || undefined });
 
       setCertGenerateOpen(false);
       setCertName("");
@@ -838,7 +836,7 @@ export default function AdminPage() {
     }
   };
 
-  const openCertificatePreview = async (opts: { studentName: string; levelTitle: string; average: number; certificateId: string; settings?: DocumentSettings }) => {
+  const openCertificatePreview = async (opts: { studentName: string; levelTitle: string; average: number; certificateId: string; studentId?: string; settings?: DocumentSettings }) => {
     if (certPreviewUrl) URL.revokeObjectURL(certPreviewUrl);
     setCertPreviewUrl(await getCertificatePreviewUrl(opts));
   };
@@ -1920,7 +1918,7 @@ export default function AdminPage() {
                     <b className="text-ink">Statut :</b>{" "}
                     {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
                   </p>
-                  <p className="text-ink"><b className="text-ink">Matricule :</b> {s.matricule || "-"}</p>
+                  <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
 
                   <div className="flex flex-wrap gap-3 mt-4">
                     <button
@@ -2191,7 +2189,7 @@ export default function AdminPage() {
                       <th className="py-2 pr-4">Langue</th>
                       <th className="py-2 pr-4">Montant</th>
                       <th className="py-2 pr-4">Statut</th>
-                      <th className="py-2 pr-4">Matricule</th>
+                      <th className="py-2 pr-4">Student ID</th>
                       <th className="py-2 pr-4">Référence</th>
                     </tr>
                   </thead>
@@ -2849,10 +2847,18 @@ export default function AdminPage() {
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de l'identifiant (ex. Student ID)</label>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé du numéro de certificat</label>
                       <input
-                        value={docSettings.idLabel}
-                        onChange={(e) => setDocSettings((d) => ({ ...d, idLabel: e.target.value }))}
+                        value={docSettings.certificateNumberLabel}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, certificateNumberLabel: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de l'identifiant étudiant</label>
+                      <input
+                        value={docSettings.studentIdLabel}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, studentIdLabel: e.target.value }))}
                         className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
                       />
                     </div>
@@ -2943,7 +2949,8 @@ export default function AdminPage() {
                           studentName: "Nom de l'étudiant",
                           levelTitle: "Level 1 - Beginner English",
                           average: 85,
-                          certificateId: "BMCA-EN-2026-0001",
+                          certificateId: "CERT-EN-2026-0001",
+                          studentId: "BMCA-EN-2026-001",
                           settings: docSettings,
                         })
                       }
@@ -3042,6 +3049,7 @@ export default function AdminPage() {
                                 levelTitle: certEditLevelTitle || `${languageLabel(certEditLangCode)} — Niveau ${certEditLevel}`,
                                 average: Number(certEditAverage) || 0,
                                 certificateId: cert.certificateId,
+                                studentId: cert.studentId || undefined,
                               })
                             }
                             className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
@@ -3057,7 +3065,10 @@ export default function AdminPage() {
                           <div>
                             <p className="text-ink font-bold">{cert.studentName}</p>
                             <p className="text-xs text-ink-soft mt-0.5">{cert.levelTitle || `${languageLabel(cert.langCode)} — Niveau ${cert.level}`}</p>
-                            <p className="text-xs text-ink-faint font-mono mt-1">{cert.certificateId}</p>
+                            <p className="text-xs text-ink-faint font-mono mt-1">
+                              {cert.certificateId}
+                              {cert.studentId ? ` · Student ID : ${cert.studentId}` : ""}
+                            </p>
                           </div>
                           <div className="text-right shrink-0">
                             <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cert.issuedBy === "admin" ? "bg-amber-700 text-white" : "bg-surface-alt text-ink-soft"}`}>
@@ -3088,6 +3099,7 @@ export default function AdminPage() {
                                 levelTitle: cert.levelTitle || `${languageLabel(cert.langCode)} — Niveau ${cert.level}`,
                                 average: cert.average || 0,
                                 certificateId: cert.certificateId,
+                                studentId: cert.studentId || undefined,
                               })
                             }
                             className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
@@ -3490,14 +3502,14 @@ export default function AdminPage() {
               onChange={(e) => setCertEmail(e.target.value)}
               className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Matricule de l'étudiant (recommandé)</label>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Student ID de l'étudiant (recommandé)</label>
             <input
               value={certMatricule}
               onChange={(e) => setCertMatricule(e.target.value)}
               placeholder="BMCA-EN-2026-004"
               className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-1 focus:outline-none focus:border-red-600/60"
             />
-            <p className="text-xs text-ink-faint mb-4">Le même matricule que celui remis à l'inscription (onglet Étudiants). Laissé vide, un numéro est généré automatiquement.</p>
+            <p className="text-xs text-ink-faint mb-4">Le même Student ID que celui remis à l'inscription (onglet Étudiants). Le numéro du certificat (Certificate Number) est généré automatiquement.</p>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Langue</label>
@@ -3553,7 +3565,8 @@ export default function AdminPage() {
                     studentName: certName.trim() || "Nom de l'étudiant",
                     levelTitle: certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`,
                     average: Number(certAverage) || 0,
-                    certificateId: certMatricule.trim() || "APERÇU",
+                    certificateId: "CERT-APERÇU",
+                    studentId: certMatricule.trim() || undefined,
                   })
                 }
                 className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"

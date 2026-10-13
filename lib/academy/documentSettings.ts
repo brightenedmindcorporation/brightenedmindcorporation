@@ -15,8 +15,10 @@ export interface DocumentSettings {
   completionText: string;
   averageLabel: string;
   issuedLabel: string;
-  /** Label printed before the certificate/enrolment number. */
-  idLabel: string;
+  /** Label before the certificate's own number (CERT-EN-2026-0007). */
+  certificateNumberLabel: string;
+  /** Label before the student's enrolment ID (BMCA-EN-2026-004). */
+  studentIdLabel: string;
   signatory1: Signatory;
   signatory2: Signatory;
 }
@@ -29,7 +31,8 @@ export const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
   completionText: "for successfully completing",
   averageLabel: "Final Average",
   issuedLabel: "Issued on",
-  idLabel: "Student ID",
+  certificateNumberLabel: "Certificate Number",
+  studentIdLabel: "Student ID",
   signatory1: { name: "Jordi MUKOSA", role: "Director" },
   signatory2: { name: "Jacques RACIAL", role: "Academic Supervisor" },
 };
@@ -53,7 +56,8 @@ export function sanitizeDocumentSettings(input: any): DocumentSettings {
     completionText: str(input?.completionText, d.completionText),
     averageLabel: str(input?.averageLabel, d.averageLabel),
     issuedLabel: str(input?.issuedLabel, d.issuedLabel),
-    idLabel: str(input?.idLabel, d.idLabel),
+    certificateNumberLabel: str(input?.certificateNumberLabel, d.certificateNumberLabel),
+    studentIdLabel: str(input?.studentIdLabel, d.studentIdLabel),
     signatory1: sig(input?.signatory1, d.signatory1),
     signatory2: sig(input?.signatory2, d.signatory2),
   };

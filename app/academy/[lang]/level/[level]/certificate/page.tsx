@@ -8,6 +8,8 @@ import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { getLevelProgress, getOrCreateCertificateId } from "@/lib/academy/progress";
 import { syncCertificateIssued } from "@/lib/academy/progressSync";
 import CertificateButton from "@/components/academy/CertificateButton";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export default function CertificatePage() {
   const router = useRouter();
@@ -23,6 +25,7 @@ export default function CertificatePage() {
   const [eligible, setEligible] = useState(false);
   const [loading, setLoading] = useState(true);
   const [certificateId, setCertificateId] = useState("");
+  const [studentId, setStudentId] = useState("");
 
   useEffect(() => {
     const studentData = localStorage.getItem("loggedStudent");
@@ -68,12 +71,31 @@ export default function CertificatePage() {
     }
 
     setAverage(totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0);
-    // Le certificat doit porter le même matricule que celui remis à
-    // l'inscription, pas un identifiant distinct généré au hasard —
-    // repli sur l'ancien générateur seulement pour les tout vieux comptes
-    // sans matricule enregistré.
-    setCertificateId(enrollment.matricule || getOrCreateCertificateId(langSlug, level, langCode));
-    setLoading(false);
+    // Le Student ID (matricule d'inscription) et le numéro du certificat
+    // sont deux identifiants distincts. Le numéro est attribué une seule
+    // fois côté serveur ; repli local seulement si le serveur est injoignable.
+    setStudentId(enrollment.matricule || "");
+    const fallbackNumber = getOrCreateCertificateId(langSlug, level, langCode);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe();
+      try {
+        if (!user) throw new Error("not signed in");
+        const idToken = await user.getIdToken();
+        const response = await fetch("/api/academy/certificates/number", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken, langCode, level }),
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Erreur serveur");
+        setCertificateId(result.certificateId);
+      } catch (error) {
+        console.error("Certificate number fallback:", error);
+        setCertificateId(fallbackNumber);
+      } finally {
+        setLoading(false);
+      }
+    });
   }, [router, langSlug, level, curriculum, langCode]);
 
   if (loading) {
@@ -112,7 +134,8 @@ export default function CertificatePage() {
                   <p><strong className="text-ink">Student:</strong> {studentName}</p>
                   <p><strong className="text-ink">Level:</strong> {curriculum?.levelTitle}</p>
                   <p><strong className="text-ink">Final Average:</strong> {average}%</p>
-                  <p><strong className="text-ink">Matricule:</strong> {certificateId}</p>
+                  <p><strong className="text-ink">Student ID:</strong> {studentId || "—"}</p>
+                  <p><strong className="text-ink">Certificate Number:</strong> {certificateId}</p>
                   <p className="text-emerald-400 font-bold mt-3 flex items-center gap-2"><CheckCircle2 size={16} /> Eligible for Certificate</p>
                 </div>
 
@@ -122,6 +145,7 @@ export default function CertificatePage() {
                     levelTitle={curriculum?.levelTitle ?? ""}
                     average={average}
                     certificateId={certificateId}
+                    studentId={studentId}
                     onGenerated={() =>
                       syncCertificateIssued({
                         langCode,
@@ -130,6 +154,7 @@ export default function CertificatePage() {
                         studentName,
                         average,
                         certificateId,
+                        studentId,
                       })
                     }
                   />

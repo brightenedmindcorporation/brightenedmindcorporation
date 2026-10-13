@@ -415,7 +415,7 @@ export default function Dashboard() {
                 <p className="text-sm font-semibold text-ink mt-1 truncate">{student.email || "N/A"}</p>
               </div>
               <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
-                <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">Matricule</span>
+                <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">Student ID</span>
                 <p className="text-sm font-semibold text-ink mt-1">{activeEnrollment.matricule || "N/A"}</p>
               </div>
               <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
@@ -526,7 +526,7 @@ export default function Dashboard() {
 
             <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
               <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
-                Matricule
+                Student ID
               </span>
               <p className="text-sm font-semibold text-ink mt-1">
                 {activeEnrollment.matricule || "N/A"}

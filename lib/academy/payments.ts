@@ -30,7 +30,7 @@ async function sendMatriculeEmail(email: string, amount: number | undefined, cur
   await resend.emails.send({
     from: mailFrom("Brightened Mind Academia"),
     to: email,
-    subject: "Confirmation d'inscription & Votre Matricule BMCA",
+    subject: "Confirmation d'inscription & Votre Student ID BMCA",
     html: `
       <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px;">
         <h2 style="color: #111;">Bienvenue chez Brightened Mind Corporation !</h2>
@@ -41,7 +41,7 @@ async function sendMatriculeEmail(email: string, amount: number | undefined, cur
           ${matricule}
         </div>
 
-        <p style="margin-top: 20px;">Conservez précieusement ce matricule, il vous permettra d'accéder à tous vos cours sur l'Espace Academia.</p>
+        <p style="margin-top: 20px;">Conservez précieusement ce Student ID, il vous permettra d'accéder à tous vos cours sur l'Espace Academia.</p>
 
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
         <p style="font-size: 12px; color: #777; text-align: center;">Brightened Mind Corporation — Service Admission</p>

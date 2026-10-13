@@ -6,7 +6,10 @@ export interface CertificateOpts {
   studentName: string;
   levelTitle: string;
   average: number;
+  /** The certificate's own number (CERT-…). */
   certificateId: string;
+  /** The student's enrolment ID, printed under the certificate number. */
+  studentId?: string;
   /** Override the saved wording (used by the admin editor's live preview). */
   settings?: DocumentSettings;
 }
@@ -14,7 +17,7 @@ export interface CertificateOpts {
 /** Builds (but does not save or output) the certificate PDF — shared by
  * download, preview and anything else that needs the raw jsPDF document. */
 async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
-  const { studentName, levelTitle, average, certificateId } = opts;
+  const { studentName, levelTitle, average, certificateId, studentId } = opts;
   const logo = await loadLogo(); // also refreshes the saved wording
   const cfg = opts.settings ?? getCachedDocumentSettings();
   const doc = new jsPDF("landscape", "mm", "a4");
@@ -72,7 +75,11 @@ async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
 
   doc.setFont("courier", "bold");
   doc.setFontSize(13);
-  doc.text(`${cfg.idLabel}: ${certificateId}`, 148, 153, { align: "center" });
+  doc.text(`${cfg.certificateNumberLabel}: ${certificateId}`, 148, 152, { align: "center" });
+  if (studentId) {
+    doc.setFontSize(11);
+    doc.text(`${cfg.studentIdLabel}: ${studentId}`, 148, 159, { align: "center" });
+  }
 
   doc.line(50, 172, 95, 172);
   doc.line(202, 172, 247, 172);

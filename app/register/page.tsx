@@ -140,7 +140,7 @@ function RegisterForm() {
           <h1 className="text-2xl font-bold mb-2">Inscription enregistrée !</h1>
           <p className="text-ink-soft text-sm mb-6">
             {isLanguageProgram
-              ? "Payez maintenant pour activer votre compte immédiatement et recevoir votre matricule tout de suite, ou patientez pour une approbation manuelle par l'administration."
+              ? "Payez maintenant pour activer votre compte immédiatement et recevoir votre Student ID tout de suite, ou patientez pour une approbation manuelle par l'administration."
               : "Votre demande a été transmise à l'administration. Vous recevrez un email de confirmation une fois votre inscription approuvée."}
           </p>
           <div className="flex flex-col gap-3">

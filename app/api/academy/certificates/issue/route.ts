@@ -10,7 +10,7 @@ export async function POST(request: Request) {
     if (!isAdminConfigured()) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
-    const { idToken, langCode, level, levelTitle, studentName, average, certificateId } = await request.json();
+    const { idToken, langCode, level, levelTitle, studentName, average, certificateId, studentId } = await request.json();
     if (!idToken || !certificateId) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
     }
@@ -21,6 +21,7 @@ export async function POST(request: Request) {
     await adminDb.collection("certificates").doc(certificateId).set(
       {
         certificateId,
+        studentId: studentId || null,
         uid: decoded.uid,
         studentName: studentName || decoded.name || decoded.email || "Étudiant",
         langCode: langCode || null,

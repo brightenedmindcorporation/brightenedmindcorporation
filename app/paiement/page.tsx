@@ -172,7 +172,7 @@ export default function PaymentPage() {
             </p>
             {matricule && (
               <div className="bg-surface-alt border border-emerald-700/50 rounded-xl p-4 inline-block">
-                <p className="text-xs text-ink-faint mb-1">Votre matricule</p>
+                <p className="text-xs text-ink-faint mb-1">Votre Student ID</p>
                 <p className="text-2xl font-black text-emerald-400 font-mono tracking-wider">{matricule}</p>
               </div>
             )}

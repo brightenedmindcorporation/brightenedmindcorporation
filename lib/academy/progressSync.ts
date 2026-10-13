@@ -34,6 +34,7 @@ export async function syncCertificateIssued(opts: {
   studentName: string;
   average: number;
   certificateId: string;
+  studentId?: string;
 }) {
   try {
     const idToken = await auth.currentUser?.getIdToken();

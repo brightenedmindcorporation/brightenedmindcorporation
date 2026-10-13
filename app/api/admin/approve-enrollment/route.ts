@@ -59,7 +59,7 @@ export async function POST(request: Request) {
           audience: uid,
           type: "enrollment-approved",
           title: "Inscription approuvée",
-          message: `Votre inscription (${langCode}) a été approuvée — matricule ${matricule}.`,
+          message: `Votre inscription (${langCode}) a été approuvée — Student ID ${matricule}.`,
           link: "/academy/dashboard",
         });
       } catch (notifError) {

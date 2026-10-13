@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { nextCertificateNumber } from "@/lib/academy/certificateNumber";
 
 // GET routes are cached by Next.js by default unless marked dynamic — this
 // serves live admin data and must never be stale.
@@ -40,10 +41,10 @@ export async function POST(request: Request) {
     if (!isAdminConfigured()) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
-    const { idToken, studentName, studentEmail, langCode, level, levelTitle, average, certificateId } = await request.json();
+    const { idToken, studentName, studentEmail, langCode, level, levelTitle, average, studentId } = await request.json();
     if (!idToken) return NextResponse.json({ error: "idToken requis." }, { status: 400 });
-    if (!studentName || !certificateId) {
-      return NextResponse.json({ error: "Nom de l'étudiant et identifiant de certificat requis." }, { status: 400 });
+    if (!studentName) {
+      return NextResponse.json({ error: "Nom de l'étudiant requis." }, { status: 400 });
     }
 
     const decoded = await getAdminAuth().verifyIdToken(idToken);
@@ -52,8 +53,11 @@ export async function POST(request: Request) {
     }
 
     const adminDb = getAdminDb();
+    // The certificate always gets its own number, distinct from the Student ID.
+    const certificateId = await nextCertificateNumber(langCode);
     await adminDb.collection("certificates").doc(certificateId).set({
       certificateId,
+      studentId: studentId || null,
       uid: null,
       studentName,
       studentEmail: studentEmail || null,
@@ -79,7 +83,7 @@ export async function POST(request: Request) {
       } catch {}
     }
 
-    return NextResponse.json({ status: "success" });
+    return NextResponse.json({ status: "success", certificateId });
   } catch (error: any) {
     console.error("Error issuing certificate:", error);
     return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });

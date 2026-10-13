@@ -36,7 +36,7 @@ export async function POST(req: Request) {
         <p><b>Langue :</b> ${langLabel ?? "—"}</p>
         <p><b>Niveau :</b> ${level ?? "—"}</p>
         ${studyDaysLine}
-        <h3>Votre matricule : <b>${matricule}</b></h3>
+        <h3>Votre Student ID : <b>${matricule}</b></h3>
         <p>Conservez-le précieusement, il vous sera demandé pour toute communication avec l'administration.</p>
         <p>Vous pouvez dès maintenant vous connecter à votre espace d'apprentissage avec l'email et le mot de passe utilisés lors de votre inscription.</p>
       `,
