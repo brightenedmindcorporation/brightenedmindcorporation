@@ -1,3 +1,4 @@
+import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import dns from "node:dns/promises";
 import { Resend } from "resend";
@@ -109,7 +110,7 @@ export async function POST(request: Request) {
     // files end up — if it fails to send, the application must be
     // treated as failed rather than silently lost.
     await resend.emails.send({
-      from: "Brightened Mind <onboarding@resend.dev>",
+      from: mailFrom("Brightened Mind"),
       to: ADMIN_EMAIL,
       replyTo: email,
       subject: `Nouvelle candidature — ${announcementTitle}`,
@@ -152,7 +153,7 @@ export async function POST(request: Request) {
 
     try {
       await resend.emails.send({
-        from: "Brightened Mind <onboarding@resend.dev>",
+        from: mailFrom("Brightened Mind"),
         to: email,
         subject: `Candidature reçue — ${announcementTitle}`,
         html: `

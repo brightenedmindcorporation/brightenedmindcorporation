@@ -1,3 +1,4 @@
+import { mailFrom } from "@/lib/mailFrom";
 import { Resend } from "resend";
 
 export async function POST(req: Request) {
@@ -26,7 +27,7 @@ export async function POST(req: Request) {
         : "";
 
     const result = await resend.emails.send({
-      from: "Brightened Mind <onboarding@resend.dev>",
+      from: mailFrom("Brightened Mind"),
       to: email,
       subject: "Inscription confirmée — Brightened Mind Academia",
       html: `

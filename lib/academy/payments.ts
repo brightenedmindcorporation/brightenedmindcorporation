@@ -1,3 +1,4 @@
+import { mailFrom } from "@/lib/mailFrom";
 import "server-only";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
@@ -27,7 +28,7 @@ function isGatewaySuccess(status: string): boolean {
 
 async function sendMatriculeEmail(email: string, amount: number | undefined, currency: string | undefined, matricule: string) {
   await resend.emails.send({
-    from: "Brightened Mind Academia <contact@brightenedmind.com>",
+    from: mailFrom("Brightened Mind Academia"),
     to: email,
     subject: "Confirmation d'inscription & Votre Matricule BMCA",
     html: `

@@ -1,3 +1,4 @@
+import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
@@ -9,7 +10,7 @@ async function sendAcknowledgementEmail(email: string, name: string, title: stri
   if (!process.env.RESEND_API_KEY) return;
   const resend = new Resend(process.env.RESEND_API_KEY);
   await resend.emails.send({
-    from: "Brightened Mind <onboarding@resend.dev>",
+    from: mailFrom("Brightened Mind"),
     to: email,
     subject: `Votre candidature — ${title}`,
     html: `

@@ -1,3 +1,4 @@
+import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
@@ -97,7 +98,7 @@ export async function POST(request: Request) {
       // bcc, not to, when there's more than one recipient — a broadcast
       // shouldn't expose every student's email address to the others.
       const { error: sendError } = await resend.emails.send({
-        from: "BM Corporation Academia <onboarding@resend.dev>",
+        from: mailFrom("BM Corporation Academia"),
         to: emails.length === 1 ? emails[0] : ADMIN_EMAIL,
         bcc: emails.length > 1 ? emails : undefined,
         replyTo: ADMIN_EMAIL,

@@ -1,3 +1,4 @@
+import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
@@ -70,7 +71,7 @@ export async function POST(request: Request) {
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
       await resend.emails.send({
-        from: "Brightened Mind <onboarding@resend.dev>",
+        from: mailFrom("Brightened Mind"),
         to: ADMIN_EMAIL,
         replyTo: email,
         subject: `Nouvelle demande de devis — ${service || "Autre"}`,
