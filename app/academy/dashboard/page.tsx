@@ -10,7 +10,7 @@ import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
-import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
+import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { getVerbReference } from "@/content/verbs";
 
 interface Enrollment {
@@ -387,7 +387,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {liveSession && isSessionJoinable(liveSession) ? (
+              {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
                   onClick={() => router.push(`/academy/program/${activeEnrollment.langCode}/live`)}
                   className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0"
@@ -451,7 +451,7 @@ export default function Dashboard() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-              {liveSession && isSessionJoinable(liveSession) ? (
+              {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
                   onClick={() => router.push(`/academy/${langSlug}/level/${(activeEnrollment.level || "Level 1").slice(-1)}/live`)}
                   className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"

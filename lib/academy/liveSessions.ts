@@ -11,6 +11,24 @@ export interface LiveSession {
   scheduledAt: string; // ISO datetime
   durationMinutes: number;
   createdAt?: string;
+  /** True while the teacher has opened the room to students. */
+  open?: boolean;
+  openedAt?: string;
+  endedAt?: string;
+}
+
+/** An open room stays valid this long after the scheduled end, so a class
+ * that overruns is never cut off, yet a room the teacher forgot to close
+ * can't be joined days later. */
+const OPEN_GRACE_AFTER_END_MIN = 180;
+
+export function isSessionOpenNow(
+  session: Pick<LiveSession, "scheduledAt" | "durationMinutes" | "open">,
+  now: Date = new Date()
+): boolean {
+  if (session.open !== true) return false;
+  const end = new Date(session.scheduledAt).getTime() + session.durationMinutes * 60_000;
+  return now.getTime() <= end + OPEN_GRACE_AFTER_END_MIN * 60_000;
 }
 
 // Students can join from 10 minutes before the scheduled start until the

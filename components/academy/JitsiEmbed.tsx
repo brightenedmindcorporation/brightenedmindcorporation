@@ -10,11 +10,26 @@ declare global {
   }
 }
 
+// Students get the tools a learner needs (mic, camera, chat, raise hand,
+// participants, layout) — no screen sharing, recording or room security.
+const STUDENT_TOOLBAR = [
+  "microphone",
+  "camera",
+  "raisehand",
+  "chat",
+  "participants-pane",
+  "tileview",
+  "fullscreen",
+  "settings",
+  "hangup",
+];
+
 export default function JitsiEmbed({
   appId,
   roomName,
   displayName,
   jwt,
+  role = "student",
 }: {
   appId: string;
   roomName: string;
@@ -22,6 +37,7 @@ export default function JitsiEmbed({
   /** Signed JaaS token carrying the moderator claim — without it, JaaS
    * falls back to granting moderator to whoever joins the room first. */
   jwt?: string;
+  role?: "teacher" | "student";
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +56,15 @@ export default function JitsiEmbed({
           userInfo: { displayName },
           width: "100%",
           height: "100%",
-          configOverwrite: { prejoinPageEnabled: false },
+          configOverwrite: {
+            prejoinPageEnabled: false,
+            prejoinConfig: { enabled: false },
+            defaultLanguage: "fr",
+            disableInviteFunctions: true,
+            ...(role === "student"
+              ? { startWithAudioMuted: true, toolbarButtons: STUDENT_TOOLBAR, disableRemoteMute: true }
+              : {}),
+          },
         });
       } catch (err) {
         console.error("Jitsi init error:", err);
@@ -61,17 +85,24 @@ export default function JitsiEmbed({
 
     return () => {
       api?.dispose();
-      if (script) document.body.removeChild(script);
+      if (script && script.parentNode) script.parentNode.removeChild(script);
     };
-  }, [appId, roomName, displayName, jwt]);
+  }, [appId, roomName, displayName, jwt, role]);
 
   if (error) {
     return (
-      <div className="w-full h-full min-h-[480px] flex items-center justify-center bg-surface-sunken text-red-400 rounded-2xl border border-line">
+      <div className="w-full h-[70vh] min-h-[480px] flex items-center justify-center bg-surface-sunken text-red-400 rounded-2xl border border-line">
         {error}
       </div>
     );
   }
 
-  return <div ref={containerRef} className="w-full h-full min-h-[480px] rounded-2xl overflow-hidden border border-line" />;
+  // The iframe is sized at 100% of this box, so the box needs a real height
+  // (a bare h-full collapses to the iframe's tiny default).
+  return (
+    <div
+      ref={containerRef}
+      className="w-full h-[75vh] min-h-[520px] max-h-[820px] rounded-2xl overflow-hidden border border-line bg-black"
+    />
+  );
 }

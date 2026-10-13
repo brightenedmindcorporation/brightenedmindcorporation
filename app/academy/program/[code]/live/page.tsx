@@ -3,12 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
 import { otherPrograms } from "@/content/programs";
-import { getLiveRoomName, getJaasAppId, isJitsiConfigured } from "@/lib/academy/liveRooms";
-import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
-import JitsiEmbed from "@/components/academy/JitsiEmbed";
+import StudentLiveRoom from "@/components/academy/StudentLiveRoom";
 
 // Mirrors app/academy/[lang]/level/[level]/live/page.tsx for the non-language
 // formations (Bureautique, Visuel & Audiovisuel, Logiciels de Gestion), which
@@ -25,10 +21,6 @@ export default function ProgramLiveClassPage() {
 
   const [allowed, setAllowed] = useState(false);
   const [studentName, setStudentName] = useState("Élève");
-  const [liveSession, setLiveSession] = useState<LiveSession | null>(null);
-  const [sessionChecked, setSessionChecked] = useState(false);
-  const [liveToken, setLiveToken] = useState<string | null>(null);
-  const [liveTokenError, setLiveTokenError] = useState<string | null>(null);
 
   useEffect(() => {
     try {
@@ -53,38 +45,6 @@ export default function ProgramLiveClassPage() {
     }
   }, [router, code]);
 
-  useEffect(() => {
-    if (!program) return;
-    fetch(`/api/live-sessions?langCode=${program.code}&level=${LEVEL}`)
-      .then((res) => res.json())
-      .then((data) => setLiveSession(data.session ?? null))
-      .catch(() => setLiveSession(null))
-      .finally(() => setSessionChecked(true));
-  }, [program]);
-
-  useEffect(() => {
-    if (!program || !liveSession || !isSessionJoinable(liveSession)) return;
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!user) return;
-      try {
-        const idToken = await user.getIdToken();
-        const response = await fetch("/api/academy/live-token", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken, langCode: program.code, level: LEVEL }),
-        });
-        const result = await response.json();
-        if (!response.ok) throw new Error(result.error || "Erreur serveur");
-        setLiveToken(result.token);
-      } catch (error: any) {
-        setLiveTokenError(error.message || "Erreur serveur.");
-      }
-    });
-
-    return unsubscribe;
-  }, [program, liveSession]);
-
   if (!program) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft text-center px-6">
@@ -98,7 +58,7 @@ export default function ProgramLiveClassPage() {
     );
   }
 
-  if (!allowed || !sessionChecked) {
+  if (!allowed) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <div className="flex flex-col items-center gap-3">
@@ -108,9 +68,6 @@ export default function ProgramLiveClassPage() {
       </main>
     );
   }
-
-  const canJoinNow = liveSession ? isSessionJoinable(liveSession) : false;
-  const appId = getJaasAppId();
 
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
@@ -134,50 +91,7 @@ export default function ProgramLiveClassPage() {
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{program.label}</p>
           </div>
 
-          {!liveSession ? (
-            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
-              <p className="text-xl font-bold text-ink">Aucun cours en direct programmé</p>
-              <p className="text-ink-soft text-sm max-w-md mx-auto">
-                Aucune session n'est actuellement programmée pour cette formation. Consultez votre tableau de bord
-                régulièrement, ou contactez l'administration pour connaître le prochain horaire.
-              </p>
-            </div>
-          ) : !canJoinNow ? (
-            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
-              <p className="text-xl font-bold text-ink">Le cours n'a pas encore commencé</p>
-              <p className="text-ink-soft text-sm max-w-md mx-auto">
-                Prochaine session {liveSession.title ? `« ${liveSession.title} » ` : ""}:{" "}
-                <span className="text-red-500 font-semibold">
-                  {new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })}
-                </span>
-                <br />
-                L'accès s'ouvre 10 minutes avant le début.
-              </p>
-            </div>
-          ) : liveTokenError ? (
-            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
-              <p className="text-xl font-bold text-ink">{liveTokenError}</p>
-            </div>
-          ) : isJitsiConfigured() && appId && liveToken ? (
-            <JitsiEmbed
-              appId={appId}
-              roomName={getLiveRoomName(program.code, LEVEL)}
-              displayName={studentName}
-              jwt={liveToken}
-            />
-          ) : isJitsiConfigured() && appId ? (
-            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
-              <p className="text-xl font-bold text-ink">Connexion à la salle…</p>
-            </div>
-          ) : (
-            <div className="bg-surface rounded-3xl p-10 border border-line text-center space-y-3">
-              <p className="text-xl font-bold text-ink">Classes en direct bientôt disponibles</p>
-              <p className="text-ink-soft text-sm max-w-md mx-auto">
-                Cette fonctionnalité sera activée dès que l'administration aura configuré le service de
-                visioconférence. Revenez plus tard ou consultez le calendrier des sessions.
-              </p>
-            </div>
-          )}
+          <StudentLiveRoom langCode={program.code} level={LEVEL} studentName={studentName} />
         </div>
       </main>
     </div>

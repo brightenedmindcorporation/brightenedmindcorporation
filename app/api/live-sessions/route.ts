@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
-import { isSessionUpcomingOrLive, type LiveSession } from "@/lib/academy/liveSessions";
+import { isSessionOpenNow, isSessionUpcomingOrLive, type LiveSession } from "@/lib/academy/liveSessions";
+
+// The student page polls this every few seconds to learn when the teacher
+// opens the room — it must never be cached.
+export const dynamic = "force-dynamic";
 
 /**
  * Public, read-only: returns the next upcoming-or-live session for a given
@@ -34,9 +38,15 @@ export async function GET(request: Request) {
       .get();
 
     const sessions = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as LiveSession[];
+    // A room the teacher has opened always wins (even if the class overruns
+    // its scheduled slot); otherwise the next upcoming session.
     const upcoming = sessions
-      .filter((s) => isSessionUpcomingOrLive(s))
-      .sort((a, b) => new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime());
+      .filter((s) => isSessionOpenNow(s) || isSessionUpcomingOrLive(s))
+      .sort((a, b) => {
+        const openDiff = Number(isSessionOpenNow(b)) - Number(isSessionOpenNow(a));
+        if (openDiff !== 0) return openDiff;
+        return new Date(a.scheduledAt).getTime() - new Date(b.scheduledAt).getTime();
+      });
 
     return NextResponse.json({ session: upcoming[0] ?? null });
   } catch (error: any) {

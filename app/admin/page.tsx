@@ -106,7 +106,8 @@ export default function AdminPage() {
   const [sessionTime, setSessionTime] = useState("");
   const [sessionDuration, setSessionDuration] = useState("60");
   const [sessionTitle, setSessionTitle] = useState("");
-  const [hostingSession, setHostingSession] = useState<{ langCode: string; level: number; title?: string } | null>(null);
+  const [hostingSession, setHostingSession] = useState<{ id: string; langCode: string; level: number; title?: string } | null>(null);
+  const [roomToggling, setRoomToggling] = useState(false);
   const [hostingToken, setHostingToken] = useState<string | null>(null);
   const [hostingTokenError, setHostingTokenError] = useState<string | null>(null);
 
@@ -297,6 +298,42 @@ export default function AdminPage() {
     } catch (error) {
       console.error("Erreur lors de la déconnexion:", error);
     }
+  };
+
+  // Teacher opens/closes the room to students (students wait in a waiting
+  // room until this is pressed; the server also withholds their video
+  // token while the room is closed).
+  const setRoomOpen = async (sessionId: string, open: boolean) => {
+    setRoomToggling(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/live-sessions/${sessionId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ open }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setLiveSessions((prev) => prev.map((x) => (x.id === sessionId ? { ...x, open } : x)));
+      return true;
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+      return false;
+    } finally {
+      setRoomToggling(false);
+    }
+  };
+
+  const leaveHostedRoom = async () => {
+    if (hostingSession) {
+      const current = liveSessions.find((x) => x.id === hostingSession.id);
+      if (current?.open) {
+        const ok = confirm("Le cours est encore ouvert aux étudiants. Le clôturer en quittant ?");
+        if (ok) await setRoomOpen(hostingSession.id, false);
+        else return;
+      }
+    }
+    setHostingSession(null);
   };
 
   const fetchLiveSessions = async (silent = false) => {
@@ -2085,11 +2122,12 @@ export default function AdminPage() {
                         <p className="text-xs text-ink-soft mt-1">
                           {date.toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })} · {session.durationMinutes} min
                           {isPast && " · Terminée"}
+                          {session.open && !isPast && " · 🟢 Ouvert aux étudiants"}
                         </p>
                       </div>
                       <div className="flex items-center gap-4 self-start sm:self-center">
                         <button
-                          onClick={() => setHostingSession({ langCode: session.langCode || "EN", level: session.level, title: session.title })}
+                          onClick={() => setHostingSession({ id: session.id, langCode: session.langCode || "EN", level: session.level, title: session.title })}
                           className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition inline-flex items-center gap-2"
                         >
                           <Video size={15} /> Rejoindre en tant qu'enseignant
@@ -2120,12 +2158,50 @@ export default function AdminPage() {
                     </p>
                   </div>
                   <button
-                    onClick={() => setHostingSession(null)}
+                    onClick={leaveHostedRoom}
                     className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition whitespace-nowrap"
                   >
                     Quitter
                   </button>
                 </div>
+
+                {(() => {
+                  const live = liveSessions.find((x) => x.id === hostingSession.id);
+                  const isOpen = Boolean(live?.open);
+                  return (
+                    <div
+                      className={`mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border ${
+                        isOpen ? "border-emerald-600/40 bg-emerald-500/10" : "border-amber-600/40 bg-amber-500/10"
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <span className="relative flex h-3 w-3 mt-1.5 shrink-0">
+                          {isOpen && <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />}
+                          <span className={`relative inline-flex rounded-full h-3 w-3 ${isOpen ? "bg-emerald-500" : "bg-amber-500"}`} />
+                        </span>
+                        <div>
+                          <p className="font-bold text-ink text-sm">
+                            {isOpen ? "Cours ouvert — les étudiants peuvent entrer" : "Cours fermé — les étudiants sont en salle d'attente"}
+                          </p>
+                          <p className="text-xs text-ink-soft mt-0.5">
+                            {isOpen
+                              ? "Les étudiants voient la vidéo, peuvent lever la main et écrire dans le chat. Clôturez à la fin du cours."
+                              : "Préparez-vous (micro, caméra, supports), puis ouvrez le cours : l'accès démarre aussitôt chez les étudiants."}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setRoomOpen(hostingSession.id, !isOpen)}
+                        disabled={roomToggling || !hostingToken}
+                        className={`text-white text-sm font-bold px-5 py-2.5 rounded-xl transition shrink-0 disabled:opacity-50 ${
+                          isOpen ? "bg-red-700 hover:bg-red-600" : "bg-emerald-600 hover:bg-emerald-500"
+                        }`}
+                      >
+                        {roomToggling ? "…" : isOpen ? "Clôturer le cours" : "Ouvrir le cours aux étudiants"}
+                      </button>
+                    </div>
+                  );
+                })()}
 
                 {hostingTokenError ? (
                   <div className="p-6 rounded-2xl border border-line bg-surface-sunken text-ink-soft text-center">
@@ -2137,6 +2213,7 @@ export default function AdminPage() {
                     roomName={getLiveRoomName(hostingSession.langCode, hostingSession.level)}
                     displayName="Enseignant — BM Academia"
                     jwt={hostingToken}
+                    role="teacher"
                   />
                 ) : isJitsiConfigured() && getJaasAppId() ? (
                   <div className="p-6 rounded-2xl border border-line bg-surface-sunken text-ink-soft text-center">

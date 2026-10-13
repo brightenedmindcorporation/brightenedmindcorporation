@@ -7,7 +7,7 @@ import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy } from "luci
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
-import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
+import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 
 export default function LevelOverviewPage() {
   const router = useRouter();
@@ -106,7 +106,7 @@ export default function LevelOverviewPage() {
               <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
               <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelSubtitle}</p>
             </div>
-            {liveSession && isSessionJoinable(liveSession) ? (
+            {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
               <Link href={`${base}/live`}>
                 <button className="bg-black/40 hover:bg-black/60 border border-red-400/40 text-white font-bold px-5 py-3 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
                   <span className="relative flex h-2.5 w-2.5">

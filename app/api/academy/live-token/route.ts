@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { generateJaasToken, isJaasAuthConfigured } from "@/lib/academy/jaasToken";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
+import { isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -48,6 +49,21 @@ export async function POST(request: Request) {
 
       if (!approved) {
         return NextResponse.json({ error: "Non autorisé pour cette langue." }, { status: 403 });
+      }
+
+      // Students only get a token once the teacher has opened the room —
+      // enforced here, not just in the UI, so nobody can slip in early.
+      const sessionsSnap = await adminDb
+        .collection("liveSessions")
+        .where("langCode", "==", langCode)
+        .where("level", "==", Number(level))
+        .get();
+      const roomOpen = sessionsSnap.docs.some((d) => isSessionOpenNow(d.data() as LiveSession));
+      if (!roomOpen) {
+        return NextResponse.json(
+          { error: "Le cours n'a pas encore été ouvert par l'enseignant.", code: "not-open" },
+          { status: 403 }
+        );
       }
     }
 
