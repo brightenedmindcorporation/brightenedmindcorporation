@@ -26,6 +26,7 @@ Saludos comunes: Hola. Buenos días. Buenas tardes. Buenas noches. ¿Cómo está
 
 Presentarse: Me llamo... Tengo... años. Vivo en... Soy estudiante. Mucho gusto.`,
       videoTopic: "Cómo presentarte en español.",
+      videoUrl: "https://www.youtube.com/watch?v=HypxjkmUY6s",
       readingTitle: "¡Hola!",
       reading: [
         "Me llamo Sofia. Tengo 12 años. Vivo en Kolwezi. Soy estudiante.",
@@ -55,6 +56,7 @@ Las vocales son: A, E, I, O, U.
 
 Ejemplo: me llamo David. D, A, V, I, D.`,
       videoTopic: "Recitar el alfabeto español de la A a la Z.",
+      videoUrl: "https://www.youtube.com/watch?v=1wJIkTuckEI",
       readingTitle: "Hola, me llamo Ana.",
       reading: ["Estoy aprendiendo español en la escuela.", "Hoy estoy aprendiendo el alfabeto.", "Practico todos los días y me gusta aprender palabras nuevas.", "Puedo deletrear mi nombre: A - N - A."],
       readingSpeakText: `Hola, me llamo Ana. Estoy aprendiendo español en la escuela. Hoy estoy aprendiendo el alfabeto.`,
@@ -76,6 +78,7 @@ Información personal: ¿Cómo te llamas? ¿Cuántos años tienes? ¿Dónde vive
 
 Ejemplo de respuestas: me llamo David. Tengo quince años. Vivo en Kinshasa.`,
       videoTopic: "Aprender los números y presentarse.",
+      videoUrl: "https://www.youtube.com/watch?v=dLiWa3QEuAQ",
       readingTitle: "Hola, me llamo Sara.",
       reading: ["Tengo 14 años.", "Vivo en Kinshasa.", "Mi número de teléfono es 987654321."],
       readingSpeakText: `Hola, me llamo Sara. Tengo catorce años. Vivo en Kinshasa. Mi número de teléfono es nueve ocho siete seis cinco cuatro tres dos uno.`,
@@ -97,6 +100,7 @@ Frases útiles: este es mi padre. Mi madre es muy amable. Tengo un hermano y dos
 
 Ejemplo: vivo con mi familia. Mi padre trabaja en una oficina.`,
       videoTopic: "Aprender el vocabulario de la familia.",
+      videoUrl: "https://www.youtube.com/watch?v=FZTOI0WhFNQ",
       readingTitle: "Me llamo Juan.",
       reading: ["Vivo con mis padres y mi hermana.", "Mi padre es médico.", "Mi madre es muy cariñosa.", "Me encanta pasar tiempo con mi familia."],
       readingSpeakText: `Me llamo Juan. Vivo con mis padres y mi hermana. Mi padre es médico. Mi madre es muy cariñosa.`,
@@ -116,6 +120,7 @@ Ejemplo: vivo con mi familia. Mi padre trabaja en una oficina.`,
 
 Frases útiles: este es mi libro. Escribo con un bolígrafo. La silla es azul.`,
       videoTopic: "Aprender objetos comunes y su pronunciación.",
+      videoUrl: "https://www.youtube.com/watch?v=8fKhTpda1y8",
       readingTitle: "Me llamo Pedro.",
       reading: ["Cada día voy a la escuela con mi mochila y mi cuaderno.", "Uso un bolígrafo para escribir en mi libro.", "Mi teléfono está en mi mochila.", "Me siento en una silla y estudio cada mañana."],
       readingSpeakText: `Me llamo Pedro. Cada día voy a la escuela con mi mochila y mi cuaderno.`,
@@ -137,6 +142,7 @@ Describir objetos: la mochila es roja. El teléfono es negro.
 
 Describir personas: ella es alta. Él es bajo. Ella está feliz.`,
       videoTopic: "Aprender los colores y practicar descripciones.",
+      videoUrl: "https://www.youtube.com/watch?v=OUeqNtnVkIA",
       readingTitle: "Me llamo Lisa.",
       reading: ["Tengo una mochila escolar azul.", "Mi cuaderno es verde y mi teléfono es negro.", "Estoy feliz y soy amable.", "Mi hermano pequeño es bajo pero muy fuerte."],
       readingSpeakText: `Me llamo Lisa. Tengo una mochila escolar azul. Mi cuaderno es verde y mi teléfono es negro.`,
@@ -158,6 +164,7 @@ Meses del año: enero, febrero, marzo, abril, mayo, junio, julio, agosto, septie
 
 Frases útiles: hoy es lunes. Mi cumpleaños es en julio.`,
       videoTopic: "Aprender los días, los meses y cómo decir las fechas.",
+      videoUrl: "https://www.youtube.com/watch?v=w2nQ1c98tgk",
       readingTitle: "Me llamo Kevin.",
       reading: [
         "Hoy es viernes 12 de junio. Me levanto temprano cada mañana.",
@@ -181,6 +188,7 @@ Frases útiles: hoy es lunes. Mi cumpleaños es en julio.`,
 
 Frases útiles: me despierto a las seis. Voy a la escuela a las siete.`,
       videoTopic: "Aprender el vocabulario de las rutinas diarias.",
+      videoUrl: "https://www.youtube.com/watch?v=fIvq1HrkrnM",
       readingTitle: "Me llamo Daniel.",
       reading: [
         "Cada día me despierto a las 6 de la mañana.",
@@ -208,6 +216,7 @@ Bebidas comunes: agua, leche, jugo, té, café.
 
 Frases útiles: bebo agua todos los días. Mi comida favorita es el arroz.`,
       videoTopic: "Aprender el vocabulario de comidas y bebidas.",
+      videoUrl: "https://www.youtube.com/watch?v=CREFPST6Wqg",
       readingTitle: "Me llamo Emma.",
       reading: ["Cada mañana como pan y huevos en el desayuno.", "En la escuela, bebo agua y a veces jugo de frutas.", "Mi comida favorita es el arroz con pollo.", "Por la noche, mi familia come pescado y verduras juntos."],
       readingSpeakText: `Me llamo Emma. Cada mañana como pan y huevos en el desayuno.`,
@@ -227,6 +236,7 @@ Frases útiles: bebo agua todos los días. Mi comida favorita es el arroz.`,
 
 Preguntar por direcciones: ¿dónde está el hospital? ¿cómo llego al banco?`,
       videoTopic: "Aprender el vocabulario de lugares y direcciones.",
+      videoUrl: "https://www.youtube.com/watch?v=hz3q4WCxccA",
       readingTitle: "El miércoles pasado, Miguel fue al centro con su padre.",
       reading: [
         "Primero, se detuvieron en el banco porque su padre necesitaba retirar dinero.",
@@ -251,6 +261,7 @@ Preguntar por direcciones: ¿dónde está el hospital? ¿cómo llego al banco?`,
 
 Frases útiles: mi pasatiempo favorito es leer. Me gusta jugar al fútbol.`,
       videoTopic: "Aprender el vocabulario de pasatiempos y tiempo libre.",
+      videoUrl: "https://www.youtube.com/watch?v=cUI25Sjmdfk",
       readingTitle: "El sábado por la tarde, Jaime visitó a su primo Daniel.",
       reading: [
         "Cuando llegó, Daniel estaba sentado afuera leyendo un libro sobre animales.",
@@ -304,6 +315,7 @@ Ejemplo de conversación real.
 Hola, me llamo David. ¿Cómo te llamas?
 Hola David, me llamo Sara. Mucho gusto.`,
       videoTopic: "Repasar la conversación básica y el vocabulario del Nivel 1.",
+      videoUrl: "https://www.youtube.com/watch?v=z4xGBWwhjiA",
       readingTitle: "El domingo pasado, Kevin viajó con su familia para visitar a su tío en la ciudad.",
       reading: [
         "Antes de salir, comió pan y bebió té en el desayuno.",

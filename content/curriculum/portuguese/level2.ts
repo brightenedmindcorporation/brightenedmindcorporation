@@ -30,6 +30,7 @@ Concordância verbal. Um sujeito singular leva um verbo singular: ela trabalha e
 
 Erros comuns. Errado: as crianças brinca lá fora. Certo: as crianças brincam lá fora.`,
       videoTopic: "Revisar a estrutura da frase e a concordância verbal com exemplos.",
+      videoUrl: "https://www.youtube.com/watch?v=6XIvDQtrb8I",
       readingTitle: "Meu nome é Grace.",
       reading: [
         "Agora estou estudando português de nível intermediário.",
@@ -56,6 +57,7 @@ O pretérito imperfeito é usado para uma ação em andamento no passado. Às vi
 
 Futuro com ir e o futuro simples. Vou visitar Paris ano que vem. Acho que vai chover amanhã.`,
       videoTopic: "Comparar o pretérito perfeito, o imperfeito e as duas formas de futuro.",
+      videoUrl: "https://www.youtube.com/watch?v=oidJ0TOL6oM",
       readingTitle: "No ano passado, Tomás viajou para Lubumbashi pela primeira vez.",
       reading: [
         "Enquanto esperava o ônibus, encontrou um velho amigo da escola.",
@@ -82,6 +84,7 @@ Manter uma conversa. Mostre interesse: sério? Conte mais.
 
 Concordar e discordar educadamente. Eu concordo com você. É um bom ponto, mas eu acho que...`,
       videoTopic: "Praticar perguntas de acompanhamento em uma conversa real.",
+      videoUrl: "https://www.youtube.com/watch?v=QviLRRwIfb8",
       readingTitle: "Na sexta-feira passada, Paulo conheceu uma nova colega de trabalho chamada Clara.",
       reading: [
         "Ele perguntou, “De onde você é?” e ela disse que era de Goma.",
@@ -106,6 +109,7 @@ Concordar e discordar educadamente. Eu concordo com você. É um bom ponto, mas 
 
 Palavras conectivas. Adição: e, também. Contraste: mas, porém. Causa e efeito: porque, portanto.`,
       videoTopic: "Ver como as palavras conectivas unem ideias em um parágrafo.",
+      videoUrl: "https://www.youtube.com/watch?v=MXcovtPUyNE",
       readingTitle: "Por que Gosto de Ler",
       reading: [
         "Eu gosto de ler porque me ajuda a relaxar depois de um dia longo.",
@@ -133,6 +137,7 @@ Está certo pedir para alguém repetir: você pode repetir, por favor?
 
 Seguir direções. Vire à esquerda. Vire à direita. Siga em frente.`,
       videoTopic: "Praticar seguir direções faladas pela cidade.",
+      videoUrl: "https://www.youtube.com/watch?v=eX_TTO0KMsk",
       readingTitle: "Marie perguntou a um estranho o caminho para os correios.",
       reading: [
         "O homem disse, “Siga em frente, depois vire à esquerda no mercado.”",
@@ -158,6 +163,7 @@ Busca de informações significa procurar rapidamente uma informação específi
 
 Usar pistas do contexto. Você não precisa entender cada palavra para entender um texto.`,
       videoTopic: "Praticar a leitura rápida de um artigo curto para encontrar a ideia principal.",
+      videoUrl: "https://www.youtube.com/watch?v=gncbFC8Lqpc",
       readingTitle: "O Mercado de Kolwezi",
       reading: [
         "Todo sábado, centenas de pessoas se reúnem no mercado central de Kolwezi.",
@@ -188,6 +194,7 @@ Famílias de palavras. Ter sucesso, sucesso, bem-sucedido.
 
 Colocações são palavras que andam juntas. Tomar uma decisão. Tirar uma foto. Fazer a lição de casa.`,
       videoTopic: "Construir vocabulário através de sinônimos, antônimos e pares de palavras comuns.",
+      videoUrl: "https://www.youtube.com/watch?v=g28ERJqv138",
       readingTitle: "Construindo um Vocabulário Mais Amplo",
       reading: [
         "Aprender palavras novas todos os dias é uma das melhores formas de melhorar seu português rapidamente.",
@@ -214,6 +221,7 @@ Entonação. Perguntas de sim ou não geralmente sobem no final: você vem?
 
 Sons que se confundem com frequência. Caro versus carro.`,
       videoTopic: "Ouvir a diferença entre a entonação ascendente e descendente.",
+      videoUrl: "https://www.youtube.com/watch?v=SQH-Xv9i7aw",
       readingTitle: "Por que a Pronúncia Importa",
       reading: [
         "A boa gramática é importante, mas uma pronúncia clara ajuda as pessoas a te entenderem imediatamente.",
@@ -240,6 +248,7 @@ No aeroporto. Onde fica o balcão de check-in? Eu gostaria de um assento na jane
 
 Em uma entrevista de emprego. Fale sobre você. Quais são seus pontos fortes?`,
       videoTopic: "Praticar diálogos reais em um restaurante, aeroporto e entrevista de emprego.",
+      videoUrl: "https://www.youtube.com/watch?v=RaaLjEIFWAU",
       readingTitle: "A Entrevista de Emprego de Ana",
       reading: [
         "Ana chegou cedo para a entrevista de emprego e cumprimentou o gerente educadamente.",
@@ -267,6 +276,7 @@ Frases úteis para reuniões. Vamos começar. Você poderia esclarecer esse pont
 
 Vocabulário profissional. Prazo significa a data em que algo deve ser concluído.`,
       videoTopic: "Ver como se estrutura um e-mail profissional e uma conversa de reunião.",
+      videoUrl: "https://www.youtube.com/watch?v=fGWspM9MA4A",
       readingTitle: "A Primeira Semana de David em um Novo Emprego",
       reading: [
         "Durante sua primeira reunião, David ouviu sua gerente dizer, “Vamos começar.”",
@@ -293,6 +303,7 @@ Concordar e discordar formalmente. Eu concordo completamente com esse ponto. Ent
 
 Apoiar um argumento. Por exemplo... Pesquisas mostram que... Em conclusão, acredito que...`,
       videoTopic: "Ver um debate curto e respeitoso usando frases de opinião e argumento.",
+      videoUrl: "https://www.youtube.com/watch?v=PUh76LFZXdg",
       readingTitle: "Um Debate em Sala de Aula",
       reading: [
         "Na aula, os estudantes debateram se os celulares deveriam ser permitidos na escola.",
@@ -344,6 +355,7 @@ Exemplo de conversa da vida real.
 Oi, soube que você começou um novo emprego. Como está sendo?
 Está indo bem, obrigada! Eu estava nervosa no início, mas meus colegas são muito simpáticos.`,
       videoTopic: "Revisar todos os temas do Nível 2 através de uma conversa estendida.",
+      videoUrl: "https://www.youtube.com/watch?v=u15mgPYMKhU",
       readingTitle: "Um Ano de Progresso",
       reading: [
         "Há um ano, Patrick mal conseguia se apresentar em português.",

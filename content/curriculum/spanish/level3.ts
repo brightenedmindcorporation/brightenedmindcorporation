@@ -26,6 +26,7 @@ Segundo condicional, para algo poco probable o hipotético. Si tuviera más tiem
 
 Usos empresariales. Los condicionales son comunes en negociaciones y planificación.`,
       videoTopic: "Comparar el primer y el segundo condicional en una negociación empresarial.",
+      videoUrl: "https://www.youtube.com/watch?v=G2iihnuAsQE",
       readingTitle: "Una Negociación en la Empresa Brightened Mind",
       reading: [
         "Durante la reunión, el proveedor dijo, “Si pide más unidades, le ofreceremos un descuento.”",
@@ -52,6 +53,7 @@ Consejo y sugerencia. Deberías se usa para dar consejos. Deberías revisar los 
 
 Posibilidad. Podría y es posible que muestran que algo es posible pero no seguro.`,
       videoTopic: "Escuchar la diferencia entre obligación, consejo y posibilidad en el trabajo.",
+      videoUrl: "https://www.youtube.com/watch?v=gdZNvl7TKyY",
       readingTitle: "Preparativos para la Auditoría",
       reading: [
         "La gerente financiera dijo, “Debemos terminar los documentos de la auditoría antes del lunes.”",
@@ -81,6 +83,7 @@ Responder y llegar a un punto medio. Eso parece razonable, pero ¿también podr�
 
 Cerrar un trato. Creo que tenemos un acuerdo. Pongámoslo por escrito.`,
       videoTopic: "Ver una negociación completa desde el inicio hasta el cierre del trato.",
+      videoUrl: "https://www.youtube.com/watch?v=EJ1DFJntu2A",
       readingTitle: "Cerrando el Trato",
       reading: [
         "Dos empresas negociaron durante casi dos horas sobre el precio del nuevo equipo.",
@@ -107,6 +110,7 @@ Organizar tus puntos. Primero, explicaré... Luego, pasaré a... Finalmente, con
 
 Cerrar una presentación. Para resumir, los puntos clave son... Gracias por su atención. ¿Hay alguna pregunta?`,
       videoTopic: "Ver una presentación profesional corta y bien estructurada.",
+      videoUrl: "https://www.youtube.com/watch?v=nq8smHf6YZ0",
       readingTitle: "La Primera Presentación de Linda",
       reading: [
         "Linda estaba nerviosa antes de su primera presentación ante el equipo directivo.",
@@ -134,6 +138,7 @@ Pedir la palabra. ¿Puedo decir algo? Si puedo añadir... Disculpa que interrump
 
 Escribir actas de reunión. Las actas registran lo discutido y decidido.`,
       videoTopic: "Ver cómo se desarrolla una reunión formal de principio a fin.",
+      videoUrl: "https://www.youtube.com/watch?v=0xa5ZRX7B7Q",
       readingTitle: "La Reunión del Lunes",
       reading: [
         "A las 9 de la mañana, el líder del equipo dijo, “¿Empezamos?” y todos estuvieron de acuerdo.",
@@ -157,6 +162,7 @@ Escribir actas de reunión. Las actas registran lo discutido y decidido.`,
 
 Frases útiles. El propósito de este informe es... Los datos muestran que... Según estos resultados, recomendamos...`,
       videoTopic: "Ver cómo se organiza un informe empresarial desde la introducción hasta las recomendaciones.",
+      videoUrl: "https://www.youtube.com/watch?v=HATatgvgKAs",
       readingTitle: "Un Informe sobre la Satisfacción del Cliente",
       reading: [
         "El propósito de este informe es evaluar la satisfacción del cliente durante el último trimestre.",
@@ -184,6 +190,7 @@ Durante la llamada. ¿Podría repetir eso, por favor? Lo siento, la línea no se
 
 Terminar una llamada. Gracias por su tiempo. Le enviaré un correo para confirmar.`,
       videoTopic: "Escuchar una llamada profesional de principio a fin.",
+      videoUrl: "https://www.youtube.com/watch?v=6eJx4FPQSOQ",
       readingTitle: "Una Llamada a un Cliente",
       reading: [
         "“Hola, le habla Sara de la empresa Brightened Mind. Le llamo por su pedido reciente.”",
@@ -210,6 +217,7 @@ Intercambiar información de contacto. Fue un placer hablar contigo. ¿Podría t
 
 Temas seguros versus temas a evitar. Seguros: el trabajo, las tendencias del sector. A evitar: el salario, la política.`,
       videoTopic: "Ver una conversación informal natural en un evento de negocios.",
+      videoUrl: "https://www.youtube.com/watch?v=fw0fEIBNN30",
       readingTitle: "Conociendo a Alguien Nuevo en una Conferencia",
       reading: [
         "En la conferencia, Miguel se presentó a un desconocido que estaba cerca de la mesa de café.",
@@ -236,6 +244,7 @@ Sugerir soluciones. Una opción sería... Podríamos intentar... ¿Qué tal si..
 
 Tomar una decisión. Vayamos con esta opción. Hemos decidido seguir adelante con...`,
       videoTopic: "Ver a un equipo identificar un problema y acordar una solución juntos.",
+      videoUrl: "https://www.youtube.com/watch?v=mQjGXGLVU_A",
       readingTitle: "Un Problema de Entrega",
       reading: [
         "El equipo de logística dijo, “Hemos tenido un problema con el camión de reparto. El problema principal parece ser un fallo mecánico.”",
@@ -262,6 +271,7 @@ Frases útiles. ¿Podría ayudarme a entender cómo se hace esto normalmente en 
 
 Consejos para una comunicación clara. Habla con claridad y evita modismos complicados.`,
       videoTopic: "Ver cómo un equipo internacional se comunica con claridad entre culturas.",
+      videoUrl: "https://www.youtube.com/watch?v=HCaTtjFch6g",
       readingTitle: "Trabajando con un Equipo Internacional",
       reading: [
         "Cuando la empresa Brightened Mind empezó a trabajar con socios en el extranjero, el equipo notó algunas diferencias culturales.",
@@ -288,6 +298,7 @@ Dar retroalimentación. Realmente aprecio el esfuerzo que pusiste en esto.
 
 Liderar un equipo. Me gustaría delegarte esta tarea.`,
       videoTopic: "Ver a un gerente dar retroalimentación clara y respetuosa a un miembro del equipo.",
+      videoUrl: "https://www.youtube.com/watch?v=Ku2CcLh6ZiE",
       readingTitle: "Un Nuevo Líder de Equipo",
       reading: [
         "Cuando José se convirtió en líder de equipo, aprendió a delegar tareas en lugar de hacerlo todo él mismo.",
@@ -338,6 +349,7 @@ Ejemplo de conversación real.
 Buenos días. Gracias por unirse a esta llamada.
 Buenos días, encantado de estar aquí. Le llamo por la propuesta que envió.`,
       videoTopic: "Repasar todos los temas del Nivel 3 a través de una conversación de negocios completa.",
+      videoUrl: "https://www.youtube.com/watch?v=ougsRwg2ItA",
       readingTitle: "Completando el Programa",
       reading: [
         "Después de terminar los Niveles 1, 2 y 3, Chantal ahora puede dirigir reuniones, escribir informes profesionales y negociar con clientes internacionales con confianza.",

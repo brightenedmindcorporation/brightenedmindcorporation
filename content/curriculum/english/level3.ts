@@ -532,6 +532,7 @@ Safe topics versus topics to avoid.
 
 Safe topics include work, industry trends, the event itself, and travel. Topics to avoid include salary, politics, personal problems, and religion.`,
       videoTopic: "See a natural networking conversation at a business event.",
+      videoUrl: "https://www.youtube.com/watch?v=jZ8PIImWs5Q",
       readingTitle: "Meeting Someone New at a Conference",
       reading: [
         "At the conference, Michael introduced himself to a stranger standing near the coffee table.",
@@ -598,6 +599,7 @@ Making a decision.
 
 Let's go with this option. I think that's our best course of action. We've decided to move forward with...`,
       videoTopic: "Watch a team identify a problem and agree on a solution together.",
+      videoUrl: "https://www.youtube.com/watch?v=Ny3b8BAie3Y",
       readingTitle: "A Delivery Problem",
       reading: [
         "The logistics team said, “We've run into an issue with the delivery truck. The main problem seems to be a mechanical failure.”",
@@ -663,6 +665,7 @@ Tips for clear communication.
 
 Speak clearly and avoid complicated idioms. Check understanding with simple follow up questions. Be patient and respectful of different communication styles.`,
       videoTopic: "See how an international team communicates clearly across cultures.",
+      videoUrl: "https://www.youtube.com/watch?v=AuROwC6p2ws",
       readingTitle: "Working With an International Team",
       reading: [
         "When Brightened Mind Corporation started working with partners abroad, the team noticed some cultural differences.",
@@ -730,6 +733,7 @@ Leading a team.
 
 I'd like to delegate this task to you. Great job motivating the team this week. We all need to be accountable for our deadlines.`,
       videoTopic: "See a manager give clear, respectful feedback to a team member.",
+      videoUrl: "https://www.youtube.com/watch?v=0tSXSrtSl-k",
       readingTitle: "A New Team Leader",
       reading: [
         "When Joseph became team leader, he learned to delegate tasks instead of doing everything himself.",
@@ -797,6 +801,7 @@ Overall, it looks strong. If you could extend the delivery deadline by one week,
 That sounds reasonable. Let me check with my team and get back to you today.
 Perfect, thank you for your time. I look forward to working together.`,
       videoTopic: "Review all Level 3 topics through one complete business conversation.",
+      videoUrl: "https://www.youtube.com/watch?v=q9UjYpHp2Vk",
       readingTitle: "Completing the Program",
       reading: [
         "After finishing Levels 1, 2, and 3, Chantal can now confidently lead meetings, write professional reports, and negotiate with international clients.",

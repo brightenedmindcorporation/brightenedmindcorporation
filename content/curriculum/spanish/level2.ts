@@ -30,6 +30,7 @@ Concordancia. Un sujeto singular lleva un verbo singular: ella trabaja en un hos
 
 Errores comunes. Incorrecto: los niños juega afuera. Correcto: los niños juegan afuera.`,
       videoTopic: "Repasar la estructura de la oración y la concordancia con ejemplos.",
+      videoUrl: "https://www.youtube.com/watch?v=bDLN4XmBUZU",
       readingTitle: "Me llamo Grace.",
       reading: [
         "Ahora estoy estudiando español de nivel intermedio.",
@@ -56,6 +57,7 @@ El pretérito imperfecto se usa para una acción en progreso en el pasado. A las
 
 Futuro con ir a y el futuro simple. Voy a visitar París el año que viene. Creo que lloverá mañana.`,
       videoTopic: "Comparar el pretérito, el imperfecto y las dos formas de futuro.",
+      videoUrl: "https://www.youtube.com/watch?v=IE0duCvUMlg",
       readingTitle: "El año pasado, Tomás viajó a Lubumbashi por primera vez.",
       reading: [
         "Mientras esperaba el autobús, se encontró con un viejo amigo de la escuela.",
@@ -82,6 +84,7 @@ Mantener una conversación. Muestra interés: ¿en serio? Cuéntame más.
 
 Estar de acuerdo y en desacuerdo cortésmente. Estoy de acuerdo contigo. Es un buen punto, pero creo que...`,
       videoTopic: "Practicar preguntas de seguimiento en una conversación real.",
+      videoUrl: "https://www.youtube.com/watch?v=tBZ_sq3CJSM",
       readingTitle: "El viernes pasado, Pablo conoció a una nueva compañera de trabajo llamada Clara.",
       reading: [
         "Le preguntó, “¿De dónde eres?” y ella dijo que era de Goma.",
@@ -106,6 +109,7 @@ Estar de acuerdo y en desacuerdo cortésmente. Estoy de acuerdo contigo. Es un b
 
 Palabras conectoras. Adición: y, también. Contraste: pero, sin embargo. Causa y efecto: porque, por lo tanto.`,
       videoTopic: "Ver cómo las palabras conectoras unen ideas en un párrafo.",
+      videoUrl: "https://www.youtube.com/watch?v=HU5nH8i7Tbg",
       readingTitle: "Por Qué Me Gusta Leer",
       reading: [
         "Me gusta leer porque me ayuda a relajarme después de un día largo.",
@@ -133,6 +137,7 @@ Está bien pedirle a alguien que repita: ¿puedes repetir eso, por favor?
 
 Seguir direcciones. Gira a la izquierda. Gira a la derecha. Sigue derecho.`,
       videoTopic: "Practicar seguir direcciones habladas por la ciudad.",
+      videoUrl: "https://www.youtube.com/watch?v=u38aHc1525I",
       readingTitle: "Marie le preguntó a un desconocido cómo llegar a la oficina de correos.",
       reading: [
         "El hombre dijo, “Sigue derecho, luego gira a la izquierda en el mercado.”",
@@ -158,6 +163,7 @@ La búsqueda de datos significa buscar rápidamente información específica, co
 
 Usar pistas de contexto. No necesitas entender cada palabra para entender un texto.`,
       videoTopic: "Practicar la lectura rápida de un artículo corto para encontrar la idea principal.",
+      videoUrl: "https://www.youtube.com/watch?v=iR0-03DZJGI",
       readingTitle: "El Mercado de Kolwezi",
       reading: [
         "Cada sábado, cientos de personas se reúnen en el mercado central de Kolwezi.",
@@ -188,6 +194,7 @@ Familias de palabras. Tener éxito, éxito, exitoso, exitosamente.
 
 Colocaciones son palabras que van juntas. Tomar una decisión. Tomar una foto. Hacer la tarea.`,
       videoTopic: "Construir vocabulario a través de sinónimos, antónimos y pares de palabras comunes.",
+      videoUrl: "https://www.youtube.com/watch?v=DWTeDUleMp0",
       readingTitle: "Construyendo un Vocabulario Más Amplio",
       reading: [
         "Aprender palabras nuevas todos los días es una de las mejores formas de mejorar tu español rápidamente.",
@@ -214,6 +221,7 @@ Entonación. Las preguntas de sí o no suelen subir al final: ¿vienes?
 
 Sonidos que se confunden frecuentemente. Pero versus perro.`,
       videoTopic: "Escuchar la diferencia entre la entonación ascendente y descendente.",
+      videoUrl: "https://www.youtube.com/watch?v=H577slU01_Q",
       readingTitle: "Por Qué Importa la Pronunciación",
       reading: [
         "La buena gramática es importante, pero una pronunciación clara ayuda a la gente a entenderte de inmediato.",
@@ -240,6 +248,7 @@ En el aeropuerto. ¿Dónde está el mostrador de facturación? Quisiera un asien
 
 En una entrevista de trabajo. Hábleme de usted. ¿Cuáles son sus fortalezas?`,
       videoTopic: "Practicar diálogos reales en un restaurante, aeropuerto y entrevista de trabajo.",
+      videoUrl: "https://www.youtube.com/watch?v=u3pbPdgDi-0",
       readingTitle: "La Entrevista de Trabajo de Ana",
       reading: [
         "Ana llegó temprano a su entrevista de trabajo y saludó al gerente cortésmente.",
@@ -267,6 +276,7 @@ Frases útiles para reuniones. Empecemos. ¿Podría aclarar ese punto? Me gustar
 
 Vocabulario profesional. Plazo significa la fecha límite. Colega significa una persona con la que trabajas.`,
       videoTopic: "Ver cómo se estructura un correo profesional y una conversación de reunión.",
+      videoUrl: "https://www.youtube.com/watch?v=zcoYh0TZ-e8",
       readingTitle: "La Primera Semana de David en un Nuevo Trabajo",
       reading: [
         "Durante su primera reunión, David escuchó a su jefa decir, “Empecemos.”",
@@ -293,6 +303,7 @@ Estar de acuerdo y en desacuerdo formalmente. Estoy completamente de acuerdo con
 
 Apoyar un argumento. Por ejemplo... Los estudios muestran que... En conclusión, creo que...`,
       videoTopic: "Ver un debate corto y respetuoso usando frases de opinión y argumento.",
+      videoUrl: "https://www.youtube.com/watch?v=f3NsjctF100",
       readingTitle: "Un Debate en Clase",
       reading: [
         "En clase, los estudiantes debatieron si los teléfonos deberían permitirse en la escuela.",
@@ -344,6 +355,7 @@ Ejemplo de conversación de la vida real.
 Hola, me enteré de que empezaste un nuevo trabajo. ¿Cómo va?
 Va bien, ¡gracias! Estaba nerviosa al principio, pero mis colegas son muy amables.`,
       videoTopic: "Repasar todos los temas del Nivel 2 a través de una conversación extendida.",
+      videoUrl: "https://www.youtube.com/watch?v=SEefRHuXr0c",
       readingTitle: "Un Año de Progreso",
       reading: [
         "Hace un año, Patrick apenas podía presentarse en español.",
