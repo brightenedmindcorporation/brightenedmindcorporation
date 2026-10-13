@@ -66,6 +66,15 @@ export default function AdminPage() {
   const [messageAttachments, setMessageAttachments] = useState<File[]>([]);
   const [messageSending, setMessageSending] = useState(false);
 
+  // --- Sent messages management (view/edit/delete past broadcasts) ---
+  const [sentMessagesOpen, setSentMessagesOpen] = useState(false);
+  const [sentMessages, setSentMessages] = useState<any[]>([]);
+  const [sentMessagesLoading, setSentMessagesLoading] = useState(false);
+  const [editingSentMessageId, setEditingSentMessageId] = useState<string | null>(null);
+  const [editSentSubject, setEditSentSubject] = useState("");
+  const [editSentBody, setEditSentBody] = useState("");
+  const [sentMessageSaving, setSentMessageSaving] = useState(false);
+
   // --- Live sessions ---
   const [liveSessions, setLiveSessions] = useState<any[]>([]);
   const [liveLoading, setLiveLoading] = useState(false);
@@ -582,6 +591,67 @@ export default function AdminPage() {
       alert(`Erreur : ${error.message || error}`);
     } finally {
       setMessageSending(false);
+    }
+  };
+
+  const fetchSentMessages = async () => {
+    setSentMessagesLoading(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/sent-messages", {
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      const result = await response.json();
+      if (response.ok) setSentMessages(result.messages || []);
+    } catch (error) {
+      console.error("Error fetching sent messages:", error);
+    } finally {
+      setSentMessagesLoading(false);
+    }
+  };
+
+  const startEditSentMessage = (m: any) => {
+    setEditingSentMessageId(m.id);
+    setEditSentSubject(m.subject || "");
+    setEditSentBody(m.body || "");
+  };
+
+  const saveSentMessageEdit = async (id: string) => {
+    if (!editSentSubject.trim() || !editSentBody.trim()) return;
+    setSentMessageSaving(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/sent-messages/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ subject: editSentSubject, body: editSentBody }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setEditingSentMessageId(null);
+      fetchSentMessages();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setSentMessageSaving(false);
+    }
+  };
+
+  const deleteSentMessage = async (id: string) => {
+    if (!confirm("Retirer ce message ? Il disparaîtra aussi du tableau de bord des destinataires.")) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/sent-messages/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${idToken}` },
+      });
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(result.error || "Erreur serveur");
+      }
+      setSentMessages((prev) => prev.filter((m) => m.id !== id));
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
     }
   };
 
@@ -1599,12 +1669,21 @@ export default function AdminPage() {
               ))}
             </div>
 
-            <div className="mb-6">
+            <div className="mb-6 flex flex-wrap gap-3">
               <button
                 onClick={() => setMessageOpen(true)}
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
               >
                 <Mail size={15} /> Message aux étudiants
+              </button>
+              <button
+                onClick={() => {
+                  setSentMessagesOpen(true);
+                  fetchSentMessages();
+                }}
+                className="bg-surface-alt hover:bg-surface text-ink-soft hover:text-ink border border-line text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+              >
+                <SquarePen size={15} /> Messages envoyés
               </button>
             </div>
 
@@ -3177,6 +3256,91 @@ export default function AdminPage() {
                 {messageSending ? "Envoi…" : "Envoyer"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ================= SENT MESSAGES MODAL ================= */}
+      {sentMessagesOpen && (
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-bold text-ink flex items-center gap-2"><SquarePen size={18} /> Messages envoyés aux étudiants</h3>
+              <button onClick={() => setSentMessagesOpen(false)} className="text-ink-faint hover:text-ink"><X size={18} /></button>
+            </div>
+
+            {sentMessagesLoading ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface-alt text-ink-soft text-sm">Chargement…</div>
+            ) : sentMessages.length === 0 ? (
+              <div className="p-4 rounded-2xl border border-line bg-surface-alt text-ink-soft text-sm">Aucun message envoyé pour le moment.</div>
+            ) : (
+              <div className="space-y-3">
+                {sentMessages.map((m) => (
+                  <div key={m.id} className="p-4 rounded-2xl border border-line bg-surface-alt">
+                    {editingSentMessageId === m.id ? (
+                      <div className="space-y-2">
+                        <input
+                          type="text"
+                          value={editSentSubject}
+                          onChange={(e) => setEditSentSubject(e.target.value)}
+                          className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        />
+                        <textarea
+                          value={editSentBody}
+                          onChange={(e) => setEditSentBody(e.target.value)}
+                          rows={4}
+                          className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        />
+                        <div className="flex justify-end gap-2">
+                          <button
+                            onClick={() => setEditingSentMessageId(null)}
+                            className="text-xs font-semibold text-ink-soft hover:text-ink px-3 py-1.5"
+                          >
+                            Annuler
+                          </button>
+                          <button
+                            onClick={() => saveSentMessageEdit(m.id)}
+                            disabled={sentMessageSaving}
+                            className="text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 px-3 py-1.5 rounded-lg"
+                          >
+                            {sentMessageSaving ? "Enregistrement…" : "Enregistrer"}
+                          </button>
+                        </div>
+                        <p className="text-[11px] text-ink-faint">La modification met à jour la notification dans le tableau de bord des destinataires — l'email déjà envoyé ne peut pas être rappelé.</p>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm font-bold text-ink">{m.subject}</p>
+                          <span className="text-xs text-ink-faint shrink-0">
+                            {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" }) : ""}
+                          </span>
+                        </div>
+                        <p className="text-sm text-ink-soft mt-1 whitespace-pre-wrap line-clamp-3">{m.body}</p>
+                        <p className="text-xs text-ink-faint mt-2">
+                          {m.recipients?.length || 0} destinataire{(m.recipients?.length || 0) > 1 ? "s" : ""}
+                          {m.attachmentNames?.length ? ` · ${m.attachmentNames.join(", ")}` : ""}
+                        </p>
+                        <div className="flex gap-3 mt-3">
+                          <button
+                            onClick={() => startEditSentMessage(m)}
+                            className="text-xs font-bold text-red-500 hover:text-red-400"
+                          >
+                            Modifier
+                          </button>
+                          <button
+                            onClick={() => deleteSentMessage(m.id)}
+                            className="text-xs font-semibold text-ink-faint hover:text-red-500"
+                          >
+                            Supprimer
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}

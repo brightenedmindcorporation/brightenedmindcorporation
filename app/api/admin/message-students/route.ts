@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { isAdminConfigured, getAdminAuth } from "@/lib/firebase-admin";
-import { createNotification } from "@/lib/notifications";
+import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -55,18 +54,41 @@ export async function POST(request: Request) {
     }
 
     // Notification first — this is the channel guaranteed to work
-    // regardless of Resend's domain-verification status.
+    // regardless of Resend's domain-verification status. Each recipient's
+    // notification carries the same batchId as the adminMessages summary
+    // doc below, so the admin can later edit or delete this broadcast as
+    // one unit (editing/deleting every per-recipient notification too)
+    // instead of it being fire-and-forget.
+    const adminDb = getAdminDb();
+    const createdAt = new Date().toISOString();
+    const batchRef = adminDb.collection("adminMessages").doc();
+    const batchId = batchRef.id;
+
     await Promise.all(
       recipients.map((r) =>
-        createNotification({
-          audience: r.uid,
-          type: "admin-message",
-          title: subject,
-          message: body,
-          link: "/academy/dashboard",
-        }).catch((err) => console.error(`Error notifying ${r.uid} (non-fatal):`, err))
+        adminDb
+          .collection("notifications")
+          .add({
+            audience: r.uid,
+            type: "admin-message",
+            title: subject,
+            message: body,
+            link: "/academy/dashboard",
+            read: false,
+            createdAt,
+            batchId,
+          })
+          .catch((err) => console.error(`Error notifying ${r.uid} (non-fatal):`, err))
       )
     );
+
+    await batchRef.set({
+      subject,
+      body,
+      recipients,
+      attachmentNames: attachments.map((a) => a.filename),
+      createdAt,
+    });
 
     let emailWarning: string | null = null;
     if (process.env.RESEND_API_KEY) {
