@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BmLogo from "@/components/BmLogo";
-import { Lock, MessageSquarePlus, Paperclip, X } from "lucide-react";
+import { Lock, MessageSquarePlus, Paperclip, X, BookText } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AcademyHeader from "../components/AcademyHeader";
@@ -11,6 +11,7 @@ import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, type LiveSession } from "@/lib/academy/liveSessions";
+import { getVerbReference } from "@/content/verbs";
 
 interface Enrollment {
   langCode: string;
@@ -443,6 +444,15 @@ export default function Dashboard() {
                     ? new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })
                     : "Pas de live programmé"}
                 </div>
+              )}
+
+              {getVerbReference(activeEnrollment.langCode) && (
+                <button
+                  onClick={() => router.push(`/academy/${langSlug}/verbs`)}
+                  className="border border-line hover:border-red-600/50 text-ink-soft hover:text-ink font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                >
+                  <BookText size={16} /> Verbes
+                </button>
               )}
 
               <button
