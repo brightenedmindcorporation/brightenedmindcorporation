@@ -55,7 +55,7 @@ function buildCertificateDoc(opts: CertificateOpts): jsPDF {
 
   doc.setFont("courier", "bold");
   doc.setFontSize(13);
-  doc.text(`Certificate ID: ${certificateId}`, 148, 154, { align: "center" });
+  doc.text(`Matricule: ${certificateId}`, 148, 154, { align: "center" });
 
   doc.line(50, 172, 95, 172);
   doc.line(202, 172, 247, 172);

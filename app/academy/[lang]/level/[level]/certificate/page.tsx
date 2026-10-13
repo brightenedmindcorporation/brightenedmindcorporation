@@ -68,7 +68,11 @@ export default function CertificatePage() {
     }
 
     setAverage(totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0);
-    setCertificateId(getOrCreateCertificateId(langSlug, level, langCode));
+    // Le certificat doit porter le même matricule que celui remis à
+    // l'inscription, pas un identifiant distinct généré au hasard —
+    // repli sur l'ancien générateur seulement pour les tout vieux comptes
+    // sans matricule enregistré.
+    setCertificateId(enrollment.matricule || getOrCreateCertificateId(langSlug, level, langCode));
     setLoading(false);
   }, [router, langSlug, level, curriculum, langCode]);
 
@@ -108,7 +112,7 @@ export default function CertificatePage() {
                   <p><strong className="text-ink">Student:</strong> {studentName}</p>
                   <p><strong className="text-ink">Level:</strong> {curriculum?.levelTitle}</p>
                   <p><strong className="text-ink">Final Average:</strong> {average}%</p>
-                  <p><strong className="text-ink">Certificate ID:</strong> {certificateId}</p>
+                  <p><strong className="text-ink">Matricule:</strong> {certificateId}</p>
                   <p className="text-emerald-400 font-bold mt-3 flex items-center gap-2"><CheckCircle2 size={16} /> Eligible for Certificate</p>
                 </div>
 

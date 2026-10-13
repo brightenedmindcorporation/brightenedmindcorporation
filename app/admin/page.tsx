@@ -144,6 +144,7 @@ export default function AdminPage() {
   const [certGenerateOpen, setCertGenerateOpen] = useState(false);
   const [certName, setCertName] = useState("");
   const [certEmail, setCertEmail] = useState("");
+  const [certMatricule, setCertMatricule] = useState("");
   const [certLangCode, setCertLangCode] = useState(availableLanguages[0].code);
   const [certLevel, setCertLevel] = useState("1");
   const [certLevelTitle, setCertLevelTitle] = useState("");
@@ -693,7 +694,10 @@ export default function AdminPage() {
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const year = new Date().getFullYear();
-      const certificateId = `BMCA-${certLangCode}-L${certLevel}-${year}-${Math.floor(Math.random() * 100000)}`;
+      // Utilise le vrai matricule de l'étudiant quand il est connu — un
+      // certificat doit porter le même identifiant que son inscription,
+      // pas un numéro distinct inventé pour l'occasion.
+      const certificateId = certMatricule.trim() || `BMCA-${certLangCode}-L${certLevel}-${year}-${Math.floor(Math.random() * 100000)}`;
       const average = Number(certAverage) || 0;
       const levelTitle = certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`;
 
@@ -719,6 +723,7 @@ export default function AdminPage() {
       setCertGenerateOpen(false);
       setCertName("");
       setCertEmail("");
+      setCertMatricule("");
       setCertLevelTitle("");
       setCertAverage("100");
       fetchCertificates();
@@ -3117,6 +3122,14 @@ export default function AdminPage() {
               onChange={(e) => setCertEmail(e.target.value)}
               className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
             />
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Matricule de l'étudiant (recommandé)</label>
+            <input
+              value={certMatricule}
+              onChange={(e) => setCertMatricule(e.target.value)}
+              placeholder="BMCA-EN-2026-004"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-1 focus:outline-none focus:border-red-600/60"
+            />
+            <p className="text-xs text-ink-faint mb-4">Le même matricule que celui remis à l'inscription (onglet Étudiants). Laissé vide, un numéro est généré automatiquement.</p>
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Langue</label>
@@ -3172,7 +3185,7 @@ export default function AdminPage() {
                     studentName: certName.trim() || "Nom de l'étudiant",
                     levelTitle: certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`,
                     average: Number(certAverage) || 0,
-                    certificateId: "APERÇU",
+                    certificateId: certMatricule.trim() || "APERÇU",
                   })
                 }
                 className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
