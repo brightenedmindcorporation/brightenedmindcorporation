@@ -152,13 +152,24 @@ function VideoCard({ lesson }: { lesson: Lesson }) {
     <Card>
       <CardTitle icon={PlayCircle}>Video</CardTitle>
       {embedUrl ? (
-        <div className="mt-4 aspect-video rounded-2xl overflow-hidden border border-line bg-black">
+        <div
+          className="mt-4 aspect-video rounded-2xl overflow-hidden border border-line bg-black"
+          onContextMenu={(e) => e.preventDefault()}
+        >
           <iframe
             src={embedUrl}
             className="w-full h-full"
             title={lesson.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
             allowFullScreen
+            // Deliberately omits allow-popups and allow-top-navigation: the
+            // player's own "watch on YouTube"/channel-logo links try to open
+            // youtube.com via window.open()/top navigation, and without
+            // those tokens the browser silently blocks it instead of
+            // leaving the lesson — the closest thing to hiding that link
+            // an iframe embed allows (the underlying URL is still visible
+            // to anyone opening devtools, which no embed can prevent).
+            sandbox="allow-scripts allow-same-origin allow-presentation"
           />
         </div>
       ) : (
