@@ -13,6 +13,7 @@ export async function POST(request: Request) {
 
     const form = await request.formData();
     const idToken = form.get("idToken")?.toString();
+    const from = form.get("from")?.toString();
     const threadId = form.get("threadId")?.toString();
     const to = form.get("to")?.toString();
     const subject = form.get("subject")?.toString();
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
       });
     }
 
-    await sendGmailReply({ threadId, to, subject, body, inReplyToMessageId, references, attachments });
+    await sendGmailReply({ from, threadId, to, subject, body, inReplyToMessageId, references, attachments });
     return NextResponse.json({ status: "success" });
   } catch (error: any) {
     console.error("Error sending Gmail reply:", error);

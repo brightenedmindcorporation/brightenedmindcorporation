@@ -52,6 +52,8 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
   { id: "trash", label: "Corbeille" },
 ];
 
+const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
+
 type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates";
 
 export default function AdminPage() {
@@ -199,6 +201,8 @@ export default function AdminPage() {
   const [mailReplySending, setMailReplySending] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
   const [composeTo, setComposeTo] = useState("");
+  const [composeFrom, setComposeFrom] = useState(MAIL_SENDERS[0]);
+  const [replyFrom, setReplyFrom] = useState(MAIL_SENDERS[0]);
   const [composeSubject, setComposeSubject] = useState("");
   const [composeBody, setComposeBody] = useState("");
   const [composeAttachments, setComposeAttachments] = useState<File[]>([]);
@@ -1108,6 +1112,8 @@ export default function AdminPage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
       setSelectedMail(result.message);
+      const receivedOn = String(result.message?.to || "").toLowerCase();
+      setReplyFrom(MAIL_SENDERS.find((a) => receivedOn.includes(a)) || MAIL_SENDERS[0]);
       setMailMessages((prev) => prev.map((m) => (m.id === id ? { ...m, unread: false } : m)));
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -1125,6 +1131,7 @@ export default function AdminPage() {
       const to = fromMatch ? fromMatch[1] : selectedMail.from;
       const form = new FormData();
       form.append("idToken", idToken || "");
+      form.append("from", replyFrom);
       form.append("threadId", selectedMail.threadId);
       form.append("to", to);
       form.append("subject", selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`);
@@ -1214,6 +1221,7 @@ export default function AdminPage() {
       const idToken = await auth.currentUser?.getIdToken();
       const form = new FormData();
       form.append("idToken", idToken || "");
+      form.append("from", composeFrom);
       form.append("to", composeTo);
       form.append("subject", composeSubject);
       form.append("body", composeBody);
@@ -3210,6 +3218,18 @@ export default function AdminPage() {
                         )}
 
                         <div className="mt-6 pt-4 border-t border-line">
+                          <div className="flex items-center gap-2 mb-3">
+                            <label className="text-xs font-semibold text-ink-soft shrink-0">De</label>
+                            <select
+                              value={replyFrom}
+                              onChange={(e) => setReplyFrom(e.target.value)}
+                              className="flex-1 bg-surface-alt border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            >
+                              {MAIL_SENDERS.map((a) => (
+                                <option key={a} value={a}>{a}</option>
+                              ))}
+                            </select>
+                          </div>
                           <label className="block text-xs font-semibold text-ink-soft mb-1.5">Répondre à {parseFromHeader(selectedMail.from).name}</label>
                           <textarea
                             value={mailReplyBody}
@@ -3532,6 +3552,16 @@ export default function AdminPage() {
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Nouveau message</h3>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">De</label>
+            <select
+              value={composeFrom}
+              onChange={(e) => setComposeFrom(e.target.value)}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            >
+              {MAIL_SENDERS.map((a) => (
+                <option key={a} value={a}>{a}</option>
+              ))}
+            </select>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">À</label>
             <input
               type="email"

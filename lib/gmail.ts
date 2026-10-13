@@ -276,7 +276,21 @@ function encodeSubject(subject: string): string {
   return /^[\x20-\x7e]*$/.test(subject) ? subject : `=?UTF-8?B?${Buffer.from(subject, "utf-8").toString("base64")}?=`;
 }
 
+/** Addresses the admin may send from. The Gmail account itself, plus the
+ * professional alias (must be added in Gmail → "Send mail as", otherwise
+ * Gmail silently rewrites From back to the account address). */
+export const MAIL_SENDERS: { email: string; name: string }[] = [
+  { email: ADMIN_EMAIL, name: "BM Corporation" },
+  { email: "info@bmcorporation-cd.com", name: "BM Corporation" },
+];
+
+function fromHeader(from?: string): string {
+  const sender = MAIL_SENDERS.find((s) => s.email.toLowerCase() === from?.trim().toLowerCase());
+  return sender ? `${sender.name} <${sender.email}>` : ADMIN_EMAIL;
+}
+
 function buildRawMessage(opts: {
+  from?: string;
   to: string;
   cc?: string;
   bcc?: string;
@@ -286,7 +300,7 @@ function buildRawMessage(opts: {
   references?: string;
   attachments?: GmailAttachment[];
 }): string {
-  const headers = [`From: ${ADMIN_EMAIL}`, `To: ${opts.to}`];
+  const headers = [`From: ${fromHeader(opts.from)}`, `To: ${opts.to}`];
   if (opts.cc?.trim()) headers.push(`Cc: ${opts.cc.trim()}`);
   if (opts.bcc?.trim()) headers.push(`Bcc: ${opts.bcc.trim()}`);
   headers.push(`Subject: ${encodeSubject(opts.subject)}`, "MIME-Version: 1.0");
@@ -330,6 +344,7 @@ function buildRawMessage(opts: {
  * threaded both in the recipient's inbox and in the BM Corporation Sent
  * folder — unlike a Resend-sent email, this really is sent from Gmail. */
 export async function sendGmailReply(opts: {
+  from?: string;
   threadId: string;
   to: string;
   subject: string;
@@ -348,6 +363,7 @@ export async function sendGmailReply(opts: {
 
 /** Sends a brand-new (non-reply) email from the BM Corporation Gmail account. */
 export async function sendGmailMessage(opts: {
+  from?: string;
   to: string;
   cc?: string;
   bcc?: string;
