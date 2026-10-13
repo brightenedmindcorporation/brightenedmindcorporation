@@ -1112,8 +1112,7 @@ export default function AdminPage() {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
       setSelectedMail(result.message);
-      const receivedOn = String(result.message?.to || "").toLowerCase();
-      setReplyFrom(MAIL_SENDERS.find((a) => receivedOn.includes(a)) || MAIL_SENDERS[0]);
+      setReplyFrom(MAIL_SENDERS[0]);
       setMailMessages((prev) => prev.map((m) => (m.id === id ? { ...m, unread: false } : m)));
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -1158,6 +1157,7 @@ export default function AdminPage() {
     setComposeSubject(prefillSubject);
     setComposeBody(prefillBody);
     setComposeAttachments([]);
+    setComposeFrom(MAIL_SENDERS[0]);
     setComposeCc("");
     setComposeBcc("");
     setComposeShowCc(false);
