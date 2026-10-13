@@ -1,5 +1,6 @@
 import "server-only";
 import jwt from "jsonwebtoken";
+import { createPrivateKey } from "crypto";
 
 /**
  * Signs a JaaS (8x8) Jitsi JWT so moderator status is explicit in the
@@ -41,6 +42,21 @@ function getPrivateKey(): string {
   return raw;
 }
 
+/** Validates the key up front so a badly pasted value produces an
+ * actionable message instead of jsonwebtoken's cryptic "must be an
+ * asymmetric key when using RS256". */
+function getValidatedPrivateKey(): string {
+  const key = getPrivateKey();
+  try {
+    createPrivateKey(key);
+  } catch {
+    throw new Error(
+      "La clé privée JaaS (JAAS_PRIVATE_KEY) est mal collée sur le serveur. Remplacez-la par la version base64 sur une seule ligne."
+    );
+  }
+  return key;
+}
+
 export function generateJaasToken({
   appId,
   name,
@@ -79,5 +95,5 @@ export function generateJaasToken({
     },
   };
 
-  return jwt.sign(payload, getPrivateKey(), { algorithm: "RS256", header: { alg: "RS256", kid: keyId } });
+  return jwt.sign(payload, getValidatedPrivateKey(), { algorithm: "RS256", header: { alg: "RS256", kid: keyId } });
 }

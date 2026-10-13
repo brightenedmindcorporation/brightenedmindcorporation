@@ -1,18 +1,22 @@
 import jsPDF from "jspdf";
 import { addWatermark, loadLogo } from "./pdfBranding";
+import { getCachedDocumentSettings, type DocumentSettings } from "./documentSettings";
 
 export interface CertificateOpts {
   studentName: string;
   levelTitle: string;
   average: number;
   certificateId: string;
+  /** Override the saved wording (used by the admin editor's live preview). */
+  settings?: DocumentSettings;
 }
 
 /** Builds (but does not save or output) the certificate PDF — shared by
  * download, preview and anything else that needs the raw jsPDF document. */
 async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
   const { studentName, levelTitle, average, certificateId } = opts;
-  const logo = await loadLogo();
+  const logo = await loadLogo(); // also refreshes the saved wording
+  const cfg = opts.settings ?? getCachedDocumentSettings();
   const doc = new jsPDF("landscape", "mm", "a4");
   const date = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
@@ -31,21 +35,21 @@ async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
   doc.setFont("times", "bold");
   doc.setTextColor(150, 0, 0);
   doc.setFontSize(20);
-  doc.text("BRIGHTENED MIND CORPORATION", 148, 44, { align: "center" });
+  doc.text(cfg.companyName.toUpperCase(), 148, 44, { align: "center" });
   doc.setFont("times", "italic");
   doc.setFontSize(13);
   doc.setTextColor(60, 60, 60);
-  doc.text("Département Academia", 148, 51, { align: "center" });
+  doc.text(cfg.department, 148, 51, { align: "center" });
 
   doc.setFont("times", "bold");
   doc.setTextColor(150, 0, 0);
   doc.setFontSize(19);
-  doc.text("CERTIFICATE OF ACHIEVEMENT", 148, 63, { align: "center" });
+  doc.text(cfg.certificateTitle, 148, 63, { align: "center" });
 
   doc.setFont("times", "normal");
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
-  doc.text("This certificate is proudly presented to", 148, 75, { align: "center" });
+  doc.text(cfg.presentedToText, 148, 75, { align: "center" });
 
   doc.setFont("times", "bold");
   doc.setFontSize(28);
@@ -55,7 +59,7 @@ async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
   doc.setFont("times", "normal");
   doc.setFontSize(14);
   doc.setTextColor(0, 0, 0);
-  doc.text("for successfully completing", 148, 105, { align: "center" });
+  doc.text(cfg.completionText, 148, 105, { align: "center" });
 
   doc.setFont("times", "bold");
   doc.setFontSize(20);
@@ -63,25 +67,26 @@ async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
 
   doc.setFont("times", "normal");
   doc.setFontSize(14);
-  doc.text(`Final Average: ${average}%`, 148, 131, { align: "center" });
-  doc.text(`Issued on ${date}`, 148, 141, { align: "center" });
+  doc.text(`${cfg.averageLabel}: ${average}%`, 148, 131, { align: "center" });
+  doc.text(`${cfg.issuedLabel} ${date}`, 148, 141, { align: "center" });
 
   doc.setFont("courier", "bold");
   doc.setFontSize(13);
-  doc.text(`Matricule: ${certificateId}`, 148, 153, { align: "center" });
+  doc.text(`${cfg.idLabel}: ${certificateId}`, 148, 153, { align: "center" });
 
   doc.line(50, 172, 95, 172);
   doc.line(202, 172, 247, 172);
 
   doc.setFont("times", "bold");
   doc.setFontSize(13);
-  doc.text("Jordi MUKOSA", 60, 180);
-  doc.text("Jacques RACIAL", 208, 180);
+  // Names/roles are centred under each signature line (x 72.5 and 224.5).
+  doc.text(cfg.signatory1.name, 72.5, 180, { align: "center" });
+  doc.text(cfg.signatory2.name, 224.5, 180, { align: "center" });
 
   doc.setFont("times", "italic");
   doc.setFontSize(11);
-  doc.text("Director", 67, 186);
-  doc.text("Academic Supervisor", 205, 186);
+  doc.text(cfg.signatory1.role, 72.5, 186, { align: "center" });
+  doc.text(cfg.signatory2.role, 224.5, 186, { align: "center" });
 
   return doc;
 }

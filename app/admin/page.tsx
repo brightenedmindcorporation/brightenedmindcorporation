@@ -37,6 +37,7 @@ import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
 import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
+import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
 
 export const dynamic = "force-dynamic";
 
@@ -163,6 +164,9 @@ export default function AdminPage() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const [certificatesLoading, setCertificatesLoading] = useState(false);
   const [certGenerateOpen, setCertGenerateOpen] = useState(false);
+  const [docSettings, setDocSettings] = useState<DocumentSettings>(DEFAULT_DOCUMENT_SETTINGS);
+  const [docSettingsOpen, setDocSettingsOpen] = useState(false);
+  const [docSettingsSaving, setDocSettingsSaving] = useState(false);
   const [certName, setCertName] = useState("");
   const [certEmail, setCertEmail] = useState("");
   const [certMatricule, setCertMatricule] = useState("");
@@ -707,6 +711,26 @@ export default function AdminPage() {
     }
   };
 
+  const saveDocSettings = async () => {
+    setDocSettingsSaving(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/document-settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, settings: docSettings }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      setDocSettings(result.settings);
+      alert("Modèle du certificat enregistré. Il s'applique aux prochains PDF générés.");
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setDocSettingsSaving(false);
+    }
+  };
+
   const fetchCertificates = async (silent = false) => {
     if (!silent) setCertificatesLoading(true);
     try {
@@ -814,7 +838,7 @@ export default function AdminPage() {
     }
   };
 
-  const openCertificatePreview = async (opts: { studentName: string; levelTitle: string; average: number; certificateId: string }) => {
+  const openCertificatePreview = async (opts: { studentName: string; levelTitle: string; average: number; certificateId: string; settings?: DocumentSettings }) => {
     if (certPreviewUrl) URL.revokeObjectURL(certPreviewUrl);
     setCertPreviewUrl(await getCertificatePreviewUrl(opts));
   };
@@ -1299,6 +1323,7 @@ export default function AdminPage() {
     if (tab === "requests" && studentRequests.length === 0) fetchStudentRequests();
     if (tab === "progress" && progressList.length === 0) fetchProgress();
     if (tab === "certificates" && certificates.length === 0) fetchCertificates();
+    if (tab === "certificates") loadDocumentSettings().then(setDocSettings);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authorized, tab]);
 
@@ -2781,6 +2806,160 @@ export default function AdminPage() {
               >
                 <Trophy size={15} /> Générer un certificat
               </button>
+            </div>
+
+            <div className="mb-6 rounded-2xl border border-line bg-surface">
+              <button
+                onClick={() => setDocSettingsOpen((o) => !o)}
+                className="w-full flex items-center justify-between px-5 py-4 text-left"
+              >
+                <span>
+                  <span className="block font-bold text-ink">Modèle du certificat (modifier tous les textes)</span>
+                  <span className="block text-xs text-ink-soft mt-0.5">
+                    Nom de l'entreprise, signataires, intitulés, libellé de l'identifiant… Appliqué à tous les nouveaux PDF.
+                  </span>
+                </span>
+                <span className="text-xs font-bold text-red-500 shrink-0 ml-4">{docSettingsOpen ? "Fermer" : "Modifier"}</span>
+              </button>
+              {docSettingsOpen && (
+                <div className="px-5 pb-5 space-y-5 border-t border-line pt-5">
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Nom de l'entreprise</label>
+                      <input
+                        value={docSettings.companyName}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, companyName: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Département / sous-titre</label>
+                      <input
+                        value={docSettings.department}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, department: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Titre du certificat</label>
+                      <input
+                        value={docSettings.certificateTitle}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, certificateTitle: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de l'identifiant (ex. Student ID)</label>
+                      <input
+                        value={docSettings.idLabel}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, idLabel: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Texte « décerné à »</label>
+                      <input
+                        value={docSettings.presentedToText}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, presentedToText: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Texte « pour avoir réussi »</label>
+                      <input
+                        value={docSettings.completionText}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, completionText: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de la moyenne</label>
+                      <input
+                        value={docSettings.averageLabel}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, averageLabel: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de la date</label>
+                      <input
+                        value={docSettings.issuedLabel}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, issuedLabel: e.target.value }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    <div className="space-y-3">
+                      <p className="text-xs font-bold text-ink uppercase tracking-wide">Signature de gauche</p>
+                      <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Nom</label>
+                      <input
+                        value={docSettings.signatory1.name}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, signatory1: { ...d.signatory1, name: e.target.value } }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                      <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Fonction</label>
+                      <input
+                        value={docSettings.signatory1.role}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, signatory1: { ...d.signatory1, role: e.target.value } }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    </div>
+                    <div className="space-y-3">
+                      <p className="text-xs font-bold text-ink uppercase tracking-wide">Signature de droite</p>
+                      <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Nom</label>
+                      <input
+                        value={docSettings.signatory2.name}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, signatory2: { ...d.signatory2, name: e.target.value } }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                      <div>
+                      <label className="block text-xs font-semibold text-ink-soft mb-1">Fonction</label>
+                      <input
+                        value={docSettings.signatory2.role}
+                        onChange={(e) => setDocSettings((d) => ({ ...d, signatory2: { ...d.signatory2, role: e.target.value } }))}
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      />
+                    </div>
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={saveDocSettings}
+                      disabled={docSettingsSaving}
+                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
+                    >
+                      {docSettingsSaving ? "Enregistrement…" : "Enregistrer"}
+                    </button>
+                    <button
+                      onClick={() =>
+                        openCertificatePreview({
+                          studentName: "Nom de l'étudiant",
+                          levelTitle: "Level 1 - Beginner English",
+                          average: 85,
+                          certificateId: "BMCA-EN-2026-0001",
+                          settings: docSettings,
+                        })
+                      }
+                      className="bg-surface-alt hover:bg-surface text-ink-soft font-bold text-sm px-4 py-2.5 rounded-xl border border-line transition"
+                    >
+                      Aperçu avec ces textes
+                    </button>
+                    <button
+                      onClick={() => setDocSettings(DEFAULT_DOCUMENT_SETTINGS)}
+                      className="text-xs font-semibold text-ink-soft hover:text-ink"
+                    >
+                      Remettre les textes d'origine
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             {certificatesLoading ? (

@@ -1,4 +1,5 @@
 import jsPDF from "jspdf";
+import { getCachedDocumentSettings, loadDocumentSettings } from "./documentSettings";
 
 // Shared branding for every PDF the site generates (verb references,
 // certificates): company logo + "Brightened Mind Corporation / Département
@@ -17,7 +18,11 @@ let logoCache: Promise<LoadedImage> | null = null;
 
 // The source logo is a ~400 KB, 1300 px PNG — redrawn at a modest size so
 // each generated PDF doesn't carry the full-resolution file.
-export function loadLogo(maxSize = 480): Promise<LoadedImage> {
+export async function loadLogo(maxSize = 480): Promise<LoadedImage> {
+  // Every PDF builder calls loadLogo() first, so this is also where the
+  // editable wording (company name, department…) is refreshed for the
+  // header below.
+  await loadDocumentSettings();
   if (!logoCache) {
     logoCache = new Promise((resolve, reject) => {
       const img = new Image();
@@ -66,11 +71,12 @@ export function addBrandHeader(doc: jsPDF, logo: LoadedImage, title?: string, ac
   doc.setFont("helvetica", "bold");
   doc.setFontSize(14);
   doc.setTextColor(35, 31, 29);
-  doc.text("Brightened Mind Corporation", textX, 15);
+  const brand = getCachedDocumentSettings();
+  doc.text(brand.companyName, textX, 15);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10.5);
   doc.setTextColor(...accent);
-  doc.text("Département Academia", textX, 21);
+  doc.text(brand.department, textX, 21);
 
   if (title) {
     doc.setFontSize(9.5);
