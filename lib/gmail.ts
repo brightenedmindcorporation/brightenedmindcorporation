@@ -115,19 +115,50 @@ export interface GmailMessageSummary {
   id: string;
   threadId: string;
   from: string;
+  to: string;
   subject: string;
   snippet: string;
   date: string;
   unread: boolean;
+  starred: boolean;
 }
 
-export async function listInboxMessages(maxResults = 25): Promise<GmailMessageSummary[]> {
+export type MailFolder = "inbox" | "sent" | "starred" | "drafts" | "spam" | "trash" | "all";
+
+const FOLDER_LABEL: Record<Exclude<MailFolder, "all">, string> = {
+  inbox: "INBOX",
+  sent: "SENT",
+  starred: "STARRED",
+  drafts: "DRAFT",
+  spam: "SPAM",
+  trash: "TRASH",
+};
+
+export interface MailListResult {
+  messages: GmailMessageSummary[];
+  nextPageToken: string | null;
+  unreadInbox: number;
+}
+
+export async function listMessages(opts: {
+  folder?: MailFolder;
+  query?: string;
+  pageToken?: string;
+  maxResults?: number;
+}): Promise<MailListResult> {
+  const { folder = "inbox", query, pageToken, maxResults = 25 } = opts;
   const gmail = await getGmailClient();
   const list = await gmail.users.messages.list({
     userId: "me",
     maxResults,
-    labelIds: ["INBOX"],
+    pageToken: pageToken || undefined,
+    q: query?.trim() || undefined,
+    labelIds: folder === "all" ? undefined : [FOLDER_LABEL[folder]],
+    // "Tous les messages" excludes spam and trash, like Gmail's own All Mail.
+    includeSpamTrash: false,
   });
+
+  const unreadInbox = (await gmail.users.labels.get({ userId: "me", id: "INBOX" })).data.messagesUnread ?? 0;
 
   const messages = list.data.messages || [];
   const details = await Promise.all(
@@ -136,27 +167,64 @@ export async function listInboxMessages(maxResults = 25): Promise<GmailMessageSu
         userId: "me",
         id: m.id!,
         format: "metadata",
-        metadataHeaders: ["From", "Subject", "Date"],
+        metadataHeaders: ["From", "To", "Subject", "Date"],
       })
     )
   );
 
-  return details.map((res) => {
-    const headers = res.data.payload?.headers || [];
-    return {
-      id: res.data.id!,
-      threadId: res.data.threadId!,
-      from: headerValue(headers, "From"),
-      subject: headerValue(headers, "Subject") || "(sans sujet)",
-      snippet: res.data.snippet || "",
-      date: headerValue(headers, "Date"),
-      unread: (res.data.labelIds || []).includes("UNREAD"),
-    };
-  });
+  return {
+    messages: details.map((res) => {
+      const headers = res.data.payload?.headers || [];
+      const labels = res.data.labelIds || [];
+      return {
+        id: res.data.id!,
+        threadId: res.data.threadId!,
+        from: headerValue(headers, "From"),
+        to: headerValue(headers, "To"),
+        subject: headerValue(headers, "Subject") || "(sans sujet)",
+        snippet: res.data.snippet || "",
+        date: headerValue(headers, "Date"),
+        unread: labels.includes("UNREAD"),
+        starred: labels.includes("STARRED"),
+      };
+    }),
+    nextPageToken: list.data.nextPageToken || null,
+    unreadInbox,
+  };
+}
+
+export type MailAction = "read" | "unread" | "star" | "unstar" | "archive" | "trash" | "untrash" | "spam" | "notspam";
+
+/** Applies one mailbox action to a message — the same operations Gmail's
+ * own toolbar offers. (Permanent deletion needs a broader Gmail scope than
+ * this app holds; "trash" is Gmail's own delete and purges after 30 days.) */
+export async function applyMailAction(id: string, action: MailAction): Promise<void> {
+  const gmail = await getGmailClient();
+  if (action === "trash") {
+    await gmail.users.messages.trash({ userId: "me", id });
+    return;
+  }
+  if (action === "untrash") {
+    await gmail.users.messages.untrash({ userId: "me", id });
+    await gmail.users.messages.modify({ userId: "me", id, requestBody: { addLabelIds: ["INBOX"] } });
+    return;
+  }
+  const changes: Record<Exclude<MailAction, "trash" | "untrash">, { add?: string[]; remove?: string[] }> = {
+    read: { remove: ["UNREAD"] },
+    unread: { add: ["UNREAD"] },
+    star: { add: ["STARRED"] },
+    unstar: { remove: ["STARRED"] },
+    archive: { remove: ["INBOX"] },
+    spam: { add: ["SPAM"], remove: ["INBOX"] },
+    notspam: { add: ["INBOX"], remove: ["SPAM"] },
+  };
+  const { add, remove } = changes[action];
+  await gmail.users.messages.modify({ userId: "me", id, requestBody: { addLabelIds: add, removeLabelIds: remove } });
 }
 
 export interface GmailMessageDetail extends GmailMessageSummary {
-  to: string;
+  cc: string;
+  folderLabels: string[];
   body: string;
   attachments: GmailAttachmentMeta[];
 }
@@ -176,10 +244,13 @@ export async function getMessageDetail(id: string): Promise<GmailMessageDetail> 
     threadId: res.data.threadId!,
     from: headerValue(headers, "From"),
     to: headerValue(headers, "To"),
+    cc: headerValue(headers, "Cc"),
     subject: headerValue(headers, "Subject") || "(sans sujet)",
     snippet: res.data.snippet || "",
     date: headerValue(headers, "Date"),
     unread: false,
+    starred: (res.data.labelIds || []).includes("STARRED"),
+    folderLabels: res.data.labelIds || [],
     body: extractBody(res.data.payload),
     attachments: extractAttachmentMeta(res.data.payload),
   };
@@ -200,15 +271,25 @@ export interface GmailAttachment {
   content: Buffer;
 }
 
+// RFC 2047: a non-ASCII Subject must be encoded or accents arrive garbled.
+function encodeSubject(subject: string): string {
+  return /^[\x20-\x7e]*$/.test(subject) ? subject : `=?UTF-8?B?${Buffer.from(subject, "utf-8").toString("base64")}?=`;
+}
+
 function buildRawMessage(opts: {
   to: string;
+  cc?: string;
+  bcc?: string;
   subject: string;
   body: string;
   inReplyToMessageId?: string;
   references?: string;
   attachments?: GmailAttachment[];
 }): string {
-  const headers = [`From: ${ADMIN_EMAIL}`, `To: ${opts.to}`, `Subject: ${opts.subject}`, "MIME-Version: 1.0"];
+  const headers = [`From: ${ADMIN_EMAIL}`, `To: ${opts.to}`];
+  if (opts.cc?.trim()) headers.push(`Cc: ${opts.cc.trim()}`);
+  if (opts.bcc?.trim()) headers.push(`Bcc: ${opts.bcc.trim()}`);
+  headers.push(`Subject: ${encodeSubject(opts.subject)}`, "MIME-Version: 1.0");
   if (opts.inReplyToMessageId) headers.push(`In-Reply-To: ${opts.inReplyToMessageId}`);
   if (opts.references) headers.push(`References: ${opts.references}`);
 
@@ -268,6 +349,8 @@ export async function sendGmailReply(opts: {
 /** Sends a brand-new (non-reply) email from the BM Corporation Gmail account. */
 export async function sendGmailMessage(opts: {
   to: string;
+  cc?: string;
+  bcc?: string;
   subject: string;
   body: string;
   attachments?: GmailAttachment[];

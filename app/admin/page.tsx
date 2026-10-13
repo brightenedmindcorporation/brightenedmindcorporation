@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
   RefreshCw,
@@ -20,6 +20,13 @@ import {
   BellRing,
   Trophy,
   Download,
+  Star,
+  Archive,
+  Trash2,
+  ShieldAlert,
+  MailOpen,
+  RotateCcw,
+  Search,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -32,6 +39,18 @@ import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
 
 export const dynamic = "force-dynamic";
+
+type MailFolderId = "inbox" | "sent" | "starred" | "drafts" | "spam" | "trash" | "all";
+
+const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
+  { id: "inbox", label: "Réception" },
+  { id: "starred", label: "Favoris" },
+  { id: "sent", label: "Envoyés" },
+  { id: "drafts", label: "Brouillons" },
+  { id: "all", label: "Tous" },
+  { id: "spam", label: "Spam" },
+  { id: "trash", label: "Corbeille" },
+];
 
 type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates";
 
@@ -186,6 +205,18 @@ export default function AdminPage() {
   const [composeSending, setComposeSending] = useState(false);
   const [mailFilter, setMailFilter] = useState<"all" | "unread" | "read">("all");
   const [mailSearch, setMailSearch] = useState("");
+  const [mailFolder, setMailFolder] = useState<MailFolderId>("inbox");
+  const [mailQuery, setMailQuery] = useState("");
+  const [mailNextToken, setMailNextToken] = useState<string | null>(null);
+  const [mailLoadingMore, setMailLoadingMore] = useState(false);
+  const [mailUnreadInbox, setMailUnreadInbox] = useState(0);
+  const [composeCc, setComposeCc] = useState("");
+  const [composeBcc, setComposeBcc] = useState("");
+  const [composeShowCc, setComposeShowCc] = useState(false);
+  // Polled refreshes run from an interval closure created once per tab, so
+  // they read the current folder/search through refs, not stale state.
+  const mailFolderRef = useRef<MailFolderId>("inbox");
+  const mailQueryRef = useRef("");
 
   // Rows come from two sources: the new `enrollments` collection (one doc
   // per uid+language — how every registration works since multi-language
@@ -935,23 +966,87 @@ export default function AdminPage() {
     }
   };
 
-  const fetchMailMessages = async (silent = false) => {
-    if (!silent) setMailLoading(true);
+  const fetchMailMessages = async (silent = false, pageToken?: string) => {
+    if (pageToken) setMailLoadingMore(true);
+    else if (!silent) setMailLoading(true);
     try {
       const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/gmail/messages", {
+      const params = new URLSearchParams({ folder: mailFolderRef.current });
+      if (mailQueryRef.current) params.set("q", mailQueryRef.current);
+      if (pageToken) params.set("pageToken", pageToken);
+      const response = await fetch(`/api/admin/gmail/messages?${params}`, {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       const result = await response.json();
       if (response.ok) {
         setMailConfigured(Boolean(result.configured));
         setMailConnected(Boolean(result.connected));
-        setMailMessages(result.messages || []);
+        setMailMessages((prev) => (pageToken ? [...prev, ...(result.messages || [])] : result.messages || []));
+        setMailNextToken(result.nextPageToken ?? null);
+        setMailUnreadInbox(result.unreadInbox ?? 0);
       }
     } catch (error) {
       console.error("Error fetching Gmail messages:", error);
     } finally {
-      if (!silent) setMailLoading(false);
+      if (pageToken) setMailLoadingMore(false);
+      else if (!silent) setMailLoading(false);
+    }
+  };
+
+  const changeMailFolder = (folder: MailFolderId) => {
+    mailFolderRef.current = folder;
+    setMailFolder(folder);
+    setSelectedMail(null);
+    fetchMailMessages();
+  };
+
+  const submitMailSearch = () => {
+    mailQueryRef.current = mailSearch.trim();
+    setMailQuery(mailSearch.trim());
+    setSelectedMail(null);
+    fetchMailMessages();
+  };
+
+  const clearMailSearch = () => {
+    setMailSearch("");
+    mailQueryRef.current = "";
+    setMailQuery("");
+    fetchMailMessages();
+  };
+
+  // Mailbox actions (same toolbar as Gmail): update the UI optimistically,
+  // roll back by refetching if the server refuses.
+  const mailAction = async (id: string, action: "read" | "unread" | "star" | "unstar" | "archive" | "trash" | "untrash" | "spam" | "notspam") => {
+    const leavesFolder = ["archive", "trash", "untrash", "spam", "notspam"].includes(action);
+    setMailMessages((prev) =>
+      leavesFolder
+        ? prev.filter((m) => m.id !== id)
+        : prev.map((m) =>
+            m.id === id
+              ? { ...m, unread: action === "unread" ? true : action === "read" ? false : m.unread, starred: action === "star" ? true : action === "unstar" ? false : m.starred }
+              : m
+          )
+    );
+    setSelectedMail((prev: any) => {
+      if (!prev || prev.id !== id) return prev;
+      if (leavesFolder) return null;
+      return { ...prev, starred: action === "star" ? true : action === "unstar" ? false : prev.starred };
+    });
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch(`/api/admin/gmail/messages/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ action }),
+      });
+      if (!response.ok) {
+        const result = await response.json().catch(() => ({}));
+        throw new Error(result.error || "Erreur serveur");
+      }
+      if (leavesFolder || action === "read" || action === "unread") fetchMailMessages(true);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+      fetchMailMessages(true);
     }
   };
 
@@ -1056,6 +1151,9 @@ export default function AdminPage() {
     setComposeSubject(prefillSubject);
     setComposeBody(prefillBody);
     setComposeAttachments([]);
+    setComposeCc("");
+    setComposeBcc("");
+    setComposeShowCc(false);
     setComposeOpen(true);
   };
 
@@ -1119,6 +1217,8 @@ export default function AdminPage() {
       form.append("to", composeTo);
       form.append("subject", composeSubject);
       form.append("body", composeBody);
+      if (composeCc.trim()) form.append("cc", composeCc.trim());
+      if (composeBcc.trim()) form.append("bcc", composeBcc.trim());
       composeAttachments.forEach((file) => form.append("attachments", file));
 
       const response = await fetch("/api/admin/gmail/send", { method: "POST", body: form });
@@ -1143,14 +1243,9 @@ export default function AdminPage() {
     return mailMessages.filter((m) => {
       if (mailFilter === "unread" && !m.unread) return false;
       if (mailFilter === "read" && m.unread) return false;
-      if (mailSearch.trim()) {
-        const q = mailSearch.trim().toLowerCase();
-        const haystack = `${m.from} ${m.subject} ${m.snippet}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
       return true;
     });
-  }, [mailMessages, mailFilter, mailSearch]);
+  }, [mailMessages, mailFilter]);
 
   const detectedAddresses = useMemo(() => {
     if (!selectedMail) return [];
@@ -1619,7 +1714,7 @@ export default function AdminPage() {
             { id: "applications", label: "Candidatures", badge: jobApplications.filter((a) => a.status === "new").length },
             { id: "projects", label: "Projets", badge: projectRequests.filter((r) => r.status === "new").length },
             { id: "devis", label: "Devis", badge: devisRequests.filter((r) => r.status === "new").length },
-            { id: "mail", label: "Mail", badge: mailMessages.filter((m) => m.unread).length },
+            { id: "mail", label: "Mail", badge: mailUnreadInbox },
             { id: "requests", label: "Messages Étudiants", badge: studentRequests.filter((r) => r.status === "new").length },
             { id: "progress", label: "Progression", badge: 0 },
             { id: "certificates", label: "Certificats", badge: 0 },
@@ -2865,7 +2960,7 @@ export default function AdminPage() {
                   <div>
                     <p className="font-black text-ink flex items-center gap-2"><Inbox size={16} /> brightenedmindcorporation@gmail.com</p>
                     <p className="text-xs text-ink-soft mt-0.5">
-                      {mailMessages.filter((m) => m.unread).length} non lu(s) · {mailMessages.length} affiché(s)
+                      {mailUnreadInbox} non lu(s) dans la réception · {mailMessages.length} affiché(s)
                     </p>
                   </div>
                   <button
@@ -2879,13 +2974,38 @@ export default function AdminPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-5">
                   <div className="lg:col-span-2 lg:border-r border-line flex flex-col">
                     <div className="p-3 border-b border-line space-y-2 shrink-0">
-                      <input
-                        type="text"
-                        value={mailSearch}
-                        onChange={(e) => setMailSearch(e.target.value)}
-                        placeholder="Rechercher par expéditeur, sujet…"
-                        className="w-full bg-surface-alt border border-line rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-                      />
+                      <div className="flex gap-1.5 overflow-x-auto pb-1">
+                        {MAIL_FOLDERS.map((f) => (
+                          <button
+                            key={f.id}
+                            onClick={() => changeMailFolder(f.id)}
+                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
+                              mailFolder === f.id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
+                            }`}
+                          >
+                            {f.label}
+                            {f.id === "inbox" && mailUnreadInbox > 0 ? ` (${mailUnreadInbox})` : ""}
+                          </button>
+                        ))}
+                      </div>
+                      <form
+                        onSubmit={(e) => { e.preventDefault(); submitMailSearch(); }}
+                        className="relative"
+                      >
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
+                        <input
+                          type="text"
+                          value={mailSearch}
+                          onChange={(e) => setMailSearch(e.target.value)}
+                          placeholder="Rechercher (Entrée) — ex. from:nom, has:attachment"
+                          className="w-full bg-surface-alt border border-line rounded-lg pl-9 pr-8 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                        />
+                        {(mailSearch || mailQuery) && (
+                          <button type="button" onClick={clearMailSearch} className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink">
+                            <X size={14} />
+                          </button>
+                        )}
+                      </form>
                       <div className="flex gap-1.5">
                         {([
                           { id: "all", label: "Tous" },
@@ -2911,7 +3031,7 @@ export default function AdminPage() {
                       <div className="p-6 text-ink-soft text-sm">Aucun email ne correspond.</div>
                     ) : (
                       filteredMailMessages.map((m) => {
-                        const { name } = parseFromHeader(m.from);
+                        const { name } = parseFromHeader(mailFolder === "sent" || mailFolder === "drafts" ? m.to || m.from : m.from);
                         return (
                           <button
                             key={m.id}
@@ -2926,7 +3046,10 @@ export default function AdminPage() {
                             <span className="min-w-0 flex-1">
                               <span className="flex items-center justify-between gap-2">
                                 <span className={`text-sm truncate ${m.unread ? "font-black text-ink" : "font-semibold text-ink-soft"}`}>{name}</span>
-                                {m.unread && <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />}
+                                <span className="flex items-center gap-1.5 shrink-0">
+                                  {m.starred && <Star size={13} className="text-yellow-400 fill-yellow-400" />}
+                                  {m.unread && <span className="w-2 h-2 rounded-full bg-red-500" />}
+                                </span>
                               </span>
                               <span className={`block text-sm truncate ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject}</span>
                               <span className="block text-xs text-ink-faint truncate mt-0.5">{m.snippet}</span>
@@ -2934,6 +3057,15 @@ export default function AdminPage() {
                           </button>
                         );
                       })
+                    )}
+                    {mailNextToken && !mailLoading && (
+                      <button
+                        onClick={() => fetchMailMessages(true, mailNextToken)}
+                        disabled={mailLoadingMore}
+                        className="w-full py-3 text-xs font-bold text-red-500 hover:bg-surface-alt disabled:opacity-50 transition"
+                      >
+                        {mailLoadingMore ? "Chargement…" : "Charger plus"}
+                      </button>
                     )}
                     </div>
                   </div>
@@ -2954,7 +3086,38 @@ export default function AdminPage() {
                           >
                             <ArrowLeft size={14} /> Retour
                           </button>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button onClick={() => mailAction(selectedMail.id, selectedMail.starred ? "unstar" : "star")} title={selectedMail.starred ? "Retirer des favoris" : "Favori"} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                              <Star size={14} className={selectedMail.starred ? "text-yellow-400 fill-yellow-400" : ""} /> Favori
+                            </button>
+                            {mailFolder === "trash" ? (
+                              <button onClick={() => mailAction(selectedMail.id, "untrash")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                <RotateCcw size={14} /> Restaurer
+                              </button>
+                            ) : (
+                              <>
+                                {mailFolder !== "spam" && (
+                                  <button onClick={() => mailAction(selectedMail.id, "archive")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                    <Archive size={14} /> Archiver
+                                  </button>
+                                )}
+                                {mailFolder === "spam" ? (
+                                  <button onClick={() => mailAction(selectedMail.id, "notspam")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                    <Inbox size={14} /> Pas un spam
+                                  </button>
+                                ) : (
+                                  <button onClick={() => mailAction(selectedMail.id, "spam")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                    <ShieldAlert size={14} /> Spam
+                                  </button>
+                                )}
+                                <button onClick={() => mailAction(selectedMail.id, "trash")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                  <Trash2 size={14} /> Corbeille
+                                </button>
+                              </>
+                            )}
+                            <button onClick={() => { mailAction(selectedMail.id, "unread"); setSelectedMail(null); }} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                              <MailOpen size={14} /> Non lu
+                            </button>
                             <button
                               onClick={printMail}
                               title="Imprimer"
@@ -2988,6 +3151,12 @@ export default function AdminPage() {
                           </div>
                           <span className="text-xs text-ink-faint ml-auto shrink-0">{formatMailDate(selectedMail.date)}</span>
                         </div>
+                        {(selectedMail.to || selectedMail.cc) && (
+                          <p className="text-xs text-ink-faint mt-2 break-words">
+                            {selectedMail.to && <>À : {selectedMail.to}</>}
+                            {selectedMail.cc && <> · Cc : {selectedMail.cc}</>}
+                          </p>
+                        )}
 
                         {detectedAddresses.length > 0 && (
                           <div className="flex flex-wrap items-center gap-2 mt-4 p-3 bg-surface-alt/60 border border-line rounded-xl">
@@ -3369,8 +3538,30 @@ export default function AdminPage() {
               value={composeTo}
               onChange={(e) => setComposeTo(e.target.value)}
               placeholder="destinataire@email.com"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-2 focus:outline-none focus:border-red-600/60"
             />
+            {!composeShowCc ? (
+              <button onClick={() => setComposeShowCc(true)} className="text-xs font-semibold text-red-500 hover:text-red-400 mb-4">
+                + Cc / Cci
+              </button>
+            ) : (
+              <div className="space-y-2 mb-4">
+                <input
+                  type="text"
+                  value={composeCc}
+                  onChange={(e) => setComposeCc(e.target.value)}
+                  placeholder="Cc (séparer par des virgules)"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                />
+                <input
+                  type="text"
+                  value={composeBcc}
+                  onChange={(e) => setComposeBcc(e.target.value)}
+                  placeholder="Cci (copie cachée)"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                />
+              </div>
+            )}
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
             <input
               type="text"

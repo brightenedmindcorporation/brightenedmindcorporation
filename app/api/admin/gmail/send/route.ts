@@ -14,6 +14,8 @@ export async function POST(request: Request) {
     const form = await request.formData();
     const idToken = form.get("idToken")?.toString();
     const to = form.get("to")?.toString();
+    const cc = form.get("cc")?.toString();
+    const bcc = form.get("bcc")?.toString();
     const subject = form.get("subject")?.toString();
     const body = form.get("body")?.toString();
 
@@ -40,7 +42,7 @@ export async function POST(request: Request) {
       });
     }
 
-    await sendGmailMessage({ to, subject, body, attachments });
+    await sendGmailMessage({ to, cc, bcc, subject, body, attachments });
     return NextResponse.json({ status: "success" });
   } catch (error: any) {
     console.error("Error sending new Gmail message:", error);

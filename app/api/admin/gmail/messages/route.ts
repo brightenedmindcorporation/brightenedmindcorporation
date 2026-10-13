@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth } from "@/lib/firebase-admin";
-import { isGmailOAuthConfigured, isGmailConnected, listInboxMessages } from "@/lib/gmail";
+import { isGmailOAuthConfigured, isGmailConnected, listMessages, type MailFolder } from "@/lib/gmail";
 
 // GET routes are cached by Next.js by default unless marked dynamic — this
 // serves live admin data and must never be stale.
@@ -28,8 +28,15 @@ export async function GET(request: Request) {
       return NextResponse.json({ connected: false, configured: true, messages: [] });
     }
 
-    const messages = await listInboxMessages(25);
-    return NextResponse.json({ connected: true, configured: true, messages });
+    const { searchParams } = new URL(request.url);
+    const folder = (searchParams.get("folder") || "inbox") as MailFolder;
+    const result = await listMessages({
+      folder,
+      query: searchParams.get("q") || undefined,
+      pageToken: searchParams.get("pageToken") || undefined,
+      maxResults: 25,
+    });
+    return NextResponse.json({ connected: true, configured: true, ...result });
   } catch (error: any) {
     console.error("Error listing Gmail messages:", error);
     return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });

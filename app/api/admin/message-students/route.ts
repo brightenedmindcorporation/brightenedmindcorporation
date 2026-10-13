@@ -93,22 +93,32 @@ export async function POST(request: Request) {
 
     let emailWarning: string | null = null;
     if (process.env.RESEND_API_KEY) {
-      const emails = recipients.map((r) => r.email);
+      const emails = recipients.map((r) => r.email).filter(Boolean);
       const resend = new Resend(process.env.RESEND_API_KEY);
-      // bcc, not to, when there's more than one recipient — a broadcast
-      // shouldn't expose every student's email address to the others.
-      const { error: sendError } = await resend.emails.send({
-        from: mailFrom("BM Corporation Academia"),
-        to: emails.length === 1 ? emails[0] : ADMIN_EMAIL,
-        bcc: emails.length > 1 ? emails : undefined,
-        replyTo: ADMIN_EMAIL,
-        subject,
-        html: `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(body).replace(/\n/g, "<br/>")}</div>`,
-        attachments: attachments.length ? attachments : undefined,
-      });
-      if (sendError) {
-        console.error("Resend rejected broadcast email:", sendError);
-        emailWarning = sendError.message || "L'envoi de l'email a échoué (voir la notification dans leur tableau de bord à la place).";
+      // One email per student: nobody sees the other addresses, and the
+      // admin no longer gets a stray copy of every broadcast (the old
+      // single bcc send needed a visible "to", which was the admin). Paced
+      // below Resend's 2 requests/second default limit.
+      let failed = 0;
+      let lastError = "";
+      for (let i = 0; i < emails.length; i++) {
+        if (i > 0) await new Promise((r) => setTimeout(r, 600));
+        const { error: sendError } = await resend.emails.send({
+          from: mailFrom("BM Corporation Academia"),
+          to: emails[i],
+          replyTo: ADMIN_EMAIL,
+          subject,
+          html: `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(body).replace(/\n/g, "<br/>")}</div>`,
+          attachments: attachments.length ? attachments : undefined,
+        });
+        if (sendError) {
+          failed++;
+          lastError = sendError.message;
+          console.error("Resend rejected email to a student:", sendError);
+        }
+      }
+      if (failed > 0) {
+        emailWarning = `${failed} email(s) sur ${emails.length} n'ont pas pu partir${lastError ? ` (${lastError})` : ""} — la notification dans le tableau de bord a bien été envoyée à tous.`;
       }
     } else {
       emailWarning = "Email non configuré côté serveur — seule la notification dans le tableau de bord a été envoyée.";

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -34,7 +34,7 @@ export default function CTA() {
             <br />
 
             <span className="text-gradient-red">
-              d’exception ensemble.
+              dâ€™exception ensemble.
             </span>
 
           </h2>
@@ -42,15 +42,15 @@ export default function CTA() {
           <p className="mt-10 max-w-3xl mx-auto text-ink-soft text-lg leading-9 font-sans">
 
             Brightened Mind Corporation accompagne les individus,
-            les entreprises et les communautés dans leur évolution
-            grâce à des solutions innovantes, éducatives et stratégiques.
+            les entreprises et les communautÃ©s dans leur Ã©volution
+            grÃ¢ce Ã  des solutions innovantes, Ã©ducatives et stratÃ©giques.
 
           </p>
 
           <div className="mt-12 flex justify-center gap-6 flex-wrap">
 
             <Link
-              href="mailto:brightenedmindcorporation@gmail.com"
+              href="mailto:info@bmcorporation-cd.com"
               className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-10 py-5 rounded-2xl font-semibold transition duration-300"
             >
               Nous contacter
