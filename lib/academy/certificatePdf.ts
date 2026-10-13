@@ -24,7 +24,7 @@ function buildCertificateDoc(opts: CertificateOpts): jsPDF {
   doc.setFont("times", "bold");
   doc.setTextColor(150, 0, 0);
   doc.setFontSize(26);
-  doc.text("BRIGHTENED MIND CORPORATION ACADEMY", 148, 28, { align: "center" });
+  doc.text("BRIGHTENED MIND CORPORATION ACADEMIA", 148, 28, { align: "center" });
 
   doc.setFontSize(20);
   doc.text("CERTIFICATE OF ACHIEVEMENT", 148, 45, { align: "center" });

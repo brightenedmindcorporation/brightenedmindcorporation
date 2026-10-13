@@ -62,7 +62,7 @@ export default function Home() {
           <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-ink tracking-tight leading-[1.15] max-w-4xl">
             Toutes les formations de <br className="hidden sm:inline" />
             <span className="text-red-500">
-              Brightened Mind Academy
+              Brightened Mind Academia
             </span>
           </h1>
 
@@ -242,12 +242,12 @@ export default function Home() {
               <BmLogo size={32} />
             </div>
             <span className="font-extrabold text-ink text-sm">
-              Brightened Mind <span className="text-red-500">Academy</span>
+              Brightened Mind <span className="text-red-500">Academia</span>
             </span>
           </div>
 
           <p className="text-xs text-ink-soft font-medium text-center">
-            © {new Date().getFullYear()} Brightened Mind Academy. All rights reserved.
+            © {new Date().getFullYear()} Brightened Mind Academia. All rights reserved.
           </p>
 
           <div className="flex items-center gap-6 text-xs text-ink-soft font-medium">

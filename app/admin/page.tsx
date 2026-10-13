@@ -24,7 +24,7 @@ import {
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
-import { getOtherProgramLabel, otherPrograms } from "@/content/programs";
+import { getOtherProgramLabel, isOtherProgramCode, otherPrograms } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
@@ -92,6 +92,7 @@ export default function AdminPage() {
   const [annDetails, setAnnDetails] = useState("");
   const [annDuration, setAnnDuration] = useState("");
   const [annDurationCustom, setAnnDurationCustom] = useState("");
+  const [annShowInTicker, setAnnShowInTicker] = useState(true);
   const [annImage, setAnnImage] = useState<File | null>(null);
   const [annVideo, setAnnVideo] = useState<File | null>(null);
   const [annSubmitting, setAnnSubmitting] = useState(false);
@@ -103,6 +104,7 @@ export default function AdminPage() {
   const [editAnnDetails, setEditAnnDetails] = useState("");
   const [editAnnDuration, setEditAnnDuration] = useState("");
   const [editAnnDurationCustom, setEditAnnDurationCustom] = useState("");
+  const [editAnnShowInTicker, setEditAnnShowInTicker] = useState(true);
   const [editAnnImage, setEditAnnImage] = useState<File | null>(null);
   const [editAnnVideo, setEditAnnVideo] = useState<File | null>(null);
   const [editAnnSubmitting, setEditAnnSubmitting] = useState(false);
@@ -316,6 +318,7 @@ export default function AdminPage() {
       form.append("description", annDescription);
       form.append("type", annType);
       form.append("details", annDetails);
+      form.append("showInTicker", String(annShowInTicker));
       if (resolvedDuration) form.append("durationDays", resolvedDuration);
       if (annImage) form.append("image", annImage);
       if (annVideo) form.append("video", annVideo);
@@ -329,6 +332,7 @@ export default function AdminPage() {
       setAnnType("normal");
       setAnnDetails("");
       setAnnDuration("");
+      setAnnShowInTicker(true);
       setAnnDurationCustom("");
       setAnnImage(null);
       setAnnVideo(null);
@@ -348,6 +352,7 @@ export default function AdminPage() {
     setEditAnnDetails(a.details || "");
     setEditAnnDuration("");
     setEditAnnDurationCustom("");
+    setEditAnnShowInTicker(a.showInTicker !== false);
     setEditAnnImage(null);
     setEditAnnVideo(null);
   };
@@ -372,6 +377,7 @@ export default function AdminPage() {
       form.append("description", editAnnDescription);
       form.append("type", editAnnType);
       form.append("details", editAnnDetails);
+      form.append("showInTicker", String(editAnnShowInTicker));
       if (resolvedEditDuration) form.append("durationDays", resolvedEditDuration);
       if (editAnnImage) form.append("image", editAnnImage);
       if (editAnnVideo) form.append("video", editAnnVideo);
@@ -1323,7 +1329,10 @@ export default function AdminPage() {
         body: JSON.stringify({
           idToken,
           langCode: sessionLangCode,
-          level: sessionLevel,
+          // Les formations hors langues (Bureautique, Visuel, Logiciels)
+          // n'ont pas de niveaux 1/2/3 — une seule salle "Niveau 1" leur
+          // sert de salle unique.
+          level: isOtherProgramCode(sessionLangCode) ? "1" : sessionLevel,
           scheduledAt,
           durationMinutes: sessionDuration,
           title: sessionTitle,
@@ -1506,21 +1515,21 @@ export default function AdminPage() {
   return (
     <main className="p-6 md:p-10 min-h-screen bg-surface-sunken text-ink font-sans">
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
-          <div className="flex items-center gap-3">
+        <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
             <NotificationBell scope="admin" />
             <button
               onClick={() => refreshTab(tab)}
-              className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all duration-200 bg-surface"
+              className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-3 sm:px-4 py-2 rounded-xl transition-all duration-200 bg-surface whitespace-nowrap"
             >
-              <RefreshCw size={15} /> Actualiser
+              <RefreshCw size={15} /> <span className="hidden sm:inline">Actualiser</span>
             </button>
             <button
               onClick={handleAdminLogout}
-              className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
+              className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-3 sm:px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30 whitespace-nowrap"
             >
-              <LogOut size={15} /> Déconnexion
+              <LogOut size={15} /> <span className="hidden sm:inline">Déconnexion</span>
             </button>
           </div>
         </div>
@@ -1747,29 +1756,42 @@ export default function AdminPage() {
           <div>
             <form onSubmit={createLiveSession} className="bg-surface border border-line rounded-2xl p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
               <div className="lg:col-span-1">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Langue</label>
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Formation</label>
                 <select
                   value={sessionLangCode}
                   onChange={(e) => setSessionLangCode(e.target.value)}
                   className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 >
-                  {availableLanguages.map((l) => (
-                    <option key={l.code} value={l.code}>{l.label}</option>
-                  ))}
+                  <optgroup label="Langues">
+                    {availableLanguages.map((l) => (
+                      <option key={l.code} value={l.code}>{l.label}</option>
+                    ))}
+                  </optgroup>
+                  <optgroup label="Autres formations">
+                    {otherPrograms.map((p) => (
+                      <option key={p.code} value={p.code}>{p.label}</option>
+                    ))}
+                  </optgroup>
                 </select>
               </div>
 
               <div className="lg:col-span-1">
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Niveau</label>
-                <select
-                  value={sessionLevel}
-                  onChange={(e) => setSessionLevel(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                >
-                  <option value="1">Niveau 1</option>
-                  <option value="2">Niveau 2</option>
-                  <option value="3">Niveau 3</option>
-                </select>
+                {isOtherProgramCode(sessionLangCode) ? (
+                  <div className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink-faint">
+                    Salle unique
+                  </div>
+                ) : (
+                  <select
+                    value={sessionLevel}
+                    onChange={(e) => setSessionLevel(e.target.value)}
+                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  >
+                    <option value="1">Niveau 1</option>
+                    <option value="2">Niveau 2</option>
+                    <option value="3">Niveau 3</option>
+                  </select>
+                )}
               </div>
 
               <div className="lg:col-span-1">
@@ -1903,7 +1925,7 @@ export default function AdminPage() {
                   <JitsiEmbed
                     appId={getJaasAppId()!}
                     roomName={getLiveRoomName(hostingSession.langCode, hostingSession.level)}
-                    displayName="Enseignant — BM Academy"
+                    displayName="Enseignant — BM Academia"
                     jwt={hostingToken}
                   />
                 ) : isJitsiConfigured() && getJaasAppId() ? (
@@ -2070,6 +2092,18 @@ export default function AdminPage() {
                 )}
                 <p className="text-xs text-ink-faint mt-1">L'annonce se masque automatiquement du site public à la fin de cette durée.</p>
               </div>
+              <div className="sm:col-span-2">
+                <label className="inline-flex items-center gap-2 text-sm text-ink-soft cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={annShowInTicker}
+                    onChange={(e) => setAnnShowInTicker(e.target.checked)}
+                    className="rounded border-line accent-red-600"
+                  />
+                  Afficher dans la bande défilante de la page d'accueil
+                </label>
+                <p className="text-xs text-ink-faint mt-1">Décochez pour que cette annonce apparaisse dans le carrousel mais pas dans le bandeau défilant.</p>
+              </div>
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Photo (optionnel)</label>
                 <input
@@ -2132,6 +2166,9 @@ export default function AdminPage() {
                               ? `Expire le ${new Date(a.expiresAt).toLocaleDateString("fr-FR")}`
                               : `Expirée le ${new Date(a.expiresAt).toLocaleDateString("fr-FR")}`}
                           </p>
+                        )}
+                        {a.showInTicker === false && (
+                          <p className="text-xs text-ink-faint mt-1">Pas dans la bande défilante</p>
                         )}
                         <Link href={`/annonces/${a.id}`} className="text-xs text-red-500 hover:text-red-400 hover:underline mt-1 inline-block">
                           Voir la page publique →
@@ -3342,6 +3379,16 @@ export default function AdminPage() {
                 ? `Actuellement : ${editingAnnouncement.expiresAt > new Date().toISOString() ? "expire" : "expirée"} le ${new Date(editingAnnouncement.expiresAt).toLocaleDateString("fr-FR")}.`
                 : "Actuellement : illimitée."}
             </p>
+
+            <label className="inline-flex items-center gap-2 text-sm text-ink-soft cursor-pointer mb-4">
+              <input
+                type="checkbox"
+                checked={editAnnShowInTicker}
+                onChange={(e) => setEditAnnShowInTicker(e.target.checked)}
+                className="rounded border-line accent-red-600"
+              />
+              Afficher dans la bande défilante de la page d'accueil
+            </label>
 
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>

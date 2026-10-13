@@ -28,7 +28,7 @@ export async function POST(req: Request) {
     const result = await resend.emails.send({
       from: "Brightened Mind <onboarding@resend.dev>",
       to: email,
-      subject: "Inscription confirmée — Brightened Mind Academy",
+      subject: "Inscription confirmée — Brightened Mind Academia",
       html: `
         <h2>Bienvenue ${name},</h2>
         <p>Votre inscription a été approuvée. Voici le récapitulatif de votre inscription :</p>

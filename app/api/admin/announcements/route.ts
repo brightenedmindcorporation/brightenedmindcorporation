@@ -54,6 +54,7 @@ export async function POST(request: Request) {
     const details = form.get("details")?.toString()?.trim() || "";
     const durationDaysRaw = form.get("durationDays")?.toString();
     const durationDays = durationDaysRaw ? Number(durationDaysRaw) : null;
+    const showInTicker = form.get("showInTicker")?.toString() !== "false";
 
     if (!title || !description) {
       return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
@@ -88,6 +89,7 @@ export async function POST(request: Request) {
       imageUrl,
       videoUrl,
       active: true,
+      showInTicker,
       expiresAt,
       createdAt: new Date().toISOString(),
     });

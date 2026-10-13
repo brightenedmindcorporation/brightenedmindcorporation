@@ -35,7 +35,8 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
     }
 
-    const updates: Record<string, any> = { title, description, type, details };
+    const showInTicker = form.get("showInTicker")?.toString() !== "false";
+    const updates: Record<string, any> = { title, description, type, details, showInTicker };
 
     const durationDaysRaw = form.get("durationDays")?.toString();
     if (durationDaysRaw) {

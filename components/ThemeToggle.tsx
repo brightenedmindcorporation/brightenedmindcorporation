@@ -31,7 +31,9 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
     try {
       stored = localStorage.getItem("theme");
     } catch {}
-    const initial: Theme = stored === "light" || stored === "dark" ? stored : "system";
+    // Pas de préférence enregistrée = premier passage sur le site : on
+    // démarre en clair par défaut, plutôt que de deviner via l'OS.
+    const initial: Theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "light";
     setTheme(initial);
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -40,7 +42,7 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
       try {
         current = localStorage.getItem("theme");
       } catch {}
-      if (current !== "light" && current !== "dark") applyTheme("system");
+      if (current === "system") applyTheme("system");
     };
     mq.addEventListener("change", handleChange);
     return () => mq.removeEventListener("change", handleChange);
@@ -49,8 +51,7 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   const choose = (next: Theme) => {
     setTheme(next);
     try {
-      if (next === "system") localStorage.removeItem("theme");
-      else localStorage.setItem("theme", next);
+      localStorage.setItem("theme", next);
     } catch {}
     applyTheme(next);
   };

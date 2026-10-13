@@ -62,21 +62,29 @@ function extractSpeechText(line: string): string {
   return line;
 }
 
+// Distraction-free params: rel=0 limits end-of-video suggestions to the
+// same channel (YouTube no longer allows disabling them entirely),
+// modestbranding/iv_load_policy/disablekb trim branding, annotations and
+// keyboard shortcuts that could lead off the lesson. There is no official
+// way to remove the clickable YouTube logo from the embedded player itself.
+const YOUTUBE_EMBED_PARAMS = "rel=0&modestbranding=1&iv_load_policy=3&disablekb=1";
+const VIMEO_EMBED_PARAMS = "title=0&byline=0&portrait=0";
+
 function getEmbedUrl(url: string): string | null {
   try {
     const u = new URL(url);
     if (u.hostname.includes("youtube.com")) {
-      if (u.pathname.startsWith("/embed/")) return url;
+      if (u.pathname.startsWith("/embed/")) return `${url}${url.includes("?") ? "&" : "?"}${YOUTUBE_EMBED_PARAMS}`;
       const id = u.searchParams.get("v");
-      if (id) return `https://www.youtube.com/embed/${id}`;
+      if (id) return `https://www.youtube.com/embed/${id}?${YOUTUBE_EMBED_PARAMS}`;
     }
     if (u.hostname === "youtu.be") {
       const id = u.pathname.slice(1);
-      if (id) return `https://www.youtube.com/embed/${id}`;
+      if (id) return `https://www.youtube.com/embed/${id}?${YOUTUBE_EMBED_PARAMS}`;
     }
     if (u.hostname.includes("vimeo.com")) {
       const id = u.pathname.split("/").filter(Boolean).pop();
-      if (id) return `https://player.vimeo.com/video/${id}`;
+      if (id) return `https://player.vimeo.com/video/${id}?${VIMEO_EMBED_PARAMS}`;
     }
     return null;
   } catch {

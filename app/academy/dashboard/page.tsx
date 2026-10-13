@@ -80,9 +80,26 @@ export default function Dashboard() {
   const approvedEnrollments = student?.enrollments?.filter((e) => e.status === "Approved") ?? [];
   const activeEnrollment = approvedEnrollments.find((e) => e.langCode === student?.activeLangCode) ?? approvedEnrollments[0];
 
+  // Other programs (Bureautique, Visuel, Logiciels) have no curriculum/
+  // levels — the admin schedules them under a single "level 1" room — but
+  // they can still have a live class, so that part is fetched separately
+  // from the language progress effect below.
+  useEffect(() => {
+    if (!activeEnrollment || !isOtherProgramCode(activeEnrollment.langCode)) return;
+    const loadLiveSession = () => {
+      fetch(`/api/live-sessions?langCode=${activeEnrollment.langCode}&level=1`)
+        .then((res) => res.json())
+        .then((d) => setLiveSession(d.session ?? null))
+        .catch(() => setLiveSession(null));
+    };
+    loadLiveSession();
+    const interval = setInterval(loadLiveSession, 30_000);
+    return () => clearInterval(interval);
+  }, [activeEnrollment?.langCode]);
+
   // Recompute progress/live-session whenever the active language changes.
   // Other programs (Bureautique, Visuel, Logiciels) have no curriculum to
-  // compute progress against, so there's nothing to fetch for them.
+  // compute progress against, so there's nothing to fetch for them here.
   useEffect(() => {
     if (!activeEnrollment || isOtherProgramCode(activeEnrollment.langCode)) return;
 
@@ -326,18 +343,41 @@ export default function Dashboard() {
           /* Carte simplifiée : pas de leçons interactives pour ce programme */
           <div className="bg-surface rounded-3xl border border-line p-8 relative overflow-hidden shadow-2xl">
             <div className="absolute inset-0 radial-fade pointer-events-none" />
-            <div className="relative flex items-center gap-5 mb-8">
-              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
-                <BmLogo size={56} className="rounded-[14px]" />
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+              <div className="flex items-center gap-5">
+                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
+                  <BmLogo size={56} className="rounded-[14px]" />
+                </div>
+                <div>
+                  <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
+                    Bienvenue, {fullName}
+                  </h1>
+                  <p className="text-ink-soft text-sm mt-1 font-sans">
+                    Votre inscription à <span className="text-red-500 font-semibold">{programLabel}</span> est confirmée.
+                  </p>
+                </div>
               </div>
-              <div>
-                <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
-                  Bienvenue, {fullName}
-                </h1>
-                <p className="text-ink-soft text-sm mt-1 font-sans">
-                  Votre inscription à <span className="text-red-500 font-semibold">{programLabel}</span> est confirmée.
-                </p>
-              </div>
+
+              {liveSession && isSessionJoinable(liveSession) ? (
+                <button
+                  onClick={() => router.push(`/academy/program/${activeEnrollment.langCode}/live`)}
+                  className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0"
+                >
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
+                  </span>
+                  Live Class — En direct
+                </button>
+              ) : liveSession ? (
+                <div
+                  className="border border-line text-ink-faint font-semibold px-5 py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-not-allowed text-sm shrink-0"
+                  title="Le cours n'a pas encore commencé"
+                >
+                  <Lock size={13} className="inline -mt-0.5" />{" "}
+                  {new Date(liveSession.scheduledAt).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}
+                </div>
+              ) : null}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 relative">

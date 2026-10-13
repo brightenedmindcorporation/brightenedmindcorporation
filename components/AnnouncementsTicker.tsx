@@ -8,6 +8,7 @@ interface Announcement {
   title: string;
   description: string;
   type: "job" | "normal";
+  showInTicker?: boolean;
 }
 
 /**
@@ -22,7 +23,7 @@ export default function AnnouncementsTicker() {
     const load = () => {
       fetch("/api/announcements")
         .then((res) => res.json())
-        .then((data) => setAnnouncements(data.announcements || []))
+        .then((data) => setAnnouncements((data.announcements || []).filter((a: Announcement) => a.showInTicker !== false)))
         .catch(() => setAnnouncements([]));
     };
     load();

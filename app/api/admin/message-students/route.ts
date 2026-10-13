@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       // bcc, not to, when there's more than one recipient — a broadcast
       // shouldn't expose every student's email address to the others.
       const { error: sendError } = await resend.emails.send({
-        from: "BM Corporation Academy <onboarding@resend.dev>",
+        from: "BM Corporation Academia <onboarding@resend.dev>",
         to: emails.length === 1 ? emails[0] : ADMIN_EMAIL,
         bcc: emails.length > 1 ? emails : undefined,
         replyTo: ADMIN_EMAIL,

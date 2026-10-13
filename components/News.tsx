@@ -23,7 +23,7 @@ export default function News() {
           <div className="bg-surface/60 border border-line hover:border-red-700/30 p-10 rounded-3xl shadow-lg shadow-black/20 transition-colors">
             <span className="text-xs uppercase tracking-widest text-red-500 font-sans font-semibold">Academia</span>
             <h3 className="text-2xl font-bold text-ink mt-2">
-              BM Academy
+              BM Academia
             </h3>
             <p className="mt-5 text-ink-soft leading-8 font-sans">
               Déploiement de nouveaux programmes

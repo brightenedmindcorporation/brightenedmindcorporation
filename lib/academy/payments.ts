@@ -27,7 +27,7 @@ function isGatewaySuccess(status: string): boolean {
 
 async function sendMatriculeEmail(email: string, amount: number | undefined, currency: string | undefined, matricule: string) {
   await resend.emails.send({
-    from: "Brightened Mind Academy <contact@brightenedmind.com>",
+    from: "Brightened Mind Academia <contact@brightenedmind.com>",
     to: email,
     subject: "Confirmation d'inscription & Votre Matricule BMCA",
     html: `

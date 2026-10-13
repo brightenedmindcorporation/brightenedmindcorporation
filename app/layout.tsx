@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 
   keywords: [
     "Brightened Mind Corporation",
-    "BM Academy",
+    "BM Academia",
     "BM Communication",
     "BM Domestica",
     "Education",
@@ -60,9 +60,10 @@ export const viewport: Viewport = {
 };
 
 // Runs before paint (blocking, in <head>) so the page never flashes the
-// wrong theme: reads the stored preference (defaulting to the OS/browser
-// setting) and sets the `dark` class synchronously, before React hydrates.
-const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var t=(s==='light'||s==='dark')?s:'system';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
+// wrong theme: reads the stored preference (defaulting to light on a first
+// visit, never to the OS/browser setting) and sets the `dark` class
+// synchronously, before React hydrates.
+const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var t=(s==='light'||s==='dark'||s==='system')?s:'light';var d=t==='dark'||(t==='system'&&window.matchMedia('(prefers-color-scheme: dark)').matches);document.documentElement.classList.toggle('dark',d);}catch(e){}})();`;
 
 // A phone browser's "Request desktop site" changes the User-Agent string
 // but, because this page declares width=device-width, many browsers still
