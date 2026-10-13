@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BmLogo from "@/components/BmLogo";
-import { Lock, MessageSquarePlus, Paperclip, X, BookText } from "lucide-react";
+import { Lock, MessageSquarePlus, Paperclip, X, BookText, ChevronDown } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AcademyHeader from "../components/AcademyHeader";
@@ -52,6 +52,8 @@ export default function Dashboard() {
   const [requestSending, setRequestSending] = useState(false);
   const [requestAttachments, setRequestAttachments] = useState<File[]>([]);
   const [adminMessages, setAdminMessages] = useState<any[]>([]);
+  const [openMessageId, setOpenMessageId] = useState<string | null>(null);
+  const [showAllMessages, setShowAllMessages] = useState(false);
   const router = useRouter();
 
   // Load the logged-in student once on mount.
@@ -301,19 +303,45 @@ export default function Dashboard() {
 
         {/* Messages de l'administration */}
         {adminMessages.length > 0 && (
-          <div className="bg-surface border border-line rounded-2xl p-5 space-y-3">
-            <p className="text-sm font-bold text-ink flex items-center gap-2">
+          <div className="bg-surface border border-line rounded-2xl p-5 space-y-2">
+            <p className="text-sm font-bold text-ink flex items-center gap-2 mb-1">
               <MessageSquarePlus size={16} /> Messages de l'administration
             </p>
-            {adminMessages.slice(0, 5).map((m) => (
-              <div key={m.id} className="bg-surface-alt border border-line rounded-xl p-4">
-                <p className="text-sm font-bold text-ink">{m.title}</p>
-                <p className="text-sm text-ink-soft mt-1 whitespace-pre-wrap">{m.message}</p>
-                <p className="text-xs text-ink-faint mt-2">
-                  {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" }) : ""}
-                </p>
-              </div>
-            ))}
+            {(showAllMessages ? adminMessages : adminMessages.slice(0, 3)).map((m) => {
+              const isOpen = openMessageId === m.id;
+              return (
+                <div key={m.id} className="bg-surface-alt border border-line rounded-xl overflow-hidden">
+                  <button
+                    onClick={() => setOpenMessageId(isOpen ? null : m.id)}
+                    aria-expanded={isOpen}
+                    className="w-full text-left px-4 py-3 flex items-start gap-3 hover:bg-surface transition"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-bold text-ink truncate">{m.title}</p>
+                      {!isOpen && <p className="text-xs text-ink-soft mt-0.5 line-clamp-1">{m.message}</p>}
+                      <p className="text-[11px] text-ink-faint mt-1">
+                        {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" }) : ""}
+                      </p>
+                    </div>
+                    <span className="text-xs font-semibold text-red-500 shrink-0 flex items-center gap-1 mt-0.5">
+                      {isOpen ? "Fermer" : "Ouvrir"}
+                      <ChevronDown size={14} className={`transition-transform ${isOpen ? "rotate-180" : ""}`} />
+                    </span>
+                  </button>
+                  {isOpen && (
+                    <p className="px-4 pb-4 text-sm text-ink-soft whitespace-pre-wrap border-t border-line pt-3">{m.message}</p>
+                  )}
+                </div>
+              );
+            })}
+            {adminMessages.length > 3 && (
+              <button
+                onClick={() => setShowAllMessages((v) => !v)}
+                className="text-xs font-semibold text-ink-soft hover:text-ink pt-1"
+              >
+                {showAllMessages ? "Afficher moins" : `Voir tous les messages (${adminMessages.length})`}
+              </button>
+            )}
           </div>
         )}
 
