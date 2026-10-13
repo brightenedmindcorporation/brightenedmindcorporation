@@ -81,7 +81,7 @@ export default function VerbsPage() {
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <h1 className="text-3xl md:text-4xl font-black tracking-tight text-red-50 flex items-center gap-3">
-              <BookText size={30} /> {reference.kind === "particles" ? "Particules d'aspect" : "Verbes irréguliers & réguliers"}
+              <BookText size={30} /> {reference.kind === "particles" ? "Verbes & particules" : "Verbes irréguliers & réguliers"}
             </h1>
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{langInfo.label}</p>
           </div>

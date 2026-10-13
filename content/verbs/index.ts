@@ -19,4 +19,4 @@ export function getVerbReference(langCode: string): VerbReference | null {
   return BY_LANG[langCode] ?? null;
 }
 
-export type { VerbReference, StandardVerbReference, ParticleVerbReference, IrregularVerb, RegularVerb, AspectParticle } from "./types";
+export type { VerbReference, StandardVerbReference, ParticleVerbReference, IrregularVerb, RegularVerb, AspectParticle, ChineseVerb } from "./types";

@@ -37,11 +37,21 @@ export interface AspectParticle {
   translation: string;
 }
 
+export interface ChineseVerb {
+  hanzi: string;
+  pinyin: string;
+  meaning: string;
+  example: string;
+  translation: string;
+}
+
 export interface ParticleVerbReference {
   kind: "particles";
   langCode: string;
   intro: string;
   particles: AspectParticle[];
+  verbsIntro: string;
+  verbs: ChineseVerb[];
 }
 
 export type VerbReference = StandardVerbReference | ParticleVerbReference;

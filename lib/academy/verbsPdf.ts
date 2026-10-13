@@ -1,152 +1,100 @@
 import jsPDF from "jspdf";
 import type { VerbReference } from "@/content/verbs";
+import { addBrandHeader, addWatermark, loadLogo, writeLine, writeWrapped, type LoadedImage, type RGB } from "./pdfBranding";
 
-const RED: [number, number, number] = [122, 31, 43];
-const DARK: [number, number, number] = [35, 31, 29];
-const GRAY: [number, number, number] = [110, 104, 96];
-const PAGE_WIDTH = 210;
-const PAGE_HEIGHT = 297;
+const RED: RGB = [122, 31, 43];
+const DARK: RGB = [35, 31, 29];
+const GRAY: RGB = [110, 104, 96];
 const MARGIN_X = 18;
-const BOTTOM_LIMIT = 280;
+const BOTTOM_LIMIT = 282;
 
-function addHeader(doc: jsPDF, title: string) {
-  doc.setFillColor(...RED);
-  doc.rect(0, 0, PAGE_WIDTH, 28, "F");
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(15);
-  doc.text("BRIGHTENED MIND CORPORATION ACADEMIA", MARGIN_X, 13);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10.5);
-  doc.text(title, MARGIN_X, 21);
-  return 40;
-}
+class PdfWriter {
+  doc = new jsPDF({ unit: "mm", format: "a4" });
+  y = 0;
+  readonly contentWidth = this.doc.internal.pageSize.getWidth() - 2 * MARGIN_X;
 
-function sectionTitle(doc: jsPDF, text: string, y: number): number {
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(12);
-  doc.setTextColor(...RED);
-  doc.text(text, MARGIN_X, y);
-  doc.setDrawColor(...RED);
-  doc.setLineWidth(0.4);
-  doc.line(MARGIN_X, y + 2, PAGE_WIDTH - MARGIN_X, y + 2);
-  return y + 9;
-}
-
-function ensureSpace(doc: jsPDF, y: number, needed: number, title: string): number {
-  if (y + needed > BOTTOM_LIMIT) {
-    doc.addPage();
-    return addHeader(doc, title);
+  constructor(private logo: LoadedImage, private title: string) {
+    this.startPage();
   }
-  return y;
+
+  private startPage() {
+    addWatermark(this.doc, this.logo);
+    this.y = addBrandHeader(this.doc, this.logo, this.title, RED);
+  }
+
+  ensure(needed: number) {
+    if (this.y + needed > BOTTOM_LIMIT) {
+      this.doc.addPage();
+      this.startPage();
+    }
+  }
+
+  section(text: string) {
+    this.ensure(16);
+    writeLine(this.doc, text, MARGIN_X, this.y, { size: 12, color: RED, style: "bold" });
+    this.doc.setDrawColor(...RED);
+    this.doc.setLineWidth(0.3);
+    this.doc.line(MARGIN_X, this.y + 2, MARGIN_X + this.contentWidth, this.y + 2);
+    this.y += 9;
+  }
+
+  paragraph(text: string) {
+    const lines = writeWrapped(this.doc, text, MARGIN_X, this.y, this.contentWidth, { size: 9.5, color: GRAY });
+    this.y += lines * 4.4 + 4;
+  }
+
+  /** One verb entry: bold head + side form on the first line, then example and translation. */
+  entry(head: string, side: string, example: string, translation: string, headColor: RGB = RED, sideColor: RGB = DARK) {
+    this.ensure(18);
+    writeLine(this.doc, head, MARGIN_X, this.y, { size: 11, color: headColor, style: "bold" });
+    if (side) writeLine(this.doc, side, MARGIN_X + 38, this.y, { size: 9.5, color: sideColor });
+    this.y += 4.8;
+    const exLines = writeWrapped(this.doc, example, MARGIN_X, this.y, this.contentWidth, { size: 9.5, color: GRAY, style: "italic" });
+    this.y += exLines * 4.4;
+    const trLines = writeWrapped(this.doc, translation, MARGIN_X, this.y, this.contentWidth, { size: 9.5, color: GRAY });
+    this.y += trLines * 4.4 + 2.5;
+  }
 }
 
-function buildVerbsDoc(reference: VerbReference, langLabel: string): jsPDF {
-  const doc = new jsPDF({ unit: "mm", format: "a4" });
-  const title = `Référence des verbes — ${langLabel}`;
-  let y = addHeader(doc, title);
+async function buildVerbsDoc(reference: VerbReference, langLabel: string): Promise<jsPDF> {
+  const logo = await loadLogo();
+  const w = new PdfWriter(logo, `Référence des verbes — ${langLabel}`);
 
   if (reference.kind === "particles") {
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.5);
-    doc.setTextColor(...GRAY);
-    const introLines = doc.splitTextToSize(reference.intro, PAGE_WIDTH - 2 * MARGIN_X);
-    doc.text(introLines, MARGIN_X, y);
-    y += introLines.length * 4.5 + 6;
-
-    y = sectionTitle(doc, "Particules d'aspect", y);
-
+    w.paragraph(reference.intro);
+    w.section("Particules d'aspect");
     for (const p of reference.particles) {
-      y = ensureSpace(doc, y, 22, title);
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(13);
-      doc.setTextColor(...RED);
-      doc.text(`${p.particle}  (${p.pinyin})`, MARGIN_X, y);
-      y += 5.5;
-      doc.setFont("helvetica", "normal");
-      doc.setFontSize(9.5);
-      doc.setTextColor(...DARK);
-      const usageLines = doc.splitTextToSize(p.usage, PAGE_WIDTH - 2 * MARGIN_X);
-      doc.text(usageLines, MARGIN_X, y);
-      y += usageLines.length * 4.3 + 1;
-      doc.setFont("helvetica", "italic");
-      doc.setTextColor(...GRAY);
-      doc.text(p.example, MARGIN_X, y);
-      y += 4.3;
-      doc.setFont("helvetica", "normal");
-      doc.text(p.translation, MARGIN_X, y);
-      y += 7;
+      w.entry(`${p.particle}  (${p.pinyin})`, "", `${p.usage}  ${p.example}`, p.translation);
     }
-
-    return doc;
+    if (reference.verbs.length > 0) {
+      w.y += 4;
+      w.section(`Les ${reference.verbs.length} verbes essentiels`);
+      w.paragraph(reference.verbsIntro);
+      for (const v of reference.verbs) {
+        w.entry(v.hanzi, `${v.pinyin} — ${v.meaning}`, v.example, v.translation);
+      }
+    }
+    return w.doc;
   }
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9.5);
-  doc.setTextColor(...GRAY);
-  const introLines = doc.splitTextToSize(reference.irregularIntro, PAGE_WIDTH - 2 * MARGIN_X);
-  doc.text(introLines, MARGIN_X, y);
-  y += introLines.length * 4.5 + 6;
-
-  y = sectionTitle(doc, "Verbes irréguliers", y);
-
+  w.paragraph(reference.irregularIntro);
+  w.section(`Verbes irréguliers (${reference.irregular.length})`);
   for (const v of reference.irregular) {
-    y = ensureSpace(doc, y, 18, title);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11.5);
-    doc.setTextColor(...RED);
-    doc.text(v.base, MARGIN_X, y);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.5);
-    doc.setTextColor(...DARK);
-    doc.text(v.forms, MARGIN_X + 32, y);
-    y += 4.8;
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(...GRAY);
-    doc.text(v.example, MARGIN_X, y);
-    y += 4.4;
-    doc.setFont("helvetica", "normal");
-    doc.text(v.translation, MARGIN_X, y);
-    y += 6.5;
+    w.entry(v.base, v.forms, v.example, v.translation);
   }
 
-  y = ensureSpace(doc, y, 20, title);
-  y += 3;
-  y = sectionTitle(doc, "Verbes réguliers", y);
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(9.5);
-  doc.setTextColor(...GRAY);
-  const regIntroLines = doc.splitTextToSize(reference.regularIntro, PAGE_WIDTH - 2 * MARGIN_X);
-  doc.text(regIntroLines, MARGIN_X, y);
-  y += regIntroLines.length * 4.5 + 5;
-
+  w.y += 4;
+  w.section(`Verbes réguliers (${reference.regular.length})`);
+  w.paragraph(reference.regularIntro);
   for (const v of reference.regular) {
-    y = ensureSpace(doc, y, 18, title);
     const conjugated = v.prefix ? `${v.prefix}${v.stem ?? ""}` : `${v.stem ?? v.base}${v.suffix ?? ""}`;
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(11.5);
-    doc.setTextColor(...DARK);
-    doc.text(v.base, MARGIN_X, y);
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9.5);
-    doc.setTextColor(...RED);
-    doc.text(conjugated, MARGIN_X + 32, y);
-    y += 4.8;
-    doc.setFont("helvetica", "italic");
-    doc.setTextColor(...GRAY);
-    doc.text(v.example, MARGIN_X, y);
-    y += 4.4;
-    doc.setFont("helvetica", "normal");
-    doc.text(v.translation, MARGIN_X, y);
-    y += 6.5;
+    w.entry(v.base, conjugated, v.example, v.translation, DARK, RED);
   }
 
-  return doc;
+  return w.doc;
 }
 
-/** Runs entirely client-side (jsPDF needs a browser) — only call from
- * "use client" code, same convention as certificatePdf.ts. */
-export function downloadVerbsPdf(reference: VerbReference, langLabel: string) {
-  const doc = buildVerbsDoc(reference, langLabel);
+export async function downloadVerbsPdf(reference: VerbReference, langLabel: string) {
+  const doc = await buildVerbsDoc(reference, langLabel);
   doc.save(`BM-Academia-verbes-${langLabel}.pdf`);
 }

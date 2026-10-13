@@ -14,10 +14,28 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
 
+  const [downloading, setDownloading] = useState(false);
+
   const filteredParticles = useMemo(
     () => (reference.kind === "particles" ? reference.particles.filter((p) => matches(q, p.particle, p.pinyin, p.translation, p.example)) : []),
     [reference, q]
   );
+  const filteredChineseVerbs = useMemo(
+    () => (reference.kind === "particles" ? reference.verbs.filter((v) => matches(q, v.hanzi, v.pinyin, v.meaning, v.translation)) : []),
+    [reference, q]
+  );
+
+  const download = async () => {
+    setDownloading(true);
+    try {
+      await downloadVerbsPdf(reference, langLabel);
+    } catch (error) {
+      console.error("PDF generation failed:", error);
+      alert("Le PDF n'a pas pu être généré. Réessayez.");
+    } finally {
+      setDownloading(false);
+    }
+  };
   const filteredIrregular = useMemo(
     () => (reference.kind === "standard" ? reference.irregular.filter((v) => matches(q, v.base, v.forms, v.translation)) : []),
     [reference, q]
@@ -28,21 +46,25 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
   );
 
   const noResults =
-    reference.kind === "particles" ? filteredParticles.length === 0 : filteredIrregular.length === 0 && filteredRegular.length === 0;
+    reference.kind === "particles"
+      ? filteredParticles.length === 0 && filteredChineseVerbs.length === 0
+      : filteredIrregular.length === 0 && filteredRegular.length === 0;
 
-  const placeholder = reference.kind === "particles" ? "Rechercher une particule…" : "Rechercher un verbe (ou sa traduction)…";
+  const placeholder =
+    reference.kind === "particles" ? "Rechercher un verbe, une particule, un pinyin ou une traduction…" : "Rechercher un verbe (ou sa traduction)…";
 
   return (
     <div className="bg-surface rounded-3xl p-8 border border-line shadow-xl">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <h2 className="text-2xl font-bold text-red-500 flex items-center gap-2">
-          <BookText size={22} /> {reference.kind === "particles" ? "Particules d'aspect" : "Verbes irréguliers & réguliers"}
+          <BookText size={22} /> {reference.kind === "particles" ? "Verbes & particules" : "Verbes irréguliers & réguliers"}
         </h2>
         <button
-          onClick={() => downloadVerbsPdf(reference, langLabel)}
-          className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all bg-surface-alt shrink-0"
+          onClick={download}
+          disabled={downloading}
+          className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all bg-surface-alt shrink-0 disabled:opacity-50"
         >
-          <Download size={15} /> Télécharger en PDF
+          <Download size={15} /> {downloading ? "Préparation du PDF…" : "Télécharger en PDF"}
         </button>
       </div>
 
@@ -83,6 +105,42 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
                   <div className="px-3 py-3 text-ink-soft">{p.translation}</div>
                 </div>
               ))}
+            </div>
+          )}
+
+          {filteredChineseVerbs.length > 0 && (
+            <div className="mt-8">
+              <div className="flex items-center gap-2.5 mb-3">
+                <span className="w-1.5 h-5 bg-red-600 rounded-full" />
+                <h3 className="text-sm font-extrabold text-ink uppercase tracking-wide">
+                  Les {reference.verbs.length} verbes essentiels
+                </h3>
+              </div>
+              <p className="text-xs text-ink-faint mb-3">{reference.verbsIntro}</p>
+              <div className="border border-line rounded-2xl overflow-hidden overflow-x-auto">
+                <div className="min-w-[640px]">
+                  <div className="grid grid-cols-[80px_110px_1.7fr_1.3fr] bg-surface-sunken text-ink-faint text-[11px] font-bold uppercase tracking-wide">
+                    <div className="px-3 py-2.5">Verbe</div>
+                    <div className="px-3 py-2.5">Pinyin / sens</div>
+                    <div className="px-3 py-2.5">Exemple</div>
+                    <div className="px-3 py-2.5">Traduction</div>
+                  </div>
+                  {filteredChineseVerbs.map((v, i) => (
+                    <div
+                      key={v.hanzi}
+                      className={`grid grid-cols-[80px_110px_1.7fr_1.3fr] text-sm border-t border-line ${i % 2 === 0 ? "" : "bg-surface-sunken/40"}`}
+                    >
+                      <div className="px-3 py-2.5 font-bold text-red-500 text-lg">{v.hanzi}</div>
+                      <div className="px-3 py-2.5 text-ink-soft">
+                        <p className="italic">{v.pinyin}</p>
+                        <p className="text-xs text-ink-faint">{v.meaning}</p>
+                      </div>
+                      <div className="px-3 py-2.5 text-ink-soft">{v.example}</div>
+                      <div className="px-3 py-2.5 text-ink-soft">{v.translation}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </>

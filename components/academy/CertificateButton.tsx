@@ -13,8 +13,8 @@ interface CertificateButtonProps {
 }
 
 export default function CertificateButton({ studentName, levelTitle, average, certificateId, className, onGenerated }: CertificateButtonProps) {
-  const generate = () => {
-    generateCertificatePdf({ studentName, levelTitle, average, certificateId });
+  const generate = async () => {
+    await generateCertificatePdf({ studentName, levelTitle, average, certificateId });
     onGenerated?.();
   };
 

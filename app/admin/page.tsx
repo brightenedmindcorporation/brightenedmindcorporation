@@ -701,7 +701,7 @@ export default function AdminPage() {
       const average = Number(certAverage) || 0;
       const levelTitle = certLevelTitle.trim() || `${languageLabel(certLangCode)} — Niveau ${certLevel}`;
 
-      generateCertificatePdf({ studentName: certName.trim(), levelTitle, average, certificateId });
+      await generateCertificatePdf({ studentName: certName.trim(), levelTitle, average, certificateId });
 
       const response = await fetch("/api/admin/certificates", {
         method: "POST",
@@ -779,9 +779,9 @@ export default function AdminPage() {
     }
   };
 
-  const openCertificatePreview = (opts: { studentName: string; levelTitle: string; average: number; certificateId: string }) => {
+  const openCertificatePreview = async (opts: { studentName: string; levelTitle: string; average: number; certificateId: string }) => {
     if (certPreviewUrl) URL.revokeObjectURL(certPreviewUrl);
-    setCertPreviewUrl(getCertificatePreviewUrl(opts));
+    setCertPreviewUrl(await getCertificatePreviewUrl(opts));
   };
 
   const closeCertificatePreview = () => {
