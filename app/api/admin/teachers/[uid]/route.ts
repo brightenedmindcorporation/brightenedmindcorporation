@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { mailFrom } from "@/lib/mailFrom";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller, normalizeAssignments } from "@/lib/teacherAuth";
+import { sendWithText } from "@/lib/mailText";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bmcorporation-cd.com";
 
@@ -28,7 +29,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ ui
       const inviteLink = await getAdminAuth().generatePasswordResetLink(teacher.email, { url: `${SITE_URL}/teacher` });
       let emailSent = false;
       if (process.env.RESEND_API_KEY) {
-        const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
+        const { error } = await sendWithText(new Resend(process.env.RESEND_API_KEY), {
           from: mailFrom("BM Academia"),
           to: teacher.email,
           subject: "Votre accès enseignant BM Academia",

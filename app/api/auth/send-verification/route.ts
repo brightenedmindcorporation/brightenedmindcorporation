@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { mailFrom } from "@/lib/mailFrom";
 import { isAdminConfigured, getAdminAuth } from "@/lib/firebase-admin";
+import { sendWithText } from "@/lib/mailText";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bmcorporation-cd.com";
 
@@ -44,7 +45,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Envoi d'e-mails non configuré." }, { status: 500 });
     }
     const name = (user.displayName || "").replace(/[<>&"]/g, "");
-    const { error } = await new Resend(process.env.RESEND_API_KEY).emails.send({
+    const { error } = await sendWithText(new Resend(process.env.RESEND_API_KEY), {
       from: mailFrom("BM Academia"),
       to: user.email,
       replyTo: "info@bmcorporation-cd.com",

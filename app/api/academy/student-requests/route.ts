@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -81,7 +82,7 @@ export async function POST(request: Request) {
     if (process.env.RESEND_API_KEY) {
       try {
         const resend = new Resend(process.env.RESEND_API_KEY);
-        const { error: sendError } = await resend.emails.send({
+        const { error: sendError } = await sendWithText(resend, {
           from: mailFrom("Brightened Mind"),
           to: ADMIN_EMAIL,
           replyTo: decoded.email || undefined,

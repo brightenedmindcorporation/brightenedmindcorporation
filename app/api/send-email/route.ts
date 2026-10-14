@@ -2,6 +2,7 @@ import { mailFrom } from "@/lib/mailFrom";
 import { Resend } from "resend";
 import { isAdminConfigured } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
+import { sendWithText } from "@/lib/mailText";
 
 const esc = (v: unknown) =>
   String(v ?? "")
@@ -41,7 +42,7 @@ export async function POST(req: Request) {
       studyDays === 3 || studyDays === 5 ? `<p><b>Rythme d'étude :</b> ${studyDays} jours / semaine</p>` : "";
 
     const resend = new Resend(apiKey);
-    const { data, error } = await resend.emails.send({
+    const { data, error } = await sendWithText(resend, {
       from: mailFrom("Brightened Mind Academia"),
       to: String(email).trim(),
       replyTo: "info@bmcorporation-cd.com",

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 import { mailFrom } from "@/lib/mailFrom";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller, normalizeAssignments } from "@/lib/teacherAuth";
+import { sendWithText } from "@/lib/mailText";
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +80,7 @@ export async function POST(request: Request) {
     let emailSent = false;
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      const { error } = await resend.emails.send({
+      const { error } = await sendWithText(resend, {
         from: mailFrom("BM Academia"),
         to: cleanEmail,
         subject: "Votre compte enseignant BM Academia",

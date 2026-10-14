@@ -2,6 +2,8 @@ import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { sendGmailMessage, type GmailAttachment } from "@/lib/gmail";
+import { htmlToText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const ALLOWED_COLLECTIONS = ["projectRequests", "devisRequests", "jobApplications", "studentRequests"];
@@ -41,6 +43,7 @@ export async function POST(request: Request) {
     const message = form.get("message")?.toString();
     const collection = form.get("collection")?.toString();
     const docId = form.get("docId")?.toString();
+    const via = form.get("via")?.toString() === "resend" ? "resend" : "gmail";
 
     if (!idToken) return NextResponse.json({ error: "idToken requis." }, { status: 400 });
     if (!to || !subject || !message) {
@@ -61,15 +64,40 @@ export async function POST(request: Request) {
       attachments.push({ filename: file.name, content: Buffer.from(await file.arrayBuffer()) });
     }
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { error: sendError } = await resend.emails.send({
-      from: mailFrom("BM Corporation"),
-      to,
-      replyTo: ADMIN_EMAIL,
-      subject,
-      html: `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(message).replace(/\n/g, "<br/>")}</div>`,
-      attachments: attachments.length ? attachments : undefined,
-    });
+    // Preferred path: send through the admin's own Gmail account. Mail from a
+    // Gmail account lands in the recipient's inbox far more reliably than
+    // mail from a brand-new domain (which Gmail often files as spam), and
+    // the customer's answer comes straight back to the admin's mailbox.
+    let sentVia: "gmail" | "resend" = "resend";
+    let sendError: { message?: string } | null = null;
+    if (via === "gmail") {
+      try {
+        const gmailAttachments: GmailAttachment[] = attachments.map((a, i) => ({
+          filename: a.filename,
+          mimeType: "application/octet-stream",
+          content: a.content,
+        }));
+        await sendGmailMessage({ from: ADMIN_EMAIL, to, subject, body: String(message), attachments: gmailAttachments });
+        sentVia = "gmail";
+      } catch (gmailError: any) {
+        console.error("Gmail send failed, falling back to Resend:", gmailError);
+      }
+    }
+
+    if (sentVia !== "gmail") {
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      const html = `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(message).replace(/\n/g, "<br/>")}</div>`;
+      const result = await resend.emails.send({
+        from: mailFrom("BM Corporation"),
+        to,
+        replyTo: ADMIN_EMAIL,
+        subject,
+        html,
+        text: htmlToText(html),
+        attachments: attachments.length ? attachments : undefined,
+      });
+      sendError = result.error;
+    }
 
     // The Resend SDK returns an {error} field on an API-level rejection
     // instead of throwing — not checking it meant a reply could "succeed"
@@ -88,7 +116,7 @@ export async function POST(request: Request) {
       await adminDb.collection(collection).doc(docId).update(update);
     }
 
-    return NextResponse.json({ status: "success" });
+    return NextResponse.json({ status: "success", sentVia });
   } catch (error: any) {
     console.error("Error sending admin reply:", error);
     return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });

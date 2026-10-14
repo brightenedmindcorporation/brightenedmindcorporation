@@ -2,6 +2,7 @@ import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const VALID_STATUSES = ["new", "reviewing", "accepted", "rejected"];
@@ -9,7 +10,7 @@ const VALID_STATUSES = ["new", "reviewing", "accepted", "rejected"];
 async function sendAcknowledgementEmail(email: string, name: string, title: string) {
   if (!process.env.RESEND_API_KEY) return;
   const resend = new Resend(process.env.RESEND_API_KEY);
-  await resend.emails.send({
+  await sendWithText(resend, {
     from: mailFrom("Brightened Mind"),
     to: email,
     subject: `Votre candidature — ${title}`,

@@ -191,6 +191,7 @@ export default function AdminPage() {
   const [replySubject, setReplySubject] = useState("");
   const [replyMessage, setReplyMessage] = useState("");
   const [replyAttachments, setReplyAttachments] = useState<File[]>([]);
+  const [replyVia, setReplyVia] = useState<"gmail" | "resend">("gmail");
   const [replySending, setReplySending] = useState(false);
 
   // --- Gmail inbox tab ---
@@ -1010,11 +1011,15 @@ export default function AdminPage() {
       form.append("message", replyMessage);
       form.append("collection", replyTarget.collection);
       form.append("docId", replyTarget.docId);
+      form.append("via", replyVia);
       replyAttachments.forEach((file) => form.append("attachments", file));
 
       const response = await fetch("/api/admin/send-reply", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      if (replyVia === "gmail" && result.sentVia === "resend") {
+        alert("Gmail n'étant pas disponible, le message est parti par l'adresse BM Corporation (noreply). Reconnectez Gmail dans l'onglet Mail pour de meilleurs résultats.");
+      }
 
       setReplyTarget(null);
       setReplyMessage("");
@@ -3929,8 +3934,17 @@ export default function AdminPage() {
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-1">Répondre sur le site</h3>
             <p className="text-xs text-ink-soft mb-4">
-              Le message part immédiatement par email à <span className="text-ink font-semibold">{replyTarget.to}</span>, depuis l'adresse centrale BM Corporation.
+              Le message part immédiatement par e-mail à <span className="text-ink font-semibold">{replyTarget.to}</span>.
             </p>
+            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Envoyer depuis</label>
+            <select
+              value={replyVia}
+              onChange={(e) => setReplyVia(e.target.value as "gmail" | "resend")}
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+            >
+              <option value="gmail">Mon Gmail (recommandé — arrive en boîte de réception, la réponse revient ici)</option>
+              <option value="resend">Adresse BM Corporation (noreply@bmcorporation-cd.com)</option>
+            </select>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
             <input
               type="text"

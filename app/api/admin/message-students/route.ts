@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { getCaller, teachesLanguage } from "@/lib/teacherAuth";
+import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -117,7 +118,7 @@ export async function POST(request: Request) {
       let lastError = "";
       for (let i = 0; i < emails.length; i++) {
         if (i > 0) await new Promise((r) => setTimeout(r, 600));
-        const { error: sendError } = await resend.emails.send({
+        const { error: sendError } = await sendWithText(resend, {
           from: mailFrom("BM Corporation Academia"),
           to: emails[i],
           replyTo: caller.role === "teacher" ? caller.email : ADMIN_EMAIL,

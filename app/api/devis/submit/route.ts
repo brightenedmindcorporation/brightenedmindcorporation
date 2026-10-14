@@ -5,6 +5,7 @@ import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
+import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -73,7 +74,7 @@ export async function POST(request: Request) {
 
     if (process.env.RESEND_API_KEY) {
       const resend = new Resend(process.env.RESEND_API_KEY);
-      await resend.emails.send({
+      await sendWithText(resend, {
         from: mailFrom("Brightened Mind"),
         to: ADMIN_EMAIL,
         replyTo: email,

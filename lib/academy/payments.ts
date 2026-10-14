@@ -3,6 +3,7 @@ import "server-only";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { generateMatriculeAdmin } from "@/lib/academy/matricule-admin";
+import { sendWithText } from "@/lib/mailText";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -27,7 +28,7 @@ function isGatewaySuccess(status: string): boolean {
 }
 
 async function sendMatriculeEmail(email: string, amount: number | undefined, currency: string | undefined, matricule: string) {
-  const { error } = await resend.emails.send({
+  const { error } = await sendWithText(resend, {
     from: mailFrom("Brightened Mind Academia"),
     to: email,
     subject: "Confirmation d'inscription & Votre Student ID BMCA",

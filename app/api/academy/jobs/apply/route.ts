@@ -6,6 +6,7 @@ import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isCloudinaryConfigured, uploadBufferToCloudinary } from "@/lib/cloudinary";
+import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/;
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
     // The admin email with the attached files is the only place these
     // files end up — if it fails to send, the application must be
     // treated as failed rather than silently lost.
-    await resend.emails.send({
+    await sendWithText(resend, {
       from: mailFrom("Brightened Mind"),
       to: ADMIN_EMAIL,
       replyTo: email,
@@ -155,7 +156,7 @@ export async function POST(request: Request) {
     }
 
     try {
-      await resend.emails.send({
+      await sendWithText(resend, {
         from: mailFrom("Brightened Mind"),
         to: email,
         subject: `Candidature reçue — ${announcementTitle}`,
