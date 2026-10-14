@@ -37,32 +37,80 @@ async function authedFetch(url: string, init: RequestInit = {}) {
   return result;
 }
 
-/** Checkbox grid: for each language/program, which levels the teacher teaches. */
+const CATEGORIES: { id: string; label: string; items: typeof PROGRAMS }[] = [
+  { id: "languages", label: "Langues", items: PROGRAMS.slice(0, availableLanguages.length) },
+  { id: "programs", label: "Formations (Bureautique, Visuel, Logiciels…)", items: PROGRAMS.slice(availableLanguages.length) },
+];
+
+/**
+ * Which languages/programs and levels the teacher teaches. Besides the
+ * per-level checkboxes: "tous les niveaux" per row, "toute la catégorie"
+ * per group, and a global select-all / clear.
+ */
 function AssignmentPicker({ value, onChange }: { value: Assignment[]; onChange: (v: Assignment[]) => void }) {
-  const has = (code: string, level: number) => value.some((a) => a.langCode === code && a.levels.includes(level));
+  const levelsOf = (code: string) => value.find((a) => a.langCode === code)?.levels ?? [];
+  const has = (code: string, level: number) => levelsOf(code).includes(level);
+
+  const setLevels = (base: Assignment[], code: string, levels: number[]) => {
+    const rest = base.filter((a) => a.langCode !== code);
+    return levels.length > 0 ? [...rest, { langCode: code, levels: [...levels].sort() }] : rest;
+  };
   const toggle = (code: string, level: number) => {
-    const current = value.find((a) => a.langCode === code);
-    let next: Assignment[];
-    if (!current) next = [...value, { langCode: code, levels: [level] }];
-    else {
-      const levels = current.levels.includes(level) ? current.levels.filter((l) => l !== level) : [...current.levels, level].sort();
-      next = value.map((a) => (a.langCode === code ? { ...a, levels } : a)).filter((a) => a.levels.length > 0);
-    }
+    const cur = levelsOf(code);
+    onChange(setLevels(value, code, cur.includes(level) ? cur.filter((l) => l !== level) : [...cur, level]));
+  };
+  const rowAll = (p: (typeof PROGRAMS)[number]) => levelsOf(p.code).length === p.levels.length;
+  const toggleRow = (p: (typeof PROGRAMS)[number]) => onChange(setLevels(value, p.code, rowAll(p) ? [] : p.levels));
+
+  const groupAll = (items: typeof PROGRAMS) => items.every(rowAll);
+  const toggleGroup = (items: typeof PROGRAMS) => {
+    let next = value;
+    for (const p of items) next = setLevels(next, p.code, groupAll(items) ? [] : p.levels);
     onChange(next);
   };
+  const everything = PROGRAMS.every(rowAll);
+
+  const linkBtn = "text-xs font-semibold text-red-500 hover:text-red-400";
+
   return (
-    <div className="grid sm:grid-cols-2 gap-2">
-      {PROGRAMS.map((p) => (
-        <div key={p.code} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-line bg-surface-alt">
-          <span className="text-sm font-semibold text-ink">{p.label}</span>
-          <span className="flex gap-3">
-            {p.levels.map((level) => (
-              <label key={level} className="flex items-center gap-1 text-xs text-ink-soft cursor-pointer">
-                <input type="checkbox" checked={has(p.code, level)} onChange={() => toggle(p.code, level)} />
-                {p.levels.length > 1 ? `Niv. ${level}` : "Cours"}
-              </label>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-ink-faint">
+          {value.reduce((n, a) => n + a.levels.length, 0)} cours sélectionné(s)
+        </p>
+        <button type="button" onClick={() => onChange(everything ? [] : PROGRAMS.reduce<Assignment[]>((acc, p) => setLevels(acc, p.code, p.levels), []))} className={linkBtn}>
+          {everything ? "Tout désélectionner" : "Tout sélectionner"}
+        </button>
+      </div>
+      {CATEGORIES.map((cat) => (
+        <div key={cat.id} className="space-y-2">
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-bold text-ink uppercase tracking-wide">{cat.label}</p>
+            <button type="button" onClick={() => toggleGroup(cat.items)} className={linkBtn}>
+              {groupAll(cat.items) ? "Désélectionner la catégorie" : "Sélectionner toute la catégorie"}
+            </button>
+          </div>
+          <div className="grid sm:grid-cols-2 gap-2">
+            {cat.items.map((p) => (
+              <div key={p.code} className="flex items-center justify-between gap-3 px-3 py-2 rounded-xl border border-line bg-surface-alt">
+                <span className="text-sm font-semibold text-ink">{p.label}</span>
+                <span className="flex items-center gap-3">
+                  {p.levels.length > 1 && (
+                    <label className="flex items-center gap-1 text-xs font-semibold text-ink cursor-pointer">
+                      <input type="checkbox" checked={rowAll(p)} onChange={() => toggleRow(p)} />
+                      Tous
+                    </label>
+                  )}
+                  {p.levels.map((level) => (
+                    <label key={level} className="flex items-center gap-1 text-xs text-ink-soft cursor-pointer">
+                      <input type="checkbox" checked={has(p.code, level)} onChange={() => toggle(p.code, level)} />
+                      {p.levels.length > 1 ? `Niv. ${level}` : "Cours"}
+                    </label>
+                  ))}
+                </span>
+              </div>
             ))}
-          </span>
+          </div>
         </div>
       ))}
     </div>

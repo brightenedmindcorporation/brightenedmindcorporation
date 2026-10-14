@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { teacherAuth as auth } from "@/lib/firebaseTeacher";
 import { availableLanguages } from "@/content/curriculum";
 import { getOtherProgramLabel } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
