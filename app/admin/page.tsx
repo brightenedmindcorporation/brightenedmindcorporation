@@ -1960,7 +1960,7 @@ export default function AdminPage() {
                   </p>
                   <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
                   {s.emailUnverified && (
-                    <p className="text-amber-500 text-xs font-semibold">✉ E-mail non vérifié — approbation bloquée tant que l'étudiant n'a pas cliqué sur le lien reçu</p>
+                    <p className="text-amber-500 text-xs font-semibold">✉ E-mail non confirmé par l'étudiant (information — vous pouvez approuver quand même)</p>
                   )}
 
                   <div className="flex flex-wrap gap-3 mt-4">

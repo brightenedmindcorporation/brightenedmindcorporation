@@ -33,8 +33,8 @@ function VerifyEmail() {
           <>
             <h1 className="text-2xl font-bold mb-2">Adresse e-mail confirmée ✓</h1>
             <p className="text-ink-soft text-sm mb-6">
-              Merci ! L'administration peut maintenant approuver votre inscription. Vous recevrez un e-mail avec votre
-              Student ID dès que ce sera fait.
+              Merci ! Votre adresse est confirmée : vous recevrez ici votre Student ID et les notifications de vos
+              cours.
             </p>
             <Link
               href="/login"

@@ -27,6 +27,7 @@ function RegisterForm() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [emailConfirm, setEmailConfirm] = useState("");
   const [password, setPassword] = useState("");
   const [level, setLevel] = useState("Level 1");
   const [programCode, setProgramCode] = useState(initialProgram);
@@ -42,6 +43,11 @@ function RegisterForm() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase()) {
+      setError("Les deux adresses e-mail ne sont pas identiques. Vérifiez votre saisie.");
+      return;
+    }
 
     try {
       setLoading(true);
@@ -148,9 +154,9 @@ function RegisterForm() {
           <h1 className="text-2xl font-bold mb-2">Inscription enregistrée !</h1>
           {verificationSent && (
             <p className="text-sm text-amber-500 bg-amber-500/10 border border-amber-600/30 rounded-xl p-3 mb-4">
-              Un e-mail de vérification vient d'être envoyé à <b>{email.trim()}</b>. Cliquez sur le lien qu'il contient
-              (pensez à regarder les courriers indésirables) : l'administration ne peut approuver votre inscription
-              qu'une fois votre adresse confirmée.
+              Un e-mail de confirmation a été envoyé à <b>{email.trim()}</b> (pensez à regarder les courriers
+              indésirables). Cliquez sur le lien qu'il contient pour confirmer votre adresse : c'est elle qui recevra
+              votre Student ID et les notifications de vos cours.
             </p>
           )}
           <p className="text-ink-soft text-sm mb-6">
@@ -215,6 +221,24 @@ function RegisterForm() {
               className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+            <p className="text-xs text-ink-faint mt-1.5">
+              Utilisez une <b>vraie adresse e-mail que vous consultez</b> : vous y recevrez votre Student ID et les
+              notifications de votre apprentissage (cours en direct, messages de vos enseignants, certificats…).
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Confirmez votre e-mail</label>
+            <input
+              type="email"
+              required
+              placeholder="Retapez votre adresse e-mail"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
+              value={emailConfirm}
+              onChange={(e) => setEmailConfirm(e.target.value)}
+              onPaste={(e) => e.preventDefault()}
+              autoComplete="off"
             />
           </div>
 

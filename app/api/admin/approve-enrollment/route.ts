@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { generateMatriculeAdmin } from "@/lib/academy/matricule-admin";
-import { unverifiedEmailMessage } from "@/lib/emailVerification";
 import { createNotification } from "@/lib/notifications";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
@@ -28,9 +27,6 @@ export async function POST(request: Request) {
     if (decoded.email !== ADMIN_EMAIL) {
       return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
     }
-
-    const unverified = await unverifiedEmailMessage(String(enrollmentId).split("_")[0]);
-    if (unverified) return NextResponse.json({ error: unverified }, { status: 400 });
 
     const adminDb = getAdminDb();
     const enrollmentRef = adminDb.collection("enrollments").doc(enrollmentId);
