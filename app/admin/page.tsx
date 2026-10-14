@@ -37,6 +37,7 @@ import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";
 import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
+import TeachersTab from "@/components/admin/TeachersTab";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
 
 export const dynamic = "force-dynamic";
@@ -55,7 +56,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1340,7 +1341,7 @@ export default function AdminPage() {
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
     const requestedTab = params.get("tab");
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1786,6 +1787,7 @@ export default function AdminPage() {
             { id: "requests", label: "Messages Étudiants", badge: studentRequests.filter((r) => r.status === "new").length },
             { id: "progress", label: "Progression", badge: 0 },
             { id: "certificates", label: "Certificats", badge: 0 },
+            { id: "teachers", label: "Professeurs", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
               key={t.id}
@@ -2228,6 +2230,9 @@ export default function AdminPage() {
             )}
           </div>
         )}
+
+        {/* ================= TEACHERS TAB ================= */}
+        {tab === "teachers" && <TeachersTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

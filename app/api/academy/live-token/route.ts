@@ -3,6 +3,7 @@ import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admi
 import { generateJaasToken, isJaasAuthConfigured } from "@/lib/academy/jaasToken";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import { isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
+import { canTeach } from "@/lib/teacherAuth";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -33,7 +34,19 @@ export async function POST(request: Request) {
     }
 
     const decoded = await getAdminAuth().verifyIdToken(idToken);
-    const isAdmin = decoded.email === ADMIN_EMAIL;
+    let isAdmin = decoded.email === ADMIN_EMAIL;
+    let teacherName: string | null = null;
+
+    // An active teacher assigned to this language/level hosts the room as
+    // moderator, exactly like the admin.
+    if (!isAdmin) {
+      const teacherSnap = await getAdminDb().collection("teachers").doc(decoded.uid).get();
+      const t = teacherSnap.data();
+      if (teacherSnap.exists && t?.active !== false && canTeach(t?.assignments || [], String(langCode), Number(level))) {
+        isAdmin = true;
+        teacherName = t?.name || null;
+      }
+    }
 
     if (!isAdmin) {
       const adminDb = getAdminDb();
@@ -71,7 +84,7 @@ export async function POST(request: Request) {
     const roomName = getLiveRoomName(langCode, Number(level));
     const token = generateJaasToken({
       appId,
-      name: decoded.name || decoded.email || (isAdmin ? "Enseignant" : "Étudiant"),
+      name: teacherName || decoded.name || decoded.email || (isAdmin ? "Enseignant" : "Étudiant"),
       email: decoded.email || "",
       moderator: isAdmin,
     });

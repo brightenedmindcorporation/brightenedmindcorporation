@@ -1,7 +1,8 @@
 import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
-import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { getCaller, teachesLanguage } from "@/lib/teacherAuth";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -40,9 +41,19 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Destinataire(s), sujet et message sont requis." }, { status: 400 });
     }
 
-    const decoded = await getAdminAuth().verifyIdToken(idToken);
-    if (decoded.email !== ADMIN_EMAIL) {
-      return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
+    const caller = await getCaller(idToken);
+    if (caller.role === "teacher") {
+      // A teacher can only message students enrolled in a language they teach.
+      const db = getAdminDb();
+      for (const r of recipients) {
+        const enrolls = await db.collection("enrollments").where("uid", "==", r.uid).get();
+        const ok = enrolls.docs.some(
+          (d) => d.data().status === "Approved" && teachesLanguage(caller.assignments, d.data().langCode)
+        );
+        if (!ok) {
+          return NextResponse.json({ error: "Vous ne pouvez écrire qu'à vos propres étudiants." }, { status: 403 });
+        }
+      }
     }
 
     const attachments: { filename: string; content: Buffer }[] = [];
@@ -89,6 +100,9 @@ export async function POST(request: Request) {
       recipients,
       attachmentNames: attachments.map((a) => a.filename),
       createdAt,
+      senderUid: caller.uid,
+      senderName: caller.name,
+      senderRole: caller.role,
     });
 
     let emailWarning: string | null = null;
@@ -106,7 +120,7 @@ export async function POST(request: Request) {
         const { error: sendError } = await resend.emails.send({
           from: mailFrom("BM Corporation Academia"),
           to: emails[i],
-          replyTo: ADMIN_EMAIL,
+          replyTo: caller.role === "teacher" ? caller.email : ADMIN_EMAIL,
           subject,
           html: `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(body).replace(/\n/g, "<br/>")}</div>`,
           attachments: attachments.length ? attachments : undefined,
