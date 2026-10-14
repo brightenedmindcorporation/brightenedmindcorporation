@@ -1,16 +1,69 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Search, Download, BookText } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Search, Download, BookText, CheckCircle2 } from "lucide-react";
 import type { VerbReference } from "@/content/verbs";
 import { downloadVerbsPdf } from "@/lib/academy/verbsPdf";
+import SpeakIcon from "@/components/academy/SpeakIcon";
+import { irregularVerbSpeech, regularVerbSpeech, verbExampleSpeech, verbPhrases } from "@/lib/academy/audioClips";
+import { downloadLessonAudio, isLessonCached } from "@/lib/academy/lessonAudioPlayer";
 
 function matches(query: string, ...fields: string[]): boolean {
   if (!query) return true;
   return fields.some((f) => f.toLowerCase().includes(query));
 }
 
-export default function VerbsReference({ reference, langLabel }: { reference: VerbReference; langLabel: string }) {
+/** Downloads every verb recording so the whole page can be heard offline. */
+function OfflineVerbsAudio({ reference, langSlug }: { reference: VerbReference; langSlug: string }) {
+  const phrases = useMemo(() => verbPhrases(reference), [reference]);
+  const [state, setState] = useState<"idle" | "loading" | "done">("idle");
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    isLessonCached(langSlug, phrases).then((cached) => {
+      if (!cancelled && cached) setState("done");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [langSlug, phrases]);
+
+  if (typeof window !== "undefined" && !("caches" in window)) return null;
+
+  if (state === "done") {
+    return (
+      <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-500">
+        <CheckCircle2 size={16} /> Audios des verbes disponibles hors ligne
+      </span>
+    );
+  }
+  return (
+    <button
+      onClick={async () => {
+        setState("loading");
+        setProgress(0);
+        const stored = await downloadLessonAudio(langSlug, phrases, (done) => setProgress(done));
+        setState(stored > 0 ? "done" : "idle");
+      }}
+      disabled={state === "loading"}
+      className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 transition disabled:opacity-60"
+    >
+      <Download size={15} />
+      {state === "loading" ? `Téléchargement… ${progress}/${phrases.length}` : "Télécharger les audios pour les écouter hors ligne"}
+    </button>
+  );
+}
+
+export default function VerbsReference({
+  reference,
+  langLabel,
+  langSlug,
+}: {
+  reference: VerbReference;
+  langLabel: string;
+  langSlug: string;
+}) {
   const [query, setQuery] = useState("");
   const q = query.trim().toLowerCase();
 
@@ -80,6 +133,10 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
         />
       </div>
 
+      <div className="mb-6">
+        <OfflineVerbsAudio reference={reference} langSlug={langSlug} />
+      </div>
+
       {reference.kind === "particles" ? (
         <>
           <p className="text-sm text-ink-soft mb-5">{reference.intro}</p>
@@ -100,7 +157,10 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
                   <div className="px-3 py-3 text-ink-soft italic">{p.pinyin}</div>
                   <div className="px-3 py-3 text-ink-soft">
                     <p>{p.usage}</p>
-                    <p className="mt-1 text-ink-faint italic">{p.example}</p>
+                    <p className="mt-1 text-ink-faint italic flex items-start gap-2">
+                      <SpeakIcon text={verbExampleSpeech(p.example)} langSlug={langSlug} label="Écouter l'exemple" />
+                      <span>{p.example}</span>
+                    </p>
                   </div>
                   <div className="px-3 py-3 text-ink-soft">{p.translation}</div>
                 </div>
@@ -130,12 +190,18 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
                       key={v.hanzi}
                       className={`grid grid-cols-[80px_110px_1.7fr_1.3fr] text-sm border-t border-line ${i % 2 === 0 ? "" : "bg-surface-sunken/40"}`}
                     >
-                      <div className="px-3 py-2.5 font-bold text-red-500 text-lg">{v.hanzi}</div>
+                      <div className="px-3 py-2.5 font-bold text-red-500 text-lg flex items-center gap-2">
+                        {v.hanzi}
+                        <SpeakIcon text={v.hanzi} langSlug={langSlug} label="Écouter le verbe" />
+                      </div>
                       <div className="px-3 py-2.5 text-ink-soft">
                         <p className="italic">{v.pinyin}</p>
                         <p className="text-xs text-ink-faint">{v.meaning}</p>
                       </div>
-                      <div className="px-3 py-2.5 text-ink-soft">{v.example}</div>
+                      <div className="px-3 py-2.5 text-ink-soft flex items-start gap-2">
+                        <SpeakIcon text={verbExampleSpeech(v.example)} langSlug={langSlug} label="Écouter l'exemple" />
+                        <span>{v.example}</span>
+                      </div>
                       <div className="px-3 py-2.5 text-ink-soft">{v.translation}</div>
                     </div>
                   ))}
@@ -166,9 +232,15 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
                       key={v.base}
                       className={`grid grid-cols-[110px_160px_1.6fr_1.3fr] text-sm border-t border-line ${i % 2 === 0 ? "" : "bg-surface-sunken/40"}`}
                     >
-                      <div className="px-3 py-2.5 font-bold text-red-500">{v.base}</div>
+                      <div className="px-3 py-2.5 font-bold text-red-500 flex items-center gap-2">
+                        {v.base}
+                        <SpeakIcon text={irregularVerbSpeech(v)} langSlug={langSlug} label="Écouter le verbe et ses formes" />
+                      </div>
                       <div className="px-3 py-2.5 text-ink-soft">{v.forms}</div>
-                      <div className="px-3 py-2.5 text-ink-soft italic">{v.example}</div>
+                      <div className="px-3 py-2.5 text-ink-soft italic flex items-start gap-2">
+                        <SpeakIcon text={verbExampleSpeech(v.example)} langSlug={langSlug} label="Écouter l'exemple" />
+                        <span>{v.example}</span>
+                      </div>
                       <div className="px-3 py-2.5 text-ink-soft">{v.translation}</div>
                     </div>
                   ))}
@@ -197,7 +269,10 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
                       key={v.base}
                       className={`grid grid-cols-[110px_160px_1.6fr_1.3fr] text-sm border-t border-line ${i % 2 === 0 ? "" : "bg-surface-sunken/40"}`}
                     >
-                      <div className="px-3 py-2.5 font-bold text-ink-soft">{v.base}</div>
+                      <div className="px-3 py-2.5 font-bold text-ink-soft flex items-center gap-2">
+                        {v.base}
+                        <SpeakIcon text={regularVerbSpeech(v)} langSlug={langSlug} label="Écouter le verbe conjugué" />
+                      </div>
                       <div className="px-3 py-2.5 text-ink-soft">
                         {v.prefix ? (
                           <>
@@ -211,7 +286,10 @@ export default function VerbsReference({ reference, langLabel }: { reference: Ve
                           </>
                         )}
                       </div>
-                      <div className="px-3 py-2.5 text-ink-soft italic">{v.example}</div>
+                      <div className="px-3 py-2.5 text-ink-soft italic flex items-start gap-2">
+                        <SpeakIcon text={verbExampleSpeech(v.example)} langSlug={langSlug} label="Écouter l'exemple" />
+                        <span>{v.example}</span>
+                      </div>
                       <div className="px-3 py-2.5 text-ink-soft">{v.translation}</div>
                     </div>
                   ))}

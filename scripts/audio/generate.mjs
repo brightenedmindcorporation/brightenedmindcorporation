@@ -37,7 +37,16 @@ for (const lang of selectedLangs()) {
 
   async function worker(n) {
     const tts = new MsEdgeTTS();
-    await tts.setMetadata(VOICES[lang], OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+    // The handshake itself can be rate-limited too (429): retry it.
+    for (let attempt = 1; ; attempt++) {
+      try {
+        await tts.setMetadata(VOICES[lang], OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+        break;
+      } catch (error) {
+        if (attempt >= 30) throw error;
+        await sleep(Math.min(60000, 5000 * attempt));
+      }
+    }
     while (queue.length) {
       const item = queue.shift();
       const ok = await makeClip(tts, item.text, path.join(dir, `${item.id}.mp3`), path.join(dir, `.tmp-${n}`));

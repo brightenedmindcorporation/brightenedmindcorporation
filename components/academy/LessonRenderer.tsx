@@ -3,64 +3,10 @@
 import type { Lesson } from "@/content/curriculum/types";
 import { useEffect, useMemo, useState } from "react";
 import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2 } from "lucide-react";
-import { extractSpeechText } from "@/lib/academy/audioClips";
-import { downloadLessonAudio, isLessonCached, lessonPhrases, playClip, stopClip } from "@/lib/academy/lessonAudioPlayer";
-
-// Maps our URL language slugs to BCP-47 tags for the Web Speech API.
-// Without this, every language's "Listen" buttons were reading the text
-// aloud with an English voice (the bug this fixes).
-const SPEECH_LANG: Record<string, string> = {
-  english: "en-US",
-  french: "fr-FR",
-  swahili: "sw-KE",
-  spanish: "es-ES",
-  portuguese: "pt-PT",
-  chinese: "zh-CN",
-};
-
-let cachedVoices: SpeechSynthesisVoice[] = [];
-if (typeof window !== "undefined" && "speechSynthesis" in window) {
-  cachedVoices = window.speechSynthesis.getVoices();
-  window.speechSynthesis.addEventListener("voiceschanged", () => {
-    cachedVoices = window.speechSynthesis.getVoices();
-  });
-}
-
-// Prefers a voice the device has installed locally (works without a network
-// request) over a cloud-streamed one, when the browser exposes that choice.
-function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
-  const base = langTag.split("-")[0];
-  const matches = cachedVoices.filter((v) => v.lang === langTag || v.lang.startsWith(base));
-  return matches.find((v) => v.localService) ?? matches[0];
-}
-
-// Recorded clip first (works offline once downloaded/played); the device's own
-// voice is only the fallback when no clip is available.
-async function speak(text: string, langSlug: string) {
-  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-  const played = await playClip(langSlug, text);
-  if (!played) speakWithDeviceVoice(text, langSlug);
-}
-
-function speakWithDeviceVoice(text: string, langSlug: string) {
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-  const speech = new SpeechSynthesisUtterance(text);
-  const langTag = SPEECH_LANG[langSlug] ?? "en-US";
-  speech.lang = langTag;
-  const voice = pickVoice(langTag);
-  if (voice) speech.voice = voice;
-  speech.rate = 0.9;
-  speech.pitch = 1;
-  speech.volume = 1;
-  window.speechSynthesis.speak(speech);
-}
-
-function stopSpeaking() {
-  stopClip();
-  if (!("speechSynthesis" in window)) return;
-  window.speechSynthesis.cancel();
-}
+import { extractSpeechText, lessonNarrations } from "@/lib/academy/audioClips";
+import NarrationPlayer from "@/components/academy/NarrationPlayer";
+import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
+import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
 // same channel (YouTube no longer allows disabling them entirely),
@@ -101,25 +47,6 @@ function CardTitle({ icon: Icon, children }: { icon: React.ComponentType<{ size?
     <h2 className="text-2xl font-bold text-red-500 flex items-center gap-2">
       <Icon size={22} /> {children}
     </h2>
-  );
-}
-
-function SpeakButtons({ text, langSlug, label = "Listen" }: { text: string; langSlug: string; label?: string }) {
-  return (
-    <div className="mt-6 flex flex-wrap gap-4">
-      <button
-        onClick={() => speak(text, langSlug)}
-        className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50 inline-flex items-center gap-2"
-      >
-        <Volume2 size={16} /> {label}
-      </button>
-      <button
-        onClick={stopSpeaking}
-        className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-6 py-3 rounded-xl border border-line transition"
-      >
-        ⏹ Stop
-      </button>
-    </div>
   );
 }
 
@@ -180,7 +107,7 @@ function VideoCard({ lesson }: { lesson: Lesson }) {
 }
 
 function OfflineAudioButton({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
-  const phrases = useMemo(() => lessonPhrases(lesson), [lesson]);
+  const phrases = useMemo(() => lessonPhrases(langSlug, lesson), [langSlug, lesson]);
   const [state, setState] = useState<"idle" | "loading" | "done">("idle");
   const [progress, setProgress] = useState(0);
 
@@ -223,6 +150,7 @@ function OfflineAudioButton({ lesson, langSlug }: { lesson: Lesson; langSlug: st
 }
 
 export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
+  const narration = useMemo(() => lessonNarrations(langSlug, lesson), [langSlug, lesson]);
   return (
     <div className="space-y-8">
       <Card>
@@ -239,7 +167,13 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
             </div>
           ))}
         </div>
-        <SpeakButtons text={lesson.speakText} langSlug={langSlug} label="Listen Lesson" />
+        <NarrationPlayer
+          text={narration.lesson}
+          langSlug={langSlug}
+          label="Listen Lesson"
+          onFallbackSpeak={() => speakWithDeviceVoice(narration.lesson, langSlug)}
+          onFallbackStop={stopSpeaking}
+        />
         <OfflineAudioButton lesson={lesson} langSlug={langSlug} />
       </Card>
 
@@ -253,7 +187,13 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
             <SpeakableLine key={i} text={p} langSlug={langSlug} />
           ))}
         </div>
-        <SpeakButtons text={lesson.readingSpeakText} langSlug={langSlug} label="Listen Reading" />
+        <NarrationPlayer
+          text={narration.reading}
+          langSlug={langSlug}
+          label="Listen Reading"
+          onFallbackSpeak={() => speakWithDeviceVoice(narration.reading, langSlug)}
+          onFallbackStop={stopSpeaking}
+        />
       </Card>
 
       <Card>

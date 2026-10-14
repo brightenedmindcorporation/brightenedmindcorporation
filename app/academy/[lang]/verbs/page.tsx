@@ -86,7 +86,7 @@ export default function VerbsPage() {
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{langInfo.label}</p>
           </div>
 
-          <VerbsReference reference={reference} langLabel={langInfo.label} />
+          <VerbsReference reference={reference} langLabel={langInfo.label} langSlug={langInfo.slug} />
         </div>
       </main>
     </div>
