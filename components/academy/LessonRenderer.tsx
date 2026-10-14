@@ -1,7 +1,10 @@
 "use client";
 
 import type { Lesson } from "@/content/curriculum/types";
-import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2 } from "lucide-react";
+import { extractSpeechText } from "@/lib/academy/audioClips";
+import { downloadLessonAudio, isLessonCached, lessonPhrases, playClip, stopClip } from "@/lib/academy/lessonAudioPlayer";
 
 // Maps our URL language slugs to BCP-47 tags for the Web Speech API.
 // Without this, every language's "Listen" buttons were reading the text
@@ -31,7 +34,15 @@ function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
   return matches.find((v) => v.localService) ?? matches[0];
 }
 
-function speak(text: string, langSlug: string) {
+// Recorded clip first (works offline once downloaded/played); the device's own
+// voice is only the fallback when no clip is available.
+async function speak(text: string, langSlug: string) {
+  if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  const played = await playClip(langSlug, text);
+  if (!played) speakWithDeviceVoice(text, langSlug);
+}
+
+function speakWithDeviceVoice(text: string, langSlug: string) {
   if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
   const speech = new SpeechSynthesisUtterance(text);
@@ -46,20 +57,9 @@ function speak(text: string, langSlug: string) {
 }
 
 function stopSpeaking() {
+  stopClip();
   if (!("speechSynthesis" in window)) return;
   window.speechSynthesis.cancel();
-}
-
-// Lesson lines are written as "target-language phrase (phonetics) -
-// translation" (e.g. Chinese: "你好 (nǐ hǎo) - Bonjour"). Speaking the raw
-// line would read the phonetics and the French translation aloud too, so
-// we only speak the part before the first parenthesis.
-function extractSpeechText(line: string): string {
-  const parenIndex = line.indexOf("(");
-  if (parenIndex > 0) {
-    return line.slice(0, parenIndex).trim();
-  }
-  return line;
 }
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
@@ -179,6 +179,49 @@ function VideoCard({ lesson }: { lesson: Lesson }) {
   );
 }
 
+function OfflineAudioButton({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
+  const phrases = useMemo(() => lessonPhrases(lesson), [lesson]);
+  const [state, setState] = useState<"idle" | "loading" | "done">("idle");
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    isLessonCached(langSlug, phrases).then((cached) => {
+      if (!cancelled && cached) setState("done");
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [langSlug, phrases]);
+
+  if (typeof window !== "undefined" && !("caches" in window)) return null;
+
+  const download = async () => {
+    setState("loading");
+    setProgress(0);
+    const stored = await downloadLessonAudio(langSlug, phrases, (done) => setProgress(done));
+    setState(stored > 0 ? "done" : "idle");
+  };
+
+  if (state === "done") {
+    return (
+      <span className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-emerald-500">
+        <CheckCircle2 size={16} /> Audio de la leçon disponible hors ligne
+      </span>
+    );
+  }
+  return (
+    <button
+      onClick={download}
+      disabled={state === "loading"}
+      className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 transition disabled:opacity-60"
+    >
+      <Download size={15} />
+      {state === "loading" ? `Téléchargement… ${progress}/${phrases.length}` : "Télécharger l'audio pour l'écouter hors ligne"}
+    </button>
+  );
+}
+
 export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
   return (
     <div className="space-y-8">
@@ -197,6 +240,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
           ))}
         </div>
         <SpeakButtons text={lesson.speakText} langSlug={langSlug} label="Listen Lesson" />
+        <OfflineAudioButton lesson={lesson} langSlug={langSlug} />
       </Card>
 
       <VideoCard lesson={lesson} />
