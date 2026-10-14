@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -25,6 +26,8 @@ export async function POST(request: Request) {
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Nom, email et message sont requis." }, { status: 400 });
     }
+    const fakeEmail = await rejectIfFakeEmail(email);
+    if (fakeEmail) return fakeEmail;
 
     let attachmentUrl: string | null = null;
     let attachmentName: string | null = null;

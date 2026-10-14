@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { requiresEmailVerification } from "@/lib/emailVerificationPolicy";
 
 // GET routes are cached by Next.js by default unless marked dynamic — this
 // serves live admin data and must never be stale.
@@ -56,7 +57,24 @@ export async function GET(request: Request) {
         ...doc.data(),
       }));
 
-    return NextResponse.json({ students: [...enrollmentRows, ...legacyRows] });
+    const rows: any[] = [...enrollmentRows, ...legacyRows];
+
+    // Flag accounts whose e-mail address was never confirmed (new accounts only).
+    const uids = Array.from(new Set(rows.map((r) => r.uid || r.id?.split("_")[0]).filter(Boolean))) as string[];
+    const unverified = new Set<string>();
+    try {
+      for (let i = 0; i < uids.length; i += 100) {
+        const res = await getAdminAuth().getUsers(uids.slice(i, i + 100).map((uid) => ({ uid })));
+        for (const u of res.users) {
+          if (requiresEmailVerification(u.metadata.creationTime) && !u.emailVerified) unverified.add(u.uid);
+        }
+      }
+    } catch (verifyError) {
+      console.error("Could not check e-mail verification (non-fatal):", verifyError);
+    }
+    for (const r of rows) r.emailUnverified = unverified.has(r.uid || r.id?.split("_")[0]);
+
+    return NextResponse.json({ students: rows });
   } catch (error: any) {
     console.error("Error fetching admin students:", error);
     return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });

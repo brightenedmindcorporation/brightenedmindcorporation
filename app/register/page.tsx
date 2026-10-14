@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -34,6 +34,7 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
 
   const router = useRouter();
   const isLanguageProgram = !isOtherProgramCode(programCode);
@@ -53,11 +54,7 @@ function RegisterForm() {
       const check = await checkResponse.json();
 
       if (!check.valid) {
-        setError(
-          check.reason === "format"
-            ? "Le format de l'adresse email n'est pas valide."
-            : "Cette adresse email semble invalide : son domaine ne peut pas recevoir d'emails. Vérifiez qu'il n'y a pas de faute de frappe."
-        );
+        setError(check.message || "Cette adresse e-mail n'est pas valide.");
         setLoading(false);
         return;
       }
@@ -71,6 +68,13 @@ function RegisterForm() {
       try {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
         idToken = await cred.user.getIdToken();
+        // Proof that the address is real and theirs: they must click the link.
+        try {
+          await sendEmailVerification(cred.user);
+          setVerificationSent(true);
+        } catch (verificationError) {
+          console.error("Verification e-mail not sent:", verificationError);
+        }
       } catch (authErr: any) {
         if (authErr.code === "auth/email-already-in-use") {
           try {
@@ -138,6 +142,13 @@ function RegisterForm() {
       <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
         <div className="bg-surface-sunken border border-line p-8 rounded-2xl w-full max-w-md text-center text-ink">
           <h1 className="text-2xl font-bold mb-2">Inscription enregistrée !</h1>
+          {verificationSent && (
+            <p className="text-sm text-amber-500 bg-amber-500/10 border border-amber-600/30 rounded-xl p-3 mb-4">
+              Un e-mail de vérification vient d'être envoyé à <b>{email.trim()}</b>. Cliquez sur le lien qu'il contient
+              (pensez à regarder les courriers indésirables) : l'administration ne peut approuver votre inscription
+              qu'une fois votre adresse confirmée.
+            </p>
+          )}
           <p className="text-ink-soft text-sm mb-6">
             {isLanguageProgram
               ? "Payez maintenant pour activer votre compte immédiatement et recevoir votre Student ID tout de suite, ou patientez pour une approbation manuelle par l'administration."

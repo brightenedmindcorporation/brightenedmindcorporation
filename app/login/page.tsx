@@ -1,7 +1,8 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut } from "firebase/auth";
+import { requiresEmailVerification } from "@/lib/emailVerificationPolicy";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -26,6 +27,8 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [needsVerification, setNeedsVerification] = useState(false);
+  const [verificationInfo, setVerificationInfo] = useState<string | null>(null);
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -46,6 +49,17 @@ function LoginForm() {
 
       const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
       const user = userCred.user;
+
+      // Accounts created from now on must confirm their e-mail address first
+      // (older accounts are not affected).
+      if (requiresEmailVerification(user.metadata.creationTime) && !user.emailVerified) {
+        setNeedsVerification(true);
+        setLoginError(
+          "Votre adresse e-mail n'est pas encore vérifiée. Cliquez sur le lien envoyé à votre inscription (regardez aussi les courriers indésirables), puis reconnectez-vous."
+        );
+        return;
+      }
+      setNeedsVerification(false);
       const idToken = await user.getIdToken();
 
       const enrollResponse = await fetch("/api/academy/my-enrollments", {
@@ -174,6 +188,25 @@ function LoginForm() {
         {loginError && (
           <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">
             {loginError}
+            {needsVerification && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    if (auth.currentUser) await sendEmailVerification(auth.currentUser);
+                    setVerificationInfo("E-mail de vérification renvoyé. Vérifiez votre boîte de réception.");
+                  } catch {
+                    setVerificationInfo("Impossible de renvoyer l'e-mail maintenant. Réessayez dans quelques minutes.");
+                  } finally {
+                    await signOut(auth);
+                  }
+                }}
+                className="block mt-2 underline font-semibold"
+              >
+                Renvoyer l'e-mail de vérification
+              </button>
+            )}
+            {verificationInfo && <p className="mt-2 text-emerald-300">{verificationInfo}</p>}
           </div>
         )}
 

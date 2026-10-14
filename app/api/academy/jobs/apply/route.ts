@@ -4,6 +4,7 @@ import dns from "node:dns/promises";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isCloudinaryConfigured, uploadBufferToCloudinary } from "@/lib/cloudinary";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
@@ -71,6 +72,8 @@ export async function POST(request: Request) {
     if (!announcementId || !name || !email || !phone) {
       return NextResponse.json({ error: "Nom, email, téléphone et offre sont requis." }, { status: 400 });
     }
+    const fakeEmail = await rejectIfFakeEmail(email);
+    if (fakeEmail) return fakeEmail;
     if (!(cvFile instanceof File) || cvFile.size === 0) {
       return NextResponse.json({ error: "Le CV est obligatoire." }, { status: 400 });
     }

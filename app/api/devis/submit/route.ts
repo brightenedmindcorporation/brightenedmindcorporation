@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isCloudinaryConfigured, uploadToCloudinary } from "@/lib/cloudinary";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
@@ -26,6 +27,8 @@ export async function POST(request: Request) {
     if (!name || !email || !message) {
       return NextResponse.json({ error: "Nom, email et message sont requis." }, { status: 400 });
     }
+    const fakeEmail = await rejectIfFakeEmail(email);
+    if (fakeEmail) return fakeEmail;
 
     let attachmentUrl: string | null = null;
     let attachmentName: string | null = null;

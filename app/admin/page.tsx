@@ -1958,6 +1958,9 @@ export default function AdminPage() {
                     {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
                   </p>
                   <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
+                  {s.emailUnverified && (
+                    <p className="text-amber-500 text-xs font-semibold">✉ E-mail non vérifié — approbation bloquée tant que l'étudiant n'a pas cliqué sur le lien reçu</p>
+                  )}
 
                   <div className="flex flex-wrap gap-3 mt-4">
                     <button

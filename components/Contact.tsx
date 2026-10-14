@@ -40,11 +40,7 @@ export default function Contact() {
       setChecking(false);
 
       if (!check.valid) {
-        setEmailError(
-          check.reason === "format"
-            ? "Le format de l'adresse email n'est pas valide."
-            : "Cette adresse email semble invalide : son domaine ne peut pas recevoir d'emails. Vérifiez qu'il n'y a pas de faute de frappe."
-        );
+        setEmailError(check.message || "Cette adresse e-mail n'est pas valide.");
         return;
       }
 

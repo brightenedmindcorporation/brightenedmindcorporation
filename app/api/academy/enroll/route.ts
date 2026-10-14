@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 
@@ -36,6 +37,9 @@ export async function POST(request: Request) {
     if (!email) {
       return NextResponse.json({ error: "Compte sans adresse email." }, { status: 400 });
     }
+    const fakeEmail = await rejectIfFakeEmail(email);
+    if (fakeEmail) return fakeEmail;
+
 
     const adminDb = getAdminDb();
     const studentRef = adminDb.collection("students").doc(uid);
