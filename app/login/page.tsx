@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail, sendEmailVerification, signOut } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, signOut } from "firebase/auth";
 import { requiresEmailVerification } from "@/lib/emailVerificationPolicy";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -193,8 +193,18 @@ function LoginForm() {
                 type="button"
                 onClick={async () => {
                   try {
-                    if (auth.currentUser) await sendEmailVerification(auth.currentUser);
-                    setVerificationInfo("E-mail de vérification renvoyé. Vérifiez votre boîte de réception.");
+                    const idToken = await auth.currentUser?.getIdToken();
+                    const response = await fetch("/api/auth/send-verification", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ idToken }),
+                    });
+                    const result = await response.json();
+                    setVerificationInfo(
+                      response.ok
+                        ? "E-mail de vérification renvoyé. Vérifiez votre boîte de réception (et les courriers indésirables)."
+                        : result.error || "Impossible de renvoyer l'e-mail maintenant."
+                    );
                   } catch {
                     setVerificationInfo("Impossible de renvoyer l'e-mail maintenant. Réessayez dans quelques minutes.");
                   } finally {

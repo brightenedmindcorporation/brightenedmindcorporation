@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useState } from "react";
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -70,8 +70,12 @@ function RegisterForm() {
         idToken = await cred.user.getIdToken();
         // Proof that the address is real and theirs: they must click the link.
         try {
-          await sendEmailVerification(cred.user);
-          setVerificationSent(true);
+          const verification = await fetch("/api/auth/send-verification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idToken }),
+          });
+          if (verification.ok) setVerificationSent(true);
         } catch (verificationError) {
           console.error("Verification e-mail not sent:", verificationError);
         }

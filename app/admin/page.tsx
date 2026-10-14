@@ -1418,9 +1418,10 @@ export default function AdminPage() {
   }, [hostingSession]);
 
   const sendEmail = async (email: string, name: string, matricule: string, langLabel: string, level: string, studyDays?: number) => {
+    const idToken = await auth.currentUser?.getIdToken();
     const response = await fetch("/api/send-email", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
       body: JSON.stringify({ email, name, matricule, langLabel, level, studyDays }),
     });
 
@@ -1463,9 +1464,9 @@ export default function AdminPage() {
       try {
         await sendEmail(student.email, student.name, result.matricule, languageLabel(student.langCode), student.level, student.studyDays);
         alert("Approuvé + Email envoyé !");
-      } catch (emailError) {
+      } catch (emailError: any) {
         console.error("EMAIL ERROR:", emailError);
-        alert("Étudiant approuvé mais l'envoi de l'email a échoué.");
+        alert(`Étudiant approuvé, mais l'e-mail de confirmation n'est PAS parti : ${emailError?.message || emailError}\n\nCommuniquez-lui son Student ID (${result.matricule}) par un autre moyen.`);
       }
 
       fetchStudents();
