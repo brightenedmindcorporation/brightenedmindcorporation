@@ -46,7 +46,9 @@ for (const lang of selectedLangs()) {
   const ids = JSON.parse(fs.readFileSync(textsFile(lang), "utf8")).map((i) => i.id);
   const dir = audioDir(lang);
   const existing = await listExisting(lang);
-  const todo = ids.filter((id) => fs.existsSync(path.join(dir, `${id}.mp3`)) && !existing.has(id));
+  const changedFile = path.join(dir, "_changed.json");
+  const changed = new Set(fs.existsSync(changedFile) ? JSON.parse(fs.readFileSync(changedFile, "utf8")) : []);
+  const todo = ids.filter((id) => fs.existsSync(path.join(dir, `${id}.mp3`)) && (!existing.has(id) || changed.has(id)));
   const missing = ids.filter((id) => !fs.existsSync(path.join(dir, `${id}.mp3`))).length;
   console.log(`${lang}: ${existing.size} already online, ${todo.length} to upload, ${missing} not generated yet`);
 
@@ -62,7 +64,8 @@ for (const lang of selectedLangs()) {
           await cloudinary.uploader.upload(path.join(dir, `${id}.mp3`), {
             resource_type: "video",
             public_id: `bm-audio/${lang}/${id}`,
-            overwrite: false,
+            overwrite: changed.has(id),
+            invalidate: changed.has(id),
           });
           ok = true;
         } catch {
@@ -75,5 +78,6 @@ for (const lang of selectedLangs()) {
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+  if (failed === 0 && fs.existsSync(changedFile)) fs.writeFileSync(changedFile, "[]");
   console.log(`${lang}: upload finished — ${done} uploaded, ${failed} failed`);
 }

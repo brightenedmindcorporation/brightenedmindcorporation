@@ -28,7 +28,17 @@ for (const lang of selectedLangs()) {
   const items = JSON.parse(fs.readFileSync(textsFile(lang), "utf8"));
   const dir = audioDir(lang);
   fs.mkdirSync(dir, { recursive: true });
-  const todo = items.filter((i) => !fs.existsSync(path.join(dir, `${i.id}.mp3`)));
+  // Remember which voice made each clip, so a clip made with the wrong voice
+  // (e.g. French read by the Chinese voice) is redone when the rule changes.
+  const registryFile = path.join(dir, "_voices.json");
+  const registry = fs.existsSync(registryFile) ? JSON.parse(fs.readFileSync(registryFile, "utf8")) : {};
+  const changedFile = path.join(dir, "_changed.json");
+  const changed = fs.existsSync(changedFile) ? JSON.parse(fs.readFileSync(changedFile, "utf8")) : [];
+  const todo = items.filter((i) => {
+    const file = path.join(dir, `${i.id}.mp3`);
+    if (!fs.existsSync(file)) return true;
+    return (registry[i.id] ?? VOICES[lang]) !== i.voice;
+  });
   console.log(`${lang}: ${items.length - todo.length}/${items.length} already done, ${todo.length} to generate (${VOICES[lang]})`);
 
   let done = 0;
@@ -36,27 +46,41 @@ for (const lang of selectedLangs()) {
   const queue = [...todo];
 
   async function worker(n) {
-    const tts = new MsEdgeTTS();
-    // The handshake itself can be rate-limited too (429): retry it.
-    for (let attempt = 1; ; attempt++) {
-      try {
-        await tts.setMetadata(VOICES[lang], OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
-        break;
-      } catch (error) {
-        if (attempt >= 30) throw error;
-        await sleep(Math.min(60000, 5000 * attempt));
+    // One connection per voice, created on first use.
+    const engines = {};
+    const engineFor = async (voice) => {
+      if (engines[voice]) return engines[voice];
+      const tts = new MsEdgeTTS();
+      // The handshake itself can be rate-limited too (429): retry it.
+      for (let attempt = 1; ; attempt++) {
+        try {
+          await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+          break;
+        } catch (error) {
+          if (attempt >= 30) throw error;
+          await sleep(Math.min(60000, 5000 * attempt));
+        }
       }
-    }
+      engines[voice] = tts;
+      return tts;
+    };
     while (queue.length) {
       const item = queue.shift();
+      const existed = fs.existsSync(path.join(dir, `${item.id}.mp3`));
+      const tts = await engineFor(item.voice);
       const ok = await makeClip(tts, item.text, path.join(dir, `${item.id}.mp3`), path.join(dir, `.tmp-${n}`));
-      if (ok) done++;
-      else failed++;
+      if (ok) {
+        done++;
+        registry[item.id] = item.voice;
+        if (existed) changed.push(item.id);
+      } else failed++;
       if ((done + failed) % 25 === 0) console.log(`  ${lang}: ${done + failed}/${todo.length} (${failed} failed)`);
       await sleep(250);
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, (_, n) => worker(n)));
+  fs.writeFileSync(registryFile, JSON.stringify(registry));
+  fs.writeFileSync(changedFile, JSON.stringify(changed));
   console.log(`${lang}: finished — ${done} generated, ${failed} failed`);
 }
 process.exit(0);

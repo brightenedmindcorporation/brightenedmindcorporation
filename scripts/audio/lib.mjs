@@ -26,6 +26,27 @@ export const VOICES = {
   swahili: "sw-KE-ZuriNeural",
 };
 
+// Some lessons mix languages: e.g. the Chinese course explains in French and
+// only the examples are Chinese. Reading a French explanation with the
+// Chinese voice (or the reverse) sounds wrong, so each phrase gets the voice
+// of the language it is actually written in.
+const FRENCH_MARKERS = new Set(
+  "les des du est sont avec pour dans cette vous nous très être avoir aux sur par pas ne mais où leur leurs mon mes notre votre exemple verbe verbes pluriel singulier prononciation exercice phrase phrases mot mots voyelle voyelles consonne consonnes lettre lettres chinois français anglais qui quoi ces elle ils elles".split(" ")
+);
+
+export function looksFrench(text) {
+  const tokens = text.toLowerCase().replace(/[.,;:!?()«»"'’\-–—]/g, " ").split(/\s+/).filter(Boolean);
+  if (tokens.length < 3) return false;
+  const strong = tokens.filter((t) => FRENCH_MARKERS.has(t)).length;
+  return strong >= 2 && strong / tokens.length >= 0.2;
+}
+
+export function voiceFor(lang, text) {
+  if (lang === "chinese") return /[\u4e00-\u9fff]/.test(text) ? VOICES.chinese : VOICES.french;
+  if (lang !== "french" && looksFrench(text)) return VOICES.french;
+  return VOICES[lang];
+}
+
 export function selectedLangs() {
   const args = process.argv.slice(2).filter((a) => LANGS.includes(a));
   return args.length ? args : LANGS;
@@ -57,7 +78,7 @@ export async function collectTexts(lang) {
     const mod = await import(pathToFileURL(verbFile).href);
     if (mod.default) for (const phrase of verbPhrases(mod.default)) add(phrase);
   }
-  return Array.from(texts, ([id, text]) => ({ id, text }));
+  return Array.from(texts, ([id, text]) => ({ id, text, voice: voiceFor(lang, text) }));
 }
 
 export function textsFile(lang) {

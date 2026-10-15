@@ -9,7 +9,7 @@ import type { Lesson } from "@/content/curriculum/types";
 // fetched (never cached and offline, not generated yet…) the caller's
 // fallback — the device's own speech synthesis — takes over.
 
-const CACHE_NAME = "bm-audio-v1";
+const CACHE_NAME = "bm-audio-v2";
 
 function cacheSupported(): boolean {
   return typeof window !== "undefined" && "caches" in window;

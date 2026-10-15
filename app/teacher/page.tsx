@@ -60,13 +60,13 @@ const input =
 const primaryBtn =
   "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition";
 
-type Tab = "live" | "students" | "messages";
+type Tab = "news" | "live" | "students" | "messages";
 
 export default function TeacherPage() {
   const [checking, setChecking] = useState(true);
   const [teacher, setTeacher] = useState<TeacherProfile | null>(null);
   const [authError, setAuthError] = useState<string | null>(null);
-  const [tab, setTab] = useState<Tab>("live");
+  const [tab, setTab] = useState<Tab>("news");
 
   // login form
   const [email, setEmail] = useState("");
@@ -181,6 +181,7 @@ export default function TeacherPage() {
 
         <div className="flex gap-1 border-b border-line mb-6">
           {([
+            { id: "news", label: "Actualités" },
             { id: "live", label: "Mes cours en direct" },
             { id: "students", label: "Mes étudiants" },
             { id: "messages", label: "Messages" },
@@ -197,6 +198,7 @@ export default function TeacherPage() {
           ))}
         </div>
 
+        {tab === "news" && <NewsTab />}
         {tab === "live" && <LiveTab teacher={teacher} />}
         {tab === "students" && <StudentsTab teacher={teacher} />}
         {tab === "messages" && <MessagesTab />}
@@ -501,10 +503,18 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
 /* ------------------------------------------------------------------ */
 /* Messages                                                            */
 /* ------------------------------------------------------------------ */
-function MessagesTab() {
+function MessageComposer({
+  prefillUid,
+  prefillSubject,
+  onSent,
+}: {
+  prefillUid?: string;
+  prefillSubject?: string;
+  onSent?: () => void;
+}) {
   const { students, loading } = useStudents();
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [subject, setSubject] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set(prefillUid ? [prefillUid] : []));
+  const [subject, setSubject] = useState(prefillSubject ?? "");
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
@@ -542,6 +552,7 @@ function MessagesTab() {
       setBody("");
       setFiles([]);
       setSelected(new Set());
+      onSent?.();
     } catch (error: any) {
       setNotice(`Erreur : ${error.message}`);
     } finally {
@@ -596,6 +607,213 @@ function MessagesTab() {
         {notice && <p className="text-sm text-ink break-words">{notice}</p>}
         <p className="text-xs text-ink-faint">Les étudiants reçoivent le message dans leur tableau de bord et par e-mail. Leurs réponses vous reviennent à votre adresse.</p>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Actualités (news feed)                                              */
+/* ------------------------------------------------------------------ */
+const FEED_ICON: Record<string, string> = {
+  enrollment: "🎓",
+  certificate: "🏆",
+  message: "✉️",
+  session: "🎥",
+  announcement: "📣",
+};
+
+function fmtDate(iso: string) {
+  const d = new Date(iso);
+  return Number.isNaN(d.getTime()) ? "" : d.toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+}
+
+function RefreshButton({ onClick, loading }: { onClick: () => void; loading: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      disabled={loading}
+      className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 disabled:opacity-50"
+    >
+      {loading ? "Actualisation…" : "↻ Actualiser"}
+    </button>
+  );
+}
+
+function NewsTab() {
+  const [items, setItems] = useState<{ id: string; kind: string; title: string; detail?: string; at: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const result = await api("/api/teacher/feed");
+      setItems(result.items || []);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-ink-soft">Ce qui se passe autour de vos cours : nouveaux étudiants, certificats, messages, classes à venir et annonces de l'école.</p>
+        <RefreshButton onClick={load} loading={loading} />
+      </div>
+      {loading && items.length === 0 ? (
+        <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+      ) : items.length === 0 ? (
+        <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Rien de nouveau pour le moment.</div>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <div key={item.id} className="flex gap-4 p-4 rounded-2xl border border-line bg-surface">
+              <span className="text-2xl shrink-0">{FEED_ICON[item.kind] ?? "•"}</span>
+              <div className="min-w-0">
+                <p className="font-bold text-sm">{item.title}</p>
+                {item.detail && <p className="text-xs text-ink-soft mt-0.5 line-clamp-2">{item.detail}</p>}
+                <p className="text-xs text-ink-faint mt-1">{fmtDate(item.at)}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Messages: received / sent / write                                   */
+/* ------------------------------------------------------------------ */
+function MessagesTab() {
+  const [view, setView] = useState<"received" | "sent" | "write">("received");
+  const [received, setReceived] = useState<any[]>([]);
+  const [sent, setSent] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [reply, setReply] = useState<{ uid: string; subject: string } | null>(null);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const result = await api("/api/teacher/messages");
+      setReceived(result.received || []);
+      setSent(result.sent || []);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message}`);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    load();
+  }, []);
+
+  const subTab = (id: typeof view, label: string, count?: number) => (
+    <button
+      key={id}
+      onClick={() => {
+        setView(id);
+        setOpenId(null);
+        if (id !== "write") setReply(null);
+      }}
+      className={`px-4 py-2 text-sm font-bold rounded-xl transition ${
+        view === id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
+      }`}
+    >
+      {label}
+      {count !== undefined ? ` (${count})` : ""}
+    </button>
+  );
+
+  return (
+    <div className="space-y-5">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex gap-2">
+          {subTab("received", "Reçus", received.length)}
+          {subTab("sent", "Envoyés", sent.length)}
+          {subTab("write", "Écrire")}
+        </div>
+        {view !== "write" && <RefreshButton onClick={load} loading={loading} />}
+      </div>
+
+      {view === "received" &&
+        (loading && received.length === 0 ? (
+          <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+        ) : received.length === 0 ? (
+          <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Aucun message reçu de vos étudiants pour le moment.</div>
+        ) : (
+          <div className="space-y-2">
+            {received.map((m) => (
+              <div key={m.id} className="rounded-2xl border border-line bg-surface">
+                <button onClick={() => setOpenId(openId === m.id ? null : m.id)} className="w-full text-left p-4">
+                  <p className="font-bold text-sm">{m.subject}</p>
+                  <p className="text-xs text-ink-soft mt-0.5">
+                    {m.name} · {m.email} · {fmtDate(m.createdAt)}
+                  </p>
+                </button>
+                {openId === m.id && (
+                  <div className="px-4 pb-4 space-y-3 border-t border-line pt-3">
+                    <p className="text-sm whitespace-pre-wrap">{m.message}</p>
+                    {m.attachmentNames?.length > 0 && <p className="text-xs text-ink-faint">Pièces jointes : {m.attachmentNames.join(", ")}</p>}
+                    <button
+                      onClick={() => {
+                        setReply({ uid: m.uid, subject: m.subject?.startsWith("Re:") ? m.subject : `Re: ${m.subject}` });
+                        setView("write");
+                      }}
+                      className={primaryBtn}
+                    >
+                      Répondre
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+
+      {view === "sent" &&
+        (loading && sent.length === 0 ? (
+          <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
+        ) : sent.length === 0 ? (
+          <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Vous n'avez encore envoyé aucun message.</div>
+        ) : (
+          <div className="space-y-2">
+            {sent.map((m) => (
+              <div key={m.id} className="rounded-2xl border border-line bg-surface">
+                <button onClick={() => setOpenId(openId === m.id ? null : m.id)} className="w-full text-left p-4">
+                  <p className="font-bold text-sm">{m.subject}</p>
+                  <p className="text-xs text-ink-soft mt-0.5">
+                    À {m.recipients.length} étudiant(s) · {fmtDate(m.createdAt)}
+                  </p>
+                </button>
+                {openId === m.id && (
+                  <div className="px-4 pb-4 space-y-2 border-t border-line pt-3">
+                    <p className="text-sm whitespace-pre-wrap">{m.body}</p>
+                    <p className="text-xs text-ink-faint">Destinataires : {m.recipients.map((r: any) => r.email).join(", ")}</p>
+                    {m.attachmentNames?.length > 0 && <p className="text-xs text-ink-faint">Pièces jointes : {m.attachmentNames.join(", ")}</p>}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ))}
+
+      {view === "write" && (
+        <MessageComposer
+          key={reply ? `${reply.uid}-${reply.subject}` : "new"}
+          prefillUid={reply?.uid}
+          prefillSubject={reply?.subject}
+          onSent={() => {
+            setReply(null);
+            load();
+          }}
+        />
+      )}
     </div>
   );
 }
