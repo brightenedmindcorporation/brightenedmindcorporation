@@ -10,12 +10,26 @@
 /** Folder on Cloudinary: <base>/<langSlug>/<clipId>.mp3 */
 export const AUDIO_BASE_URL = "https://res.cloudinary.com/je49b88w/video/upload/bm-audio";
 
+/** Bump when clips are re-recorded under the same name: it changes every
+ * clip URL, so browsers and CDNs drop the old (wrongly voiced) copies. */
+export const AUDIO_VERSION = 2;
+
+const CJK = /[\u3400-\u9fff]/;
+
 /** Lesson lines are written "phrase (phonetics) - translation"; only the
- * phrase before the first parenthesis is spoken. */
+ * phrase before the first parenthesis is spoken.
+ *
+ * Chinese lessons also have explanation lines where the characters sit
+ * INSIDE the parentheses ("1er ton (plat, haut) : mā (妈) - maman"): there
+ * the characters are what must be heard, not the French around them. */
 export function extractSpeechText(line: string): string {
   const parenIndex = line.indexOf("(");
-  if (parenIndex > 0) return line.slice(0, parenIndex).trim();
-  return line;
+  const head = parenIndex > 0 ? line.slice(0, parenIndex).trim() : line;
+  if (!CJK.test(head) && CJK.test(line)) {
+    const runs = line.match(/[\u3400-\u9fff]+/g);
+    if (runs) return runs.join("，");
+  }
+  return head;
 }
 
 /** Fast, deterministic 2×32-bit string hash (cyrb53 variants) → 22 hex
@@ -42,7 +56,7 @@ export function clipId(langSlug: string, text: string): string {
 }
 
 export function clipUrl(langSlug: string, text: string): string {
-  return `${AUDIO_BASE_URL}/${langSlug}/${clipId(langSlug, text)}.mp3`;
+  return `${AUDIO_BASE_URL}/${langSlug}/${clipId(langSlug, text)}.mp3?v=${AUDIO_VERSION}`;
 }
 
 /** The parts of a lesson the narration is built from. */
