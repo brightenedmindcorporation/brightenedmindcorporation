@@ -31,8 +31,8 @@ function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
 }
 
 /** The device's own voice — only the fallback when no recording is available. */
-export function speakWithDeviceVoice(text: string, langSlug: string) {
-  if (!("speechSynthesis" in window)) return;
+export function speakWithDeviceVoice(text: string, langSlug: string, opts: { pitch?: number } = {}): Promise<void> {
+  if (!("speechSynthesis" in window)) return Promise.resolve();
   window.speechSynthesis.cancel();
   const speech = new SpeechSynthesisUtterance(text);
   const langTag = SPEECH_LANG[langSlug] ?? "en-US";
@@ -40,9 +40,14 @@ export function speakWithDeviceVoice(text: string, langSlug: string) {
   const voice = pickVoice(langTag);
   if (voice) speech.voice = voice;
   speech.rate = 0.9;
-  speech.pitch = 1;
+  speech.pitch = opts.pitch ?? 1;
   speech.volume = 1;
-  window.speechSynthesis.speak(speech);
+  // Resolves when the voice has finished, so a conversation can chain lines.
+  return new Promise((resolve) => {
+    speech.onend = () => resolve();
+    speech.onerror = () => resolve();
+    window.speechSynthesis.speak(speech);
+  });
 }
 
 /** Recorded clip first (works offline once downloaded/played); the device's

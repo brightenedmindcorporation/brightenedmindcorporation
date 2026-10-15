@@ -95,13 +95,15 @@ export function recordQuizResult(
   level: number,
   lessonId: number,
   score: number,
-  passingScore: number
+  passingScore: number,
+  /** False when another part of the quiz (the conversation) was failed. */
+  extraPass: boolean = true
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
 
   if (!(lessonId in progress.quizScores)) {
     progress.quizScores[lessonId] = score;
-    if (score >= passingScore && !progress.completedQuizzes.includes(lessonId)) {
+    if (score >= passingScore && extraPass && !progress.completedQuizzes.includes(lessonId)) {
       progress.completedQuizzes.push(lessonId);
       progress.completedAt[lessonId] = new Date().toISOString();
     }
@@ -115,13 +117,14 @@ export function recordFinalQuizResult(
   langSlug: string,
   level: number,
   score: number,
-  passingScore: number
+  passingScore: number,
+  extraPass: boolean = true
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
 
   if (progress.finalQuizScore === null) {
     progress.finalQuizScore = score;
-    if (score >= passingScore) {
+    if (score >= passingScore && extraPass) {
       progress.finalQuizPassed = true;
     }
   }

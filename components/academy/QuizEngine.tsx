@@ -1,46 +1,74 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, XCircle, RefreshCw } from "lucide-react";
-import type { Quiz, FinalQuiz } from "@/content/curriculum/types";
+import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } from "lucide-react";
+import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
+import type { Dialogue } from "@/content/dialogues/types";
+import DialoguePlayer from "@/components/academy/DialoguePlayer";
+import { textLength, usedKeyWords } from "@/lib/academy/writingLab";
+
+/** What the student did in the extra steps of a quiz. */
+export interface QuizParts {
+  dialogueScore: number;
+  dialogueTotal: number;
+  /** Heard-conversation questions answered well enough (at least 60 %). */
+  dialoguePassed: boolean;
+  writing: string;
+}
+
+export interface QuizWriting {
+  prompt: string;
+  keyWords: string[];
+  /** Minimum length: words, or characters for Chinese. */
+  minLength: number;
+  cjk: boolean;
+}
 
 interface QuizEngineProps {
   quiz: Quiz | FinalQuiz;
   badge?: string;
   alreadyScore: number | null;
-  onSubmit: (score: number) => void;
+  onSubmit: (score: number, parts?: QuizParts) => void;
+  /** Step 1: a recorded conversation with questions. */
+  dialogue?: Dialogue;
+  langSlug?: string;
+  /** Step 3: a short written production. */
+  writing?: QuizWriting;
 }
 
-export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: QuizEngineProps) {
-  const [answers, setAnswers] = useState<string[]>(Array(quiz.questions.length).fill(""));
-  const [submitted, setSubmitted] = useState(alreadyScore !== null);
-  const [score, setScore] = useState(alreadyScore ?? 0);
-
-  const handleSelect = (questionIndex: number, option: string) => {
-    if (submitted) return;
-    const updated = [...answers];
-    updated[questionIndex] = option;
-    setAnswers(updated);
-  };
-
-  const submitQuiz = () => {
-    if (submitted) return;
-    const finalScore = answers.filter((answer, index) => answer === quiz.questions[index].answer).length;
-    setScore(finalScore);
-    setSubmitted(true);
-    onSubmit(finalScore);
-  };
-
-  const passed = score >= quiz.passingScore;
-
+function StepTitle({ n, icon: Icon, title, hint }: { n: number; icon: React.ComponentType<{ size?: number }>; title: string; hint: string }) {
   return (
-    <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-8">
-      {quiz.questions.map((q, index) => (
+    <div className="flex items-start gap-3">
+      <span className="w-9 h-9 shrink-0 rounded-full bg-red-600 text-white font-black flex items-center justify-center">{n}</span>
+      <div>
+        <h2 className="text-xl font-black text-ink flex items-center gap-2">
+          <Icon size={18} /> {title}
+        </h2>
+        <p className="text-xs text-ink-soft mt-0.5">{hint}</p>
+      </div>
+    </div>
+  );
+}
+
+function Questions({
+  questions,
+  answers,
+  submitted,
+  onSelect,
+}: {
+  questions: QuizQuestion[];
+  answers: string[];
+  submitted: boolean;
+  onSelect: (index: number, option: string) => void;
+}) {
+  return (
+    <>
+      {questions.map((q, index) => (
         <div key={index} className="border-b border-line/80 pb-6 last:border-b-0 last:pb-0">
-          <h2 className="font-bold text-lg text-ink mb-4 flex items-start gap-3">
+          <h3 className="font-bold text-lg text-ink mb-4 flex items-start gap-3">
             <span className="text-red-500 font-extrabold">{index + 1}.</span>
             <span>{q.question}</span>
-          </h2>
+          </h3>
 
           <div className="space-y-3">
             {q.options.map((option) => {
@@ -65,7 +93,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
                 <button
                   key={option}
                   disabled={submitted}
-                  onClick={() => handleSelect(index, option)}
+                  onClick={() => onSelect(index, option)}
                   className={`w-full text-left px-5 py-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${buttonStyle}`}
                 >
                   <span>{option}</span>
@@ -77,53 +105,201 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit }: Quiz
           </div>
         </div>
       ))}
+    </>
+  );
+}
 
-      {!submitted ? (
-        <div className="pt-4">
-          <button
-            onClick={submitQuiz}
-            disabled={answers.includes("")}
-            className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl ${
-              answers.includes("")
-                ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
-                : "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white shadow-red-950/60"
-            }`}
-          >
-            {answers.includes("") ? "Please answer all questions" : badge ? `Submit ${badge}` : "Submit Quiz"}
-          </button>
+export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing }: QuizEngineProps) {
+  const alreadyDone = alreadyScore !== null;
+  // A quiz already taken only shows its main questions (the extra steps
+  // were not part of it, or are not stored); a practice retake shows all.
+  const [practice, setPractice] = useState(false);
+  const withExtras = !alreadyDone || practice;
+  const useDialogue = withExtras ? dialogue : undefined;
+  const useWriting = withExtras ? writing : undefined;
+
+  const [answers, setAnswers] = useState<string[]>(Array(quiz.questions.length).fill(""));
+  const [dialogueAnswers, setDialogueAnswers] = useState<string[]>(Array(dialogue?.questions.length ?? 0).fill(""));
+  const [text, setText] = useState("");
+  const [submitted, setSubmitted] = useState(alreadyDone);
+  const [score, setScore] = useState(alreadyScore ?? 0);
+  const [dialogueScore, setDialogueScore] = useState(0);
+
+  const dialogueTotal = useDialogue?.questions.length ?? 0;
+  const dialoguePassNeeded = Math.ceil(dialogueTotal * 0.6);
+  const length = useWriting ? textLength(text, useWriting.cjk) : 0;
+  const writingOk = !useWriting || length >= useWriting.minLength;
+  const allAnswered = !answers.includes("") && !(useDialogue && dialogueAnswers.includes(""));
+  const ready = allAnswered && writingOk;
+
+  const select = (list: string[], set: (v: string[]) => void) => (i: number, option: string) => {
+    if (submitted) return;
+    const updated = [...list];
+    updated[i] = option;
+    set(updated);
+  };
+
+  const submitQuiz = () => {
+    if (submitted || !ready) return;
+    const finalScore = answers.filter((answer, index) => answer === quiz.questions[index].answer).length;
+    const dScore = useDialogue ? dialogueAnswers.filter((a, i) => a === useDialogue.questions[i].answer).length : 0;
+    setScore(finalScore);
+    setDialogueScore(dScore);
+    setSubmitted(true);
+    onSubmit(
+      finalScore,
+      useDialogue || useWriting
+        ? { dialogueScore: dScore, dialogueTotal, dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded, writing: text }
+        : undefined
+    );
+  };
+
+  const dialoguePassed = !useDialogue || dialogueScore >= dialoguePassNeeded;
+  const mainPassed = score >= quiz.passingScore;
+  const passed = mainPassed && dialoguePassed;
+
+  let step = 0;
+  const missing = [
+    useDialogue && dialogueAnswers.includes("") ? "la conversation" : null,
+    answers.includes("") ? "les questions" : null,
+    !writingOk ? "la rédaction" : null,
+  ].filter(Boolean);
+
+  return (
+    <div className="space-y-6">
+      {useDialogue && (
+        <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-6">
+          <StepTitle n={++step} icon={Headphones} title="Conversation à écouter" hint="Écoutez la conversation, puis répondez. Le texte n'est pas affiché pendant l'écoute." />
+          <DialoguePlayer dialogue={useDialogue} langSlug={langSlug} showTranscript={submitted} />
+          <Questions
+            questions={useDialogue.questions}
+            answers={dialogueAnswers}
+            submitted={submitted}
+            onSelect={select(dialogueAnswers, setDialogueAnswers)}
+          />
         </div>
-      ) : (
-        <div className="mt-8 p-6 bg-surface-sunken rounded-2xl border border-line space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-black text-ink">
-                Your Score: <span className={passed ? "text-emerald-400" : "text-red-500"}>{score} / {quiz.questions.length}</span>
-              </h2>
-              <p className="mt-1 font-semibold text-sm">
-                {passed ? (
-                  <span className="text-emerald-400 inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> Passed! Great job.</span>
-                ) : (
-                  <span className="text-red-400 inline-flex items-center gap-1.5"><XCircle size={16} /> Failed. You need at least {quiz.passingScore}/{quiz.questions.length} to pass.</span>
-                )}
-              </p>
-            </div>
+      )}
 
-            <button
-              onClick={() => {
-                setAnswers(Array(quiz.questions.length).fill(""));
-                setSubmitted(false);
-              }}
-              className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto inline-flex items-center gap-2"
-            >
-              <RefreshCw size={15} /> Retake (practice only)
-            </button>
+      <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-8">
+        {(useDialogue || useWriting) && (
+          <StepTitle n={++step} icon={ListChecks} title="Questions du quiz" hint="Répondez à toutes les questions." />
+        )}
+        <Questions questions={quiz.questions} answers={answers} submitted={submitted} onSelect={select(answers, setAnswers)} />
+      </div>
+
+      {useWriting && (
+        <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-5">
+          <StepTitle
+            n={++step}
+            icon={PenLine}
+            title="Rédaction"
+            hint={`Écrivez au moins ${useWriting.minLength} ${useWriting.cjk ? "caractères" : "mots"}. Votre texte est enregistré avec votre quiz.`}
+          />
+          <div className="rounded-2xl border border-red-700/30 bg-red-500/5 p-4">
+            <p className="text-xs font-bold uppercase tracking-wide text-red-500">Sujet</p>
+            <p className="text-ink font-semibold mt-1">{useWriting.prompt}</p>
           </div>
-
-          <p className="text-xs text-red-400/80 italic font-medium pt-2 border-t border-line">
-            Note: Only your first attempt score is recorded in your progress.
+          {useWriting.keyWords.length > 0 && (
+            <div className="flex flex-wrap gap-2" translate="no">
+              {useWriting.keyWords.map((w) => {
+                const ok = usedKeyWords(text, [w]).length > 0;
+                return (
+                  <span
+                    key={w}
+                    className={`notranslate text-sm font-semibold px-3 py-1 rounded-full border ${
+                      ok ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/40" : "bg-surface-alt text-ink-soft border-line"
+                    }`}
+                  >
+                    {ok ? "✓ " : ""}
+                    {w}
+                  </span>
+                );
+              })}
+            </div>
+          )}
+          <textarea
+            value={text}
+            onChange={(e) => !submitted && setText(e.target.value)}
+            readOnly={submitted}
+            rows={8}
+            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+            placeholder="Écrivez votre texte ici…"
+            translate="no"
+            spellCheck={false}
+            autoCorrect="off"
+          />
+          <p className={`text-sm font-bold ${writingOk ? "text-emerald-500" : "text-ink-soft"}`}>
+            {length}/{useWriting.minLength} {useWriting.cjk ? "caractères" : "mots"}
           </p>
         </div>
       )}
+
+      <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl">
+        {!submitted ? (
+          <div>
+            <button
+              onClick={submitQuiz}
+              disabled={!ready}
+              className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl ${
+                !ready
+                  ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
+                  : "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white shadow-red-950/60"
+              }`}
+            >
+              {!ready ? `À compléter : ${missing.join(", ")}` : badge ? `Submit ${badge}` : "Submit Quiz"}
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-black text-ink">
+                  Your Score: <span className={mainPassed ? "text-emerald-400" : "text-red-500"}>{score} / {quiz.questions.length}</span>
+                </h2>
+                {useDialogue && (
+                  <p className="text-sm font-semibold mt-1 text-ink-soft">
+                    Conversation :{" "}
+                    <span className={dialoguePassed ? "text-emerald-400" : "text-red-500"}>
+                      {dialogueScore} / {dialogueTotal}
+                    </span>{" "}
+                    (minimum {dialoguePassNeeded})
+                  </p>
+                )}
+                {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée.</p>}
+                <p className="mt-2 font-semibold text-sm">
+                  {passed ? (
+                    <span className="text-emerald-400 inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> Passed! Great job.</span>
+                  ) : (
+                    <span className="text-red-400 inline-flex items-center gap-1.5">
+                      <XCircle size={16} />{" "}
+                      {!mainPassed
+                        ? `Failed. You need at least ${quiz.passingScore}/${quiz.questions.length} to pass.`
+                        : `Failed. Il faut au moins ${dialoguePassNeeded}/${dialogueTotal} à la conversation.`}
+                    </span>
+                  )}
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  setAnswers(Array(quiz.questions.length).fill(""));
+                  setDialogueAnswers(Array(dialogue?.questions.length ?? 0).fill(""));
+                  setText("");
+                  setPractice(true);
+                  setSubmitted(false);
+                }}
+                className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto inline-flex items-center gap-2"
+              >
+                <RefreshCw size={15} /> Retake (practice only)
+              </button>
+            </div>
+
+            <p className="text-xs text-red-400/80 italic font-medium pt-2 border-t border-line">
+              Note: Only your first attempt score is recorded in your progress.
+            </p>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

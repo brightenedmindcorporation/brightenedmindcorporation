@@ -9,7 +9,7 @@
 import path from "path";
 import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
-import { clipId, extractSpeechText, lessonNarrations, verbPhrases } from "../../lib/academy/audioClips.ts";
+import { clipId, dialogueClipText, extractSpeechText, lessonNarrations, verbPhrases } from "../../lib/academy/audioClips.ts";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const WORK = process.env.AUDIO_WORK_DIR || path.resolve(ROOT, "..", "bm-audio");
@@ -24,6 +24,16 @@ export const VOICES = {
   portuguese: "pt-BR-FranciscaNeural",
   chinese: "zh-CN-XiaoxiaoNeural",
   swahili: "sw-KE-ZuriNeural",
+};
+
+// The second person of each quiz conversation.
+export const VOICES_B = {
+  english: "en-US-GuyNeural",
+  french: "fr-FR-HenriNeural",
+  spanish: "es-ES-AlvaroNeural",
+  portuguese: "pt-BR-AntonioNeural",
+  chinese: "zh-CN-YunxiNeural",
+  swahili: "sw-KE-RafikiNeural",
 };
 
 // Some lessons mix languages: e.g. the Chinese course explains in French and
@@ -59,6 +69,23 @@ export async function collectTexts(lang) {
     const text = (t || "").trim();
     if (text) texts.set(clipId(lang, text), text);
   };
+  // Quiz conversations: speaker A uses the language's usual voice, speaker B
+  // the second voice (its clip is keyed with the [B] marker).
+  const voiceOverride = new Map();
+  const dialogueFile = path.join(ROOT, "content", "dialogues", `${lang}.ts`);
+  if (fs.existsSync(dialogueFile)) {
+    const mod = await import(pathToFileURL(dialogueFile).href);
+    for (const d of Object.values(mod.default || {})) {
+      d.lines.forEach((line, i) => {
+        const text = line.trim();
+        if (!text) return;
+        const speaker = i % 2 === 0 ? "A" : "B";
+        const id = clipId(lang, dialogueClipText(speaker, text));
+        texts.set(id, text);
+        if (speaker === "B") voiceOverride.set(id, VOICES_B[lang]);
+      });
+    }
+  }
   for (const level of [1, 2, 3]) {
     const file = path.join(ROOT, "content", "curriculum", lang, `level${level}.ts`);
     const mod = await import(pathToFileURL(file).href);
@@ -82,7 +109,7 @@ export async function collectTexts(lang) {
     const charsFile = path.join(ROOT, "content", "vocabulary", "chinese.json");
     if (fs.existsSync(charsFile)) for (const ch of Object.keys(JSON.parse(fs.readFileSync(charsFile, "utf8")))) add(ch);
   }
-  return Array.from(texts, ([id, text]) => ({ id, text, voice: voiceFor(lang, text) }));
+  return Array.from(texts, ([id, text]) => ({ id, text, voice: voiceOverride.get(id) ?? voiceFor(lang, text) }));
 }
 
 export function textsFile(lang) {

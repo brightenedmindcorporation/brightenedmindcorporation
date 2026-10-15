@@ -8,6 +8,8 @@ import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
 import { syncProgress } from "@/lib/academy/progressSync";
+import { getDialogue } from "@/content/dialogues";
+import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
 
 export default function FinalQuizPage() {
   const router = useRouter();
@@ -102,8 +104,12 @@ export default function FinalQuizPage() {
             quiz={curriculum.finalQuiz}
             badge="Final Quiz"
             alreadyScore={alreadyScore}
-            onSubmit={(score) => {
-              const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore);
+            langSlug={langSlug}
+            dialogue={getDialogue(langSlug, level, "final") ?? undefined}
+            writing={quizWriting(langSlug, curriculum, "final")}
+            onSubmit={(score, parts) => {
+              if (parts && alreadyScore === null) saveQuizParts(langSlug, level, "final", parts);
+              const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore, parts?.dialoguePassed ?? true);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}
           />

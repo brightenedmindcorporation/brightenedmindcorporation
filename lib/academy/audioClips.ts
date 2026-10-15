@@ -32,6 +32,13 @@ export function extractSpeechText(line: string): string {
   return head;
 }
 
+/** Conversation lines are voiced by two people. Speaker A shares the
+ * language's usual voice (and clips); speaker B's clips are keyed with a
+ * marker so they get the second voice. */
+export function dialogueClipText(speaker: "A" | "B", text: string): string {
+  return speaker === "B" ? `[B] ${text.trim()}` : text.trim();
+}
+
 /** Fast, deterministic 2×32-bit string hash (cyrb53 variants) → 22 hex
  * chars. Identical in Node and the browser; collisions are not a concern
  * at a few thousand clips. */
