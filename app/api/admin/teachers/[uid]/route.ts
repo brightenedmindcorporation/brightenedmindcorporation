@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
+import { FieldValue } from "firebase-admin/firestore";
 import { mailFrom } from "@/lib/mailFrom";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller, normalizeAssignments } from "@/lib/teacherAuth";
@@ -72,6 +73,15 @@ export async function DELETE(request: Request, { params }: { params: Promise<{ u
     const snap = await getAdminDb().collection("teachers").doc(uid).get();
     if (!snap.exists) return NextResponse.json({ error: "Professeur introuvable." }, { status: 404 });
     await getAdminDb().collection("teachers").doc(uid).delete();
+    // Their students go back to "not attributed" (visible to the teachers of their language).
+    try {
+      for (const collection of ["enrollments", "students"]) {
+        const owned = await getAdminDb().collection(collection).where("teacherUid", "==", uid).get();
+        for (const d of owned.docs) await d.ref.update({ teacherUid: FieldValue.delete(), teacherAssignedAt: FieldValue.delete() });
+      }
+    } catch (error) {
+      console.error("Releasing the teacher's students failed (non-fatal):", error);
+    }
     try {
       await getAdminAuth().deleteUser(uid);
     } catch (error) {

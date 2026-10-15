@@ -50,6 +50,20 @@ export function teachesLanguage(assignments: Assignment[], langCode: string): bo
 }
 
 /**
+ * Does this enrolment belong to the teacher? An explicit attribution made by
+ * the admin (`teacherUid`) wins: only that teacher sees the student. Students
+ * who have not been attributed yet stay visible to every teacher of their
+ * language, so nobody disappears before the admin has sorted them out.
+ */
+export function isTeachersStudent(
+  teacher: { uid: string; assignments: Assignment[] },
+  enrollment: { langCode?: string; teacherUid?: string | null }
+): boolean {
+  if (enrollment.teacherUid) return enrollment.teacherUid === teacher.uid;
+  return Boolean(enrollment.langCode) && teachesLanguage(teacher.assignments, enrollment.langCode!);
+}
+
+/**
  * Verifies the Firebase ID token and works out who is calling: the admin
  * (by email) or an active teacher (a `teachers/{uid}` doc). Anyone else is
  * refused. Every teacher-facing route goes through this, so a student can

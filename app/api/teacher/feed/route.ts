@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
-import { AuthError, bearer, canTeach, getCaller, teachesLanguage } from "@/lib/teacherAuth";
+import { AuthError, bearer, canTeach, getCaller, isTeachersStudent, teachesLanguage } from "@/lib/teacherAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -35,10 +35,14 @@ export async function GET(request: Request) {
 
     const items: FeedItem[] = [];
     const myStudentUids = new Set<string>();
+    const attributedElsewhere = new Set<string>(); // students the admin gave to another teacher
 
     for (const d of enrollSnap.docs) {
       const e = d.data();
-      if (!teachesLanguage(caller.assignments, e.langCode)) continue;
+      if (!isTeachersStudent(caller, e as any)) {
+        if (e.teacherUid) attributedElsewhere.add(e.uid);
+        continue;
+      }
       myStudentUids.add(e.uid);
       items.push({
         id: `enr-${d.id}`,
@@ -52,8 +56,15 @@ export async function GET(request: Request) {
 
     for (const d of certSnap.docs) {
       const c = d.data();
-      if (!c.langCode || !teachesLanguage(caller.assignments, c.langCode) || c.revoked) continue;
-      if (c.level && !canTeach(caller.assignments, c.langCode, Number(c.level))) continue;
+      if (!c.langCode || c.revoked) continue;
+      // Certificates of the teacher's own (attributed) students, otherwise
+      // those of the languages/levels they teach.
+      const isMine = Boolean(c.uid) && myStudentUids.has(c.uid);
+      if (!isMine) {
+        if (c.uid && attributedElsewhere.has(c.uid)) continue;
+        if (!teachesLanguage(caller.assignments, c.langCode)) continue;
+        if (c.level && !canTeach(caller.assignments, c.langCode, Number(c.level))) continue;
+      }
       items.push({
         id: `cert-${d.id}`,
         kind: "certificate",

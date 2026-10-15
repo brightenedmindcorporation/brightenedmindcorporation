@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
-import { AuthError, bearer, getCaller, teachesLanguage } from "@/lib/teacherAuth";
+import { AuthError, bearer, getCaller, isTeachersStudent } from "@/lib/teacherAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -28,7 +28,7 @@ export async function GET(request: Request) {
     const myStudents = new Map<string, string[]>();
     for (const d of enrollSnap.docs) {
       const e = d.data();
-      if (!teachesLanguage(caller.assignments, e.langCode)) continue;
+      if (!isTeachersStudent(caller, e as any)) continue;
       myStudents.set(e.uid, [...(myStudents.get(e.uid) ?? []), e.langCode]);
     }
 

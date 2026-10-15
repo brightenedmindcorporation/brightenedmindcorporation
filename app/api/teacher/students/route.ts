@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
-import { AuthError, bearer, getCaller, teachesLanguage, canTeach } from "@/lib/teacherAuth";
+import { AuthError, bearer, getCaller, isTeachersStudent, canTeach } from "@/lib/teacherAuth";
 
 export const dynamic = "force-dynamic";
 
@@ -25,19 +25,20 @@ export async function GET(request: Request) {
     const students = new Map<string, any>(); // key: uid_langCode
     for (const d of enrollSnap.docs) {
       const e = d.data();
-      if (!teachesLanguage(caller.assignments, e.langCode)) continue;
+      if (!isTeachersStudent(caller, e as any)) continue;
       students.set(`${e.uid}_${e.langCode}`, {
         uid: e.uid,
         name: e.name,
         email: e.email,
         langCode: e.langCode,
         studentId: e.matricule || "",
+        attributed: Boolean(e.teacherUid),
         levels: {},
       });
     }
     for (const d of legacySnap.docs) {
       const s = d.data();
-      if (!s.langCode || !teachesLanguage(caller.assignments, s.langCode)) continue;
+      if (!s.langCode || !isTeachersStudent(caller, s as any)) continue;
       const key = `${d.id}_${s.langCode}`;
       if (!students.has(key)) {
         students.set(key, {
@@ -46,6 +47,7 @@ export async function GET(request: Request) {
           email: s.email,
           langCode: s.langCode,
           studentId: s.matricule || "",
+          attributed: Boolean(s.teacherUid),
           levels: {},
         });
       }
@@ -54,7 +56,9 @@ export async function GET(request: Request) {
     for (const d of progressSnap.docs) {
       const p = d.data();
       const row = students.get(`${p.uid}_${p.langCode}`);
-      if (!row || !canTeach(caller.assignments, p.langCode, Number(p.level))) continue;
+      // Students the admin attributed to this teacher show every level; the
+      // others only the levels the teacher teaches.
+      if (!row || (!row.attributed && !canTeach(caller.assignments, p.langCode, Number(p.level)))) continue;
       row.levels[p.level] = {
         completedLessons: (p.completedLessons || []).length,
         completedQuizzes: (p.completedQuizzes || []).length,

@@ -2,7 +2,7 @@ import { mailFrom } from "@/lib/mailFrom";
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
-import { getCaller, teachesLanguage } from "@/lib/teacherAuth";
+import { getCaller, isTeachersStudent } from "@/lib/teacherAuth";
 import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       for (const r of recipients) {
         const enrolls = await db.collection("enrollments").where("uid", "==", r.uid).get();
         const ok = enrolls.docs.some(
-          (d) => d.data().status === "Approved" && teachesLanguage(caller.assignments, d.data().langCode)
+          (d) => d.data().status === "Approved" && isTeachersStudent(caller, d.data() as any)
         );
         if (!ok) {
           return NextResponse.json({ error: "Vous ne pouvez écrire qu'à vos propres étudiants." }, { status: 403 });

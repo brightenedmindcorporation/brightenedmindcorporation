@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { auth } from "@/lib/firebase";
 import { availableLanguages } from "@/content/curriculum";
 import { otherPrograms } from "@/content/programs";
@@ -35,6 +35,17 @@ async function authedFetch(url: string, init: RequestInit = {}) {
   const result = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(result.error || "Erreur serveur");
   return result;
+}
+
+interface StudentRow {
+  id: string;
+  kind: "enrollment" | "legacyStudent";
+  name?: string;
+  email?: string;
+  langCode?: string;
+  matricule?: string;
+  status?: string;
+  teacherUid?: string;
 }
 
 const CATEGORIES: { id: string; label: string; items: typeof PROGRAMS }[] = [
@@ -128,6 +139,25 @@ export default function TeachersTab() {
   const [editAssignments, setEditAssignments] = useState<Assignment[]>([]);
   const [notice, setNotice] = useState<string | null>(null);
 
+  // Student attribution: who follows which student
+  const [students, setStudents] = useState<StudentRow[]>([]);
+  const [filterTeacher, setFilterTeacher] = useState("all"); // all | none | <teacher uid>
+  const [filterLang, setFilterLang] = useState("all");
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [targetTeacher, setTargetTeacher] = useState("");
+  const [assigning, setAssigning] = useState(false);
+  const assignRef = useRef<HTMLDivElement>(null);
+
+  const loadStudents = async () => {
+    try {
+      const result = await authedFetch("/api/admin/students");
+      setStudents((result.students || []).filter((r: StudentRow) => r.status === "Approved" && r.langCode));
+    } catch (error: any) {
+      setNotice(`Erreur : ${error.message}`);
+    }
+  };
+
   const load = async () => {
     try {
       const result = await authedFetch("/api/admin/teachers");
@@ -141,7 +171,68 @@ export default function TeachersTab() {
 
   useEffect(() => {
     load();
+    loadStudents();
   }, []);
+
+  const rowKey = (r: StudentRow) => `${r.kind}:${r.id}`;
+  const teacherName = (uid?: string) => teachers.find((t) => t.id === uid)?.name;
+  const countFor = (uid: string) => students.filter((r) => r.teacherUid === uid).length;
+  const unattributed = students.filter((r) => !r.teacherUid).length;
+
+  const visibleStudents = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return students
+      .filter((r) => (filterTeacher === "all" ? true : filterTeacher === "none" ? !r.teacherUid : r.teacherUid === filterTeacher))
+      .filter((r) => (filterLang === "all" ? true : r.langCode === filterLang))
+      .filter((r) => !q || `${r.name} ${r.email} ${r.matricule}`.toLowerCase().includes(q))
+      .sort((a, b) => String(a.name).localeCompare(String(b.name)));
+  }, [students, filterTeacher, filterLang, search]);
+
+  const allVisibleSelected = visibleStudents.length > 0 && visibleStudents.every((r) => selected.has(rowKey(r)));
+  const toggleAllVisible = () => {
+    const next = new Set(selected);
+    for (const r of visibleStudents) {
+      if (allVisibleSelected) next.delete(rowKey(r));
+      else next.add(rowKey(r));
+    }
+    setSelected(next);
+  };
+  const toggleOne = (r: StudentRow) => {
+    const next = new Set(selected);
+    if (next.has(rowKey(r))) next.delete(rowKey(r));
+    else next.add(rowKey(r));
+    setSelected(next);
+  };
+
+  const applyAssignment = async () => {
+    const items = students.filter((r) => selected.has(rowKey(r))).map((r) => ({ id: r.id, kind: r.kind }));
+    if (items.length === 0 || !targetTeacher) return;
+    const toNone = targetTeacher === "none";
+    const label = toNone ? "sans professeur attribué" : `à ${teacherName(targetTeacher)}`;
+    if (!confirm(`Attribuer ${items.length} étudiant(s) ${label} ?${toNone ? "" : "\n\nIls seront prévenus, et seul ce professeur les verra désormais."}`)) return;
+    setAssigning(true);
+    try {
+      const result = await authedFetch("/api/admin/assign-students", {
+        method: "POST",
+        body: JSON.stringify({ items, teacherUid: toNone ? null : targetTeacher }),
+      });
+      setNotice(`${result.updated} étudiant(s) mis à jour ${toNone ? "(attribution retirée)" : `→ ${teacherName(targetTeacher)}`}.`);
+      setSelected(new Set());
+      await loadStudents();
+    } catch (error: any) {
+      setNotice(`Erreur : ${error.message}`);
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const showTeacherStudents = (uid: string) => {
+    setFilterTeacher(uid);
+    setFilterLang("all");
+    setSearch("");
+    setSelected(new Set());
+    setTimeout(() => assignRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+  };
 
   const create = async () => {
     setCreating(true);
@@ -256,6 +347,9 @@ export default function TeachersTab() {
                     {t.name} {t.active === false && <span className="text-xs text-red-500 font-semibold">· désactivé</span>}
                   </p>
                   <p className="text-xs text-ink-soft mt-0.5">{t.email}</p>
+                  <p className="text-xs text-ink mt-1">
+                    <b>{countFor(t.id)}</b> étudiant(s) attribué(s)
+                  </p>
                   <div className="flex flex-wrap gap-2 mt-3">
                     {(t.assignments || []).map((a) => (
                       <span key={a.langCode} className="text-xs font-semibold px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-700/30">
@@ -273,6 +367,12 @@ export default function TeachersTab() {
                     className="px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:text-ink hover:border-red-600/50"
                   >
                     Modifier ses cours
+                  </button>
+                  <button
+                    onClick={() => showTeacherStudents(t.id)}
+                    className="px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:text-ink hover:border-red-600/50"
+                  >
+                    Ses étudiants
                   </button>
                   <button
                     onClick={() => patch(t.id, { resendInvite: true }, "Invitation renvoyée.")}
@@ -310,6 +410,111 @@ export default function TeachersTab() {
             </div>
           ))
         )}
+      </div>
+
+      <div ref={assignRef} className="bg-surface border border-line rounded-2xl p-6 space-y-4 scroll-mt-24">
+        <div>
+          <p className="font-bold text-ink">Étudiants des professeurs</p>
+          <p className="text-xs text-ink-soft mt-1 max-w-2xl">
+            Attribuez des étudiants à un professeur, ou faites-les passer d'un professeur à un autre : filtrez sur le
+            professeur actuel, cochez les étudiants (ou « tout sélectionner »), choisissez le nouveau professeur et
+            appliquez. Un étudiant attribué n'est vu que par son professeur ; tant qu'il n'est pas attribué
+            ({unattributed} actuellement), il reste visible par tous les professeurs de sa langue.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-3 gap-3">
+          <select
+            value={filterTeacher}
+            onChange={(e) => { setFilterTeacher(e.target.value); setSelected(new Set()); }}
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+          >
+            <option value="all">Tous les étudiants ({students.length})</option>
+            <option value="none">Non attribués ({unattributed})</option>
+            {teachers.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} ({countFor(t.id)})
+              </option>
+            ))}
+          </select>
+          <select
+            value={filterLang}
+            onChange={(e) => { setFilterLang(e.target.value); setSelected(new Set()); }}
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+          >
+            <option value="all">Toutes les langues / formations</option>
+            {PROGRAMS.map((p) => (
+              <option key={p.code} value={p.code}>{p.label}</option>
+            ))}
+          </select>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Rechercher (nom, e-mail, Student ID)"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface-alt border border-line">
+          <label className="flex items-center gap-2 text-xs font-semibold text-ink cursor-pointer">
+            <input type="checkbox" checked={allVisibleSelected} onChange={toggleAllVisible} />
+            Tout sélectionner ({visibleStudents.length})
+          </label>
+          <span className="text-xs text-ink-soft">{selected.size} sélectionné(s)</span>
+          <select
+            value={targetTeacher}
+            onChange={(e) => setTargetTeacher(e.target.value)}
+            className="bg-surface border border-line rounded-lg px-2 py-1.5 text-xs text-ink focus:outline-none focus:border-red-600/60 sm:ml-auto"
+          >
+            <option value="">Attribuer à…</option>
+            {teachers.filter((t) => t.active !== false).map((t) => (
+              <option key={t.id} value={t.id}>{t.name}</option>
+            ))}
+            <option value="none">— Retirer l'attribution —</option>
+          </select>
+          <button
+            onClick={applyAssignment}
+            disabled={assigning || selected.size === 0 || !targetTeacher}
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+          >
+            {assigning ? "En cours…" : "Appliquer"}
+          </button>
+        </div>
+
+        <div className="max-h-[28rem] overflow-y-auto space-y-2">
+          {visibleStudents.length === 0 ? (
+            <p className="text-sm text-ink-soft p-3">Aucun étudiant pour ce filtre.</p>
+          ) : (
+            visibleStudents.map((r) => {
+              const owner = teacherName(r.teacherUid);
+              return (
+                <label
+                  key={rowKey(r)}
+                  className="flex items-center gap-3 px-3 py-2 rounded-xl border border-line bg-surface-alt cursor-pointer hover:border-red-600/40"
+                >
+                  <input type="checkbox" checked={selected.has(rowKey(r))} onChange={() => toggleOne(r)} />
+                  <span className="flex-1 min-w-0">
+                    <span className="block text-sm font-semibold text-ink truncate">{r.name || r.email}</span>
+                    <span className="block text-xs text-ink-soft truncate">
+                      {labelOf(r.langCode!)} · {r.matricule || "—"} · {r.email}
+                    </span>
+                  </span>
+                  <span
+                    className={`text-xs font-semibold px-2.5 py-1 rounded-full border shrink-0 ${
+                      r.teacherUid
+                        ? owner
+                          ? "bg-red-500/10 text-red-500 border-red-700/30"
+                          : "bg-yellow-500/10 text-yellow-600 border-yellow-600/30"
+                        : "text-ink-faint border-line"
+                    }`}
+                  >
+                    {r.teacherUid ? owner || "Professeur supprimé" : "Non attribué"}
+                  </span>
+                </label>
+              );
+            })
+          )}
+        </div>
       </div>
     </div>
   );
