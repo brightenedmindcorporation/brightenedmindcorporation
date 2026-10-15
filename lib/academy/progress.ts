@@ -13,6 +13,8 @@
 // a dozen loose keys) rather than an anti-cheat fix.
 
 export interface LevelProgress {
+  /** Lessons the student has opened and studied (a lesson is studied before its quiz). */
+  studiedLessons: number[];
   completedQuizzes: number[];
   quizScores: Record<number, number>;
   /** ISO date a lesson's quiz was first passed — the pacing clock starts here. */
@@ -28,6 +30,7 @@ function storageKey(langSlug: string, level: number) {
 
 function emptyProgress(): LevelProgress {
   return {
+    studiedLessons: [],
     completedQuizzes: [],
     quizScores: {},
     completedAt: {},
@@ -87,6 +90,15 @@ export function getLevelProgress(langSlug: string, level: number): LevelProgress
 
 function saveProgress(langSlug: string, level: number, progress: LevelProgress) {
   window.localStorage.setItem(storageKey(langSlug, level), JSON.stringify(progress));
+}
+
+/** Notes that a lesson was opened. Returns the progress when it changed, null when already known. */
+export function markLessonStudied(langSlug: string, level: number, lessonId: number): LevelProgress | null {
+  const progress = getLevelProgress(langSlug, level);
+  if (progress.studiedLessons.includes(lessonId)) return null;
+  progress.studiedLessons.push(lessonId);
+  saveProgress(langSlug, level, progress);
+  return progress;
 }
 
 /** Records a quiz result. Only the first attempt's score counts, matching the original app's rule. */

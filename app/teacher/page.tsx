@@ -485,7 +485,7 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                         return (
                           <p key={level} className="text-xs text-ink-soft">
                             <span className="font-semibold text-ink">Niv. {level} :</span>{" "}
-                            {p ? `${p.completedLessons} leçons · ${p.completedQuizzes} quiz${p.finalQuizPassed ? ` · quiz final réussi (${p.finalQuizScore ?? "–"})` : ""}` : "pas encore commencé"}
+                            {p ? `${p.completedLessons} leçon(s) étudiée(s) · ${p.completedQuizzes} quiz réussi(s)${p.finalQuizPassed ? ` · quiz final réussi (${p.finalQuizScore ?? "–"})` : ""}` : "pas encore commencé"}
                           </p>
                         );
                       })}

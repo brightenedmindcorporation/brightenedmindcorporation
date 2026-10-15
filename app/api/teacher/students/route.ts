@@ -60,7 +60,8 @@ export async function GET(request: Request) {
       // others only the levels the teacher teaches.
       if (!row || (!row.attributed && !canTeach(caller.assignments, p.langCode, Number(p.level)))) continue;
       row.levels[p.level] = {
-        completedLessons: (p.completedLessons || []).length,
+        // A passed quiz means its lesson was studied, even for progress saved before lessons were tracked.
+        completedLessons: new Set([...(p.studiedLessons || []), ...(p.completedQuizzes || [])]).size,
         completedQuizzes: (p.completedQuizzes || []).length,
         finalQuizPassed: Boolean(p.finalQuizPassed),
         finalQuizScore: p.finalQuizScore ?? null,

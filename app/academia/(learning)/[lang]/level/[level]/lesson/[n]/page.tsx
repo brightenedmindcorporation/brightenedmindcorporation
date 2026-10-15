@@ -6,7 +6,8 @@ import { useParams, useRouter } from "next/navigation";
 import { PenLine } from "lucide-react";
 import { getLesson, getLevelCurriculum } from "@/content/curriculum";
 import LessonRenderer from "@/components/academy/LessonRenderer";
-import { getLevelProgress, isLessonUnlocked } from "@/lib/academy/progress";
+import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/academy/progress";
+import { syncProgress } from "@/lib/academy/progressSync";
 
 export default function LessonPage() {
   const router = useRouter();
@@ -43,6 +44,9 @@ export default function LessonPage() {
         return;
       }
       setUnlocked(true);
+      // Count the lesson as studied (visible to the teacher and the admin).
+      const updated = markLessonStudied(langSlug, level, lessonId);
+      if (updated && curriculum?.langCode) syncProgress(curriculum.langCode, level, updated);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");

@@ -2882,7 +2882,7 @@ export default function AdminPage() {
                       <th className="py-2 pr-4">Étudiant</th>
                       <th className="py-2 pr-4">Langue</th>
                       <th className="py-2 pr-4">Niveau</th>
-                      <th className="py-2 pr-4">Leçons terminées</th>
+                      <th className="py-2 pr-4">Quiz réussis</th>
                       <th className="py-2 pr-4">Quiz final</th>
                       <th className="py-2 pr-4">Certificat</th>
                     </tr>
