@@ -251,7 +251,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
         const response = await fetch("/api/academy/live-token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken, langCode: hosting.langCode, level: hosting.level }),
+          body: JSON.stringify({ idToken, langCode: hosting.langCode, level: hosting.level, sessionId: hosting.id }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Erreur serveur");
@@ -416,7 +416,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
           ) : isJitsiConfigured() && getJaasAppId() && token ? (
             <JitsiEmbed
               appId={getJaasAppId()!}
-              roomName={getLiveRoomName(hosting.langCode, hosting.level)}
+              roomName={getLiveRoomName(hosting.langCode, hosting.level, hosting.id)}
               displayName={`${teacher.name} — BM Academia`}
               jwt={token}
               role="teacher"

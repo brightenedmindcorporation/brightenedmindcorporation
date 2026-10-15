@@ -11,6 +11,9 @@ export interface LiveSession {
   scheduledAt: string; // ISO datetime
   durationMinutes: number;
   createdAt?: string;
+  /** The teacher who scheduled it: the class is for that teacher's students only. */
+  teacherUid?: string | null;
+  teacherName?: string | null;
   /** True while the teacher has opened the room to students. */
   open?: boolean;
   openedAt?: string;

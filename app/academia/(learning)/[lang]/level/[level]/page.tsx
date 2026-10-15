@@ -7,6 +7,7 @@ import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy } from "luci
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
+import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 
@@ -57,10 +58,7 @@ export default function LevelOverviewPage() {
 
   useEffect(() => {
     if (!curriculum) return;
-    fetch(`/api/live-sessions?langCode=${curriculum.langCode}&level=${level}`)
-      .then((res) => res.json())
-      .then((data) => setLiveSession(data.session ?? null))
-      .catch(() => setLiveSession(null));
+    fetchLiveSession(curriculum.langCode, level).then(setLiveSession);
   }, [curriculum, level]);
 
   if (!curriculum) {

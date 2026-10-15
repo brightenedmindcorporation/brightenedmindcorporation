@@ -12,6 +12,7 @@ import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
+import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { getVerbReference } from "@/content/verbs";
 
 interface Enrollment {
@@ -95,10 +96,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!activeEnrollment || !isOtherProgramCode(activeEnrollment.langCode)) return;
     const loadLiveSession = () => {
-      fetch(`/api/live-sessions?langCode=${activeEnrollment.langCode}&level=1`)
-        .then((res) => res.json())
-        .then((d) => setLiveSession(d.session ?? null))
-        .catch(() => setLiveSession(null));
+      fetchLiveSession(activeEnrollment.langCode, 1).then(setLiveSession);
     };
     loadLiveSession();
     const interval = setInterval(loadLiveSession, 30_000);
@@ -119,10 +117,7 @@ export default function Dashboard() {
     let interval: ReturnType<typeof setInterval> | undefined;
     if (curriculumForLiveCheck) {
       const loadLiveSession = () => {
-        fetch(`/api/live-sessions?langCode=${curriculumForLiveCheck.langCode}&level=${studentLevelNum}`)
-          .then((res) => res.json())
-          .then((d) => setLiveSession(d.session ?? null))
-          .catch(() => setLiveSession(null));
+        fetchLiveSession(curriculumForLiveCheck.langCode, studentLevelNum).then(setLiveSession);
       };
       loadLiveSession();
       // Poll so the "Rejoindre" button appears/disappears on its own when

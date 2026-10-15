@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
-import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { getStudentStanding, sessionOpenToStudent } from "@/lib/academy/liveAccess";
 import { isSessionOpenNow, isSessionUpcomingOrLive, type LiveSession } from "@/lib/academy/liveSessions";
+
+const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
 // The student page polls this every few seconds to learn when the teacher
 // opens the room — it must never be cached.
@@ -30,14 +33,31 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "langCode et level sont requis." }, { status: 400 });
     }
 
+    // The caller must be a signed-in student (or the admin): a teacher's class
+    // is only shown to that teacher's students.
+    const idToken = request.headers.get("authorization")?.replace(/^Bearer /, "");
+    if (!idToken) return NextResponse.json({ session: null });
+    let decoded;
+    try {
+      decoded = await getAdminAuth().verifyIdToken(idToken);
+    } catch {
+      return NextResponse.json({ session: null });
+    }
+
     const adminDb = getAdminDb();
+    const isAdmin = decoded.email === ADMIN_EMAIL;
+    const standing = isAdmin ? null : await getStudentStanding(adminDb, decoded.uid, langCode);
+    if (standing && !standing.approved) return NextResponse.json({ session: null });
+
     const snap = await adminDb
       .collection("liveSessions")
       .where("langCode", "==", langCode)
       .where("level", "==", Number(level))
       .get();
 
-    const sessions = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as LiveSession[];
+    const sessions = (snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as LiveSession[]).filter(
+      (s) => !standing || sessionOpenToStudent(s, standing)
+    );
     // A room the teacher has opened always wins (even if the class overruns
     // its scheduled slot); otherwise the next upcoming session.
     const upcoming = sessions

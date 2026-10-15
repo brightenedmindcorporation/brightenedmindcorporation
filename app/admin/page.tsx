@@ -1411,7 +1411,7 @@ export default function AdminPage() {
         const response = await fetch("/api/academy/live-token", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idToken, langCode: hostingSession.langCode, level: hostingSession.level }),
+          body: JSON.stringify({ idToken, langCode: hostingSession.langCode, level: hostingSession.level, sessionId: hostingSession.id }),
         });
         const result = await response.json();
         if (!response.ok) throw new Error(result.error || "Erreur serveur");
@@ -2255,7 +2255,7 @@ export default function AdminPage() {
                 ) : isJitsiConfigured() && getJaasAppId() && hostingToken ? (
                   <JitsiEmbed
                     appId={getJaasAppId()!}
-                    roomName={getLiveRoomName(hostingSession.langCode, hostingSession.level)}
+                    roomName={getLiveRoomName(hostingSession.langCode, hostingSession.level, hostingSession.id)}
                     displayName="Enseignant — BM Academia"
                     jwt={hostingToken}
                     role="teacher"

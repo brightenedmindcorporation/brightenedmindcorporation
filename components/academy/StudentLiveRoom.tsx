@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { getLiveRoomName, getJaasAppId, isJitsiConfigured } from "@/lib/academy/liveRooms";
+import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 
@@ -37,9 +38,9 @@ export default function StudentLiveRoom({
     let cancelled = false;
     const load = async () => {
       try {
-        const res = await fetch(`/api/live-sessions?langCode=${langCode}&level=${level}`, { cache: "no-store" });
-        const data = await res.json();
-        if (!cancelled) setSession(data.session ?? null);
+        // Only the classes of this student's own teacher come back.
+        const found = await fetchLiveSession(langCode, level);
+        if (!cancelled) setSession(found);
       } catch {
         // keep the last known state; try again on the next tick
       } finally {
@@ -71,7 +72,7 @@ export default function StudentLiveRoom({
           const response = await fetch("/api/academy/live-token", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ idToken, langCode, level }),
+            body: JSON.stringify({ idToken, langCode, level, sessionId: session?.id }),
           });
           const result = await response.json();
           if (!response.ok) {
@@ -192,7 +193,7 @@ export default function StudentLiveRoom({
         </div>
         <JitsiEmbed
           appId={appId}
-          roomName={getLiveRoomName(langCode, level)}
+          roomName={getLiveRoomName(langCode, level, session?.id)}
           displayName={studentName}
           jwt={token}
           role="student"
