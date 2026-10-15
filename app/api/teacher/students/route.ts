@@ -66,6 +66,16 @@ export async function GET(request: Request) {
         finalQuizPassed: Boolean(p.finalQuizPassed),
         finalQuizScore: p.finalQuizScore ?? null,
         updatedAt: p.updatedAt || null,
+        // The full saved progress, for the student's file (quiz scores etc.).
+        doc: {
+          studiedLessons: p.studiedLessons || [],
+          completedQuizzes: p.completedQuizzes || [],
+          quizScores: p.quizScores || {},
+          finalQuizScore: p.finalQuizScore ?? null,
+          finalQuizPassed: Boolean(p.finalQuizPassed),
+          certificateId: p.certificateId || null,
+          updatedAt: p.updatedAt || null,
+        },
       };
     }
 

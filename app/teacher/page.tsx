@@ -7,6 +7,8 @@ import { availableLanguages } from "@/content/curriculum";
 import { getOtherProgramLabel } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
+import StudentDossier from "@/components/academy/StudentDossier";
+import type { ProgressDoc } from "@/lib/academy/levelSummary";
 
 interface Assignment {
   langCode: string;
@@ -33,7 +35,7 @@ interface StudentRow {
   email: string;
   langCode: string;
   studentId: string;
-  levels: Record<string, { completedLessons: number; completedQuizzes: number; finalQuizPassed: boolean; finalQuizScore: number | null }>;
+  levels: Record<string, { doc?: ProgressDoc; completedLessons: number; completedQuizzes: number; finalQuizPassed: boolean; finalQuizScore: number | null }>;
 }
 
 const label = (code?: string) =>
@@ -448,10 +450,18 @@ function useStudents() {
 function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
   const { students, loading } = useStudents();
   const [query, setQuery] = useState("");
+  const [open, setOpen] = useState<StudentRow | null>(null);
   const shown = students.filter((s) => `${s.name} ${s.email} ${s.studentId}`.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="space-y-4">
+      {open && (
+        <StudentDossier
+          student={{ name: open.name, email: open.email, studentId: open.studentId, langCode: open.langCode }}
+          levels={Object.fromEntries(Object.entries(open.levels).map(([lvl, p]) => [lvl, p.doc]))}
+          onClose={() => setOpen(null)}
+        />
+      )}
       <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher un étudiant…" className={`${input} max-w-sm`} />
       {loading ? (
         <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
@@ -466,6 +476,7 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                 <th className="p-3">Cours</th>
                 <th className="p-3">Student ID</th>
                 <th className="p-3">Progression</th>
+                <th className="p-3" />
               </tr>
             </thead>
             <tbody>
@@ -489,6 +500,14 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                           </p>
                         );
                       })}
+                  </td>
+                  <td className="p-3">
+                    <button
+                      onClick={() => setOpen(s)}
+                      className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
+                    >
+                      Ouvrir
+                    </button>
                   </td>
                 </tr>
               ))}

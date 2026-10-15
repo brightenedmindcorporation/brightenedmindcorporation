@@ -38,6 +38,7 @@ import PasswordInput from "@/components/academy/PasswordInput";
 import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
 import TeachersTab from "@/components/admin/TeachersTab";
+import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
 
 export const dynamic = "force-dynamic";
@@ -160,6 +161,7 @@ export default function AdminPage() {
 
   // --- Progress tracking ---
   const [progressList, setProgressList] = useState<any[]>([]);
+  const [dossierOf, setDossierOf] = useState<{ uid: string; langCode: string } | null>(null);
   const [progressLoading, setProgressLoading] = useState(false);
 
   // --- Certificates ---
@@ -2307,6 +2309,18 @@ export default function AdminPage() {
               </div>
             ) : (
               <div className="overflow-x-auto">
+                {dossierOf && (() => {
+                  const owner = students.find((s) => s.uid === dossierOf.uid && s.langCode === dossierOf.langCode) || students.find((s) => s.uid === dossierOf.uid);
+                  const levels: Record<string, any> = {};
+                  for (const row of progressList) if (row.uid === dossierOf.uid && row.langCode === dossierOf.langCode) levels[String(row.level)] = row;
+                  return (
+                    <StudentDossier
+                      student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode }}
+                      levels={levels}
+                      onClose={() => setDossierOf(null)}
+                    />
+                  );
+                })()}
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="text-left text-ink-soft border-b border-line">
@@ -2885,6 +2899,7 @@ export default function AdminPage() {
                       <th className="py-2 pr-4">Quiz réussis</th>
                       <th className="py-2 pr-4">Quiz final</th>
                       <th className="py-2 pr-4">Certificat</th>
+                      <th className="py-2 pr-4" />
                     </tr>
                   </thead>
                   <tbody>
@@ -2906,6 +2921,14 @@ export default function AdminPage() {
                             )}
                           </td>
                           <td className="py-2 pr-4 text-ink-faint font-mono text-xs">{p.certificateId || "—"}</td>
+                          <td className="py-2 pr-4">
+                            <button
+                              onClick={() => setDossierOf({ uid: p.uid, langCode: p.langCode })}
+                              className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
+                            >
+                              Ouvrir
+                            </button>
+                          </td>
                         </tr>
                       );
                     })}
