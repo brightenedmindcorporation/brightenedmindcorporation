@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2 } from "lucide-react";
 import { extractSpeechText, lessonNarrations } from "@/lib/academy/audioClips";
 import NarrationPlayer from "@/components/academy/NarrationPlayer";
+import WritingLab from "@/components/academy/WritingLab";
 import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
 import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
@@ -205,6 +206,8 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
           ))}
         </ul>
       </Card>
+
+      <WritingLab lesson={lesson} langSlug={langSlug} />
 
       <Card>
         <CardTitle icon={MessageSquare}>Speaking Topic</CardTitle>
