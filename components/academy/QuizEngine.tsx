@@ -5,6 +5,7 @@ import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } fro
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
+import { CharPalette, ImeTextarea } from "@/components/academy/ImeField";
 import { textLength, usedKeyWords } from "@/lib/academy/writingLab";
 
 /** What the student did in the extra steps of a quiz. */
@@ -22,6 +23,8 @@ export interface QuizWriting {
   /** Minimum length: words, or characters for Chinese. */
   minLength: number;
   cjk: boolean;
+  /** Tap-to-type characters (Chinese only). */
+  chars?: string[];
 }
 
 interface QuizEngineProps {
@@ -217,17 +220,19 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
               })}
             </div>
           )}
-          <textarea
+          <ImeTextarea
             value={text}
-            onChange={(e) => !submitted && setText(e.target.value)}
+            onValueChange={(v) => !submitted && setText(v)}
             readOnly={submitted}
             rows={8}
             className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
             placeholder="Écrivez votre texte ici…"
-            translate="no"
-            spellCheck={false}
-            autoCorrect="off"
+            lang={useWriting.cjk ? "zh-CN" : undefined}
+            {...(useWriting.cjk ? {} : { spellCheck: false, autoCorrect: "off" })}
           />
+          {useWriting.cjk && !submitted && useWriting.chars && (
+            <CharPalette chars={useWriting.chars} onPick={(c) => setText((t) => t + c)} />
+          )}
           <p className={`text-sm font-bold ${writingOk ? "text-emerald-500" : "text-ink-soft"}`}>
             {length}/{useWriting.minLength} {useWriting.cjk ? "caractères" : "mots"}
           </p>

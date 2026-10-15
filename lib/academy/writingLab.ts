@@ -163,6 +163,8 @@ export interface WritingTask {
   /** Minimum length of the free text: words, or characters for Chinese. */
   goal: number;
   model: string[];
+  /** Tap-to-type characters (Chinese only). */
+  chars: string[];
 }
 
 function buildCloze(sentence: string, cjk: boolean): ClozeItem | null {
@@ -239,6 +241,22 @@ function pickKeyWords(lesson: Lesson, cjk: boolean): string[] {
     .slice(0, 6);
 }
 
+/** Every Chinese character used in a lesson (plus basic punctuation), in order of appearance. */
+export function lessonChars(lesson: Lesson): string[] {
+  const text = [
+    lesson.title,
+    lesson.subtitle,
+    lesson.readingTitle,
+    lesson.speakingTopic,
+    ...lesson.sections.flatMap((s) => [s.heading, ...s.body]),
+    ...lesson.reading,
+    ...lesson.exercises,
+  ].join("");
+  const seen = new Set<string>();
+  for (const c of Array.from(text)) if (CJK.test(c)) seen.add(c);
+  return [...Array.from(seen), "，", "。", "？", "！"];
+}
+
 export function buildWritingTask(langSlug: string, lesson: Lesson): WritingTask {
   const readingLines = lesson.reading.map(extractSpeechText).filter(Boolean);
   const cjk = langSlug === "chinese" || readingLines.some(isCjkText);
@@ -273,6 +291,7 @@ export function buildWritingTask(langSlug: string, lesson: Lesson): WritingTask 
     keyWords: pickKeyWords(lesson, cjk),
     goal: cjk ? 30 : 25,
     model: readingLines,
+    chars: cjk ? lessonChars(lesson) : [],
   };
 }
 

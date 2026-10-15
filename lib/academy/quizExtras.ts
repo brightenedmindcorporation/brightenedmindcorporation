@@ -14,7 +14,7 @@ export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: 
   if (!lesson) return undefined;
   const task = buildWritingTask(langSlug, lesson);
   const base = key === "final" ? 50 : 30;
-  return { prompt: lesson.speakingTopic, keyWords: task.keyWords, minLength: task.cjk ? Math.round(base * 1.2) : base, cjk: task.cjk };
+  return { prompt: lesson.speakingTopic, keyWords: task.keyWords, minLength: task.cjk ? Math.round(base * 1.2) : base, cjk: task.cjk, chars: task.chars };
 }
 
 /** Keeps the student's written answer and conversation result on this device. */

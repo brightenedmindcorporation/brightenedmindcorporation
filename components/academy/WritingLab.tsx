@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PenLine, Volume2, CheckCircle2, RotateCcw, Copy, Eye } from "lucide-react";
 import type { Lesson } from "@/content/curriculum/types";
 import { speakPhrase, speakWithDeviceVoice } from "@/lib/academy/deviceSpeech";
+import { CharPalette, ImeInput, ImeTextarea } from "@/components/academy/ImeField";
 import {
   buildWritingTask,
   diffAnswer,
@@ -70,8 +71,9 @@ function DiffView({ ops }: { ops: DiffOp[] }) {
   );
 }
 
-function Dictation({ items, langSlug, cjk, onDone }: { items: { text: string }[]; langSlug: string; cjk: boolean; onDone: () => void }) {
+function Dictation({ items, langSlug, cjk, chars, onDone }: { items: { text: string }[]; langSlug: string; cjk: boolean; chars: string[]; onDone: () => void }) {
   const [typed, setTyped] = useState<string[]>(() => items.map(() => ""));
+  const [focused, setFocused] = useState(0);
   const [results, setResults] = useState<(ReturnType<typeof diffAnswer> | null)[]>(() => items.map(() => null));
 
   const check = (i: number) => {
@@ -101,16 +103,15 @@ function Dictation({ items, langSlug, cjk, onDone }: { items: { text: string }[]
             </div>
             {!res ? (
               <>
-                <textarea
+                <ImeTextarea
                   value={typed[i]}
-                  onChange={(e) => setTyped(typed.map((t, k) => (k === i ? e.target.value : t)))}
+                  onValueChange={(v) => setTyped((prev) => prev.map((t, k) => (k === i ? v : t)))}
+                  onFocus={() => setFocused(i)}
                   rows={2}
                   className={fieldClass}
                   placeholder="Écrivez la phrase ici…"
-                  spellCheck={false}
-                  autoCorrect="off"
-                  autoCapitalize="off"
-                  translate="no"
+                  lang={cjk ? "zh-CN" : undefined}
+                  {...(cjk ? {} : { spellCheck: false, autoCorrect: "off", autoCapitalize: "off" })}
                 />
                 <button onClick={() => check(i)} disabled={!typed[i].trim()} className={primaryBtn}>
                   Vérifier
@@ -134,12 +135,14 @@ function Dictation({ items, langSlug, cjk, onDone }: { items: { text: string }[]
           </div>
         );
       })}
+      {cjk && <CharPalette chars={chars} onPick={(c) => setTyped((prev) => prev.map((t, k) => (k === focused ? t + c : t)))} />}
     </div>
   );
 }
 
-function Cloze({ items, cjk, onDone }: { items: ClozeItem[]; cjk: boolean; onDone: () => void }) {
+function Cloze({ items, cjk, chars, onDone }: { items: ClozeItem[]; cjk: boolean; chars: string[]; onDone: () => void }) {
   const [answers, setAnswers] = useState<string[]>(() => items.map(() => ""));
+  const [focused, setFocused] = useState(0);
   const [state, setState] = useState<("idle" | "ok" | "accent" | "wrong")[]>(() => items.map(() => "idle"));
 
   const check = () => {
@@ -160,16 +163,16 @@ function Cloze({ items, cjk, onDone }: { items: ClozeItem[]; cjk: boolean; onDon
         <div key={i} className="rounded-2xl border border-line bg-surface-alt p-4 space-y-2">
           <p translate="no" className="notranslate text-lg text-ink leading-10">
             {it.before}
-            <input
+            <ImeInput
               value={answers[i]}
-              onChange={(e) => {
-                setAnswers(answers.map((a, k) => (k === i ? e.target.value : a)));
-                setState(state.map((s, k) => (k === i ? "idle" : s)));
+              onValueChange={(v) => {
+                setAnswers((prev) => prev.map((a, k) => (k === i ? v : a)));
+                setState((prev) => prev.map((s, k) => (k === i ? "idle" : s)));
               }}
-              spellCheck={false}
-              autoCorrect="off"
-              autoCapitalize="off"
-              style={{ width: `${Math.max(it.answer.length, 4) + 2}ch` }}
+              onFocus={() => setFocused(i)}
+              lang={cjk ? "zh-CN" : undefined}
+              {...(cjk ? {} : { spellCheck: false, autoCorrect: "off", autoCapitalize: "off" })}
+              style={{ width: `${cjk ? Math.max(it.answer.length * 2, 8) : Math.max(it.answer.length, 4) + 2}ch` }}
               className={`mx-1.5 text-center bg-surface border-b-2 rounded px-1 py-0.5 focus:outline-none ${
                 state[i] === "ok"
                   ? "border-emerald-500 text-emerald-500"
@@ -207,6 +210,7 @@ function Cloze({ items, cjk, onDone }: { items: ClozeItem[]; cjk: boolean; onDon
       {state.every((s) => s === "ok") && (
         <p className="text-sm font-semibold text-emerald-500">Toutes les phrases sont complètes. Bravo !</p>
       )}
+      {cjk && <CharPalette chars={chars} onPick={(c) => setAnswers((prev) => prev.map((a, k) => (k === focused ? a + c : a)))} />}
     </div>
   );
 }
@@ -379,7 +383,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               hint="Écoutez, écrivez, puis comparez mot à mot. Les accents comptent ; les majuscules et la ponctuation ne sont pas notées."
               done={!!saved.done.dictation}
             />
-            <Dictation items={task.dictation} langSlug={langSlug} cjk={task.cjk} onDone={() => markDone("dictation")} />
+            <Dictation items={task.dictation} langSlug={langSlug} cjk={task.cjk} chars={task.chars} onDone={() => markDone("dictation")} />
           </section>
         )}
 
@@ -391,7 +395,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               hint="Retrouvez le mot manquant dans chaque phrase du texte de lecture."
               done={!!saved.done.cloze}
             />
-            <Cloze items={task.cloze} cjk={task.cjk} onDone={() => markDone("cloze")} />
+            <Cloze items={task.cloze} cjk={task.cjk} chars={task.chars} onDone={() => markDone("cloze")} />
           </section>
         )}
 
@@ -463,16 +467,16 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               </div>
             )}
 
-            <textarea
+            <ImeTextarea
               value={saved.draft}
-              onChange={(e) => persist({ ...saved, draft: e.target.value })}
+              onValueChange={(v) => persist({ ...saved, draft: v })}
               rows={7}
               className={fieldClass}
               placeholder="Écrivez votre texte ici…"
-              translate="no"
-              spellCheck={false}
-              autoCorrect="off"
+              lang={task.cjk ? "zh-CN" : undefined}
+              {...(task.cjk ? {} : { spellCheck: false, autoCorrect: "off" })}
             />
+            {task.cjk && <CharPalette chars={task.chars} onPick={(c) => persist({ ...saved, draft: saved.draft + c })} />}
             <div className="flex flex-wrap items-center gap-3">
               <span className={`text-sm font-bold ${length >= task.goal ? "text-emerald-500" : "text-ink-soft"}`}>
                 {length}/{task.goal} {task.cjk ? "caractères" : "mots"}
