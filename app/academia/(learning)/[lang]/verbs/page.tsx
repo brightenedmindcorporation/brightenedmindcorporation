@@ -49,7 +49,7 @@ export default function VerbsPage() {
         <div>
           <p className="text-2xl font-bold text-ink mb-2">Fiche bientôt disponible</p>
           <p className="text-ink-soft">Cette référence de verbes n'est pas encore publiée pour cette langue.</p>
-          <Link href="/academy/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
+          <Link href="/academia/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
             ← Retour au dashboard
           </Link>
         </div>
@@ -73,7 +73,7 @@ export default function VerbsPage() {
       <main className="p-6 md:p-10">
         <div className="max-w-5xl mx-auto space-y-6">
           <Link
-            href="/academy/dashboard"
+            href="/academia/dashboard"
             className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
           >
             ← Back to Dashboard

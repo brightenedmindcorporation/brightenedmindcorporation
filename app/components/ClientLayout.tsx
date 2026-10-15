@@ -6,10 +6,11 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import BmLogo from "@/components/BmLogo";
+import { availableLanguages } from "@/content/curriculum";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
-  { href: "/academy", label: "Academia" },
+  { href: "/academia", label: "Academia" },
   { href: "/communication", label: "Communication" },
   { href: "/domestica", label: "Domestica" },
 ];
@@ -23,7 +24,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   // future LearningShell) : le header/footer public ne s'y affiche pas.
   // Le panneau admin (/admin) garde le header public — sa page réserve
   // l'espace en haut (pt-28) pour que son propre en-tête reste visible.
-  const hideLayoutElements = pathname?.startsWith("/academy") ?? false;
+  const LEARNING_PREFIXES = ["/academia/dashboard", "/academia/program", ...availableLanguages.map((l) => `/academia/${l.slug}`)];
+  const hideLayoutElements =
+    pathname === "/academia" || LEARNING_PREFIXES.some((p) => pathname?.startsWith(p)) || false;
   const isHome = pathname === "/";
   const phoneOfficial = "+243988830799";
 
@@ -127,7 +130,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <div>
               <h4 className="text-ink font-semibold mb-3">Pôles Academia</h4>
               <ul className="space-y-2 text-xs">
-                <li><Link href="/academy" className="hover:text-red-500 transition">Langues (Français, Anglais...)</Link></li>
+                <li><Link href="/academia" className="hover:text-red-500 transition">Langues (Français, Anglais...)</Link></li>
                 <li><Link href="/academia/bureautique" className="hover:text-red-500 transition">Bureautique & MS Office</Link></li>
                 <li><Link href="/academia/visuel" className="hover:text-red-500 transition">Visuel & Audiovisuel</Link></li>
                 <li><Link href="/academia/logiciels" className="hover:text-red-500 transition">Logiciels de Gestion</Link></li>
@@ -139,7 +142,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <h4 className="text-ink font-semibold mb-3">Navigation</h4>
               <ul className="space-y-2 text-xs">
                 <li><Link href="/" className="hover:text-red-500 transition">Accueil</Link></li>
-                <li><Link href="/academy" className="hover:text-red-500 transition">Formations / Academia</Link></li>
+                <li><Link href="/academia" className="hover:text-red-500 transition">Formations / Academia</Link></li>
                 <li><Link href="/devis" className="hover:text-red-500 transition">Demander un Devis</Link></li>
               </ul>
             </div>

@@ -1,26 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PenLine } from "lucide-react";
-import { getLesson, getLevelCurriculum } from "@/content/curriculum";
-import LessonRenderer from "@/components/academy/LessonRenderer";
-import { getLevelProgress, isLessonUnlocked } from "@/lib/academy/progress";
+import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
+import QuizEngine from "@/components/academy/QuizEngine";
+import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
+import { syncProgress } from "@/lib/academy/progressSync";
+import { useEffect, useState } from "react";
 
-export default function LessonPage() {
+export default function QuizPage() {
   const router = useRouter();
   const params = useParams<{ lang: string; level: string; n: string }>();
   const langSlug = params.lang;
   const level = Number(params.level);
   const lessonId = Number(params.n);
-  const base = `/academy/${langSlug}/level/${level}`;
+
+  const quiz = getQuiz(langSlug, level, lessonId);
+  const curriculum = getLevelCurriculum(langSlug, level);
+  const base = `/academia/${langSlug}/level/${level}`;
 
   const [checked, setChecked] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
-
-  const lesson = getLesson(langSlug, level, lessonId);
-  const curriculum = getLevelCurriculum(langSlug, level);
+  const [alreadyScore, setAlreadyScore] = useState<number | null>(null);
 
   useEffect(() => {
     try {
@@ -42,6 +43,7 @@ export default function LessonPage() {
         router.push(base);
         return;
       }
+      setAlreadyScore(progress.quizScores[lessonId] ?? null);
       setUnlocked(true);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
@@ -51,10 +53,10 @@ export default function LessonPage() {
     }
   }, [router, langSlug, level, lessonId, base, curriculum?.langCode]);
 
-  if (!lesson) {
+  if (!quiz || !curriculum) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
-        <p>Leçon introuvable.</p>
+        <p>Quiz introuvable.</p>
       </main>
     );
   }
@@ -73,7 +75,7 @@ export default function LessonPage() {
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10">
-        <div className="max-w-5xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto space-y-8">
           <div>
             <Link
               href={base}
@@ -84,21 +86,21 @@ export default function LessonPage() {
           </div>
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">
-              Lesson {lesson.id}: {lesson.title}
-            </h1>
-            <p className="text-red-200/80 mt-2 text-sm md:text-base">{lesson.subtitle}</p>
+            <span className="text-xs font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
+              Assessment
+            </span>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50 mt-3">{quiz.title}</h1>
+            <p className="text-red-200/80 mt-2 text-sm md:text-base">{quiz.subtitle}</p>
           </div>
 
-          <LessonRenderer lesson={lesson} langSlug={langSlug} />
-
-          <div className="text-center pt-4 pb-10">
-            <Link href={`${base}/quiz/${lesson.id}`}>
-              <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg px-10 py-4 rounded-2xl transition shadow-xl shadow-red-950/60 inline-flex items-center gap-2">
-                <PenLine size={18} /> Take Quiz
-              </button>
-            </Link>
-          </div>
+          <QuizEngine
+            quiz={quiz}
+            alreadyScore={alreadyScore}
+            onSubmit={(score) => {
+              const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore);
+              if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
+            }}
+          />
         </div>
       </main>
     </div>

@@ -39,5 +39,5 @@ export const config = {
   // page already does its own client-side Firebase Auth + email check,
   // and the two mutating actions (approve/reject) are independently
   // verified server-side via ID token in app/api/admin/*-student/route.ts.
-  matcher: ["/academy/dashboard", "/academy/:lang/level/:path*"],
+  matcher: ["/academia/dashboard", "/academia/:lang/level/:path*"],
 };

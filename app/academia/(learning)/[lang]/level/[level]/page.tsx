@@ -63,7 +63,7 @@ export default function LevelOverviewPage() {
         <div>
           <p className="text-2xl font-bold text-ink mb-2">Contenu bientôt disponible</p>
           <p className="text-ink-soft">Ce niveau n'est pas encore publié pour cette langue.</p>
-          <Link href="/academy/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
+          <Link href="/academia/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
             ← Retour au dashboard
           </Link>
         </div>
@@ -84,7 +84,7 @@ export default function LevelOverviewPage() {
 
   const completedQuizzes = progress.completedQuizzes;
   const progressPct = Math.round((completedQuizzes.length / curriculum.lessons.length) * 100);
-  const base = `/academy/${langSlug}/level/${level}`;
+  const base = `/academia/${langSlug}/level/${level}`;
 
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
@@ -94,7 +94,7 @@ export default function LevelOverviewPage() {
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <Link
-              href="/academy/dashboard"
+              href="/academia/dashboard"
               className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
             >
               ← Back to Dashboard

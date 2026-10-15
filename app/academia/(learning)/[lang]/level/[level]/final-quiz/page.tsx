@@ -1,26 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
-import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
-import QuizEngine from "@/components/academy/QuizEngine";
-import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
-import { syncProgress } from "@/lib/academy/progressSync";
 import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { GraduationCap } from "lucide-react";
+import { getLevelCurriculum } from "@/content/curriculum";
+import QuizEngine from "@/components/academy/QuizEngine";
+import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
+import { syncProgress } from "@/lib/academy/progressSync";
 
-export default function QuizPage() {
+export default function FinalQuizPage() {
   const router = useRouter();
-  const params = useParams<{ lang: string; level: string; n: string }>();
+  const params = useParams<{ lang: string; level: string }>();
   const langSlug = params.lang;
   const level = Number(params.level);
-  const lessonId = Number(params.n);
 
-  const quiz = getQuiz(langSlug, level, lessonId);
   const curriculum = getLevelCurriculum(langSlug, level);
-  const base = `/academy/${langSlug}/level/${level}`;
+  const base = `/academia/${langSlug}/level/${level}`;
 
   const [checked, setChecked] = useState(false);
-  const [unlocked, setUnlocked] = useState(false);
+  const [allowed, setAllowed] = useState(false);
   const [alreadyScore, setAlreadyScore] = useState<number | null>(null);
 
   useEffect(() => {
@@ -38,30 +37,34 @@ export default function QuizPage() {
         router.push(`/login?program=${curriculum?.langCode ?? ""}`);
         return;
       }
+
       const progress = getLevelProgress(langSlug, level);
-      if (!isLessonUnlocked(progress, lessonId, enrollment.studyDays)) {
+      const totalLessons = curriculum?.lessons.length ?? 0;
+      const allLessonsDone = totalLessons > 0 && progress.completedQuizzes.length >= totalLessons;
+      if (!allLessonsDone) {
         router.push(base);
         return;
       }
-      setAlreadyScore(progress.quizScores[lessonId] ?? null);
-      setUnlocked(true);
+
+      setAlreadyScore(progress.finalQuizScore);
+      setAllowed(true);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");
     } finally {
       setChecked(true);
     }
-  }, [router, langSlug, level, lessonId, base, curriculum?.langCode]);
+  }, [router, langSlug, level, base, curriculum?.langCode]);
 
-  if (!quiz || !curriculum) {
+  if (!curriculum) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
-        <p>Quiz introuvable.</p>
+        <p>Quiz final introuvable.</p>
       </main>
     );
   }
 
-  if (!checked || !unlocked) {
+  if (!checked || !allowed) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft">
         <div className="flex flex-col items-center gap-3">
@@ -87,17 +90,20 @@ export default function QuizPage() {
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <span className="text-xs font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
-              Assessment
+              Final Assessment
             </span>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50 mt-3">{quiz.title}</h1>
-            <p className="text-red-200/80 mt-2 text-sm md:text-base">{quiz.subtitle}</p>
+            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50 mt-3 flex items-center gap-3">
+              <GraduationCap size={38} /> {curriculum.finalQuiz.title}
+            </h1>
+            <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.finalQuiz.subtitle}</p>
           </div>
 
           <QuizEngine
-            quiz={quiz}
+            quiz={curriculum.finalQuiz}
+            badge="Final Quiz"
             alreadyScore={alreadyScore}
             onSubmit={(score) => {
-              const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore);
+              const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}
           />

@@ -3,24 +3,19 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { otherPrograms } from "@/content/programs";
+import { getLevelCurriculum } from "@/content/curriculum";
 import StudentLiveRoom from "@/components/academy/StudentLiveRoom";
 
-// Mirrors app/academy/[lang]/level/[level]/live/page.tsx for the non-language
-// formations (Bureautique, Visuel & Audiovisuel, Logiciels de Gestion), which
-// have no curriculum/levels — the admin always schedules these under a
-// single "level 1" room, so this page is keyed directly by program code
-// instead of a [lang]/[level] pair.
-const LEVEL = 1;
-
-export default function ProgramLiveClassPage() {
+export default function LiveClassPage() {
   const router = useRouter();
-  const params = useParams<{ code: string }>();
-  const code = params.code?.toUpperCase();
-  const program = otherPrograms.find((p) => p.code === code);
+  const params = useParams<{ lang: string; level: string }>();
+  const langSlug = params.lang;
+  const level = Number(params.level);
 
   const [allowed, setAllowed] = useState(false);
   const [studentName, setStudentName] = useState("Élève");
+
+  const curriculum = getLevelCurriculum(langSlug, level);
 
   useEffect(() => {
     try {
@@ -31,10 +26,10 @@ export default function ProgramLiveClassPage() {
       }
       const parsed = JSON.parse(savedStudent);
       const enrollment = (parsed.enrollments || []).find(
-        (e: any) => e.langCode === code && e.status === "Approved"
+        (e: any) => e.langCode === curriculum?.langCode && e.status === "Approved"
       );
       if (!enrollment) {
-        router.push(`/login?program=${code ?? ""}`);
+        router.push(`/login?program=${curriculum?.langCode ?? ""}`);
         return;
       }
       setStudentName(parsed.name || parsed.email || "Élève");
@@ -43,14 +38,14 @@ export default function ProgramLiveClassPage() {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");
     }
-  }, [router, code]);
+  }, [router, curriculum?.langCode]);
 
-  if (!program) {
+  if (!curriculum) {
     return (
       <main className="min-h-screen flex items-center justify-center bg-surface-sunken text-ink-soft text-center px-6">
         <div>
-          <p className="text-2xl font-bold text-ink mb-2">Formation introuvable</p>
-          <Link href="/academy/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
+          <p className="text-2xl font-bold text-ink mb-2">Contenu bientôt disponible</p>
+          <Link href="/academia/dashboard" className="inline-block mt-6 text-red-500 hover:text-red-400 font-semibold">
             ← Retour au dashboard
           </Link>
         </div>
@@ -69,15 +64,17 @@ export default function ProgramLiveClassPage() {
     );
   }
 
+  const base = `/academia/${langSlug}/level/${level}`;
+
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10">
         <div className="max-w-5xl mx-auto space-y-6">
           <Link
-            href="/academy/dashboard"
+            href={base}
             className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
           >
-            ← Back to Dashboard
+            ← Back to Level
           </Link>
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
@@ -88,10 +85,10 @@ export default function ProgramLiveClassPage() {
               </span>
               Classe en direct
             </h1>
-            <p className="text-red-200/80 mt-2 text-sm md:text-base">{program.label}</p>
+            <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelTitle}</p>
           </div>
 
-          <StudentLiveRoom langCode={program.code} level={LEVEL} studentName={studentName} />
+          <StudentLiveRoom langCode={curriculum.langCode} level={level} studentName={studentName} />
         </div>
       </main>
     </div>

@@ -75,7 +75,7 @@ export default function Home() {
           {/* Boutons d'action CTA */}
           <div className="mt-10 flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
             <Link
-              href="/academy/dashboard"
+              href="/academia/dashboard"
               className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-base px-8 py-4 rounded-xl shadow-lg shadow-red-950/50 transition transform hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-3"
             >
               <span>Go to Student Portal</span>
@@ -168,7 +168,7 @@ export default function Home() {
           {availableLanguages.map((lang) => (
             <Link
               key={lang.slug}
-              href={`/academy/${lang.slug}/level/1`}
+              href={`/academia/${lang.slug}/level/1`}
               className="group bg-surface rounded-2xl p-8 border border-line hover:border-red-600/40 flex flex-col justify-between shadow-md transition"
             >
               <div>
@@ -251,7 +251,7 @@ export default function Home() {
           </p>
 
           <div className="flex items-center gap-6 text-xs text-ink-soft font-medium">
-            <Link href="/academy/dashboard" className="hover:text-ink transition">Dashboard</Link>
+            <Link href="/academia/dashboard" className="hover:text-ink transition">Dashboard</Link>
             <Link href="/login" className="hover:text-ink transition">Login</Link>
           </div>
 

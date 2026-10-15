@@ -21,7 +21,7 @@ export default function AcademyHeader() {
     }
   };
 
-  const isDashboard = pathname === "/academy/dashboard";
+  const isDashboard = pathname === "/academia/dashboard";
 
   return (
     <header className="bg-surface/90 border-b border-line sticky top-0 z-40 shadow-xl backdrop-blur-md">
@@ -41,7 +41,7 @@ export default function AcademyHeader() {
             <>
               <span className="text-ink-faint">|</span>
               <Link
-                href="/academy/dashboard"
+                href="/academia/dashboard"
                 className="text-sm font-semibold text-red-500 hover:text-red-400 transition flex items-center gap-1.5"
               >
                 <LayoutDashboard size={15} /> Mon Dashboard

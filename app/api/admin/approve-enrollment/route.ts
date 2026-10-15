@@ -60,7 +60,7 @@ export async function POST(request: Request) {
           type: "enrollment-approved",
           title: "Inscription approuvée",
           message: `Votre inscription (${langCode}) a été approuvée — Student ID ${matricule}.`,
-          link: "/academy/dashboard",
+          link: "/academia/dashboard",
         });
       } catch (notifError) {
         console.error("Error creating approval notification (non-fatal):", notifError);

@@ -15,7 +15,7 @@ export default function AcademyLayout({
   return (
     <div className="min-h-full flex flex-col">
       {/* The public ClientLayout header (and its ThemeToggle) is hidden on
-          every /academy/* route in favor of AcademyHeader/admin's own top
+          every /academia/* route in favor of AcademyHeader/admin's own top
           bars — none of which always carry a theme control (AcademyHeader
           hides it on mobile, and some pages like admin, lesson, quiz, live
           have no header at all). One floating toggle here covers all of

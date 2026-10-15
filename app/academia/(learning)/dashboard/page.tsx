@@ -263,10 +263,10 @@ export default function Dashboard() {
 
   const handleContinue = () => {
     const currentLevel = activeEnrollment.level || "Level 1";
-    if (currentLevel === "Level 1") router.push(`/academy/${langSlug}/level/1/lesson/${lastLesson}`);
-    else if (currentLevel === "Level 2") router.push(`/academy/${langSlug}/level/2`);
-    else if (currentLevel === "Level 3") router.push(`/academy/${langSlug}/level/3`);
-    else router.push(`/academy/${langSlug}/level/1`);
+    if (currentLevel === "Level 1") router.push(`/academia/${langSlug}/level/1/lesson/${lastLesson}`);
+    else if (currentLevel === "Level 2") router.push(`/academia/${langSlug}/level/2`);
+    else if (currentLevel === "Level 3") router.push(`/academia/${langSlug}/level/3`);
+    else router.push(`/academia/${langSlug}/level/1`);
   };
 
   return (
@@ -389,7 +389,7 @@ export default function Dashboard() {
 
               {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
-                  onClick={() => router.push(`/academy/program/${activeEnrollment.langCode}/live`)}
+                  onClick={() => router.push(`/academia/program/${activeEnrollment.langCode}/live`)}
                   className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0"
                 >
                   <span className="relative flex h-2.5 w-2.5">
@@ -453,7 +453,7 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
-                  onClick={() => router.push(`/academy/${langSlug}/level/${(activeEnrollment.level || "Level 1").slice(-1)}/live`)}
+                  onClick={() => router.push(`/academia/${langSlug}/level/${(activeEnrollment.level || "Level 1").slice(-1)}/live`)}
                   className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
                 >
                   <span className="relative flex h-2.5 w-2.5">
@@ -476,7 +476,7 @@ export default function Dashboard() {
 
               {getVerbReference(activeEnrollment.langCode) && (
                 <button
-                  onClick={() => router.push(`/academy/${langSlug}/verbs`)}
+                  onClick={() => router.push(`/academia/${langSlug}/verbs`)}
                   className="border border-line hover:border-red-600/50 text-ink-soft hover:text-ink font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
                 >
                   <BookText size={16} /> Verbes
@@ -569,7 +569,7 @@ export default function Dashboard() {
                 </p>
               </div>
               <button
-                onClick={() => router.push(`/academy/${langSlug}/level/1`)}
+                onClick={() => router.push(`/academia/${langSlug}/level/1`)}
                 className="glow-accent mt-6 w-full bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-2.5 rounded-xl text-sm transition"
               >
                 Open Level 1
@@ -589,7 +589,7 @@ export default function Dashboard() {
               <button
                 onClick={() => {
                   if (activeEnrollment.level === "Level 2" || activeEnrollment.level === "Level 3") {
-                    router.push(`/academy/${langSlug}/level/2`);
+                    router.push(`/academia/${langSlug}/level/2`);
                   }
                 }}
                 disabled={activeEnrollment.level === "Level 1"}
@@ -615,7 +615,7 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (activeEnrollment.level === "Level 3") router.push(`/academy/${langSlug}/level/3`);
+                  if (activeEnrollment.level === "Level 3") router.push(`/academia/${langSlug}/level/3`);
                 }}
                 disabled={activeEnrollment.level !== "Level 3"}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${

@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         type: "enrollment-rejected",
         title: "Inscription non approuvée",
         message: "Votre demande d'inscription n'a pas été approuvée. Contactez l'administration pour plus de détails.",
-        link: "/academy/dashboard",
+        link: "/academia/dashboard",
       });
     } catch (notifError) {
       console.error("Error creating rejection notification (non-fatal):", notifError);

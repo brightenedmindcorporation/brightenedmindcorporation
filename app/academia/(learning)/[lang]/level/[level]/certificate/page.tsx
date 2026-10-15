@@ -112,7 +112,7 @@ export default function CertificatePage() {
         <div className="max-w-3xl mx-auto space-y-8">
           <div>
             <Link
-              href={`/academy/${langSlug}/level/${level}`}
+              href={`/academia/${langSlug}/level/${level}`}
               className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
             >
               ← Back to Level

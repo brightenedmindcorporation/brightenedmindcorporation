@@ -34,7 +34,7 @@ function LoginForm() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const nextPath = searchParams.get("next") || "/academy/dashboard";
+  const nextPath = searchParams.get("next") || "/academia/dashboard";
   const requiredProgram = searchParams.get("program");
 
   const handleLogin = async (e: React.FormEvent) => {

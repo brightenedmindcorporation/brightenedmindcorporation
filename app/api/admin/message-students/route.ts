@@ -86,7 +86,7 @@ export async function POST(request: Request) {
             type: "admin-message",
             title: subject,
             message: body,
-            link: "/academy/dashboard",
+            link: "/academia/dashboard",
             read: false,
             createdAt,
             batchId,
