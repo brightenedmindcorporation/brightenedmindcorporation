@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
+import { normalizeGender } from "@/lib/salutation";
 
 /**
  * Admin changes a student's study plan (3 or 5 days per week). The plan sets
@@ -16,15 +17,24 @@ export async function PATCH(request: Request) {
     }
     await getCaller(bearer(request), ["admin"]);
 
-    const { id, kind, studyDays } = await request.json();
-    if (!id || (studyDays !== 3 && studyDays !== 5)) {
-      return NextResponse.json({ error: "id et studyDays (3 ou 5) requis." }, { status: 400 });
+    const { id, kind, studyDays, gender: rawGender } = await request.json();
+    const gender = normalizeGender(rawGender);
+    if (!id || (!gender && studyDays !== 3 && studyDays !== 5)) {
+      return NextResponse.json({ error: "id et studyDays (3 ou 5) ou gender (M ou F) requis." }, { status: 400 });
     }
 
     const db = getAdminDb();
     const ref = db.collection(kind === "legacyStudent" ? "students" : "enrollments").doc(String(id));
     const snap = await ref.get();
     if (!snap.exists) return NextResponse.json({ error: "Inscription introuvable." }, { status: 404 });
+
+    // Civility (Monsieur / Madame): kept on the enrolment and on the student profile.
+    if (gender) {
+      await ref.update({ gender });
+      const uid = (snap.data()!.uid as string) || String(id).split("_")[0];
+      await db.collection("students").doc(uid).set({ gender }, { merge: true });
+      if (studyDays !== 3 && studyDays !== 5) return NextResponse.json({ status: "success", gender });
+    }
 
     const before = snap.data()!.studyDays === 5 ? 5 : 3;
     await ref.update({ studyDays, studyDaysChangedAt: new Date().toISOString() });

@@ -1,6 +1,7 @@
 import { mailFrom } from "@/lib/mailFrom";
 import { Resend } from "resend";
-import { isAdminConfigured } from "@/lib/firebase-admin";
+import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { greeting } from "@/lib/salutation";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
 import { sendWithText } from "@/lib/mailText";
 
@@ -41,6 +42,15 @@ export async function POST(req: Request) {
     const studyDaysLine =
       studyDays === 3 || studyDays === 5 ? `<p><b>Rythme d'étude :</b> ${studyDays} jours / semaine</p>` : "";
 
+    // Civility (Monsieur / Madame), when the student gave it at registration.
+    let gender: unknown;
+    try {
+      const snap = await getAdminDb().collection("students").where("email", "==", String(email).trim()).limit(1).get();
+      gender = snap.docs[0]?.data().gender;
+    } catch {
+      // the greeting falls back to the plain name
+    }
+
     const resend = new Resend(apiKey);
     const { data, error } = await sendWithText(resend, {
       from: mailFrom("Brightened Mind Academia"),
@@ -49,8 +59,8 @@ export async function POST(req: Request) {
       subject: "Inscription confirmée — Brightened Mind Academia",
       html: `
         <div style="font-family: sans-serif; max-width: 560px; margin: 0 auto; color: #333;">
-          <h2 style="color: #7a1f2b;">Bienvenue ${esc(name)},</h2>
-          <p>Votre inscription a été approuvée. Voici le récapitulatif :</p>
+          <h2 style="color: #7a1f2b;">${esc(greeting(name, gender))}</h2>
+          <p>Bienvenue chez BM Academia ! Votre inscription a été approuvée. Voici le récapitulatif :</p>
           <p><b>Langue / formation :</b> ${esc(langLabel ?? "—")}</p>
           <p><b>Niveau :</b> ${esc(level ?? "—")}</p>
           ${studyDaysLine}

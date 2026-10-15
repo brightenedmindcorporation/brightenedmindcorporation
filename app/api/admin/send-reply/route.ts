@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { sendGmailMessage, type GmailAttachment } from "@/lib/gmail";
-import { htmlToText } from "@/lib/mailText";
+import { sendWithText } from "@/lib/mailText";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const ALLOWED_COLLECTIONS = ["projectRequests", "devisRequests", "jobApplications", "studentRequests"];
@@ -87,13 +87,12 @@ export async function POST(request: Request) {
     if (sentVia !== "gmail") {
       const resend = new Resend(process.env.RESEND_API_KEY);
       const html = `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(message).replace(/\n/g, "<br/>")}</div>`;
-      const result = await resend.emails.send({
+      const result = await sendWithText(resend, {
         from: mailFrom("BM Corporation"),
         to,
         replyTo: ADMIN_EMAIL,
         subject,
         html,
-        text: htmlToText(html),
         attachments: attachments.length ? attachments : undefined,
       });
       sendError = result.error;

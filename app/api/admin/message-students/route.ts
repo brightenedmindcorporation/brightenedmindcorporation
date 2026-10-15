@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { getCaller, isTeachersStudent } from "@/lib/teacherAuth";
 import { sendWithText } from "@/lib/mailText";
+import { greeting } from "@/lib/salutation";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -116,14 +117,24 @@ export async function POST(request: Request) {
       // below Resend's 2 requests/second default limit.
       let failed = 0;
       let lastError = "";
+      // Each student is greeted by civility (Monsieur / Madame) when we know it,
+      // and a teacher signs with their own name.
+      const people = new Map<string, { name?: string; gender?: string }>();
+      for (const r of recipients) {
+        const snap = await adminDb.collection("students").doc(r.uid).get().catch(() => null);
+        if (snap?.exists) people.set(r.email, { name: snap.data()!.name, gender: snap.data()!.gender });
+      }
+      const signature = caller.role === "teacher" ? { name: caller.name, title: "Professeur — BM Academia" } : undefined;
       for (let i = 0; i < emails.length; i++) {
         if (i > 0) await new Promise((r) => setTimeout(r, 600));
+        const who = people.get(emails[i]);
         const { error: sendError } = await sendWithText(resend, {
+          signature,
           from: mailFrom("BM Corporation Academia"),
           to: emails[i],
           replyTo: caller.role === "teacher" ? caller.email : ADMIN_EMAIL,
           subject,
-          html: `<div style="white-space: pre-wrap; font-family: sans-serif;">${String(body).replace(/\n/g, "<br/>")}</div>`,
+          html: `<div style="font-family: sans-serif;"><p>${greeting(who?.name, who?.gender)}</p><div style="white-space: pre-wrap;">${String(body).replace(/\n/g, "<br/>")}</div></div>`,
           attachments: attachments.length ? attachments : undefined,
         });
         if (sendError) {

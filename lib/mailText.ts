@@ -1,3 +1,5 @@
+import { withSignatureHtml, withSignatureText, type SignatureOption } from "./mailSignature";
+
 /** Plain-text twin of an HTML e-mail. Messages with only an HTML part are a
  * classic spam signal; sending both parts helps inbox placement. */
 export function htmlToText(html: string): string {
@@ -18,10 +20,18 @@ export function htmlToText(html: string): string {
     .trim();
 }
 
-/** Sends through Resend with an automatic plain-text part next to the HTML. */
+/** Sends through Resend with an automatic plain-text part next to the HTML,
+ * and the BM Corporation signature appended (pass `signature: false` to skip
+ * it, or a person — e.g. a teacher — to sign with their name). */
 export function sendWithText(
   resend: { emails: { send: (payload: any) => Promise<any> } },
-  payload: { html?: string; text?: string; [key: string]: unknown }
+  payload: { html?: string; text?: string; signature?: SignatureOption; [key: string]: unknown }
 ) {
-  return resend.emails.send({ ...payload, text: payload.text ?? (payload.html ? htmlToText(payload.html) : undefined) });
+  const { signature, ...rest } = payload;
+  const html = rest.html ? withSignatureHtml(rest.html, signature) : undefined;
+  const text = rest.text !== undefined ? withSignatureText(rest.text, signature) : html ? htmlToText(html) : undefined;
+  const out: Record<string, unknown> = { ...rest };
+  if (html !== undefined) out.html = html;
+  if (text !== undefined) out.text = text;
+  return resend.emails.send(out);
 }

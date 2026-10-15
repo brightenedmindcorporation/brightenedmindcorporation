@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { normalizeGender } from "@/lib/salutation";
 
 /**
  * Self-service enrollment request, used both for a student's very first
@@ -26,7 +27,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { idToken, name, langCode, level, studyDays } = await request.json();
+    const { idToken, name, gender: rawGender, langCode, level, studyDays } = await request.json();
+    const gender = normalizeGender(rawGender);
     if (!idToken || !name || !langCode || !level) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
     }
@@ -56,13 +58,16 @@ export async function POST(request: Request) {
       }
 
       if (!studentSnap.exists) {
-        tx.set(studentRef, { uid, name, email, createdAt: new Date().toISOString() });
+        tx.set(studentRef, { uid, name, email, ...(gender ? { gender } : {}), createdAt: new Date().toISOString() });
+      } else if (gender && !studentSnap.data()?.gender) {
+        tx.update(studentRef, { gender });
       }
 
       tx.set(enrollmentRef, {
         uid,
         email,
         name,
+        ...(gender ? { gender } : {}),
         langCode,
         level,
         studyDays: studyDays === 5 ? 5 : 3,

@@ -38,6 +38,7 @@ import PasswordInput from "@/components/academy/PasswordInput";
 import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
 import TeachersTab from "@/components/admin/TeachersTab";
+import VisitsTab from "@/components/admin/VisitsTab";
 import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
 
@@ -57,7 +58,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1348,7 +1349,7 @@ export default function AdminPage() {
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
     const requestedTab = params.get("tab");
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1462,6 +1463,23 @@ export default function AdminPage() {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
         body: JSON.stringify({ id: student.id, kind: student.kind, studyDays }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
+  // Sets the civility (Monsieur / Madame) used to address the student in e-mails.
+  const changeGender = async (student: any, gender: "M" | "F") => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/update-enrollment", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ id: student.id, kind: student.kind, gender }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
@@ -1817,6 +1835,7 @@ export default function AdminPage() {
             { id: "progress", label: "Progression", badge: 0 },
             { id: "certificates", label: "Certificats", badge: 0 },
             { id: "teachers", label: "Professeurs", badge: 0 },
+            { id: "visits", label: "Visites", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
               key={t.id}
@@ -1987,6 +2006,18 @@ export default function AdminPage() {
                     {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
                   </p>
                   <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
+                  <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
+                    <b className="text-ink">Civilité :</b>
+                    <select
+                      value={s.gender === "M" || s.gender === "F" ? s.gender : ""}
+                      onChange={(e) => e.target.value && changeGender(s, e.target.value as "M" | "F")}
+                      className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                    >
+                      <option value="">Non renseignée</option>
+                      <option value="M">Monsieur</option>
+                      <option value="F">Madame</option>
+                    </select>
+                  </div>
                   {!isOtherProgramCode(s.langCode) && (
                     <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
                       <b className="text-ink">Rythme d'étude :</b>
@@ -2278,6 +2309,7 @@ export default function AdminPage() {
 
         {/* ================= TEACHERS TAB ================= */}
         {tab === "teachers" && <TeachersTab />}
+        {tab === "visits" && <VisitsTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

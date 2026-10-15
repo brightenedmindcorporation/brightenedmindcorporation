@@ -26,6 +26,7 @@ function RegisterForm() {
     availableLanguages[0].code;
 
   const [name, setName] = useState("");
+  const [gender, setGender] = useState<"" | "M" | "F">("");
   const [email, setEmail] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
   const [password, setPassword] = useState("");
@@ -115,6 +116,7 @@ function RegisterForm() {
         body: JSON.stringify({
           idToken,
           name,
+          gender,
           langCode: programCode,
           level: isLanguageProgram ? level : "N/A",
           studyDays: isLanguageProgram ? studyDays : undefined,
@@ -201,6 +203,24 @@ function RegisterForm() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Vous êtes</label>
+            <div className="grid grid-cols-2 gap-3">
+              {([["M", "Un homme"], ["F", "Une femme"]] as const).map(([value, text]) => (
+                <label
+                  key={value}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border cursor-pointer transition ${
+                    gender === value ? "border-red-600 bg-red-600/10 text-ink font-semibold" : "border-line bg-surface text-ink-soft hover:border-red-600/50"
+                  }`}
+                >
+                  <input type="radio" name="gender" value={value} required checked={gender === value} onChange={() => setGender(value)} className="accent-red-600" />
+                  {text}
+                </label>
+              ))}
+            </div>
+            <p className="text-xs text-ink-faint mt-1.5">Pour nous adresser à vous correctement (Monsieur / Madame).</p>
+          </div>
+
           <div>
             <label className="block text-sm font-medium text-ink-soft mb-1">Nom complet</label>
             <input

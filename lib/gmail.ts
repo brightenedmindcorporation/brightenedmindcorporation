@@ -1,6 +1,7 @@
 import "server-only";
 import { google } from "googleapis";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { withSignatureHtml, type SignatureOption } from "@/lib/mailSignature";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const CONFIG_DOC = "gmail";
@@ -299,6 +300,8 @@ function buildRawMessage(opts: {
   inReplyToMessageId?: string;
   references?: string;
   attachments?: GmailAttachment[];
+  /** false = no automatic signature */
+  signature?: SignatureOption;
 }): string {
   const headers = [`From: ${fromHeader(opts.from)}`, `To: ${opts.to}`];
   if (opts.cc?.trim()) headers.push(`Cc: ${opts.cc.trim()}`);
@@ -307,7 +310,10 @@ function buildRawMessage(opts: {
   if (opts.inReplyToMessageId) headers.push(`In-Reply-To: ${opts.inReplyToMessageId}`);
   if (opts.references) headers.push(`References: ${opts.references}`);
 
-  const htmlBody = `<div style="white-space: pre-wrap; font-family: sans-serif;">${opts.body.replace(/\n/g, "<br/>")}</div>`;
+  const htmlBody = withSignatureHtml(
+    `<div style="white-space: pre-wrap; font-family: sans-serif;">${opts.body.replace(/\n/g, "<br/>")}</div>`,
+    opts.signature
+  );
 
   if (!opts.attachments?.length) {
     headers.push("Content-Type: text/html; charset=UTF-8");
