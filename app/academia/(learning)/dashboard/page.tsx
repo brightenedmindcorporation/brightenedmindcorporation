@@ -11,6 +11,7 @@ import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
+import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { getVerbReference } from "@/content/verbs";
 
 interface Enrollment {
@@ -72,6 +73,10 @@ export default function Dashboard() {
         return;
       }
       setStudent(parsedStudent);
+      // Pick up changes the admin made since login (study plan, status…).
+      refreshLoggedStudent().then((updated) => {
+        if (updated) setStudent(updated);
+      });
     } catch (e) {
       console.error("Erreur de lecture des données utilisateur :", e);
       router.replace("/login");

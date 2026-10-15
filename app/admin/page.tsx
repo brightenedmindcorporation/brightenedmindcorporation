@@ -1448,6 +1448,27 @@ export default function AdminPage() {
   // write their own document") — and that client-side email check was
   // never real security anyway, just a UI gate. The server route verifies
   // the caller's ID token server-side instead.
+  // Changes a student's study plan (3 <-> 5 days/week). Takes effect at once:
+  // the lesson-unlock pacing is computed from it, and the student is notified.
+  const changeStudyDays = async (student: any, studyDays: 3 | 5) => {
+    const current = student.studyDays === 5 ? 5 : 3;
+    if (studyDays === current) return;
+    if (!confirm(`Passer ${student.name} de ${current} à ${studyDays} jours par semaine ?\n\nSes prochaines leçons seront débloquées toutes les ${studyDays === 5 ? "24 h" : "48 h"} et il/elle en sera informé(e).`)) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/update-enrollment", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ id: student.id, kind: student.kind, studyDays }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   const approveStudent = async (student: any) => {
     if (processingIds.has(student.id)) return;
     setProcessingIds((prev) => new Set(prev).add(student.id));
@@ -1964,6 +1985,19 @@ export default function AdminPage() {
                     {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
                   </p>
                   <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
+                  {!isOtherProgramCode(s.langCode) && (
+                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
+                      <b className="text-ink">Rythme d'étude :</b>
+                      <select
+                        value={s.studyDays === 5 ? 5 : 3}
+                        onChange={(e) => changeStudyDays(s, Number(e.target.value) as 3 | 5)}
+                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      >
+                        <option value={3}>3 jours / semaine</option>
+                        <option value={5}>5 jours / semaine</option>
+                      </select>
+                    </div>
+                  )}
                   {s.emailUnverified && (
                     <p className="text-amber-500 text-xs font-semibold">✉ E-mail non confirmé par l'étudiant (information — vous pouvez approuver quand même)</p>
                   )}

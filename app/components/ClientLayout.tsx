@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import ScrollButtons from "@/components/ScrollButtons";
 import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
 
@@ -116,6 +117,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       )}
 
       <div className="flex-grow">{children}</div>
+      <ScrollButtons />
 
       {!hideLayoutElements && (
         <footer className="bg-surface-sunken border-t border-line py-12 px-6 text-ink-soft text-sm font-sans">

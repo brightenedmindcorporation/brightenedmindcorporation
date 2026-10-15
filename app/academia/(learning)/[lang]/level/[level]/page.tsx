@@ -6,6 +6,7 @@ import { useRouter, useParams } from "next/navigation";
 import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy } from "lucide-react";
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
+import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 
@@ -43,6 +44,11 @@ export default function LevelOverviewPage() {
       setAllowed(true);
       setStudyDays(enrollment.studyDays);
       setProgress(getLevelProgress(langSlug, level));
+      // The admin may have changed the study plan since login.
+      refreshLoggedStudent().then((updated) => {
+        const fresh = updated?.enrollments?.find((e: any) => e.langCode === curriculum?.langCode && e.status === "Approved");
+        if (fresh) setStudyDays(fresh.studyDays);
+      });
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");
