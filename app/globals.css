@@ -209,3 +209,20 @@ body {
 .animate-float-logo {
   animation: floatLogo 1.5s infinite ease-in-out;
 }
+
+/* Google Website Translator: keep its UI out of the way (language is chosen
+   with our own LanguageSwitcher). */
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-tooltip,
+.skiptranslate > iframe {
+  display: none !important;
+}
+body {
+  top: 0 !important;
+}
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
+}

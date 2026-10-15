@@ -67,7 +67,7 @@ function SpeakableLine({ text, langSlug, className = "" }: { text: string; langS
   return (
     <p className={`flex items-start gap-2 ${className}`}>
       <SpeakIconButton text={extractSpeechText(text)} langSlug={langSlug} />
-      <span>{text}</span>
+      <span translate="no" className="notranslate">{text}</span>
     </p>
   );
 }
@@ -201,7 +201,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
         <p className="text-ink-soft mt-4">Complete the sentences:</p>
         <ul className="list-disc ml-6 text-ink-soft mt-4 space-y-1">
           {lesson.exercises.map((ex, i) => (
-            <li key={i}>{ex}</li>
+            <li key={i} translate="no" className="notranslate">{ex}</li>
           ))}
         </ul>
       </Card>

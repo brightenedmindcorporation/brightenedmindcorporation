@@ -10,7 +10,7 @@ const SPEECH_LANG: Record<string, string> = {
   french: "fr-FR",
   swahili: "sw-KE",
   spanish: "es-ES",
-  portuguese: "pt-PT",
+  portuguese: "pt-BR",
   chinese: "zh-CN",
 };
 

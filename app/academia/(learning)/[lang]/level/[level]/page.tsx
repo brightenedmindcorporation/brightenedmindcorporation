@@ -129,6 +129,23 @@ export default function LevelOverviewPage() {
             )}
           </div>
 
+          <Link
+            href={`${base}/vocabulary`}
+            className="mt-6 flex items-center justify-between gap-4 bg-surface hover:bg-surface-alt rounded-2xl border border-line px-6 py-4 shadow-lg transition"
+          >
+            <span>
+              <span className="block font-bold text-ink">
+                {langSlug === "chinese" ? "Caractères chinois du niveau" : "Vocabulaire & prononciation du niveau"}
+              </span>
+              <span className="block text-xs text-ink-soft mt-0.5">
+                {langSlug === "chinese"
+                  ? "Tous les caractères et mots, avec pinyin, sens et audio."
+                  : "Tous les mots et phrases avec leur phonétique et leur audio."}
+              </span>
+            </span>
+            <span className="text-red-500 font-bold shrink-0">Ouvrir →</span>
+          </Link>
+
           <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-8 mt-8">
             <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
 <TrendingUp size={20} /> Course Progress

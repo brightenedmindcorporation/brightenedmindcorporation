@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export const metadata: Metadata = {
   title: "Brightened Mind Academia — Cours de langues en ligne",
@@ -20,7 +21,10 @@ export default function AcademyLayout({
           hides it on mobile, and some pages like admin, lesson, quiz, live
           have no header at all). One floating toggle here covers all of
           them uniformly instead of patching each page individually. */}
-      <ThemeToggle className="fixed bottom-4 right-4 z-[70] shadow-lg bg-surface" />
+      <div className="fixed bottom-4 right-4 z-[70] flex items-center gap-2">
+        <LanguageSwitcher dropUp />
+        <ThemeToggle className="shadow-lg bg-surface" />
+      </div>
       {children}
     </div>
   );

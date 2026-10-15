@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
 
@@ -72,6 +73,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             </nav>
 
             <div className="flex items-center gap-3">
+              <LanguageSwitcher className="hidden sm:block" />
               <ThemeToggle className="hidden sm:inline-flex" />
 
               <Link
@@ -104,8 +106,9 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               >
                 Devis / Inscription
               </Link>
-              <div className="pt-2 border-t border-line">
+              <div className="pt-2 border-t border-line flex items-center gap-3">
                 <ThemeToggle />
+                <LanguageSwitcher />
               </div>
             </nav>
           )}

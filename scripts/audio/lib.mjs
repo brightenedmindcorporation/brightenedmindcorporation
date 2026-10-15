@@ -21,7 +21,7 @@ export const VOICES = {
   english: "en-US-AriaNeural",
   french: "fr-FR-DeniseNeural",
   spanish: "es-ES-ElviraNeural",
-  portuguese: "pt-PT-RaquelNeural",
+  portuguese: "pt-BR-FranciscaNeural",
   chinese: "zh-CN-XiaoxiaoNeural",
   swahili: "sw-KE-ZuriNeural",
 };
@@ -77,6 +77,10 @@ export async function collectTexts(lang) {
   if (fs.existsSync(verbFile)) {
     const mod = await import(pathToFileURL(verbFile).href);
     if (mod.default) for (const phrase of verbPhrases(mod.default)) add(phrase);
+  }
+  if (lang === "chinese") {
+    const charsFile = path.join(ROOT, "content", "vocabulary", "chinese.json");
+    if (fs.existsSync(charsFile)) for (const ch of Object.keys(JSON.parse(fs.readFileSync(charsFile, "utf8")))) add(ch);
   }
   return Array.from(texts, ([id, text]) => ({ id, text, voice: voiceFor(lang, text) }));
 }
