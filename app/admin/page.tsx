@@ -41,6 +41,7 @@ import TeachersTab from "@/components/admin/TeachersTab";
 import VisitsTab from "@/components/admin/VisitsTab";
 import ActivityTab from "@/components/admin/ActivityTab";
 import StatsTab from "@/components/admin/StatsTab";
+import AddStudentModal from "@/components/admin/AddStudentModal";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
@@ -243,6 +244,7 @@ export default function AdminPage() {
   // to the same shape so the existing stats/filter/list code below doesn't
   // need to know which source a row came from — only approve/reject branch
   // on `row.kind` to hit the matching API route.
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
   const fetchStudents = async () => {
     try {
       const idToken = await auth.currentUser?.getIdToken();
@@ -1935,6 +1937,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             </div>
 
             <div className="mb-6 flex flex-wrap gap-3">
+              <button
+                onClick={() => setAddStudentOpen(true)}
+                className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+              >
+                + Inscrire un étudiant
+              </button>
               <button
                 onClick={() => setMessageOpen(true)}
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
@@ -3842,6 +3850,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       )}
 
       {/* ================= MESSAGE TO STUDENTS MODAL ================= */}
+      {addStudentOpen && <AddStudentModal onClose={() => setAddStudentOpen(false)} onDone={fetchStudents} />}
+
       {messageOpen && (
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
