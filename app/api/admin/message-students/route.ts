@@ -124,7 +124,7 @@ export async function POST(request: Request) {
         const snap = await adminDb.collection("students").doc(r.uid).get().catch(() => null);
         if (snap?.exists) people.set(r.email, { name: snap.data()!.name, gender: snap.data()!.gender });
       }
-      const signature = caller.role === "teacher" ? { name: caller.name, title: "Professeur — BM Academia", email: caller.email } : undefined;
+      const signature = caller.role === "teacher" ? { name: caller.name, title: "Professeur", email: caller.email } : undefined;
       for (let i = 0; i < emails.length; i++) {
         if (i > 0) await new Promise((r) => setTimeout(r, 600));
         const who = people.get(emails[i]);
