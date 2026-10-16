@@ -57,6 +57,7 @@ export async function POST(request: Request) {
     const host = request.headers.get("host") || "";
     const ref = typeof body?.ref === "string" ? refKey(body.ref, host) : null;
     const entry = body?.entry === true; // first page of the visit
+    const src = typeof body?.src === "string" && /^[a-z0-9_-]{1,30}$/.test(body.src) ? body.src : "";
     const mobile = /Mobi|Android|iPhone|iPad/i.test(ua) || (typeof body?.w === "number" && body.w < 820);
     const country =
       (request.headers.get("cf-ipcountry") || request.headers.get("x-vercel-ip-country") || "").toUpperCase().slice(0, 2) || "??";
@@ -95,7 +96,10 @@ export async function POST(request: Request) {
       update[isNew ? "newVisitors" : "returningVisitors"] = inc;
     }
     if (entry) update.visits = inc;
-    if (entry) update.sources = { [ref ?? "(direct)"]: inc };
+    if (entry) update.sources = { [src ? `campagne: ${src}` : ref ?? "(direct)"]: inc };
+    if (entry && src) {
+      update.campaigns = { [src]: { visits: inc, ...(uniqueToday ? { visitors: inc } : {}) } };
+    }
 
     await db.collection("analytics_days").doc(day).set(update, { merge: true });
     maybeRunDailyJob(); // once a day: reminders to inactive students, weekly report on Mondays

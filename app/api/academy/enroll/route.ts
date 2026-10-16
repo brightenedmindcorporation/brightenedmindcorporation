@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
@@ -27,7 +28,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { idToken, name, gender: rawGender, langCode, level, studyDays } = await request.json();
+    const { idToken, name, gender: rawGender, langCode, level, studyDays, source: rawSource } = await request.json();
+    const source = typeof rawSource === "string" && /^[a-z0-9_-]{1,30}$/.test(rawSource) ? rawSource : "";
     const gender = normalizeGender(rawGender);
     if (!idToken || !langCode || !level) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
@@ -75,6 +77,7 @@ export async function POST(request: Request) {
         langCode,
         level,
         studyDays: studyDays === 5 ? 5 : 3,
+        ...(source ? { source } : {}),
         status: "Pending",
         matricule: "",
         createdAt: new Date().toISOString(),
@@ -88,6 +91,17 @@ export async function POST(request: Request) {
         { error: "Vous avez déjà une inscription pour cette langue.", status: result.status },
         { status: 409 }
       );
+    }
+
+    // Credit the sign-up to the campaign link the student came from (see /admin → Statistiques).
+    try {
+      const day = new Date(Date.now() + 2 * 3600_000).toISOString().slice(0, 10);
+      await getAdminDb()
+        .collection("analytics_days")
+        .doc(day)
+        .set({ signups: { [source || "(direct)"]: FieldValue.increment(1) } }, { merge: true });
+    } catch (error) {
+      console.error("Sign-up attribution failed (non-fatal):", error);
     }
 
     try {

@@ -1,12 +1,13 @@
 "use client";
 
 import type { Lesson } from "@/content/curriculum/types";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2 } from "lucide-react";
 import { extractSpeechText, lessonNarrations } from "@/lib/academy/audioClips";
 import NarrationPlayer from "@/components/academy/NarrationPlayer";
 import WritingLab from "@/components/academy/WritingLab";
 import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
+import { useYouTubeMeter } from "@/lib/youtubeMeter";
 import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
@@ -14,7 +15,7 @@ import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/
 // modestbranding/iv_load_policy/disablekb trim branding, annotations and
 // keyboard shortcuts that could lead off the lesson. There is no official
 // way to remove the clickable YouTube logo from the embedded player itself.
-const YOUTUBE_EMBED_PARAMS = "rel=0&modestbranding=1&iv_load_policy=3&disablekb=1";
+const YOUTUBE_EMBED_PARAMS = "rel=0&modestbranding=1&iv_load_policy=3&disablekb=1&enablejsapi=1";
 const VIMEO_EMBED_PARAMS = "title=0&byline=0&portrait=0";
 
 function getEmbedUrl(url: string): string | null {
@@ -73,8 +74,11 @@ function SpeakableLine({ text, langSlug, className = "" }: { text: string; langS
   );
 }
 
-function VideoCard({ lesson }: { lesson: Lesson }) {
+function VideoCard({ lesson, statsKey }: { lesson: Lesson; statsKey?: string }) {
   const embedUrl = lesson.videoUrl ? getEmbedUrl(lesson.videoUrl) : null;
+  const frame = useRef<HTMLIFrameElement>(null);
+  // Plays, time watched and drop-off of the lesson video (anonymous statistics for the administration).
+  useYouTubeMeter(frame, "lesson", statsKey ?? "", lesson.title, Boolean(embedUrl && statsKey && /youtube/.test(embedUrl)));
 
   return (
     <Card>
@@ -85,6 +89,7 @@ function VideoCard({ lesson }: { lesson: Lesson }) {
           onContextMenu={(e) => e.preventDefault()}
         >
           <iframe
+            ref={frame}
             src={embedUrl}
             className="w-full h-full"
             title={lesson.title}
@@ -150,7 +155,7 @@ function OfflineAudioButton({ lesson, langSlug }: { lesson: Lesson; langSlug: st
   );
 }
 
-export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
+export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson: Lesson; langSlug: string; statsKey?: string }) {
   const narration = useMemo(() => lessonNarrations(langSlug, lesson), [langSlug, lesson]);
   return (
     <div className="space-y-8">
@@ -178,7 +183,7 @@ export default function LessonRenderer({ lesson, langSlug }: { lesson: Lesson; l
         <OfflineAudioButton lesson={lesson} langSlug={langSlug} />
       </Card>
 
-      <VideoCard lesson={lesson} />
+      <VideoCard lesson={lesson} statsKey={statsKey} />
 
       <Card>
         <CardTitle icon={FileText}>Reading Text</CardTitle>

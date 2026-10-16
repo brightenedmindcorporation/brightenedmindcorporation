@@ -29,7 +29,13 @@ export default function VisitTracker() {
       const entry = sessionStorage.getItem("bm_session") !== "1";
       if (entry) sessionStorage.setItem("bm_session", "1");
 
-      const payload = JSON.stringify({ path: pathname, vid, entry, ref: entry ? document.referrer : "", w: window.innerWidth });
+      // Campaign link (?src=tiktok or ?utm_source=…): remembered so that a later sign-up is credited to it.
+      const params = new URLSearchParams(window.location.search);
+      const found = (params.get("src") || params.get("utm_source") || "").toLowerCase();
+      if (/^[a-z0-9_-]{1,30}$/.test(found)) localStorage.setItem("bm_src", found);
+      const src = /^[a-z0-9_-]{1,30}$/.test(found) ? found : "";
+
+      const payload = JSON.stringify({ path: pathname, vid, entry, ref: entry ? document.referrer : "", w: window.innerWidth, src: entry ? src : "" });
       if (navigator.sendBeacon) {
         navigator.sendBeacon("/api/track", new Blob([payload], { type: "application/json" }));
       } else {

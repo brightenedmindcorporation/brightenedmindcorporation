@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, type PanInfo } from "framer-motion";
 import Image from "next/image";
+import { trackContent } from "@/lib/trackEvent";
 
 interface Announcement {
   id: string;
@@ -65,6 +66,12 @@ export default function Announcements() {
     return () => clearInterval(timer);
   }, [announcements.length]);
 
+  // Each announcement is counted as seen when its slide is the one on screen.
+  useEffect(() => {
+    const shown = announcements[index];
+    if (shown) trackContent({ type: "ann", key: shown.id, title: shown.title, event: "view", where: "list" });
+  }, [announcements, index]);
+
   if (announcements.length === 0) return null;
 
   const total = announcements.length;
@@ -102,7 +109,10 @@ export default function Announcements() {
                 return (
                   <motion.div
                     key={a.id}
-                    onTap={() => router.push(hrefFor(a))}
+                    onTap={() => {
+                      trackContent({ type: "ann", key: a.id, title: a.title, event: "click", kind: isJob ? "apply" : "detail" });
+                      router.push(hrefFor(a));
+                    }}
                     className="w-full shrink-0 select-none cursor-pointer"
                   >
                     <div className="grid grid-cols-1 md:grid-cols-2">

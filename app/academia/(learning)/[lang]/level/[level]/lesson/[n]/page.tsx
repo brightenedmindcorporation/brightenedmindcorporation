@@ -106,7 +106,7 @@ export default function LessonPage() {
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{lesson.subtitle}</p>
           </div>
 
-          <LessonRenderer lesson={lesson} langSlug={langSlug} />
+          <LessonRenderer lesson={lesson} langSlug={langSlug} statsKey={curriculum ? `${curriculum.langCode}-${level}-${lessonId}` : undefined} />
 
           <div className="text-center pt-4 pb-10">
             <Link href={`${base}/quiz/${lesson.id}`}>

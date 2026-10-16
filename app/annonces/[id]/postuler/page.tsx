@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { Paperclip, X } from "lucide-react";
+import { trackContent } from "@/lib/trackEvent";
 
 interface Announcement {
   id: string;
@@ -36,7 +37,10 @@ export default function JobApplyPage() {
   useEffect(() => {
     fetch(`/api/announcements/${params.id}`)
       .then((res) => (res.ok ? res.json() : Promise.reject()))
-      .then((data) => setAnnouncement(data.announcement))
+      .then((data) => {
+        setAnnouncement(data.announcement);
+        trackContent({ type: "ann", key: params.id, title: data.announcement?.title, event: "click", kind: "apply_page" });
+      })
       .catch(() => setAnnouncement(null));
   }, [params.id]);
 
@@ -71,6 +75,7 @@ export default function JobApplyPage() {
         return;
       }
 
+      trackContent({ type: "ann", key: params.id, event: "click", kind: "register" });
       setDone(true);
     } catch (err) {
       console.error(err);

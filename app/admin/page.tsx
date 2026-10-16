@@ -40,6 +40,7 @@ import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/
 import TeachersTab from "@/components/admin/TeachersTab";
 import VisitsTab from "@/components/admin/VisitsTab";
 import ActivityTab from "@/components/admin/ActivityTab";
+import StatsTab from "@/components/admin/StatsTab";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
@@ -60,7 +61,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -375,8 +376,27 @@ export default function AdminPage() {
     }
   };
 
+  // Views / clicks per announcement over the last 90 days (shown on each announcement's card).
+  const [annStats, setAnnStats] = useState<Record<string, { views: number; clicks: number; plays: number }>>({});
+  const fetchAnnStats = async () => {
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/content-stats?days=90", { headers: { Authorization: `Bearer ${idToken}` } });
+      const result = await response.json();
+      if (!response.ok) return;
+      const map: Record<string, { views: number; clicks: number; plays: number }> = {};
+      for (const it of result.items || []) {
+        if (it.type === "ann") map[it.key] = { views: it.n.views || 0, clicks: (it.n.click_detail || 0) + (it.n.click_apply || 0), plays: it.n.plays || 0 };
+      }
+      setAnnStats(map);
+    } catch {
+      // statistics are optional here
+    }
+  };
+
   const fetchAnnouncements = async (silent = false) => {
     if (!silent) setAnnouncementsLoading(true);
+    fetchAnnStats();
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/announcements", {
@@ -1351,7 +1371,7 @@ export default function AdminPage() {
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
     const requestedTab = params.get("tab");
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1862,6 +1882,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "teachers", label: "Professeurs", badge: 0 },
             { id: "visits", label: "Visites", badge: 0 },
             { id: "activity", label: "Activité", badge: 0 },
+            { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
               key={t.id}
@@ -2359,6 +2380,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "teachers" && <TeachersTab />}
         {tab === "visits" && <VisitsTab />}
         {tab === "activity" && <ActivityTab />}
+        {tab === "stats" && <StatsTab scope="admin" />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (
@@ -2590,6 +2612,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
                         </p>
                         <p className="text-xs text-ink-soft mt-1">{a.description}</p>
+                        <p className="text-xs font-semibold text-ink-soft mt-1">
+                          👁 {annStats[a.id]?.views ?? 0} vues · 🖱 {annStats[a.id]?.clicks ?? 0} clics
+                          {(annStats[a.id]?.plays ?? 0) > 0 && ` · ▶️ ${annStats[a.id].plays} lectures`}
+                          <span className="font-normal text-ink-faint"> (90 jours)</span>
+                        </p>
                         {a.expiresAt && (
                           <p className="text-xs text-ink-faint mt-1">
                             {a.expiresAt > new Date().toISOString()

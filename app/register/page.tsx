@@ -117,6 +117,13 @@ function RegisterForm() {
           idToken,
           name: name.trim(),
           gender,
+          source: (() => {
+            try {
+              return localStorage.getItem("bm_src") || "";
+            } catch {
+              return "";
+            }
+          })(),
           langCode: programCode,
           level: isLanguageProgram ? level : "N/A",
           studyDays: isLanguageProgram ? studyDays : undefined,

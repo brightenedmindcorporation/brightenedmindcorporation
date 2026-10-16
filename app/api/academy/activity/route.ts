@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { CLIENT_ACTIVITY, addTimeSpent, logActivitySafe, type ActivityType } from "@/lib/activityLog";
 import { createNotification } from "@/lib/notifications";
+import { bumpLesson } from "@/lib/contentStats";
 
 /** A signed-in student reports what they are doing (see lib/activityLog.ts). */
 export async function POST(request: Request) {
@@ -30,6 +31,16 @@ export async function POST(request: Request) {
       if (typeof v === "string" || typeof v === "number" || typeof v === "boolean") meta[key] = typeof v === "string" ? v.slice(0, 40) : v;
     }
     await logActivitySafe(decoded.uid, type, label, meta);
+
+    // Funnel per lesson (opened → quiz taken → quiz passed), shown in the admin statistics.
+    if ((type === "lesson_open" || type === "quiz") && typeof meta.langCode === "string" && meta.level && meta.lessonId) {
+      const lessonKey = `${meta.langCode}-${meta.level}-${meta.lessonId}`;
+      if (type === "lesson_open") await bumpLesson(lessonKey, decoded.uid, "opens", label.split(" (")[0].slice(0, 100));
+      else {
+        await bumpLesson(lessonKey, decoded.uid, "quizTaken");
+        if (meta.passed === true) await bumpLesson(lessonKey, decoded.uid, "quizPassed");
+      }
+    }
 
     // A failed quiz is something the administration wants to know about right away.
     if ((type === "quiz" || type === "final_quiz") && meta.passed === false) {

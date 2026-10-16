@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import TrackedVideo from "@/components/TrackedVideo";
+import { trackContent } from "@/lib/trackEvent";
 
 interface Announcement {
   id: string;
@@ -33,6 +35,10 @@ export default function AnnouncementDetailPage() {
       .then((data) => setAnnouncement(data.announcement))
       .catch(() => setAnnouncement(null));
   }, [params.id]);
+
+  useEffect(() => {
+    if (announcement) trackContent({ type: "ann", key: announcement.id, title: announcement.title, event: "view", where: "page" });
+  }, [announcement]);
 
   if (announcement === undefined) {
     return (
@@ -70,7 +76,7 @@ export default function AnnouncementDetailPage() {
           )}
 
           {announcement.videoUrl && !announcement.imageUrl && (
-            <video src={announcement.videoUrl} controls className="w-full aspect-video bg-black" />
+            <TrackedVideo src={announcement.videoUrl} type="ann" statsKey={announcement.id} title={announcement.title} className="w-full aspect-video bg-black" />
           )}
 
           <div className="p-8">
@@ -87,7 +93,7 @@ export default function AnnouncementDetailPage() {
             )}
 
             {announcement.videoUrl && announcement.imageUrl && (
-              <video src={announcement.videoUrl} controls className="w-full rounded-2xl mt-6" />
+              <TrackedVideo src={announcement.videoUrl} type="ann" statsKey={announcement.id} title={announcement.title} className="w-full rounded-2xl mt-6" />
             )}
           </div>
         </div>
