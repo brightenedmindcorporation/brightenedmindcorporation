@@ -1,15 +1,30 @@
 import "server-only";
-import { FieldPath } from "firebase-admin/firestore";
+import { localDay } from "@/lib/activityLog";
 import { getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 
 /** One student's activity file: latest events, time spent per day, last sign-in and counters. */
 export async function loadTimeline(uid: string) {
   const db = getAdminDb();
   const studentRef = db.collection("students").doc(uid);
-  const [events, student, timeSnap] = await Promise.all([
-    studentRef.collection("activity").orderBy("at", "desc").limit(200).get(),
+  // Index-free reads: the latest events (sorted here if the database cannot sort them for us) and
+  // the last 30 days of time spent, read by day name rather than by a sorted query.
+  const days = Array.from({ length: 30 }, (_, i) => localDay(Date.now() - i * 86_400_000));
+  const loadEvents = async () => {
+    try {
+      const snap = await studentRef.collection("activity").orderBy("at", "desc").limit(200).get();
+      return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch {
+      const snap = await studentRef.collection("activity").limit(500).get();
+      return snap.docs
+        .map((d) => ({ id: d.id, ...(d.data() as { at?: string }) }))
+        .sort((x, y) => String(y.at).localeCompare(String(x.at)))
+        .slice(0, 200);
+    }
+  };
+  const [events, student, timeDocs] = await Promise.all([
+    loadEvents(),
     studentRef.get(),
-    studentRef.collection("timeSpent").orderBy(FieldPath.documentId(), "desc").limit(30).get(),
+    db.getAll(...days.map((d) => studentRef.collection("timeSpent").doc(d))),
   ]);
   let account: { lastSignInAt?: string; createdAt?: string } = {};
   try {
@@ -23,8 +38,8 @@ export async function loadTimeline(uid: string) {
   }
   const s = student.data() || {};
   return {
-    events: events.docs.map((d) => ({ id: d.id, ...d.data() })),
-    time: timeSnap.docs.map((d) => ({ day: d.id, seconds: d.data().seconds || 0, pages: d.data().pages || {} })),
+    events,
+    time: timeDocs.filter((d) => d.exists).map((d) => ({ day: d.id, seconds: d.data()!.seconds || 0, pages: d.data()!.pages || {} })),
     summary: {
       name: s.name,
       email: s.email,
