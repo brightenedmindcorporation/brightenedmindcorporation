@@ -1495,7 +1495,7 @@ export default function AdminPage() {
     const next = levelNumber(student.level) + 1;
     if (!confirm(`Débloquer le niveau ${next} pour ${student.name} ?
 
-Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. Il recevra son numéro d'inscription du niveau ${next}.`)) return;
+Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. Son Student ID ne change pas.`)) return;
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/approve-level", {
@@ -1505,7 +1505,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. I
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
-      alert(`Niveau ${result.level} débloqué${result.levelRef ? ` (${result.levelRef})` : ""}${result.emailSent ? " — e-mail envoyé." : ". E-mail non envoyé : informez l'étudiant."}`);
+      alert(`Niveau ${result.level} débloqué${result.emailSent ? " — e-mail envoyé." : ". E-mail non envoyé : informez l'étudiant."}`);
       fetchStudents();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -2044,12 +2044,6 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. I
                   </div>
                   {!isOtherProgramCode(s.langCode) && s.status === "Approved" && (
                     <div className="mt-1 space-y-1">
-                      {s.levelRefs && (
-                        <p className="text-ink text-sm">
-                          <b className="text-ink">N° par niveau :</b>{" "}
-                          <span className="font-mono text-xs">{Object.values(s.levelRefs as Record<string, string>).join(" · ")}</span>
-                        </p>
-                      )}
                       {s.levelRequest && (
                         <p className="text-amber-500 text-xs font-semibold">⏳ L'étudiant demande le niveau {s.levelRequest.level} (quiz final du niveau précédent réussi).</p>
                       )}

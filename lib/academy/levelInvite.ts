@@ -66,7 +66,7 @@ export async function sendLevelInvitation(uid: string, langCode: string, complet
       html: `<div style="font-family: sans-serif; max-width: 560px; color: #333;">
         <h2 style="color: #7a1f2b; margin: 0 0 12px;">${greeting(name, gender)}</h2>
         <p>Bravo : vous avez réussi le <b>niveau ${completedLevel}</b> et vous pouvez maintenant poursuivre avec le <b>niveau ${next}</b>, avec le même compte.</p>
-        <p>Connectez-vous à votre espace, puis cliquez sur « Demander le niveau ${next} ». L'administration valide votre demande et vous recevez votre numéro d'inscription du niveau ${next}.</p>
+        <p>Connectez-vous à votre espace, puis cliquez sur « Demander le niveau ${next} ». L'administration valide votre demande, et vous gardez le même Student ID.</p>
         <p style="margin: 24px 0;"><a href="${SITE_URL}/academia/dashboard" style="background: #7a1f2b; color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold;">Accéder à mon espace</a></p>
       </div>`,
     });

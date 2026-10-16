@@ -6,15 +6,15 @@ import { createNotification } from "@/lib/notifications";
 import { mailFrom } from "@/lib/mailFrom";
 import { sendWithText } from "@/lib/mailText";
 import { greeting } from "@/lib/salutation";
-import { levelLabel, levelNumber, levelRef } from "@/lib/academy/levelAccess";
+import { levelLabel, levelNumber } from "@/lib/academy/levelAccess";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bmcorporation-cd.com";
 
 /**
  * Unlocks the next level for a student, with the SAME account and Student ID.
- * The level gets its own registration number (BMCA-EN-L2-2026-008). Used when
- * the student asked for it, or by the admin directly once the fees are paid.
+ * The Student ID never changes. Used when the student asked for the level, or
+ * by the admin directly once the fees are paid.
  *
  * Body: { id, kind: "enrollment" | "legacyStudent" }
  */
@@ -38,13 +38,10 @@ export async function POST(request: Request) {
     const current = levelNumber(data.level);
     if (current >= 3) return NextResponse.json({ error: "Cet étudiant est déjà au dernier niveau." }, { status: 400 });
     const next = current + 1;
-    const ref1 = levelRef(data.matricule, 1);
-    const refNext = levelRef(data.matricule, next);
 
     await ref.set(
       {
         level: levelLabel(next),
-        levelRefs: { ...(ref1 ? { L1: ref1 } : {}), ...(data.levelRefs || {}), ...(refNext ? { [`L${next}`]: refNext } : {}) },
         levelUnlockedAt: { ...(data.levelUnlockedAt || {}), [`L${next}`]: new Date().toISOString() },
         levelRequest: FieldValue.delete(),
       },
@@ -57,7 +54,7 @@ export async function POST(request: Request) {
         audience: uid,
         type: "level-unlocked",
         title: `Niveau ${next} débloqué`,
-        message: `Le niveau ${next} est ouvert${refNext ? ` — numéro d'inscription ${refNext}` : ""}. Bonne continuation !`,
+        message: `Le niveau ${next} est ouvert. Votre Student ID reste le même. Bonne continuation !`,
         link: "/academia/dashboard",
       });
     } catch (error) {
@@ -77,8 +74,7 @@ export async function POST(request: Request) {
         subject: `Niveau ${next} débloqué — BM Academia`,
         html: `<div style="font-family: sans-serif; max-width: 560px; color: #333;">
           <h2 style="color: #7a1f2b; margin: 0 0 12px;">${greeting(name, gender)}</h2>
-          <p>Votre accès au <b>niveau ${next}</b> est ouvert, avec le même compte et le même Student ID.</p>
-          ${refNext ? `<p>Votre numéro d'inscription du niveau ${next} :</p><div style="background: #111; color: #ef4444; padding: 14px; border-radius: 8px; text-align: center; font-size: 22px; font-weight: bold; font-family: monospace; letter-spacing: 2px;">${refNext}</div>` : ""}
+          <p>Votre accès au <b>niveau ${next}</b> est ouvert, avec le même compte et le même Student ID${data.matricule ? ` (<b>${data.matricule}</b>)` : ""}.</p>
           <p style="margin: 24px 0;"><a href="${SITE_URL}/academia/dashboard" style="background: #7a1f2b; color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold;">Commencer le niveau ${next}</a></p>
         </div>`,
       });
@@ -86,7 +82,7 @@ export async function POST(request: Request) {
       if (error) console.error("Level unlocked e-mail failed (non-fatal):", error);
     }
 
-    return NextResponse.json({ status: "success", level: next, levelRef: refNext, emailSent });
+    return NextResponse.json({ status: "success", level: next, emailSent });
   } catch (error: any) {
     const status = error instanceof AuthError ? error.status : 500;
     console.error("Error approving level:", error);
