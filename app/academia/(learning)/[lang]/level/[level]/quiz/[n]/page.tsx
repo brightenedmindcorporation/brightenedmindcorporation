@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveTime } from "@/lib/academy/useActiveTime";
 import { allowedLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -26,6 +27,9 @@ export default function QuizPage() {
   const [checked, setChecked] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
   const [alreadyScore, setAlreadyScore] = useState<number | null>(null);
+
+  // Active time on this page, shown to the administration.
+  useActiveTime(unlocked && curriculum ? `${curriculum?.langCode}-${level}-quiz-${lessonId}` : null);
 
   useEffect(() => {
     try {

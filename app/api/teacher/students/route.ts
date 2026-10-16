@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller, isTeachersStudent, canTeach } from "@/lib/teacherAuth";
 
 export const dynamic = "force-dynamic";
@@ -79,7 +79,28 @@ export async function GET(request: Request) {
       };
     }
 
-    return NextResponse.json({ students: Array.from(students.values()) });
+    // When each student last came, and how long they have worked (see lib/activityLog.ts).
+    const rows = Array.from(students.values());
+    const uids = Array.from(new Set(rows.map((r) => r.uid as string)));
+    const profiles = new Map<string, any>();
+    const lastSignIn = new Map<string, number>();
+    try {
+      const docs = await db.getAll(...uids.map((u) => db.collection("students").doc(u)));
+      for (const d of docs) if (d.exists) profiles.set(d.id, d.data());
+      for (let i = 0; i < uids.length; i += 100) {
+        const res = await getAdminAuth().getUsers(uids.slice(i, i + 100).map((uid) => ({ uid })));
+        for (const u of res.users) if (u.metadata.lastSignInTime) lastSignIn.set(u.uid, new Date(u.metadata.lastSignInTime).getTime());
+      }
+    } catch (activityError) {
+      console.error("Activity lookup failed (non-fatal):", activityError);
+    }
+    for (const r of rows) {
+      const seen = Math.max(profiles.get(r.uid)?.lastSeenAt ? new Date(profiles.get(r.uid).lastSeenAt).getTime() : 0, lastSignIn.get(r.uid) ?? 0);
+      r.lastActiveAt = seen ? new Date(seen).toISOString() : null;
+      r.activeSeconds = profiles.get(r.uid)?.activityStats?.seconds || 0;
+    }
+
+    return NextResponse.json({ students: rows });
   } catch (error: any) {
     const status = error instanceof AuthError ? error.status : 500;
     console.error("Error fetching teacher students:", error);

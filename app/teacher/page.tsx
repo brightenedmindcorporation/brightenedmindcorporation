@@ -8,6 +8,7 @@ import { getOtherProgramLabel } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import StudentDossier from "@/components/academy/StudentDossier";
+import ActivityTimeline, { ago, duration, type Timeline } from "@/components/academy/ActivityTimeline";
 import type { ProgressDoc } from "@/lib/academy/levelSummary";
 
 interface Assignment {
@@ -35,6 +36,8 @@ interface StudentRow {
   email: string;
   langCode: string;
   studentId: string;
+  lastActiveAt?: string | null;
+  activeSeconds?: number;
   levels: Record<string, { doc?: ProgressDoc; completedLessons: number; completedQuizzes: number; finalQuizPassed: boolean; finalQuizScore: number | null }>;
 }
 
@@ -451,10 +454,19 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
   const { students, loading } = useStudents();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<StudentRow | null>(null);
+  const [activityOf, setActivityOf] = useState<StudentRow | null>(null);
   const shown = students.filter((s) => `${s.name} ${s.email} ${s.studentId}`.toLowerCase().includes(query.toLowerCase()));
 
   return (
     <div className="space-y-4">
+      {activityOf && (
+        <ActivityTimeline
+          name={activityOf.name}
+          email={activityOf.email}
+          load={() => api(`/api/teacher/activity?uid=${encodeURIComponent(activityOf.uid)}`) as Promise<Timeline>}
+          onClose={() => setActivityOf(null)}
+        />
+      )}
       {open && (
         <StudentDossier
           student={{ name: open.name, email: open.email, studentId: open.studentId, langCode: open.langCode }}
@@ -476,6 +488,7 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                 <th className="p-3">Cours</th>
                 <th className="p-3">Student ID</th>
                 <th className="p-3">Progression</th>
+                <th className="p-3">Dernière connexion</th>
                 <th className="p-3" />
               </tr>
             </thead>
@@ -502,6 +515,16 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                       })}
                   </td>
                   <td className="p-3">
+                    <p className={`text-sm font-semibold ${s.lastActiveAt && Date.now() - new Date(s.lastActiveAt).getTime() < 7 * 86_400_000 ? "text-emerald-500" : "text-amber-500"}`}>{ago(s.lastActiveAt)}</p>
+                    {!!s.activeSeconds && <p className="text-xs text-ink-faint">{duration(s.activeSeconds)} de travail</p>}
+                  </td>
+                  <td className="p-3 space-y-1.5">
+                    <button
+                      onClick={() => setActivityOf(s)}
+                      className="block text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
+                    >
+                      Activité
+                    </button>
                     <button
                       onClick={() => setOpen(s)}
                       className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"

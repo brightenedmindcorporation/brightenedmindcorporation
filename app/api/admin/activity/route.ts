@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
+import { findStuckQuizzes } from "@/lib/alerts";
+import { loadTimeline } from "@/lib/studentTimeline";
 
 export const dynamic = "force-dynamic";
 
@@ -18,33 +20,7 @@ export async function GET(request: Request) {
     const db = getAdminDb();
     const uid = new URL(request.url).searchParams.get("uid");
 
-    if (uid) {
-      const [events, student] = await Promise.all([
-        db.collection("students").doc(uid).collection("activity").orderBy("at", "desc").limit(200).get(),
-        db.collection("students").doc(uid).get(),
-      ]);
-      let account: { lastSignInAt?: string; createdAt?: string } = {};
-      try {
-        const u = await getAdminAuth().getUser(uid);
-        account = { lastSignInAt: u.metadata.lastSignInTime ? new Date(u.metadata.lastSignInTime).toISOString() : undefined, createdAt: u.metadata.creationTime ? new Date(u.metadata.creationTime).toISOString() : undefined };
-      } catch {
-        // account lookup is optional
-      }
-      const s = student.data() || {};
-      return NextResponse.json({
-        events: events.docs.map((d) => ({ id: d.id, ...d.data() })),
-        summary: {
-          name: s.name,
-          email: s.email,
-          lastSeenAt: s.lastSeenAt || null,
-          lastLoginAt: s.lastLoginAt || null,
-          loginCount: s.loginCount || 0,
-          sessionCount: s.sessionCount || 0,
-          stats: s.activityStats || {},
-          ...account,
-        },
-      });
-    }
+    if (uid) return NextResponse.json(await loadTimeline(uid));
 
     const [studentsSnap, enrollSnap] = await Promise.all([db.collection("students").get(), db.collection("enrollments").get()]);
     const langs = new Map<string, Set<string>>();
@@ -89,7 +65,7 @@ export async function GET(request: Request) {
           stats: s.activityStats || {},
         };
       });
-    return NextResponse.json({ students: rows });
+    return NextResponse.json({ students: rows, alerts: { stuck: await findStuckQuizzes() } });
   } catch (error: any) {
     const status = error instanceof AuthError ? error.status : 500;
     console.error("Admin activity failed:", error);

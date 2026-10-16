@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { FieldValue } from "firebase-admin/firestore";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { maybeRunDailyJob } from "@/lib/dailyJob";
 
 // Privacy-friendly visit counter: no cookies, no IP address stored, just
 // anonymous daily counters (page views, unique visitors, pages, sources,
@@ -97,6 +98,7 @@ export async function POST(request: Request) {
     if (entry) update.sources = { [ref ?? "(direct)"]: inc };
 
     await db.collection("analytics_days").doc(day).set(update, { merge: true });
+    maybeRunDailyJob(); // once a day: reminders to inactive students, weekly report on Mondays
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error("Visit tracking failed (non-fatal):", error);

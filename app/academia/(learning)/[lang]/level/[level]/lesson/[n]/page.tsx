@@ -1,5 +1,6 @@
 "use client";
 
+import { useActiveTime } from "@/lib/academy/useActiveTime";
 import { allowedLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -24,6 +25,9 @@ export default function LessonPage() {
 
   const lesson = getLesson(langSlug, level, lessonId);
   const curriculum = getLevelCurriculum(langSlug, level);
+
+  // Active time on this page, shown to the administration.
+  useActiveTime(unlocked && curriculum ? `${curriculum?.langCode}-${level}-lesson-${lessonId}` : null);
 
   useEffect(() => {
     try {

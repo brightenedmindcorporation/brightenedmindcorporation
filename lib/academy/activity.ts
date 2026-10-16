@@ -35,3 +35,20 @@ export async function logActivity(
     // reporting is best-effort
   }
 }
+
+/** Reports a chunk of active time (seconds) spent on a page. */
+export async function reportTime(key: string, seconds: number) {
+  try {
+    const user = auth.currentUser;
+    if (!user) return;
+    const idToken = await user.getIdToken();
+    await fetch("/api/academy/activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({ type: "time", key, seconds }),
+      keepalive: true,
+    });
+  } catch {
+    // best-effort
+  }
+}
