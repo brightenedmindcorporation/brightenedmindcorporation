@@ -39,6 +39,7 @@ import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
 import TeachersTab from "@/components/admin/TeachersTab";
 import VisitsTab from "@/components/admin/VisitsTab";
+import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
 
@@ -1489,6 +1490,28 @@ export default function AdminPage() {
     }
   };
 
+  // Unlocks the next level (same account and Student ID, new level registration number).
+  const unlockLevel = async (student: any) => {
+    const next = levelNumber(student.level) + 1;
+    if (!confirm(`Débloquer le niveau ${next} pour ${student.name} ?
+
+Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. Il recevra son numéro d'inscription du niveau ${next}.`)) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/approve-level", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ id: student.id, kind: student.kind }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      alert(`Niveau ${result.level} débloqué${result.levelRef ? ` (${result.levelRef})` : ""}${result.emailSent ? " — e-mail envoyé." : ". E-mail non envoyé : informez l'étudiant."}`);
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   const approveStudent = async (student: any) => {
     if (processingIds.has(student.id)) return;
     setProcessingIds((prev) => new Set(prev).add(student.id));
@@ -1508,8 +1531,9 @@ export default function AdminPage() {
       }
 
       try {
+        if (!student.email) throw new Error("adresse e-mail manquante sur ce dossier");
         await sendEmail(student.email, student.name, result.matricule, languageLabel(student.langCode), student.level, student.studyDays);
-        alert("Approuvé + Email envoyé !");
+        alert(result.reinstated ? "Accès rétabli + Email envoyé !" : "Approuvé + Email envoyé !");
       } catch (emailError: any) {
         console.error("EMAIL ERROR:", emailError);
         alert(`Étudiant approuvé, mais l'e-mail de confirmation n'est PAS parti : ${emailError?.message || emailError}\n\nCommuniquez-lui son Student ID (${result.matricule}) par un autre moyen.`);
@@ -2018,6 +2042,27 @@ export default function AdminPage() {
                       <option value="F">Madame</option>
                     </select>
                   </div>
+                  {!isOtherProgramCode(s.langCode) && s.status === "Approved" && (
+                    <div className="mt-1 space-y-1">
+                      {s.levelRefs && (
+                        <p className="text-ink text-sm">
+                          <b className="text-ink">N° par niveau :</b>{" "}
+                          <span className="font-mono text-xs">{Object.values(s.levelRefs as Record<string, string>).join(" · ")}</span>
+                        </p>
+                      )}
+                      {s.levelRequest && (
+                        <p className="text-amber-500 text-xs font-semibold">⏳ L'étudiant demande le niveau {s.levelRequest.level} (quiz final du niveau précédent réussi).</p>
+                      )}
+                      {levelNumber(s.level) < 3 && (
+                        <button
+                          onClick={() => unlockLevel(s)}
+                          className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition ${s.levelRequest ? "bg-green-600 text-white border-green-600 hover:bg-green-700" : "border-line text-ink-soft hover:text-ink hover:border-red-600/50"}`}
+                        >
+                          Débloquer le niveau {levelNumber(s.level) + 1}
+                        </button>
+                      )}
+                    </div>
+                  )}
                   {!isOtherProgramCode(s.langCode) && (
                     <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
                       <b className="text-ink">Rythme d'étude :</b>
@@ -2038,10 +2083,10 @@ export default function AdminPage() {
                   <div className="flex flex-wrap gap-3 mt-4">
                     <button
                       onClick={() => approveStudent(s)}
-                      disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Rejected"}
+                      disabled={processingIds.has(s.id) || s.status === "Approved"}
                       className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                      {processingIds.has(s.id) ? "Traitement..." : "Approuver"}
+                      {processingIds.has(s.id) ? "Traitement..." : s.status === "Rejected" ? "Réintégrer (approuver)" : "Approuver"}
                     </button>
 
                     {s.status === "Approved" ? (

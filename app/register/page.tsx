@@ -115,7 +115,7 @@ function RegisterForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           idToken,
-          name,
+          name: name.trim(),
           gender,
           langCode: programCode,
           level: isLanguageProgram ? level : "N/A",

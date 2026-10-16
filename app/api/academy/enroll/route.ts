@@ -29,8 +29,12 @@ export async function POST(request: Request) {
 
     const { idToken, name, gender: rawGender, langCode, level, studyDays } = await request.json();
     const gender = normalizeGender(rawGender);
-    if (!idToken || !name || !langCode || !level) {
+    if (!idToken || !langCode || !level) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
+    }
+    // The name is mandatory: a dossier without one cannot be processed.
+    if (typeof name !== "string" || name.trim().length < 2) {
+      return NextResponse.json({ error: "Le nom complet est obligatoire." }, { status: 400 });
     }
 
     const decoded = await getAdminAuth().verifyIdToken(idToken);

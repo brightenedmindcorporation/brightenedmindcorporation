@@ -10,6 +10,7 @@ import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
+import { levelNumber } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
@@ -43,6 +44,7 @@ function resolveLangSlug(langCode?: string): string {
 
 export default function Dashboard() {
   const [student, setStudent] = useState<StudentData | null>(null);
+  const [levelRequesting, setLevelRequesting] = useState(false);
   const [lastLesson, setLastLesson] = useState<number>(1);
   const [progressStats, setProgressStats] = useState({ completed: 0, total: 12 });
   const [loading, setLoading] = useState<boolean>(true);
@@ -260,6 +262,43 @@ export default function Dashboard() {
   const langSlug = resolveLangSlug(activeEnrollment.langCode);
   const langInfo = availableLanguages.find((l) => l.slug === langSlug) ?? availableLanguages[0];
   const programLabel = isOtherProgram ? getOtherProgramLabel(activeEnrollment.langCode) ?? activeEnrollment.langCode : langInfo.label;
+
+  // The next level can be requested once the final quiz of the current one is passed.
+  const canRequest = (target: number) =>
+    !isOtherProgram &&
+    levelNumber(activeEnrollment.level) === target - 1 &&
+    getLevelProgress(langSlug, target - 1).finalQuizPassed &&
+    (activeEnrollment as any).levelRequest?.level !== target &&
+    !levelRequesting;
+  const levelButtonLabel = (target: number, open: string) => {
+    if (levelNumber(activeEnrollment.level) >= target) return open;
+    if (levelNumber(activeEnrollment.level) === target - 1 && getLevelProgress(langSlug, target - 1).finalQuizPassed) {
+      return (activeEnrollment as any).levelRequest?.level === target ? "Demande envoyée — en attente" : levelRequesting ? "Envoi…" : `Demander le niveau ${target}`;
+    }
+    return (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> Locked</span>);
+  };
+
+  // Asks the administration for the next level (after the final quiz of the current one).
+  const requestLevel = async () => {
+    setLevelRequesting(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/academy/request-next-level", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, langCode: activeEnrollment.langCode }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      const updated = await refreshLoggedStudent();
+      if (updated) setStudent(updated);
+      alert("Demande envoyée. L'administration la validera et vous serez prévenu.");
+    } catch (error: any) {
+      alert(error.message || "Erreur");
+    } finally {
+      setLevelRequesting(false);
+    }
+  };
 
   const handleContinue = () => {
     const currentLevel = activeEnrollment.level || "Level 1";
@@ -588,18 +627,17 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (activeEnrollment.level === "Level 2" || activeEnrollment.level === "Level 3") {
-                    router.push(`/academia/${langSlug}/level/2`);
-                  }
+                  if (levelNumber(activeEnrollment.level) >= 2) router.push(`/academia/${langSlug}/level/2`);
+                  else if (canRequest(2)) requestLevel();
                 }}
-                disabled={activeEnrollment.level === "Level 1"}
+                disabled={levelNumber(activeEnrollment.level) < 2 && !canRequest(2)}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                  activeEnrollment.level === "Level 1"
+                  levelNumber(activeEnrollment.level) < 2 && !canRequest(2)
                     ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
-                {activeEnrollment.level === "Level 1" ? (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> Locked</span>) : "Open Level 2"}
+                {levelButtonLabel(2, "Open Level 2")}
               </button>
             </div>
 
@@ -615,16 +653,17 @@ export default function Dashboard() {
               </div>
               <button
                 onClick={() => {
-                  if (activeEnrollment.level === "Level 3") router.push(`/academia/${langSlug}/level/3`);
+                  if (levelNumber(activeEnrollment.level) >= 3) router.push(`/academia/${langSlug}/level/3`);
+                  else if (canRequest(3)) requestLevel();
                 }}
-                disabled={activeEnrollment.level !== "Level 3"}
+                disabled={levelNumber(activeEnrollment.level) < 3 && !canRequest(3)}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                  activeEnrollment.level !== "Level 3"
+                  levelNumber(activeEnrollment.level) < 3 && !canRequest(3)
                     ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >
-                {activeEnrollment.level !== "Level 3" ? (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> Locked</span>) : "Open Level 3"}
+                {levelButtonLabel(3, "Open Level 3")}
               </button>
             </div>
 

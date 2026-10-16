@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { sendLevelInvitation } from "@/lib/academy/levelInvite";
 
 export async function POST(request: Request) {
   try {
@@ -24,6 +25,15 @@ export async function POST(request: Request) {
       },
       { merge: true }
     );
+
+    // Passing a level's final quiz invites the student to the next level (once).
+    if (progress?.finalQuizPassed === true) {
+      try {
+        await sendLevelInvitation(decoded.uid, String(langCode), Number(level));
+      } catch (inviteError) {
+        console.error("Level invitation failed (non-fatal):", inviteError);
+      }
+    }
 
     return NextResponse.json({ status: "success" });
   } catch (error: any) {

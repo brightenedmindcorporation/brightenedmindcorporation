@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { generateMatriculeAdmin } from "@/lib/academy/matricule-admin";
 import { createNotification } from "@/lib/notifications";
+import { FieldValue } from "firebase-admin/firestore";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -42,8 +43,8 @@ export async function POST(request: Request) {
       const snap = await tx.get(studentRef);
       if (!snap.exists) return false;
       const status = snap.data()!.status;
-      if (status === "Approved" || status === "Rejected") return false;
-      tx.update(studentRef, { status: "Approving" });
+      if (status === "Approved" || status === "Approving") return false;
+      tx.update(studentRef, { status: "Approving", previousStatus: status });
       return true;
     });
 
@@ -58,23 +59,27 @@ export async function POST(request: Request) {
     const langCode = (snap.data()?.langCode as string) || "EN";
 
     try {
-      const matricule = await generateMatriculeAdmin(langCode);
-      await studentRef.update({ status: "Approved", matricule });
+      const existing = (snap.data()?.matricule as string) || "";
+      const reinstated = snap.data()?.previousStatus === "Rejected" && Boolean(existing);
+      const matricule = existing || (await generateMatriculeAdmin(langCode));
+      await studentRef.update({ status: "Approved", matricule, previousStatus: FieldValue.delete() });
       try {
         await createNotification({
           audience: studentId,
           type: "enrollment-approved",
-          title: "Inscription approuvée",
-          message: `Votre inscription a été approuvée — Student ID ${matricule}.`,
+          title: reinstated ? "Accès rétabli" : "Inscription approuvée",
+          message: reinstated
+            ? `Votre accès a été rétabli — Student ID ${matricule}.`
+            : `Votre inscription a été approuvée — Student ID ${matricule}.`,
           link: "/academia/dashboard",
         });
       } catch (notifError) {
         console.error("Error creating approval notification (non-fatal):", notifError);
       }
-      return NextResponse.json({ status: "success", matricule });
+      return NextResponse.json({ status: "success", matricule, reinstated });
     } catch (innerError) {
-      // Roll back to "Pending" so the row is immediately retryable.
-      await studentRef.update({ status: "Pending" }).catch(() => {});
+      // Roll back so the row is immediately retryable.
+      await studentRef.update({ status: (snap.data()?.previousStatus as string) || "Pending" }).catch(() => {});
       throw innerError;
     }
   } catch (error: any) {

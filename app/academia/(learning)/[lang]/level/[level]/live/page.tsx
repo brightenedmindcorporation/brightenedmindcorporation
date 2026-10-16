@@ -1,5 +1,6 @@
 "use client";
 
+import { allowedLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -30,6 +31,11 @@ export default function LiveClassPage() {
       );
       if (!enrollment) {
         router.push(`/login?program=${curriculum?.langCode ?? ""}`);
+        return;
+      }
+      // A level is reachable once the administration has unlocked it for this student.
+      if (level > allowedLevel(enrollment)) {
+        router.push("/academia/dashboard");
         return;
       }
       setStudentName(parsed.name || parsed.email || "Élève");

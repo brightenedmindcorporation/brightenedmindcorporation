@@ -1,5 +1,6 @@
 "use client";
 
+import { allowedLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -56,6 +57,11 @@ export default function VocabularyPage() {
       const enrollment = (parsed.enrollments || []).find((e: any) => e.langCode === curriculum?.langCode && e.status === "Approved");
       if (!enrollment) {
         router.push(`/login?program=${curriculum?.langCode ?? ""}`);
+        return;
+      }
+      // A level is reachable once the administration has unlocked it for this student.
+      if (level > allowedLevel(enrollment)) {
+        router.push("/academia/dashboard");
         return;
       }
       setAllowed(true);

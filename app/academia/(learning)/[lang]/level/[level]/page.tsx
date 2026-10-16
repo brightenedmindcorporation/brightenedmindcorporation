@@ -1,5 +1,6 @@
 "use client";
 
+import { allowedLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
@@ -40,6 +41,11 @@ export default function LevelOverviewPage() {
         // on redemande une connexion spécifique à cette langue, plutôt que de
         // silencieusement renvoyer l'étudiant vers son ancien tableau de bord.
         router.push(`/login?program=${curriculum?.langCode ?? ""}`);
+        return;
+      }
+      // A level is reachable once the administration has unlocked it for this student.
+      if (level > allowedLevel(enrollment)) {
+        router.push("/academia/dashboard");
         return;
       }
       setAllowed(true);

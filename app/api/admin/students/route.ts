@@ -62,10 +62,12 @@ export async function GET(request: Request) {
     // Flag accounts whose e-mail address was never confirmed (new accounts only).
     const uids = Array.from(new Set(rows.map((r) => r.uid || r.id?.split("_")[0]).filter(Boolean))) as string[];
     const unverified = new Set<string>();
+    const accounts = new Map<string, { email?: string; name?: string }>();
     try {
       for (let i = 0; i < uids.length; i += 100) {
         const res = await getAdminAuth().getUsers(uids.slice(i, i + 100).map((uid) => ({ uid })));
         for (const u of res.users) {
+          accounts.set(u.uid, { email: u.email || undefined, name: u.displayName || undefined });
           if (requiresEmailVerification(u.metadata.creationTime) && !u.emailVerified) unverified.add(u.uid);
         }
       }
@@ -73,6 +75,17 @@ export async function GET(request: Request) {
       console.error("Could not check e-mail verification (non-fatal):", verifyError);
     }
     for (const r of rows) r.emailUnverified = unverified.has(r.uid || r.id?.split("_")[0]);
+
+    // A dossier must always show who the student is: when its own name/e-mail
+    // is empty, take them from the student profile or the sign-in account.
+    const profiles = new Map(studentsSnap.docs.map((d) => [d.id, d.data()]));
+    for (const r of rows) {
+      const uid = r.uid || r.id?.split("_")[0];
+      const profile = profiles.get(uid);
+      const account = accounts.get(uid);
+      if (!String(r.name || "").trim()) r.name = profile?.name || account?.name || "(nom non renseigné)";
+      if (!String(r.email || "").trim()) r.email = profile?.email || account?.email || "";
+    }
 
     return NextResponse.json({ students: rows });
   } catch (error: any) {
