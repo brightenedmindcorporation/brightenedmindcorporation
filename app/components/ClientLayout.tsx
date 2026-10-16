@@ -80,9 +80,15 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
               <Link
                 href="/devis"
+                className="hidden sm:inline-block border border-line hover:border-red-600/60 text-ink text-sm font-bold px-4 py-2.5 rounded-xl transition"
+              >
+                Devis
+              </Link>
+              <Link
+                href="/register"
                 className="hidden sm:inline-block glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
               >
-                Devis / Inscription
+                Inscription
               </Link>
 
               <button
@@ -103,10 +109,16 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </Link>
               ))}
               <Link
-                href="/devis"
+                href="/register"
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-center transition"
               >
-                Devis / Inscription
+                Inscription
+              </Link>
+              <Link
+                href="/devis"
+                className="border border-line hover:border-red-600/60 text-ink font-bold px-5 py-2.5 rounded-xl text-center transition"
+              >
+                Devis
               </Link>
               <div className="pt-2 border-t border-line flex items-center gap-3">
                 <ThemeToggle />
