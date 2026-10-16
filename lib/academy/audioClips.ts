@@ -24,7 +24,11 @@ const CJK = /[\u3400-\u9fff]/;
  * the characters are what must be heard, not the French around them. */
 export function extractSpeechText(line: string): string {
   const parenIndex = line.indexOf("(");
-  const head = parenIndex > 0 ? line.slice(0, parenIndex).trim() : line;
+  let head = parenIndex > 0 ? line.slice(0, parenIndex).trim() : line;
+  // Numbered lines ("1 - 一 (yī)"): the number is only a list marker. Reading it would say the
+  // number and then the character, i.e. the same word twice.
+  const numbered = head.match(/^\d+\s*[-–.:)]\s*(.+)$/);
+  if (numbered && CJK.test(numbered[1])) head = numbered[1].trim();
   if (!CJK.test(head) && CJK.test(line)) {
     const runs = line.match(/[\u3400-\u9fff]+/g);
     if (runs) return runs.join("，");
