@@ -9,6 +9,7 @@ import { getLesson, getLevelCurriculum } from "@/content/curriculum";
 import LessonRenderer from "@/components/academy/LessonRenderer";
 import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/academy/progress";
 import { syncProgress } from "@/lib/academy/progressSync";
+import { logActivity } from "@/lib/academy/activity";
 
 export default function LessonPage() {
   const router = useRouter();
@@ -53,6 +54,7 @@ export default function LessonPage() {
       // Count the lesson as studied (visible to the teacher and the admin).
       const updated = markLessonStudied(langSlug, level, lessonId);
       if (updated && curriculum?.langCode) syncProgress(curriculum.langCode, level, updated);
+      logActivity("lesson_open", `Leçon ${lessonId} : ${lesson?.title ?? ""} (${curriculum?.langLabel ?? langSlug}, niveau ${level})`, { langCode: curriculum?.langCode, level, lessonId });
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
       router.push("/login");

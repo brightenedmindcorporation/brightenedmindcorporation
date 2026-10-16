@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logActivitySafe } from "@/lib/activityLog";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 
@@ -35,6 +36,8 @@ export async function POST(request: Request) {
       },
       { merge: true }
     );
+
+    await logActivitySafe(decoded.uid, "certificate", `Certificat obtenu : ${levelTitle || ""}`, { langCode: langCode || "", level: level || 0 });
 
     try {
       await createNotification({

@@ -5,6 +5,7 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { getLiveRoomName, getJaasAppId, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
+import { logActivity } from "@/lib/academy/activity";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 
@@ -85,6 +86,7 @@ export default function StudentLiveRoom({
           }
           setTokenError(null);
           setToken(result.token);
+          logActivity("live_join", `A rejoint le cours en direct${session?.title ? ` « ${session.title} »` : ""} (${langCode}, niveau ${level})`, { langCode, level });
         } catch (error: any) {
           setTokenError(error.message || "Erreur serveur.");
           fetchingToken.current = false;

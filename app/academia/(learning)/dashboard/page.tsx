@@ -14,6 +14,7 @@ import { levelNumber } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
+import { logActivity } from "@/lib/academy/activity";
 import { getVerbReference } from "@/content/verbs";
 
 interface Enrollment {
@@ -76,6 +77,15 @@ export default function Dashboard() {
         return;
       }
       setStudent(parsedStudent);
+      // One "space opened" event per browser session (the administration sees when students come back).
+      try {
+        if (!sessionStorage.getItem("bm_activity_session")) {
+          sessionStorage.setItem("bm_activity_session", "1");
+          logActivity("session", "Ouverture de l'espace d'apprentissage");
+        }
+      } catch {
+        // storage unavailable
+      }
       // Pick up changes the admin made since login (study plan, status…).
       refreshLoggedStudent().then((updated) => {
         if (updated) setStudent(updated);

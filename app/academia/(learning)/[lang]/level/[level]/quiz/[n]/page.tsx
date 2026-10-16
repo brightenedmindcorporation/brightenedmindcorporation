@@ -7,6 +7,7 @@ import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
 import { syncProgress } from "@/lib/academy/progressSync";
+import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
 import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
 import { useEffect, useState } from "react";
@@ -110,6 +111,10 @@ export default function QuizPage() {
             onSubmit={(score, parts) => {
               // Only the first attempt counts, like the score itself.
               if (parts && alreadyScore === null) saveQuizParts(langSlug, level, lessonId, parts);
+              if (alreadyScore === null) {
+                const passed = score >= quiz.passingScore && (parts?.dialoguePassed ?? true);
+                logActivity("quiz", `Quiz ${lessonId} : ${score}/${quiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel}, niveau ${level})`, { langCode: curriculum.langCode, level, lessonId, score, total: quiz.questions.length, passed });
+              }
               const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore, parts?.dialoguePassed ?? true);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}

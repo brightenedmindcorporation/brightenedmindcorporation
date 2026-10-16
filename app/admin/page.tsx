@@ -39,6 +39,7 @@ import NotificationBell from "@/components/academy/NotificationBell";
 import { generateCertificatePdf, getCertificatePreviewUrl } from "@/lib/academy/certificatePdf";
 import TeachersTab from "@/components/admin/TeachersTab";
 import VisitsTab from "@/components/admin/VisitsTab";
+import ActivityTab from "@/components/admin/ActivityTab";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
@@ -59,7 +60,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1350,7 +1351,7 @@ export default function AdminPage() {
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
     const requestedTab = params.get("tab");
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1860,6 +1861,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "certificates", label: "Certificats", badge: 0 },
             { id: "teachers", label: "Professeurs", badge: 0 },
             { id: "visits", label: "Visites", badge: 0 },
+            { id: "activity", label: "Activité", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
               key={t.id}
@@ -2030,6 +2032,13 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
                   </p>
                   <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
+                  <p className="text-ink">
+                    <b className="text-ink">Dernière connexion :</b>{" "}
+                    {s.lastSignInAt || s.lastSeenAt
+                      ? new Date([s.lastSignInAt, s.lastSeenAt].filter(Boolean).sort().pop() as string).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })
+                      : "jamais"}
+                    <button onClick={() => setTab("activity")} className="ml-2 text-xs font-semibold text-red-500 hover:text-red-400">Voir l'activité</button>
+                  </p>
                   <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
                     <b className="text-ink">Civilité :</b>
                     <select
@@ -2349,6 +2358,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= TEACHERS TAB ================= */}
         {tab === "teachers" && <TeachersTab />}
         {tab === "visits" && <VisitsTab />}
+        {tab === "activity" && <ActivityTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

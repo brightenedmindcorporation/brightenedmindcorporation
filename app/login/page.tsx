@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { logActivity } from "@/lib/academy/activity";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -102,6 +103,8 @@ function LoginForm() {
           activeLangCode: (activeEnrollment as any).langCode,
         })
       );
+
+      logActivity("login", "Connexion", { langCode: (activeEnrollment as any).langCode });
 
       // Pose le cookie de session côté serveur (best-effort : si Firebase
       // Admin n'est pas encore configuré côté serveur, on continue quand

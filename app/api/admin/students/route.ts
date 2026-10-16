@@ -62,12 +62,16 @@ export async function GET(request: Request) {
     // Flag accounts whose e-mail address was never confirmed (new accounts only).
     const uids = Array.from(new Set(rows.map((r) => r.uid || r.id?.split("_")[0]).filter(Boolean))) as string[];
     const unverified = new Set<string>();
-    const accounts = new Map<string, { email?: string; name?: string }>();
+    const accounts = new Map<string, { email?: string; name?: string; lastSignIn?: string }>();
     try {
       for (let i = 0; i < uids.length; i += 100) {
         const res = await getAdminAuth().getUsers(uids.slice(i, i + 100).map((uid) => ({ uid })));
         for (const u of res.users) {
-          accounts.set(u.uid, { email: u.email || undefined, name: u.displayName || undefined });
+          accounts.set(u.uid, {
+            email: u.email || undefined,
+            name: u.displayName || undefined,
+            lastSignIn: u.metadata.lastSignInTime ? new Date(u.metadata.lastSignInTime).toISOString() : undefined,
+          });
           if (requiresEmailVerification(u.metadata.creationTime) && !u.emailVerified) unverified.add(u.uid);
         }
       }
@@ -85,6 +89,9 @@ export async function GET(request: Request) {
       const account = accounts.get(uid);
       if (!String(r.name || "").trim()) r.name = profile?.name || account?.name || "(nom non renseigné)";
       if (!String(r.email || "").trim()) r.email = profile?.email || account?.email || "";
+      // When the student last came (from the sign-in service, plus tracked activity).
+      r.lastSignInAt = account?.lastSignIn || null;
+      r.lastSeenAt = profile?.lastSeenAt || null;
     }
 
     return NextResponse.json({ students: rows });

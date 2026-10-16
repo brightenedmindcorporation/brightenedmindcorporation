@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { logActivitySafe } from "@/lib/activityLog";
 import { findEnrollment } from "@/lib/academy/levelInvite";
 import { levelNumber } from "@/lib/academy/levelAccess";
 
@@ -32,6 +33,8 @@ export async function POST(request: Request) {
 
     if (found.data.levelRequest?.level === next) return NextResponse.json({ status: "already", level: next });
     await found.ref.set({ levelRequest: { level: next, requestedAt: new Date().toISOString() } }, { merge: true });
+
+    await logActivitySafe(decoded.uid, "level_request", `A demandé le niveau ${next} (${langCode})`, { langCode: String(langCode), level: next });
 
     try {
       await createNotification({

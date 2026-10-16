@@ -4,6 +4,7 @@ import { Resend } from "resend";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 import { sendWithText } from "@/lib/mailText";
+import { logActivitySafe } from "@/lib/activityLog";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const MAX_FILE_BYTES = 8 * 1024 * 1024;
@@ -78,6 +79,8 @@ export async function POST(request: Request) {
       status: "new",
       createdAt: new Date().toISOString(),
     });
+
+    await logActivitySafe(decoded.uid, "message", `A envoyé un message : ${String(subject).trim().slice(0, 80)}`, { type: requestType });
 
     if (process.env.RESEND_API_KEY) {
       try {

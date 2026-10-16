@@ -9,6 +9,7 @@ import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
 import { syncProgress } from "@/lib/academy/progressSync";
+import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
 import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
 
@@ -115,6 +116,10 @@ export default function FinalQuizPage() {
             writing={quizWriting(langSlug, curriculum, "final")}
             onSubmit={(score, parts) => {
               if (parts && alreadyScore === null) saveQuizParts(langSlug, level, "final", parts);
+              if (alreadyScore === null) {
+                const passed = score >= curriculum.finalQuiz.passingScore && (parts?.dialoguePassed ?? true);
+                logActivity("final_quiz", `Quiz final du niveau ${level} : ${score}/${curriculum.finalQuiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel})`, { langCode: curriculum.langCode, level, score, total: curriculum.finalQuiz.questions.length, passed });
+              }
               const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore, parts?.dialoguePassed ?? true);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}
