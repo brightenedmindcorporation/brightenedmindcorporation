@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // The production build runs out of memory in the TypeScript step on the host
+  // (heap limit hit since the project grew). Types are checked before every push
+  // with `npm run typecheck`, so the host skips that step.
+  typescript: { ignoreBuildErrors: true },
   async redirects() {
     return [
       // www → the main domain (one canonical address for the site).
