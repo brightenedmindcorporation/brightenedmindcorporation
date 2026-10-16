@@ -42,6 +42,7 @@ import VisitsTab from "@/components/admin/VisitsTab";
 import ActivityTab from "@/components/admin/ActivityTab";
 import StatsTab from "@/components/admin/StatsTab";
 import AddStudentModal from "@/components/admin/AddStudentModal";
+import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
 import { DEFAULT_DOCUMENT_SETTINGS, loadDocumentSettings, type DocumentSettings } from "@/lib/academy/documentSettings";
@@ -109,6 +110,20 @@ export default function AdminPage() {
   const [liveLoading, setLiveLoading] = useState(false);
   const [sessionLangCode, setSessionLangCode] = useState(availableLanguages[0].code);
   const [sessionLevel, setSessionLevel] = useState("1");
+  // Who may attend the class being scheduled (null = every student concerned) and the "Participants" editor.
+  const [sessionAudience, setSessionAudience] = useState<string[] | null>(null);
+  const [audienceEdit, setAudienceEdit] = useState<{ id: string; langCode: string; value: string[] | null } | null>(null);
+  const audienceCandidates = (langCode: string) => {
+    const seen = new Set<string>();
+    const rows: { uid: string; name: string; email?: string }[] = [];
+    for (const r of students) {
+      const uid = r.uid || r.id?.split("_")[0];
+      if (!uid || r.langCode !== langCode || r.status !== "Approved" || seen.has(uid)) continue;
+      seen.add(uid);
+      rows.push({ uid, name: r.name || "", email: r.email });
+    }
+    return rows.sort((a, b) => a.name.localeCompare(b.name));
+  };
   const [sessionDate, setSessionDate] = useState("");
   const [sessionTime, setSessionTime] = useState("");
   const [sessionDuration, setSessionDuration] = useState("60");
@@ -1669,6 +1684,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
           scheduledAt,
           durationMinutes: sessionDuration,
           title: sessionTitle,
+          studentUids: sessionAudience,
         }),
       });
       const result = await response.json();
@@ -1678,6 +1694,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       setSessionDate("");
       setSessionTime("");
       setSessionTitle("");
+      setSessionAudience(null);
       fetchLiveSessions();
     } catch (error: any) {
       alert(`Erreur : ${error.message || error}`);
@@ -2161,7 +2178,10 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Formation</label>
                 <select
                   value={sessionLangCode}
-                  onChange={(e) => setSessionLangCode(e.target.value)}
+                  onChange={(e) => {
+                    setSessionLangCode(e.target.value);
+                    setSessionAudience(null);
+                  }}
                   className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
                 >
                   <optgroup label="Langues">
@@ -2247,6 +2267,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                 />
               </div>
+
+              <div className="sm:col-span-2 lg:col-span-6">
+                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Qui peut entrer ?</label>
+                <LiveAudiencePicker candidates={audienceCandidates(sessionLangCode)} value={sessionAudience} onChange={setSessionAudience} />
+              </div>
             </form>
 
             <p className="text-xs text-ink-soft mb-4">
@@ -2278,6 +2303,17 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           {date.toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })} · {session.durationMinutes} min
                           {isPast && " · Terminée"}
                           {session.open && !isPast && " · 🟢 Ouvert aux étudiants"}
+                        </p>
+                        <p className="text-xs text-ink-soft mt-1">
+                          {audienceLabel(session.studentUids)}
+                          {session.teacherName ? ` · Prof : ${session.teacherName}` : ""}
+                          <button
+                            type="button"
+                            onClick={() => setAudienceEdit({ id: session.id, langCode: session.langCode, value: Array.isArray(session.studentUids) ? session.studentUids : null })}
+                            className="ml-2 font-bold text-red-500 hover:text-red-400"
+                          >
+                            Modifier
+                          </button>
                         </p>
                       </div>
                       <div className="flex items-center gap-4 self-start sm:self-center">
@@ -3850,6 +3886,45 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       )}
 
       {/* ================= MESSAGE TO STUDENTS MODAL ================= */}
+      {audienceEdit && (
+        <div className="fixed inset-0 z-[70] bg-black/70 flex items-start justify-center overflow-y-auto p-4" onClick={() => setAudienceEdit(null)}>
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl my-8 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold text-ink">Qui peut entrer dans ce cours ?</h3>
+            <LiveAudiencePicker
+              candidates={audienceCandidates(audienceEdit.langCode)}
+              value={audienceEdit.value}
+              onChange={(value) => setAudienceEdit({ ...audienceEdit, value })}
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setAudienceEdit(null)} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink">
+                Annuler
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    const idToken = await auth.currentUser?.getIdToken();
+                    const response = await fetch(`/api/admin/live-sessions/${audienceEdit.id}`, {
+                      method: "PATCH",
+                      headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+                      body: JSON.stringify({ studentUids: audienceEdit.value }),
+                    });
+                    const result = await response.json();
+                    if (!response.ok) throw new Error(result.error || "Erreur serveur");
+                    setAudienceEdit(null);
+                    fetchLiveSessions();
+                  } catch (error: any) {
+                    alert(`Erreur : ${error.message || error}`);
+                  }
+                }}
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold"
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {addStudentOpen && <AddStudentModal onClose={() => setAddStudentOpen(false)} onDone={fetchStudents} />}
 
       {messageOpen && (

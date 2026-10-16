@@ -1,5 +1,6 @@
 import "server-only";
 import type { Firestore } from "firebase-admin/firestore";
+import { isTeachersStudent, type Caller } from "@/lib/teacherAuth";
 
 /**
  * Who may attend a live class. A session scheduled by a teacher is only for
@@ -30,8 +31,36 @@ export async function getStudentStanding(db: Firestore, uid: string, langCode: s
   return { approved: false, teacherUid: null };
 }
 
-export function sessionOpenToStudent(session: { teacherUid?: string | null }, standing: StudentStanding): boolean {
+export function sessionOpenToStudent(
+  session: { teacherUid?: string | null; studentUids?: string[] | null },
+  standing: StudentStanding,
+  uid: string
+): boolean {
   if (!standing.approved) return false;
+  // A class with a hand-picked list is for those students only.
+  if (Array.isArray(session.studentUids)) return session.studentUids.includes(uid);
   if (!session.teacherUid || !standing.teacherUid) return true;
   return session.teacherUid === standing.teacherUid;
+}
+
+/**
+ * The hand-picked students of a class, cleaned: only students approved in that language, and — for a
+ * teacher — only their own students. Returns null when no list was given (= everyone concerned).
+ */
+export async function cleanAudience(db: Firestore, caller: Caller, langCode: string, input: unknown): Promise<string[] | null> {
+  if (!Array.isArray(input)) return null;
+  const uids = Array.from(new Set(input.filter((u): u is string => typeof u === "string" && /^[A-Za-z0-9]{6,64}$/.test(u)))).slice(0, 500);
+  if (uids.length === 0) return [];
+  const snaps = await db.getAll(...uids.map((u) => db.collection("enrollments").doc(`${u}_${langCode}`)));
+  const legacySnaps = await db.getAll(...uids.map((u) => db.collection("students").doc(u)));
+  const ok: string[] = [];
+  uids.forEach((uid, i) => {
+    const e = snaps[i].exists ? snaps[i].data()! : null;
+    const l = legacySnaps[i].exists ? legacySnaps[i].data()! : null;
+    const enrollment = e && e.status === "Approved" ? e : l && l.langCode === langCode && l.status === "Approved" ? l : null;
+    if (!enrollment) return;
+    if (caller.role === "teacher" && !isTeachersStudent(caller, enrollment as any)) return;
+    ok.push(uid);
+  });
+  return ok;
 }

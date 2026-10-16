@@ -56,7 +56,7 @@ export async function GET(request: Request) {
       .get();
 
     const sessions = (snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })) as LiveSession[]).filter(
-      (s) => !standing || sessionOpenToStudent(s, standing)
+      (s) => !standing || sessionOpenToStudent(s, standing, decoded.uid)
     );
     // A room the teacher has opened always wins (even if the class overruns
     // its scheduled slot); otherwise the next upcoming session.

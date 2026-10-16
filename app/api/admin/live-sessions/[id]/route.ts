@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { FieldValue } from "firebase-admin/firestore";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
+import { cleanAudience } from "@/lib/academy/liveAccess";
 
 function fail(error: any) {
   const status = error instanceof AuthError ? error.status : 500;
@@ -16,7 +18,7 @@ async function loadOwnedSession(request: Request, id: string) {
   if (caller.role === "teacher" && snap.data()?.teacherUid !== caller.uid) {
     throw new AuthError("Cette session ne vous appartient pas.", 403);
   }
-  return { caller, ref };
+  return { caller, ref, data: snap.data()! };
 }
 
 /** Teacher/admin opens or closes the room to students. */
@@ -26,9 +28,20 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
     const { id } = await params;
-    const { ref } = await loadOwnedSession(request, id);
+    const { caller, ref, data } = await loadOwnedSession(request, id);
 
-    const { open } = await request.json();
+    const body = await request.json();
+    // Who may attend: a list of students, or null for everyone concerned.
+    if ("studentUids" in body) {
+      const list = body.studentUids === null ? null : await cleanAudience(getAdminDb(), caller, String(data.langCode), body.studentUids);
+      if (list && list.length === 0) {
+        return NextResponse.json({ error: "Choisissez au moins un étudiant, ou ouvrez le cours à tous." }, { status: 400 });
+      }
+      await ref.update({ studentUids: list ?? FieldValue.delete() });
+      return NextResponse.json({ status: "success", studentUids: list });
+    }
+
+    const { open } = body;
     if (typeof open !== "boolean") {
       return NextResponse.json({ error: "Champ « open » requis." }, { status: 400 });
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import StatsTab from "@/components/admin/StatsTab";
+import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { teacherAuth as auth } from "@/lib/firebaseTeacher";
@@ -234,6 +235,23 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
   const [token, setToken] = useState<string | null>(null);
   const [tokenError, setTokenError] = useState<string | null>(null);
   const [toggling, setToggling] = useState(false);
+  // Who may enter the class being scheduled (null = all my students of that language), and the "Participants" editor.
+  const [audience, setAudience] = useState<string[] | null>(null);
+  const [audienceEdit, setAudienceEdit] = useState<{ id: string; langCode: string; value: string[] | null } | null>(null);
+  const [myStudents, setMyStudents] = useState<{ uid: string; name: string; email: string; langCode: string }[]>([]);
+  useEffect(() => {
+    api("/api/teacher/students")
+      .then((r) => setMyStudents(r.students || []))
+      .catch(() => {});
+  }, []);
+  useEffect(() => setAudience(null), [choice]);
+  const candidatesFor = (langCode: string) => {
+    const seen = new Set<string>();
+    return myStudents
+      .filter((st) => st.langCode === langCode && !seen.has(st.uid) && seen.add(st.uid))
+      .map((st) => ({ uid: st.uid, name: st.name || "", email: st.email }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  };
 
   const load = async () => {
     try {
@@ -283,10 +301,12 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
           scheduledAt: new Date(when).toISOString(),
           durationMinutes: Number(duration) || 60,
           title: title.trim() || undefined,
+          studentUids: audience,
         }),
       });
       setWhen("");
       setTitle("");
+      setAudience(null);
       load();
     } catch (error: any) {
       alert(`Erreur : ${error.message}`);
@@ -345,6 +365,10 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
           <input type="number" min={15} step={15} value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="Durée (min)" className={input} />
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre (optionnel)" className={input} />
         </div>
+        <div>
+          <p className="text-xs font-semibold text-ink-soft mb-1.5">Qui peut entrer ?</p>
+          <LiveAudiencePicker candidates={candidatesFor(choice.split(":")[0])} value={audience} onChange={setAudience} />
+        </div>
         <button onClick={create} disabled={saving || !when || !choice} className={primaryBtn}>
           {saving ? "Enregistrement…" : "Programmer"}
         </button>
@@ -371,6 +395,16 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
                     {s.open && " · 🟢 Ouvert aux étudiants"}
                     {isPast && !s.open && " · Terminée"}
                   </p>
+                  <p className="text-xs text-ink-soft mt-1">
+                    {audienceLabel((s as any).studentUids)}
+                    <button
+                      type="button"
+                      onClick={() => setAudienceEdit({ id: s.id, langCode: s.langCode, value: Array.isArray((s as any).studentUids) ? (s as any).studentUids : null })}
+                      className="ml-2 font-bold text-red-500 hover:text-red-400"
+                    >
+                      Modifier
+                    </button>
+                  </p>
                 </div>
                 <div className="flex items-center gap-4">
                   <button onClick={() => setHosting(s)} className={primaryBtn}>
@@ -383,6 +417,34 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {audienceEdit && (
+        <div className="fixed inset-0 z-[70] bg-black/70 flex items-start justify-center overflow-y-auto p-4" onClick={() => setAudienceEdit(null)}>
+          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl my-8 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-lg font-bold">Qui peut entrer dans ce cours ?</h3>
+            <LiveAudiencePicker candidates={candidatesFor(audienceEdit.langCode)} value={audienceEdit.value} onChange={(value) => setAudienceEdit({ ...audienceEdit, value })} />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setAudienceEdit(null)} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink">
+                Annuler
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await api(`/api/admin/live-sessions/${audienceEdit.id}`, { method: "PATCH", body: JSON.stringify({ studentUids: audienceEdit.value }) });
+                    setAudienceEdit(null);
+                    load();
+                  } catch (error: any) {
+                    alert(`Erreur : ${error.message}`);
+                  }
+                }}
+                className={primaryBtn}
+              >
+                Enregistrer
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

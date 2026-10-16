@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, canTeach, getCaller } from "@/lib/teacherAuth";
+import { cleanAudience } from "@/lib/academy/liveAccess";
 
 // GET routes are cached by Next.js by default unless marked dynamic — this
 // serves live admin data and must never be stale.
@@ -71,7 +72,14 @@ export async function POST(request: Request) {
       }
     }
 
+    // Optional hand-picked list of students (otherwise: every student concerned).
+    const studentUids = await cleanAudience(adminDb, caller, String(langCode), body.studentUids);
+    if (studentUids && studentUids.length === 0) {
+      return NextResponse.json({ error: "Choisissez au moins un étudiant, ou ouvrez le cours à tous." }, { status: 400 });
+    }
+
     const docRef = await adminDb.collection("liveSessions").add({
+      ...(studentUids ? { studentUids } : {}),
       langCode,
       level: Number(level),
       scheduledAt,

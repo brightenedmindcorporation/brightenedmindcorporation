@@ -14,6 +14,8 @@ export interface LiveSession {
   /** The teacher who scheduled it: the class is for that teacher's students only. */
   teacherUid?: string | null;
   teacherName?: string | null;
+  /** When set, only these students may attend (chosen by whoever scheduled the class); otherwise everyone concerned. */
+  studentUids?: string[] | null;
   /** True while the teacher has opened the room to students. */
   open?: boolean;
   openedAt?: string;

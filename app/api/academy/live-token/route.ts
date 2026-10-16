@@ -70,7 +70,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "Session introuvable.", code: "not-open" }, { status: 403 });
       }
       // A teacher's class is only for that teacher's students.
-      if (!sessionOpenToStudent(session, standing)) {
+      if (!sessionOpenToStudent(session, standing, decoded.uid)) {
         return NextResponse.json({ error: "Ce cours est réservé aux étudiants d'un autre professeur." }, { status: 403 });
       }
 
