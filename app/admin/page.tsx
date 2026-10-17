@@ -2456,18 +2456,6 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               </div>
             ) : (
               <div className="overflow-x-auto">
-                {dossierOf && (() => {
-                  const owner = students.find((s) => s.uid === dossierOf.uid && s.langCode === dossierOf.langCode) || students.find((s) => s.uid === dossierOf.uid);
-                  const levels: Record<string, any> = {};
-                  for (const row of progressList) if (row.uid === dossierOf.uid && row.langCode === dossierOf.langCode) levels[String(row.level)] = row;
-                  return (
-                    <StudentDossier
-                      student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode }}
-                      levels={levels}
-                      onClose={() => setDossierOf(null)}
-                    />
-                  );
-                })()}
                 <table className="w-full text-sm border-collapse">
                   <thead>
                     <tr className="text-left text-ink-soft border-b border-line">
@@ -3886,6 +3874,19 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       )}
 
       {/* ================= MESSAGE TO STUDENTS MODAL ================= */}
+      {dossierOf && (() => {
+          const owner = students.find((s) => s.uid === dossierOf.uid && s.langCode === dossierOf.langCode) || students.find((s) => s.uid === dossierOf.uid);
+          const levels: Record<string, any> = {};
+          for (const row of progressList) if (row.uid === dossierOf.uid && row.langCode === dossierOf.langCode) levels[String(row.level)] = row;
+          return (
+            <StudentDossier
+              student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode }}
+              levels={levels}
+              onClose={() => setDossierOf(null)}
+            />
+          );
+        })()}
+
       {audienceEdit && (
         <div className="fixed inset-0 z-[70] bg-black/70 flex items-start justify-center overflow-y-auto p-4" onClick={() => setAudienceEdit(null)}>
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl my-8 space-y-4" onClick={(e) => e.stopPropagation()}>
