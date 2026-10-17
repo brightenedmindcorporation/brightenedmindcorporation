@@ -165,6 +165,8 @@ export interface WritingTask {
   model: string[];
   /** Tap-to-type characters (Chinese only). */
   chars: string[];
+  /** The lesson's Chinese text, the vocabulary of the built-in pinyin input. */
+  corpus: string[];
 }
 
 function buildCloze(sentence: string, cjk: boolean): ClozeItem | null {
@@ -292,6 +294,7 @@ export function buildWritingTask(langSlug: string, lesson: Lesson): WritingTask 
     goal: cjk ? 30 : 25,
     model: readingLines,
     chars: cjk ? lessonChars(lesson) : [],
+    corpus: cjk ? [lesson.title, lesson.subtitle, lesson.readingTitle, lesson.speakingTopic, ...lesson.sections.flatMap((s) => [s.heading, ...s.body]), ...lesson.reading, ...lesson.exercises] : [],
   };
 }
 

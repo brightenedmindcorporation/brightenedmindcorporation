@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import { buildPinyinIndex, type PinyinIndex } from "@/lib/academy/pinyinIndex";
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 /**
@@ -17,6 +18,9 @@ function useImeField<T extends HTMLInputElement | HTMLTextAreaElement>(value: st
   const composing = useRef(false);
   const report = useRef(onValueChange);
   report.current = onValueChange;
+  // Only the first value is given to React as the default: a changing `defaultValue` makes React
+  // rewrite the field's text node, which can cancel a composition in progress.
+  const initial = useRef(value);
 
   useEffect(() => {
     const el = ref.current;
@@ -25,7 +29,7 @@ function useImeField<T extends HTMLInputElement | HTMLTextAreaElement>(value: st
 
   return {
     ref,
-    defaultValue: value,
+    defaultValue: initial.current,
     onChange: (e: { target: { value: string } }) => {
       if (!composing.current) report.current(e.target.value);
     },
@@ -62,13 +66,70 @@ export function ImeInput({
  * exercise can always be done even when the device's own keyboard fails to
  * show its candidates in the browser.
  */
-export function CharPalette({ chars, onPick }: { chars: string[]; onPick: (c: string) => void }) {
+/**
+ * Pinyin typing built into the site: type "nihao", touch 你好. For students whose own Chinese keyboard
+ * does not engage in the browser. The candidates come from the course's own Chinese text.
+ */
+function PinyinBox({ corpus, onPick }: { corpus: string[]; onPick: (c: string) => void }) {
+  const [index, setIndex] = useState<PinyinIndex | null>(null);
+  const [typed, setTyped] = useState("");
+  useEffect(() => {
+    let alive = true;
+    buildPinyinIndex(corpus)
+      .then((i) => alive && setIndex(i))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [corpus.length]);
+  const candidates = index ? index.lookup(typed) : [];
+  return (
+    <div className="space-y-2">
+      <label className="block text-xs font-semibold text-ink-soft">Saisie pinyin du site : écrivez le son (sans les tons), puis touchez le mot. « nv » donne 女.</label>
+      <input
+        value={typed}
+        onChange={(e) => setTyped(e.target.value)}
+        placeholder={index ? "nihao, wo, xuesheng…" : "Chargement…"}
+        autoCapitalize="off"
+        autoCorrect="off"
+        spellCheck={false}
+        className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+      />
+      {typed && (
+        <div className="flex flex-wrap gap-1.5" translate="no">
+          {candidates.length === 0 && <span className="text-xs text-ink-faint">Aucun mot de la leçon ne correspond.</span>}
+          {candidates.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => {
+                onPick(c);
+                setTyped("");
+              }}
+              className="notranslate px-3 h-9 rounded-lg bg-surface border border-line text-lg text-ink hover:border-red-600/60 hover:bg-red-600 hover:text-white transition"
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function CharPalette({ chars, onPick, corpus }: { chars: string[]; onPick: (c: string) => void; corpus?: string[] }) {
   if (chars.length === 0) return null;
   return (
     <details className="rounded-xl border border-line bg-surface-alt p-3">
       <summary className="cursor-pointer text-xs font-semibold text-ink-soft">
-        Le clavier chinois ne propose pas de caractères ? Touchez ici pour utiliser les caractères de la leçon
+        Le clavier chinois ne marche pas ici ? Touchez pour écrire en pinyin ou avec les caractères de la leçon
       </summary>
+      {corpus && corpus.length > 0 && (
+        <div className="mt-3">
+          <PinyinBox corpus={corpus} onPick={onPick} />
+        </div>
+      )}
       <div className="mt-3 flex flex-wrap gap-1.5" translate="no">
         {chars.map((c) => (
           <button

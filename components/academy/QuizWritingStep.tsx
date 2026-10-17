@@ -28,6 +28,8 @@ export interface QuizWriting {
   minLength: number;
   /** Tap-to-type characters (Chinese only). */
   chars?: string[];
+  /** The lesson and conversation's Chinese text: vocabulary of the built-in pinyin input. */
+  corpus?: string[];
 }
 
 export interface WritingState {
@@ -42,14 +44,18 @@ export const emptyWritingState = (w?: QuizWriting): WritingState => ({
   free: "",
 });
 
-const dictationNeeded = (w: QuizWriting, i: number) => Math.max(1, Math.ceil(textLength(w.dictation[i].text, w.cjk) * 0.5));
-const replyNeeded = (w: QuizWriting) => (w.cjk ? 4 : 3);
+// An honest attempt is enough (the step is not graded): a dictation needs about a third of the
+// expected letters, an answer needs a word. Counting words alone failed for a spelled name
+// ("J-O-R-D-I") or an e-mail address, which are one "word" each.
+const letters = (t: string) => Array.from(t).filter((c) => /[\p{L}\p{N}]/u.test(c)).length;
+const dictationOk = (w: QuizWriting, i: number, typed: string) => letters(typed) >= Math.max(2, Math.ceil(letters(w.dictation[i].text) * 0.35));
+const replyOk = (typed: string) => letters(typed) >= 2;
 
 /** What is still missing, for the "À compléter" message (empty = ready). */
 export function writingMissing(w: QuizWriting, s: WritingState): string[] {
   const missing: string[] = [];
-  if (w.dictation.some((_, i) => textLength(s.dictation[i] ?? "", w.cjk) < dictationNeeded(w, i))) missing.push("la dictée");
-  if (w.replies.some((_, i) => textLength(s.replies[i] ?? "", w.cjk) < replyNeeded(w))) missing.push("vos réponses");
+  if (w.dictation.some((_, i) => !dictationOk(w, i, s.dictation[i] ?? ""))) missing.push("la dictée");
+  if (w.replies.some((_, i) => !replyOk(s.replies[i] ?? ""))) missing.push("vos réponses");
   if (textLength(s.free, w.cjk) < w.minLength) missing.push("le texte libre");
   return missing;
 }
@@ -215,7 +221,7 @@ export default function QuizWritingStep({
         </p>
       </Part>
 
-      {writing.cjk && !submitted && writing.chars && <CharPalette chars={writing.chars} onPick={pick} />}
+      {writing.cjk && !submitted && writing.chars && <CharPalette chars={writing.chars} corpus={writing.corpus} onPick={pick} />}
     </div>
   );
 }

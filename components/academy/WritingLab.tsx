@@ -71,7 +71,7 @@ export function DiffView({ ops }: { ops: DiffOp[] }) {
   );
 }
 
-function Dictation({ items, langSlug, cjk, chars, onDone }: { items: { text: string }[]; langSlug: string; cjk: boolean; chars: string[]; onDone: () => void }) {
+function Dictation({ items, langSlug, cjk, chars, corpus, onDone }: { items: { text: string }[]; langSlug: string; cjk: boolean; chars: string[]; corpus: string[]; onDone: () => void }) {
   const [typed, setTyped] = useState<string[]>(() => items.map(() => ""));
   const [focused, setFocused] = useState(0);
   const [results, setResults] = useState<(ReturnType<typeof diffAnswer> | null)[]>(() => items.map(() => null));
@@ -135,12 +135,12 @@ function Dictation({ items, langSlug, cjk, chars, onDone }: { items: { text: str
           </div>
         );
       })}
-      {cjk && <CharPalette chars={chars} onPick={(c) => setTyped((prev) => prev.map((t, k) => (k === focused ? t + c : t)))} />}
+      {cjk && <CharPalette chars={chars} corpus={corpus} onPick={(c) => setTyped((prev) => prev.map((t, k) => (k === focused ? t + c : t)))} />}
     </div>
   );
 }
 
-function Cloze({ items, cjk, chars, onDone }: { items: ClozeItem[]; cjk: boolean; chars: string[]; onDone: () => void }) {
+function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk: boolean; chars: string[]; corpus: string[]; onDone: () => void }) {
   const [answers, setAnswers] = useState<string[]>(() => items.map(() => ""));
   const [focused, setFocused] = useState(0);
   const [state, setState] = useState<("idle" | "ok" | "accent" | "wrong")[]>(() => items.map(() => "idle"));
@@ -210,7 +210,7 @@ function Cloze({ items, cjk, chars, onDone }: { items: ClozeItem[]; cjk: boolean
       {state.every((s) => s === "ok") && (
         <p className="text-sm font-semibold text-emerald-500">Toutes les phrases sont complètes. Bravo !</p>
       )}
-      {cjk && <CharPalette chars={chars} onPick={(c) => setAnswers((prev) => prev.map((a, k) => (k === focused ? a + c : a)))} />}
+      {cjk && <CharPalette chars={chars} corpus={corpus} onPick={(c) => setAnswers((prev) => prev.map((a, k) => (k === focused ? a + c : a)))} />}
     </div>
   );
 }
@@ -383,7 +383,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               hint="Écoutez, écrivez, puis comparez mot à mot. Les accents comptent ; les majuscules et la ponctuation ne sont pas notées."
               done={!!saved.done.dictation}
             />
-            <Dictation items={task.dictation} langSlug={langSlug} cjk={task.cjk} chars={task.chars} onDone={() => markDone("dictation")} />
+            <Dictation items={task.dictation} langSlug={langSlug} cjk={task.cjk} chars={task.chars} corpus={task.corpus} onDone={() => markDone("dictation")} />
           </section>
         )}
 
@@ -395,7 +395,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               hint="Retrouvez le mot manquant dans chaque phrase du texte de lecture."
               done={!!saved.done.cloze}
             />
-            <Cloze items={task.cloze} cjk={task.cjk} chars={task.chars} onDone={() => markDone("cloze")} />
+            <Cloze items={task.cloze} cjk={task.cjk} chars={task.chars} corpus={task.corpus} onDone={() => markDone("cloze")} />
           </section>
         )}
 
@@ -476,7 +476,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               lang={task.cjk ? "zh-CN" : undefined}
               {...(task.cjk ? {} : { spellCheck: false, autoCorrect: "off" })}
             />
-            {task.cjk && <CharPalette chars={task.chars} onPick={(c) => persist({ ...saved, draft: saved.draft + c })} />}
+            {task.cjk && <CharPalette chars={task.chars} corpus={task.corpus} onPick={(c) => persist({ ...saved, draft: saved.draft + c })} />}
             <div className="flex flex-wrap items-center gap-3">
               <span className={`text-sm font-bold ${length >= task.goal ? "text-emerald-500" : "text-ink-soft"}`}>
                 {length}/{task.goal} {task.cjk ? "caractères" : "mots"}

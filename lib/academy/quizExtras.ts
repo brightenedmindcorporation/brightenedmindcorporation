@@ -25,7 +25,9 @@ export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: 
   const size = (t: string) => wordsOf(t, cjk).length;
 
   // Short, clean lines make good dictation (no phone numbers or e-mail addresses to copy digit by digit).
-  const dictable = lines.filter((l) => !/\d{3,}|@/.test(l.text) && (cjk ? size(l.text) >= 4 && size(l.text) <= 24 : size(l.text) >= 3 && size(l.text) <= 16));
+  // Spelled letters and e-mail addresses ("sarah point brown arobase…") are no fair dictation.
+  const SPELLED = /@|arobase|arroba|\bdot\b|ponto|punto|小老鼠|\b[A-Za-z]\s?[,，-]\s?[A-Za-z]\s?[,，-]\s?[A-Za-z]\b/i;
+  const dictable = lines.filter((l) => !SPELLED.test(l.text) && !/\d{3,}/.test(l.text) && (cjk ? size(l.text) >= 4 && size(l.text) <= 24 : size(l.text) >= 3 && size(l.text) <= 16));
   const dictation = spread(dictable, 2).map((l) => ({ speaker: l.speaker, text: l.text }));
 
   // Questions heard in the conversation (a line can hold several sentences: keep the questions).
@@ -44,6 +46,7 @@ export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: 
     topic: lesson.speakingTopic,
     ideas: lesson.exercises.slice(0, 4),
     minLength: cjk ? Math.round(base * 1.2) : base,
+    corpus: cjk ? [lesson.title, lesson.subtitle, lesson.speakingTopic, ...lesson.sections.flatMap((x) => [x.heading, ...x.body]), ...lesson.reading, ...lesson.exercises, ...lines.map((l) => l.text)] : undefined,
     chars: cjk ? Array.from(new Set([...lessonChars(lesson), ...Array.from(lines.map((l) => l.text).join("")).filter((c) => isCjkText(c))])) : undefined,
   };
 }
