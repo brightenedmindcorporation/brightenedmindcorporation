@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Play, Square, Headphones } from "lucide-react";
 import type { Dialogue } from "@/content/dialogues/types";
 import { clipUrl, dialogueClipText } from "@/lib/academy/audioClips";
@@ -29,15 +29,20 @@ export default function DialoguePlayer({
   const run = useRef(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  const stop = () => {
+  // One stable "stop" for the whole life of the player. (A new function on each render used to leave
+  // an old copy registered as the active player: pressing "Réécouter" then stopped the run that
+  // had just started, and the button stayed on "Arrêter" with nothing playing.)
+  const stopSelf = useRef<() => void>(() => {});
+  const stop = useCallback(() => {
     run.current++;
     audioRef.current?.pause();
     audioRef.current = null;
     if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
     setPlaying(false);
     setCurrent(null);
-    releasePlayback(stop);
-  };
+    releasePlayback(stopSelf.current);
+  }, []);
+  stopSelf.current = stop;
 
   useEffect(() => () => stop(), []); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -46,7 +51,11 @@ export default function DialoguePlayer({
     const blob = await getClipBlob(clipUrl(langSlug, dialogueClipText(line.speaker, line.text)));
     if (run.current !== myRun) return;
     if (!blob) {
-      await speakWithDeviceVoice(line.text, langSlug, { pitch: line.speaker === "A" ? 1.15 : 0.8 });
+      // The device's voice can stay silent forever (no voice for the language): never wait more than a few seconds.
+      await Promise.race([
+        speakWithDeviceVoice(line.text, langSlug, { pitch: line.speaker === "A" ? 1.15 : 0.8 }),
+        new Promise((r) => setTimeout(r, 3000 + line.text.length * 350)),
+      ]);
       return;
     }
     const url = URL.createObjectURL(blob);
@@ -57,6 +66,7 @@ export default function DialoguePlayer({
         audio.onended = () => resolve();
         audio.onerror = () => resolve();
         audio.play().catch(() => resolve());
+        setTimeout(resolve, 45_000); // a clip that never ends must not freeze the conversation
       });
     } finally {
       URL.revokeObjectURL(url);
@@ -65,8 +75,8 @@ export default function DialoguePlayer({
 
   const start = async () => {
     stop();
-    const myRun = run.current;
     claimPlayback(stop);
+    const myRun = run.current;
     setPlaying(true);
     setPlays((p) => p + 1);
     for (let i = 0; i < dialogue.lines.length; i++) {

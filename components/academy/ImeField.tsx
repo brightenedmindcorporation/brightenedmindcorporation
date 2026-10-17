@@ -1,37 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
 
 /**
  * Text fields that behave with input-method editors (Chinese pinyin, etc.).
  *
- * While the student is composing ("ni" → 你), the field keeps its own text and
- * only reports the result to the page once the character is chosen. A field
- * that re-renders and rewrites its value on every keystroke can close the
- * IME's candidate list before the student can pick a character.
+ * The field is UNCONTROLLED: the browser alone owns the text while the student types, so React never
+ * rewrites the field's value in the middle of a composition ("ni" → 你) — which is what makes an
+ * IME's candidate list vanish. The page is told about the text after each keystroke outside a
+ * composition, and once when a character is chosen. When the page itself changes the text (a
+ * character tapped in the palette, a reset), the field is updated — never during a composition.
  */
-function useImeValue(value: string, onValueChange: (v: string) => void) {
-  const [local, setLocal] = useState(value);
+function useImeField<T extends HTMLInputElement | HTMLTextAreaElement>(value: string, onValueChange: (v: string) => void) {
+  const ref = useRef<T>(null);
   const composing = useRef(false);
+  const report = useRef(onValueChange);
+  report.current = onValueChange;
 
   useEffect(() => {
-    if (!composing.current) setLocal(value);
+    const el = ref.current;
+    if (el && !composing.current && el.value !== value) el.value = value;
   }, [value]);
 
   return {
-    value: local,
+    ref,
+    defaultValue: value,
     onChange: (e: { target: { value: string } }) => {
-      setLocal(e.target.value);
-      if (!composing.current) onValueChange(e.target.value);
+      if (!composing.current) report.current(e.target.value);
     },
     onCompositionStart: () => {
       composing.current = true;
     },
     onCompositionEnd: (e: { currentTarget: { value: string } }) => {
       composing.current = false;
-      setLocal(e.currentTarget.value);
-      onValueChange(e.currentTarget.value);
+      report.current(e.currentTarget.value);
     },
   };
 }
@@ -42,16 +45,16 @@ export function ImeTextarea({
   value,
   onValueChange,
   ...rest
-}: Extra & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "onChange">) {
-  return <textarea {...rest} {...useImeValue(value, onValueChange)} />;
+}: Extra & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "value" | "defaultValue" | "onChange">) {
+  return <textarea {...rest} {...useImeField<HTMLTextAreaElement>(value, onValueChange)} />;
 }
 
 export function ImeInput({
   value,
   onValueChange,
   ...rest
-}: Extra & Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange">) {
-  return <input {...rest} {...useImeValue(value, onValueChange)} />;
+}: Extra & Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "defaultValue" | "onChange">) {
+  return <input {...rest} {...useImeField<HTMLInputElement>(value, onValueChange)} />;
 }
 
 /**
