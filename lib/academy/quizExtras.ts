@@ -1,20 +1,51 @@
-"use client";
-
 import type { LevelCurriculum } from "@/content/curriculum/types";
-import { buildWritingTask } from "./writingLab";
+import { getDialogue } from "@/content/dialogues";
+import { isCjkText, lessonChars, wordsOf } from "./writingLab";
 import type { QuizWriting, QuizParts } from "@/components/academy/QuizEngine";
 
+/** Picks up to `n` items spread across the list. */
+function spread<T>(items: T[], n: number): T[] {
+  if (items.length <= n) return items;
+  return Array.from(new Set(Array.from({ length: n }, (_, k) => items[Math.round((k * (items.length - 1)) / (n - 1 || 1))])));
+}
+
+const QUESTION_END = /[?？]$/;
+
 /**
- * The written step of a quiz: the topic comes from the lesson (the last
- * lesson, a real-life review, for the level's final quiz) and the words to
- * reuse are that lesson's vocabulary.
+ * The written step of a quiz (see QuizWritingStep): two lines of the quiz's own conversation to write
+ * from dictation, up to two of its questions to answer about oneself, and a short free text on the
+ * lesson's topic (the last lesson, a real-life review, for the level's final quiz).
  */
 export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: number | "final"): QuizWriting | undefined {
   const lesson = key === "final" ? curriculum.lessons[curriculum.lessons.length - 1] : curriculum.lessons.find((l) => l.id === key);
   if (!lesson) return undefined;
-  const task = buildWritingTask(langSlug, lesson);
-  const base = key === "final" ? 50 : 30;
-  return { prompt: lesson.speakingTopic, keyWords: task.keyWords, minLength: task.cjk ? Math.round(base * 1.2) : base, cjk: task.cjk, chars: task.chars };
+  const dialogue = getDialogue(langSlug, curriculum.level, key);
+  const lines = dialogue?.lines ?? [];
+  const cjk = langSlug === "chinese" || lines.some((l) => isCjkText(l.text)) || isCjkText(lesson.speakingTopic);
+  const size = (t: string) => wordsOf(t, cjk).length;
+
+  // Short, clean lines make good dictation (no phone numbers or e-mail addresses to copy digit by digit).
+  const dictable = lines.filter((l) => !/\d{3,}|@/.test(l.text) && (cjk ? size(l.text) >= 4 && size(l.text) <= 24 : size(l.text) >= 3 && size(l.text) <= 16));
+  const dictation = spread(dictable, 2).map((l) => ({ speaker: l.speaker, text: l.text }));
+
+  // Questions heard in the conversation (a line can hold several sentences: keep the questions).
+  const asked: { speaker: "A" | "B"; question: string; line: string }[] = [];
+  for (const l of lines) {
+    const sentences = l.text.split(/(?<=[.!?。！？…])\s*/u).map((x) => x.trim()).filter(Boolean);
+    for (const sentence of sentences) if (QUESTION_END.test(sentence) && size(sentence) >= 2) asked.push({ speaker: l.speaker, question: sentence, line: l.text });
+  }
+  const replies = spread(asked, 2);
+
+  const base = key === "final" ? 35 : 20;
+  return {
+    cjk,
+    dictation,
+    replies,
+    topic: lesson.speakingTopic,
+    ideas: lesson.exercises.slice(0, 4),
+    minLength: cjk ? Math.round(base * 1.2) : base,
+    chars: cjk ? Array.from(new Set([...lessonChars(lesson), ...Array.from(lines.map((l) => l.text).join("")).filter((c) => isCjkText(c))])) : undefined,
+  };
 }
 
 /** Keeps the student's written answer and conversation result on this device. */

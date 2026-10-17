@@ -52,7 +52,7 @@ function StepHeader({ n, title, hint, done }: { n: number; title: string; hint: 
 }
 
 /** The typed answer, word by word: green = right, orange = accent, red = wrong/extra, "[…]" = forgotten. */
-function DiffView({ ops }: { ops: DiffOp[] }) {
+export function DiffView({ ops }: { ops: DiffOp[] }) {
   return (
     <p translate="no" className="notranslate leading-8 text-lg">
       {ops.map((op, i) => {

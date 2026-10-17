@@ -5,8 +5,7 @@ import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } fro
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
-import { CharPalette, ImeTextarea } from "@/components/academy/ImeField";
-import { textLength, usedKeyWords } from "@/lib/academy/writingLab";
+import QuizWritingStep, { emptyWritingState, writingMissing, writingSummary, type QuizWriting } from "@/components/academy/QuizWritingStep";
 
 /** What the student did in the extra steps of a quiz. */
 export interface QuizParts {
@@ -17,15 +16,7 @@ export interface QuizParts {
   writing: string;
 }
 
-export interface QuizWriting {
-  prompt: string;
-  keyWords: string[];
-  /** Minimum length: words, or characters for Chinese. */
-  minLength: number;
-  cjk: boolean;
-  /** Tap-to-type characters (Chinese only). */
-  chars?: string[];
-}
+export type { QuizWriting };
 
 interface QuizEngineProps {
   quiz: Quiz | FinalQuiz;
@@ -123,15 +114,15 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
 
   const [answers, setAnswers] = useState<string[]>(Array(quiz.questions.length).fill(""));
   const [dialogueAnswers, setDialogueAnswers] = useState<string[]>(Array(dialogue?.questions.length ?? 0).fill(""));
-  const [text, setText] = useState("");
+  const [writingState, setWritingState] = useState(() => emptyWritingState(writing));
   const [submitted, setSubmitted] = useState(alreadyDone);
   const [score, setScore] = useState(alreadyScore ?? 0);
   const [dialogueScore, setDialogueScore] = useState(0);
 
   const dialogueTotal = useDialogue?.questions.length ?? 0;
   const dialoguePassNeeded = Math.ceil(dialogueTotal * 0.6);
-  const length = useWriting ? textLength(text, useWriting.cjk) : 0;
-  const writingOk = !useWriting || length >= useWriting.minLength;
+  const writingGaps = useWriting ? writingMissing(useWriting, writingState) : [];
+  const writingOk = writingGaps.length === 0;
   const allAnswered = !answers.includes("") && !(useDialogue && dialogueAnswers.includes(""));
   const ready = allAnswered && writingOk;
 
@@ -152,7 +143,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     onSubmit(
       finalScore,
       useDialogue || useWriting
-        ? { dialogueScore: dScore, dialogueTotal, dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded, writing: text }
+        ? { dialogueScore: dScore, dialogueTotal, dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded, writing: useWriting ? writingSummary(useWriting, writingState) : "" }
         : undefined
     );
   };
@@ -165,7 +156,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const missing = [
     useDialogue && dialogueAnswers.includes("") ? "la conversation" : null,
     answers.includes("") ? "les questions" : null,
-    !writingOk ? "la rédaction" : null,
+    !writingOk ? `la rédaction (${writingGaps.join(", ")})` : null,
   ].filter(Boolean);
 
   return (
@@ -196,46 +187,9 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
             n={++step}
             icon={PenLine}
             title="Rédaction"
-            hint={`Écrivez au moins ${useWriting.minLength} ${useWriting.cjk ? "caractères" : "mots"}. Votre texte est enregistré avec votre quiz.`}
+            hint="Trois petits exercices d'écriture : écoutez et écrivez, répondez, puis rédigez votre texte. Votre travail est enregistré avec votre quiz."
           />
-          <div className="rounded-2xl border border-red-700/30 bg-red-500/5 p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-red-500">Sujet</p>
-            <p className="text-ink font-semibold mt-1">{useWriting.prompt}</p>
-          </div>
-          {useWriting.keyWords.length > 0 && (
-            <div className="flex flex-wrap gap-2" translate="no">
-              {useWriting.keyWords.map((w) => {
-                const ok = usedKeyWords(text, [w]).length > 0;
-                return (
-                  <span
-                    key={w}
-                    className={`notranslate text-sm font-semibold px-3 py-1 rounded-full border ${
-                      ok ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/40" : "bg-surface-alt text-ink-soft border-line"
-                    }`}
-                  >
-                    {ok ? "✓ " : ""}
-                    {w}
-                  </span>
-                );
-              })}
-            </div>
-          )}
-          <ImeTextarea
-            value={text}
-            onValueChange={(v) => !submitted && setText(v)}
-            readOnly={submitted}
-            rows={8}
-            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-            placeholder="Écrivez votre texte ici…"
-            lang={useWriting.cjk ? "zh-CN" : undefined}
-            {...(useWriting.cjk ? {} : { spellCheck: false, autoCorrect: "off" })}
-          />
-          {useWriting.cjk && !submitted && useWriting.chars && (
-            <CharPalette chars={useWriting.chars} onPick={(c) => setText((t) => t + c)} />
-          )}
-          <p className={`text-sm font-bold ${writingOk ? "text-emerald-500" : "text-ink-soft"}`}>
-            {length}/{useWriting.minLength} {useWriting.cjk ? "caractères" : "mots"}
-          </p>
+          <QuizWritingStep writing={useWriting} state={writingState} onChange={setWritingState} submitted={submitted} langSlug={langSlug} />
         </div>
       )}
 
@@ -289,7 +243,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                 onClick={() => {
                   setAnswers(Array(quiz.questions.length).fill(""));
                   setDialogueAnswers(Array(dialogue?.questions.length ?? 0).fill(""));
-                  setText("");
+                  setWritingState(emptyWritingState(writing));
                   setPractice(true);
                   setSubmitted(false);
                 }}
