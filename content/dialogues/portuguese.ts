@@ -14,7 +14,7 @@ const data: Record<string, RawDialogue> = {
       "Ótimo! Até amanhã, Ana.",
     ],
     q: [
-      ["Como se chama a mulher?", "Ana", "Tom", "Emma"],
+      ["Como se chama a pessoa B?", "Ana", "Tom", "Emma"],
       ["Qual é a profissão de Ana?", "Ela é estudante", "Ela é professora", "Ela é médica"],
       ["Onde Tom mora?", "Em Lubumbashi", "Em Kolwezi", "Em Kinshasa"],
     ],
@@ -31,7 +31,7 @@ const data: Record<string, RawDialogue> = {
     q: [
       ["Como Sarah soletra o nome dela?", "S-A-R-A-H", "S-A-R-R-A", "Z-A-R-A-H"],
       ["Qual é o sobrenome de Sarah?", "Brown", "Black", "Green"],
-      ["O que o homem pede no final?", "O e-mail dela", "O telefone dela", "A idade dela"],
+      ["O que a pessoa A pede no final?", "O e-mail dela", "O telefone dela", "A idade dela"],
     ],
   },
   "1-3": {
@@ -44,9 +44,9 @@ const data: Record<string, RawDialogue> = {
       "Combinado! Me ligue de manhã.",
     ],
     q: [
-      ["Quantos anos a menina tem?", "Quatorze", "Quinze", "Dezesseis"],
-      ["Quantos anos o menino tem?", "Quinze", "Quatorze", "Treze"],
-      ["Quando o menino vai ligar?", "No sábado", "Na segunda-feira", "No domingo"],
+      ["Quantos anos a pessoa B tem?", "Quatorze", "Quinze", "Dezesseis"],
+      ["Quantos anos a pessoa A tem?", "Quinze", "Quatorze", "Treze"],
+      ["Quando a pessoa A vai ligar?", "No sábado", "Na segunda-feira", "No domingo"],
     ],
   },
   "1-4": {
@@ -104,8 +104,8 @@ const data: Record<string, RawDialogue> = {
       "Boa ideia! Vou convidar todos os nossos amigos.",
     ],
     q: [
-      ["Quando é o aniversário da menina?", "Doze de março", "Três de julho", "Doze de maio"],
-      ["Quando é o aniversário do menino?", "Três de julho", "Doze de março", "Três de junho"],
+      ["Quando é o aniversário da pessoa B?", "Doze de março", "Três de julho", "Doze de maio"],
+      ["Quando é o aniversário da pessoa A?", "Três de julho", "Doze de março", "Três de junho"],
       ["Em que dia é a festa?", "Sexta-feira", "Sábado", "Domingo"],
     ],
   },
@@ -121,7 +121,7 @@ const data: Record<string, RawDialogue> = {
     q: [
       ["A que horas a pessoa acorda?", "Às seis", "Às sete", "Às oito"],
       ["A que horas a aula começa?", "Às oito", "Às sete", "Às nove"],
-      ["O que ela faz antes de dormir?", "A lição de casa e o jantar", "Assistir à televisão", "Jogar futebol"],
+      ["O que essa pessoa faz antes de dormir?", "A lição de casa e o jantar", "Assistir à televisão", "Jogar futebol"],
     ],
   },
   "1-9": {
@@ -149,8 +149,8 @@ const data: Record<string, RawDialogue> = {
       "Tem, sim. Os correios ficam em frente ao banco.",
     ],
     q: [
-      ["O que o homem procura primeiro?", "O banco", "O mercado", "A escola"],
-      ["Onde ele deve virar à esquerda?", "No mercado", "Na farmácia", "Nos correios"],
+      ["O que a pessoa A procura primeiro?", "O banco", "O mercado", "A escola"],
+      ["Onde essa pessoa deve virar à esquerda?", "No mercado", "Na farmácia", "Nos correios"],
       ["Onde ficam os correios?", "Em frente ao banco", "Ao lado do mercado", "Atrás da farmácia"],
     ],
   },
@@ -214,9 +214,9 @@ const data: Record<string, RawDialogue> = {
       "Obrigada. Mando antes do almoço.",
     ],
     q: [
-      ["A mulher terminou o relatório?", "Não, ainda não", "Sim, terminou", "Nem começou"],
-      ["O que o homem teria feito antes?", "Teria ajudado", "Teria escrito sozinho", "Teria cancelado"],
-      ["O que o homem vai revisar?", "A gramática", "Os números", "As imagens"],
+      ["A pessoa B terminou o relatório?", "Não, ainda não", "Sim, terminou", "Nem começou"],
+      ["O que a pessoa A teria feito antes?", "Teria ajudado", "Teria escrito sozinho", "Teria cancelado"],
+      ["O que a pessoa A vai revisar?", "A gramática", "Os números", "As imagens"],
     ],
   },
   "2-2": {
@@ -379,8 +379,8 @@ const data: Record<string, RawDialogue> = {
       "Excelente. Fique calmo, sorria e fale devagar amanhã.",
     ],
     q: [
-      ["Para que o homem se prepara?", "Para uma entrevista de emprego", "Para uma prova", "Para uma viagem"],
-      ["Por que ele quer trabalhar na empresa?", "Ela ajuda os jovens a aprender", "Ela paga mais", "Fica perto de casa"],
+      ["Para que a pessoa A se prepara?", "Para uma entrevista de emprego", "Para uma prova", "Para uma viagem"],
+      ["Por que essa pessoa quer trabalhar na empresa?", "Ela ajuda os jovens a aprender", "Ela paga mais", "Fica perto de casa"],
       ["Que conselho o amigo dá no final?", "Ficar calmo e falar devagar", "Chegar atrasado", "Falar muito rápido"],
     ],
   },

@@ -15,7 +15,7 @@ const data: Record<string, RawDialogue> = {
       "Vizuri sana! Tuonane kesho, Ana.",
     ],
     q: [
-      ["Mwanamke anaitwa nani?", "Ana", "Tom", "Emma"],
+      ["Mtu B anaitwa nani?", "Ana", "Tom", "Emma"],
       ["Kazi ya Ana ni ipi?", "Ni mwanafunzi", "Ni mwalimu", "Ni daktari"],
       ["Tom anaishi wapi?", "Lubumbashi", "Kolwezi", "Kinshasa"],
     ],
@@ -32,7 +32,7 @@ const data: Record<string, RawDialogue> = {
     q: [
       ["Sarah anatamka vipi herufi za jina lake?", "S-A-R-A-H", "S-A-R-R-A", "Z-A-R-A-H"],
       ["Jina la ukoo la Sarah ni lipi?", "Brown", "Black", "Green"],
-      ["Mwishoni mwanaume anaomba nini?", "Barua pepe yake", "Namba yake ya simu", "Umri wake"],
+      ["Mwishoni mtu A anaomba nini?", "Barua pepe yake", "Namba yake ya simu", "Umri wake"],
     ],
   },
   "1-3": {
@@ -45,9 +45,9 @@ const data: Record<string, RawDialogue> = {
       "Sawa! Nipigie asubuhi.",
     ],
     q: [
-      ["Msichana ana miaka mingapi?", "Kumi na minne", "Kumi na mitano", "Kumi na sita"],
-      ["Mvulana ana miaka mingapi?", "Kumi na mitano", "Kumi na minne", "Kumi na mitatu"],
-      ["Mvulana atapiga simu lini?", "Jumamosi", "Jumatatu", "Jumapili"],
+      ["Mtu B ana miaka mingapi?", "Kumi na minne", "Kumi na mitano", "Kumi na sita"],
+      ["Mtu A ana miaka mingapi?", "Kumi na mitano", "Kumi na minne", "Kumi na mitatu"],
+      ["Mtu A atapiga simu lini?", "Jumamosi", "Jumatatu", "Jumapili"],
     ],
   },
   "1-4": {
@@ -105,8 +105,8 @@ const data: Record<string, RawDialogue> = {
       "Wazo zuri! Nitawaalika marafiki zetu wote.",
     ],
     q: [
-      ["Siku ya kuzaliwa ya msichana ni lini?", "Tarehe kumi na mbili Machi", "Tarehe tatu Julai", "Tarehe kumi na mbili Mei"],
-      ["Siku ya kuzaliwa ya mvulana ni lini?", "Tarehe tatu Julai", "Tarehe kumi na mbili Machi", "Tarehe tatu Juni"],
+      ["Siku ya kuzaliwa ya mtu B ni lini?", "Tarehe kumi na mbili Machi", "Tarehe tatu Julai", "Tarehe kumi na mbili Mei"],
+      ["Siku ya kuzaliwa ya mtu A ni lini?", "Tarehe tatu Julai", "Tarehe kumi na mbili Machi", "Tarehe tatu Juni"],
       ["Sherehe ni siku gani?", "Ijumaa", "Jumamosi", "Jumapili"],
     ],
   },
@@ -150,7 +150,7 @@ const data: Record<string, RawDialogue> = {
       "Ndiyo, posta iko mkabala na benki.",
     ],
     q: [
-      ["Mwanaume anatafuta nini kwanza?", "Benki", "Soko", "Shule"],
+      ["Mtu A anatafuta nini kwanza?", "Benki", "Soko", "Shule"],
       ["Anapaswa kugeukia kushoto wapi?", "Sokoni", "Kwenye duka la dawa", "Posta"],
       ["Posta iko wapi?", "Mkabala na benki", "Karibu na soko", "Nyuma ya duka la dawa"],
     ],
@@ -215,9 +215,9 @@ const data: Record<string, RawDialogue> = {
       "Asante. Nitaituma kabla ya chakula cha mchana.",
     ],
     q: [
-      ["Mwanamke amemaliza ripoti?", "Hapana, bado", "Ndiyo, amemaliza", "Hajaanza"],
-      ["Mwanaume angefanya nini mapema?", "Kumsaidia", "Kuiandika mwenyewe", "Kuifuta"],
-      ["Mwanaume atakagua nini?", "Sarufi", "Namba", "Picha"],
+      ["Mtu B amemaliza ripoti?", "Hapana, bado", "Ndiyo, amemaliza", "Hajaanza"],
+      ["Mtu A angefanya nini mapema?", "Kumsaidia", "Kuiandika mwenyewe", "Kuifuta"],
+      ["Mtu A atakagua nini?", "Sarufi", "Namba", "Picha"],
     ],
   },
   "2-2": {
@@ -380,7 +380,7 @@ const data: Record<string, RawDialogue> = {
       "Bora kabisa. Tulia, tabasamu na ongea polepole kesho.",
     ],
     q: [
-      ["Mwanaume anajiandaa kwa nini?", "Mahojiano ya kazi", "Mtihani", "Safari"],
+      ["Mtu A anajiandaa kwa nini?", "Mahojiano ya kazi", "Mtihani", "Safari"],
       ["Kwa nini anataka kufanya kazi katika kampuni?", "Inawasaidia vijana kujifunza", "Inalipa zaidi", "Iko karibu na nyumbani"],
       ["Rafiki anashauri nini mwishoni?", "Kutulia na kuongea polepole", "Kuchelewa", "Kuongea haraka sana"],
     ],

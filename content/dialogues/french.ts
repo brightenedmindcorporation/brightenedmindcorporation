@@ -14,7 +14,7 @@ const data: Record<string, RawDialogue> = {
       "Très bien ! À demain, Anna.",
     ],
     q: [
-      ["Comment s'appelle la femme ?", "Anna", "Tom", "Emma"],
+      ["Comment s'appelle la personne B ?", "Anna", "Tom", "Emma"],
       ["Quel est le métier d'Anna ?", "Elle est étudiante", "Elle est professeur", "Elle est médecin"],
       ["Où habite Tom ?", "À Lubumbashi", "À Kolwezi", "À Kinshasa"],
     ],
@@ -31,7 +31,7 @@ const data: Record<string, RawDialogue> = {
     q: [
       ["Comment Sarah épelle-t-elle son prénom ?", "S-A-R-A-H", "S-A-R-R-A", "Z-A-R-A-H"],
       ["Quel est le nom de famille de Sarah ?", "Brown", "Black", "Green"],
-      ["Que demande l'homme à la fin ?", "Son adresse e-mail", "Son numéro de téléphone", "Son âge"],
+      ["Que demande la personne A à la fin ?", "Son adresse e-mail", "Son numéro de téléphone", "Son âge"],
     ],
   },
   "1-3": {
@@ -44,9 +44,9 @@ const data: Record<string, RawDialogue> = {
       "Parfait ! Appelle-moi le matin.",
     ],
     q: [
-      ["Quel âge a la fille ?", "Quatorze ans", "Quinze ans", "Seize ans"],
-      ["Quel âge a le garçon ?", "Quinze ans", "Quatorze ans", "Treize ans"],
-      ["Quand le garçon appellera-t-il ?", "Samedi", "Lundi", "Dimanche"],
+      ["Quel âge a la personne B ?", "Quatorze ans", "Quinze ans", "Seize ans"],
+      ["Quel âge a la personne A ?", "Quinze ans", "Quatorze ans", "Treize ans"],
+      ["Quand la personne A appellera-t-elle ?", "Samedi", "Lundi", "Dimanche"],
     ],
   },
   "1-4": {
@@ -89,8 +89,8 @@ const data: Record<string, RawDialogue> = {
       "Oui. La noire est moins chère.",
     ],
     q: [
-      ["Que veut acheter la cliente ?", "Une veste", "Un sac", "Des chaussures"],
-      ["Quelle couleur préfère-t-elle d'abord ?", "Vert clair", "Vert foncé", "Rouge"],
+      ["Que veut acheter le client ?", "Une veste", "Un sac", "Des chaussures"],
+      ["Quelle couleur le client préfère-t-il d'abord ?", "Vert clair", "Vert foncé", "Rouge"],
       ["Quelle veste est moins chère ?", "La noire", "La verte", "La bleue"],
     ],
   },
@@ -104,8 +104,8 @@ const data: Record<string, RawDialogue> = {
       "Bonne idée ! J'inviterai tous nos amis.",
     ],
     q: [
-      ["Quand est l'anniversaire de la fille ?", "Le douze mars", "Le trois juillet", "Le douze mai"],
-      ["Quand est l'anniversaire du garçon ?", "Le trois juillet", "Le douze mars", "Le trois juin"],
+      ["Quand est l'anniversaire de la personne B ?", "Le douze mars", "Le trois juillet", "Le douze mai"],
+      ["Quand est l'anniversaire de la personne A ?", "Le trois juillet", "Le douze mars", "Le trois juin"],
       ["Quel jour a lieu la fête ?", "Vendredi", "Samedi", "Dimanche"],
     ],
   },
@@ -121,7 +121,7 @@ const data: Record<string, RawDialogue> = {
     q: [
       ["À quelle heure la personne se réveille-t-elle ?", "À six heures", "À sept heures", "À huit heures"],
       ["À quelle heure le cours commence-t-il ?", "À huit heures", "À sept heures", "À neuf heures"],
-      ["Que fait-elle avant de se coucher ?", "Ses devoirs et le dîner", "Regarder la télévision", "Jouer au football"],
+      ["Que fait cette personne avant de se coucher ?", "Ses devoirs et le dîner", "Regarder la télévision", "Jouer au football"],
     ],
   },
   "1-9": {
@@ -149,7 +149,7 @@ const data: Record<string, RawDialogue> = {
       "Oui, la poste est en face de la banque.",
     ],
     q: [
-      ["Que cherche l'homme en premier ?", "La banque", "Le marché", "L'école"],
+      ["Que cherche la personne A en premier ?", "La banque", "Le marché", "L'école"],
       ["Où faut-il tourner à gauche ?", "Au marché", "À la pharmacie", "À la poste"],
       ["Où est la poste ?", "En face de la banque", "À côté du marché", "Derrière la pharmacie"],
     ],
@@ -214,9 +214,9 @@ const data: Record<string, RawDialogue> = {
       "Merci. Je te l'envoie avant le déjeuner.",
     ],
     q: [
-      ["La femme a-t-elle fini le rapport ?", "Non, pas encore", "Oui, elle l'a fini", "Elle n'a pas commencé"],
-      ["Qu'aurait fait l'homme plus tôt ?", "L'aider", "Le rédiger lui-même", "L'annuler"],
-      ["Que vérifiera l'homme ?", "La grammaire", "Les chiffres", "Les images"],
+      ["La personne B a-t-elle fini le rapport ?", "Non, pas encore", "Oui, elle l'a fini", "Elle n'a pas commencé"],
+      ["Qu'aurait fait la personne A plus tôt ?", "L'aider", "Le rédiger lui-même", "L'annuler"],
+      ["Que vérifiera la personne A ?", "La grammaire", "Les chiffres", "Les images"],
     ],
   },
   "2-2": {
@@ -379,8 +379,8 @@ const data: Record<string, RawDialogue> = {
       "Excellent. Reste calme, souris et parle lentement demain.",
     ],
     q: [
-      ["À quoi se prépare l'homme ?", "À un entretien d'embauche", "À un examen", "À un voyage"],
-      ["Pourquoi veut-il travailler pour l'entreprise ?", "Elle aide les jeunes à apprendre", "Elle paie le mieux", "Elle est près de chez lui"],
+      ["À quoi se prépare la personne A ?", "À un entretien d'embauche", "À un examen", "À un voyage"],
+      ["Pourquoi la personne A veut-elle travailler pour l'entreprise ?", "Elle aide les jeunes à apprendre", "Elle paie le mieux", "Elle est près de chez lui"],
       ["Quel conseil donne l'ami à la fin ?", "Rester calme et parler lentement", "Arriver en retard", "Parler très vite"],
     ],
   },

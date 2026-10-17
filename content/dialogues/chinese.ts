@@ -14,7 +14,7 @@ const data: Record<string, RawDialogue> = {
       "太好了！安娜，明天见。",
     ],
     q: [
-      ["女生叫什么名字？(Comment s'appelle la femme ?)", "安娜", "汤姆", "艾玛"],
+      ["B叫什么名字？(Comment s'appelle la personne B ?)", "安娜", "汤姆", "艾玛"],
       ["安娜做什么工作？(Quel est le métier d'Anna ?)", "学生", "老师", "医生"],
       ["汤姆住在哪里？(Où habite Tom ?)", "卢本巴希", "科尔韦西", "金沙萨"],
     ],
@@ -31,7 +31,7 @@ const data: Record<string, RawDialogue> = {
     q: [
       ["莎拉的名字怎么拼？(Comment Sarah épelle-t-elle son prénom ?)", "S-A-R-A-H", "S-A-R-R-A", "Z-A-R-A-H"],
       ["莎拉姓什么？(Quel est le nom de famille de Sarah ?)", "布朗", "布莱克", "格林"],
-      ["最后男生问什么？(Que demande l'homme à la fin ?)", "电子邮件地址", "电话号码", "年龄"],
+      ["最后A问什么？(Que demande la personne A à la fin ?)", "电子邮件地址", "电话号码", "年龄"],
     ],
   },
   "1-3": {
@@ -44,9 +44,9 @@ const data: Record<string, RawDialogue> = {
       "好的！早上给我打吧。",
     ],
     q: [
-      ["女孩多大？(Quel âge a la fille ?)", "十四岁", "十五岁", "十六岁"],
-      ["男孩多大？(Quel âge a le garçon ?)", "十五岁", "十四岁", "十三岁"],
-      ["男孩什么时候打电话？(Quand le garçon appellera-t-il ?)", "星期六", "星期一", "星期天"],
+      ["B多大？(Quel âge a la personne B ?)", "十四岁", "十五岁", "十六岁"],
+      ["A多大？(Quel âge a la personne A ?)", "十五岁", "十四岁", "十三岁"],
+      ["A什么时候打电话？(Quand la personne A appellera-t-elle ?)", "星期六", "星期一", "星期天"],
     ],
   },
   "1-4": {
@@ -104,8 +104,8 @@ const data: Record<string, RawDialogue> = {
       "好主意！我会请我们所有的朋友。",
     ],
     q: [
-      ["女孩的生日是什么时候？(Quand est l'anniversaire de la fille ?)", "三月十二号", "七月三号", "五月十二号"],
-      ["男孩的生日是什么时候？(Quand est l'anniversaire du garçon ?)", "七月三号", "三月十二号", "六月三号"],
+      ["B的生日是什么时候？(Quand est l'anniversaire de la personne B ?)", "三月十二号", "七月三号", "五月十二号"],
+      ["A的生日是什么时候？(Quand est l'anniversaire de la personne A ?)", "七月三号", "三月十二号", "六月三号"],
       ["派对是星期几？(Quel jour est la fête ?)", "星期五", "星期六", "星期天"],
     ],
   },
@@ -119,9 +119,9 @@ const data: Record<string, RawDialogue> = {
       "我做作业，吃晚饭，九点睡觉。",
     ],
     q: [
-      ["他几点起床？(À quelle heure se réveille-t-il ?)", "六点", "七点", "八点"],
+      ["B几点起床？(À quelle heure se réveille la personne B ?)", "六点", "七点", "八点"],
       ["几点开始上课？(À quelle heure commence le cours ?)", "八点", "七点", "九点"],
-      ["睡觉前他做什么？(Que fait-il avant de dormir ?)", "做作业和吃晚饭", "看电视", "踢足球"],
+      ["B睡觉前做什么？(Que fait la personne B avant de dormir ?)", "做作业和吃晚饭", "看电视", "踢足球"],
     ],
   },
   "1-9": {
@@ -149,7 +149,7 @@ const data: Record<string, RawDialogue> = {
       "有，邮局在银行对面。",
     ],
     q: [
-      ["男人先找什么？(Que cherche l'homme d'abord ?)", "银行", "市场", "学校"],
+      ["A先找什么？(Que cherche la personne A d'abord ?)", "银行", "市场", "学校"],
       ["在哪里向左拐？(Où faut-il tourner à gauche ?)", "在市场", "在药店", "在邮局"],
       ["邮局在哪里？(Où est la poste ?)", "在银行对面", "在市场旁边", "在药店后面"],
     ],
@@ -214,9 +214,9 @@ const data: Record<string, RawDialogue> = {
       "谢谢。我午饭前发给你。",
     ],
     q: [
-      ["女人写完报告了吗？(A-t-elle fini le rapport ?)", "还没有", "写完了", "还没有开始"],
-      ["男人早点会做什么？(Qu'aurait fait l'homme plus tôt ?)", "帮她", "自己写", "取消"],
-      ["男人会检查什么？(Que vérifiera l'homme ?)", "语法", "数字", "图片"],
+      ["B写完报告了吗？(La personne B a-t-elle fini le rapport ?)", "还没有", "写完了", "还没有开始"],
+      ["A早点会做什么？(Qu'aurait fait la personne A plus tôt ?)", "帮她", "自己写", "取消"],
+      ["A会检查什么？(Que vérifiera la personne A ?)", "语法", "数字", "图片"],
     ],
   },
   "2-2": {
@@ -379,8 +379,8 @@ const data: Record<string, RawDialogue> = {
       "太棒了。明天要保持冷静，微笑，说话慢一点。",
     ],
     q: [
-      ["男人在准备什么？(À quoi se prépare l'homme ?)", "工作面试", "考试", "旅行"],
-      ["他为什么想在这家公司工作？(Pourquoi veut-il y travailler ?)", "它帮助年轻人学习", "工资最高", "离家很近"],
+      ["A在准备什么？(À quoi se prépare la personne A ?)", "工作面试", "考试", "旅行"],
+      ["A为什么想在这家公司工作？(Pourquoi la personne A veut-elle y travailler ?)", "它帮助年轻人学习", "工资最高", "离家很近"],
       ["最后朋友给了什么建议？(Quel conseil donne l'ami ?)", "保持冷静，说话慢一点", "迟到", "说得很快"],
     ],
   },
