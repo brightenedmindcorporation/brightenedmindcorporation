@@ -21,8 +21,21 @@ export async function GET(request: Request) {
     .find((c) => c.startsWith("gmail_oauth_state="))
     ?.split("=")[1];
 
+  // Behind Render the request URL carries the internal address (localhost:10000): send the browser
+  // back to the public address, which is the one Google just redirected to.
+  const publicOrigin = (() => {
+    try {
+      if (process.env.GMAIL_REDIRECT_URI) return new URL(process.env.GMAIL_REDIRECT_URI).origin;
+    } catch {
+      // fall through
+    }
+    const host = request.headers.get("x-forwarded-host") || request.headers.get("host");
+    const proto = request.headers.get("x-forwarded-proto") || "https";
+    return host ? `${proto}://${host}` : url.origin;
+  })();
+
   const redirect = (status: "success" | "error", message?: string) => {
-    const dest = new URL("/admin", url.origin);
+    const dest = new URL("/admin", publicOrigin);
     dest.searchParams.set("gmail", status);
     if (message) dest.searchParams.set("gmail_error", message);
     const response = NextResponse.redirect(dest);
