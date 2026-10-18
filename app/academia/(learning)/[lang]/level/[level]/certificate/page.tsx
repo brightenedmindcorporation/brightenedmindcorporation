@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Trophy, XCircle, CheckCircle2 } from "lucide-react";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
+import { pullProgress } from "@/lib/academy/progressSync";
 import { getLevelProgress, getOrCreateCertificateId } from "@/lib/academy/progress";
 import { syncCertificateIssued } from "@/lib/academy/progressSync";
 import CertificateButton from "@/components/academy/CertificateButton";
@@ -28,6 +29,9 @@ export default function CertificatePage() {
   const [studentId, setStudentId] = useState("");
 
   useEffect(() => {
+    let alive = true;
+    const run = () => {
+    if (!alive) return;
     const studentData = localStorage.getItem("loggedStudent");
     if (!studentData) {
       router.push("/login");
@@ -96,6 +100,12 @@ export default function CertificatePage() {
         setLoading(false);
       }
     });
+    };
+    // Scores set by the administration reach this device before the certificate is drawn.
+    pullProgress(langSlug, curriculum?.langCode, level).then(run);
+    return () => {
+      alive = false;
+    };
   }, [router, langSlug, level, curriculum, langCode]);
 
   if (loading) {

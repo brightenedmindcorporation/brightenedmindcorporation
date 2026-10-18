@@ -3,17 +3,19 @@ import { FieldValue } from "firebase-admin/firestore";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, canTeach, getCaller, isTeachersStudent } from "@/lib/teacherAuth";
 import { createNotification } from "@/lib/notifications";
+import { sendLevelInvitation } from "@/lib/academy/levelInvite";
 import { availableLanguages, getLevelCurriculum } from "@/content/curriculum";
 
 export const dynamic = "force-dynamic";
 
 /**
- * The administration (or a teacher, for their own students) steps in on a student's progress:
- *  - unlock:   opens lesson N (and its quiz) whatever the pacing or the previous quiz;
- *  - lock:     takes that manual opening back;
- *  - validate: records quiz N as passed (with a score), for a student who already knows the lesson
- *              or whose result was lost — the next lesson then follows the normal pacing, or can be
- *              unlocked at once.
+ * The administration (or a teacher, for their own students) decides about a student's results. The first
+ * attempt of a quiz is what the student's file and certificate show; from here it can be changed:
+ *  - setScore:      sets the score of lesson quiz N (above the passing mark = passed, which opens the next lesson;
+ *                   below = not passed);
+ *  - setFinalScore: same for the level's final quiz (passing it makes the certificate available);
+ *  - unlock / lock: opens lesson N (and its quiz) whatever the pacing, or takes that back;
+ *  - resetLevel:    the student starts the level again from zero (the old results are kept in an archive).
  */
 export async function POST(request: Request) {
   try {
@@ -23,13 +25,18 @@ export async function POST(request: Request) {
     const uid = String(body.uid || "");
     const langCode = String(body.langCode || "");
     const level = Number(body.level);
-    const lessonId = Number(body.lessonId);
+    const lessonId = Number(body.lessonId ?? 0);
     const action = String(body.action || "");
-    if (!uid || !langCode || !Number.isInteger(level) || level < 1 || level > 3 || !Number.isInteger(lessonId) || lessonId < 1) {
+    const needsLesson = ["unlock", "lock", "setScore"].includes(action);
+    if (!uid || !langCode || !Number.isInteger(level) || level < 1 || level > 3 || (needsLesson && (!Number.isInteger(lessonId) || lessonId < 1))) {
       return NextResponse.json({ error: "Paramètres invalides." }, { status: 400 });
     }
-    if (!["unlock", "lock", "validate"].includes(action)) return NextResponse.json({ error: "Action inconnue." }, { status: 400 });
+    if (!["unlock", "lock", "setScore", "setFinalScore", "resetLevel"].includes(action)) return NextResponse.json({ error: "Action inconnue." }, { status: 400 });
 
+    // Changing a result or restarting a level is the administration's decision; a teacher can open lessons.
+    if (caller.role === "teacher" && !["unlock", "lock"].includes(action)) {
+      return NextResponse.json({ error: "Seule l'administration peut modifier les notes ou recommencer un niveau." }, { status: 403 });
+    }
     const db = getAdminDb();
     if (caller.role === "teacher") {
       const [enrollment, legacy] = await Promise.all([
@@ -45,34 +52,89 @@ export async function POST(request: Request) {
     const lang = availableLanguages.find((l) => l.code === langCode);
     const curriculum = lang ? getLevelCurriculum(lang.slug, level) : null;
     const lesson = curriculum?.lessons.find((l) => l.id === lessonId);
-    if (!curriculum || !lesson) return NextResponse.json({ error: "Leçon introuvable." }, { status: 404 });
+    if (!curriculum || (needsLesson && !lesson)) return NextResponse.json({ error: "Leçon introuvable." }, { status: 404 });
 
     const ref = db.collection("progress").doc(`${uid}_${langCode}_${level}`);
-    const base = { uid, langCode, level, updatedAt: new Date().toISOString() };
+    const now = new Date().toISOString();
+    const base = { uid, langCode, level, updatedAt: now };
+    const slug = lang!.slug;
+    const who = caller.role === "admin" ? "l'administration" : "votre professeur";
     let message = "";
+    let title = "";
 
     if (action === "unlock") {
       await ref.set({ ...base, unlockedLessons: FieldValue.arrayUnion(lessonId) }, { merge: true });
-      message = `La leçon ${lessonId} (${lesson.title}) est ouverte pour vous.`;
+      title = "Leçon ouverte";
+      message = `La leçon ${lessonId} (${lesson!.title}) est ouverte pour vous.`;
     } else if (action === "lock") {
       await ref.set({ ...base, unlockedLessons: FieldValue.arrayRemove(lessonId) }, { merge: true });
-    } else {
-      const total = curriculum.quizzes.find((q) => q.lessonId === lessonId)?.questions.length ?? 0;
+    } else if (action === "setScore") {
+      const quiz = curriculum.quizzes.find((q) => q.lessonId === lessonId);
+      const total = quiz?.questions.length ?? 0;
       const raw = Number(body.score);
-      const score = Number.isFinite(raw) ? Math.max(0, Math.min(total, Math.round(raw))) : total;
-      const now = new Date().toISOString();
+      if (!quiz || !Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
+      const score = Math.max(0, Math.min(total, Math.round(raw)));
+      const passed = score >= quiz.passingScore;
+      const existing = (await ref.get()).data() || {};
       await ref.set(
         {
           ...base,
-          completedQuizzes: FieldValue.arrayUnion(lessonId),
-          studiedLessons: FieldValue.arrayUnion(lessonId),
-          adminPassed: FieldValue.arrayUnion(lessonId),
           quizScores: { [lessonId]: score },
-          completedAt: { [lessonId]: now },
+          adminScored: FieldValue.arrayUnion(lessonId),
+          studiedLessons: FieldValue.arrayUnion(lessonId),
+          completedQuizzes: passed ? FieldValue.arrayUnion(lessonId) : FieldValue.arrayRemove(lessonId),
+          completedAt: { [lessonId]: passed ? existing.completedAt?.[lessonId] || now : FieldValue.delete() },
         },
         { merge: true }
       );
-      message = `Votre quiz de la leçon ${lessonId} a été validé par ${caller.role === "admin" ? "l'administration" : "votre professeur"}.`;
+      title = "Note mise à jour";
+      message = `Votre note du quiz de la leçon ${lessonId} a été fixée à ${score}/${total} par ${who}${passed ? " : la leçon suivante est disponible." : "."}`;
+    } else if (action === "setFinalScore") {
+      const total = curriculum.finalQuiz.questions.length;
+      const raw = Number(body.score);
+      if (!Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
+      const score = Math.max(0, Math.min(total, Math.round(raw)));
+      const passed = score >= curriculum.finalQuiz.passingScore;
+      await ref.set({ ...base, finalQuizScore: score, finalQuizPassed: passed, adminFinal: true }, { merge: true });
+      title = "Note mise à jour";
+      message = `Votre note du quiz final du niveau ${level} a été fixée à ${score}/${total} par ${who}${passed ? " : votre certificat est disponible." : "."}`;
+      if (passed) await sendLevelInvitation(uid, langCode, level).catch((e) => console.error("Level invitation failed (non-fatal):", e));
+    } else {
+      // resetLevel: keep an archive of the old results, then start from zero.
+      const snap = await ref.get();
+      const old = snap.data() || {};
+      const archive = {
+        at: now,
+        by: caller.email,
+        studiedLessons: old.studiedLessons || [],
+        completedQuizzes: old.completedQuizzes || [],
+        quizScores: old.quizScores || {},
+        finalQuizScore: old.finalQuizScore ?? null,
+        finalQuizPassed: Boolean(old.finalQuizPassed),
+        certificateId: old.certificateId || null,
+      };
+      await ref.set({
+        uid,
+        langCode,
+        level,
+        updatedAt: now,
+        resetAt: now,
+        previousRuns: [...(Array.isArray(old.previousRuns) ? old.previousRuns : []), archive],
+        studiedLessons: [],
+        completedQuizzes: [],
+        quizScores: {},
+        completedAt: {},
+        finalQuizPassed: false,
+        finalQuizScore: null,
+        certificateId: null,
+        unlockedLessons: [],
+        adminScored: [],
+        adminFinal: false,
+        quizAttempts: {},
+        practiceBest: {},
+      });
+      title = "Niveau à recommencer";
+      message = `${who === "l'administration" ? "L'administration" : "Votre professeur"} vous demande de recommencer le niveau ${level} depuis le début. Vos résultats précédents sont archivés.`;
     }
 
     if (message) {
@@ -80,9 +142,9 @@ export async function POST(request: Request) {
         await createNotification({
           audience: uid,
           type: "lesson-unlocked",
-          title: action === "unlock" ? "Leçon ouverte" : "Quiz validé",
+          title,
           message,
-          link: `/academia/${lang!.slug}/level/${level}`,
+          link: `/academia/${slug}/level/${level}`,
         });
       } catch (error) {
         console.error("Unlock notification failed (non-fatal):", error);

@@ -62,7 +62,7 @@ export default function FinalQuizPage() {
         return;
       }
 
-      setAlreadyScore(progress.finalQuizPassed ? progress.finalQuizScore : null);
+      setAlreadyScore(progress.finalQuizScore);
       setAllowed(true);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
@@ -128,10 +128,13 @@ export default function FinalQuizPage() {
             dialogue={getDialogue(langSlug, level, "final") ?? undefined}
             writing={quizWriting(langSlug, curriculum, "final")}
             onSubmit={(score, parts) => {
-              if (getLevelProgress(langSlug, level).finalQuizPassed) return; // practice only once passed
-              const passed = score >= curriculum.finalQuiz.passingScore && (parts?.dialoguePassed ?? true);
-              if (parts) saveQuizParts(langSlug, level, "final", parts);
-              logActivity("final_quiz", `Quiz final du niveau ${level} : ${score}/${curriculum.finalQuiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel})`, { langCode: curriculum.langCode, level, score, total: curriculum.finalQuiz.questions.length, passed });
+              // Only the first attempt is the result; later ones are practice.
+              const first = getLevelProgress(langSlug, level).finalQuizScore === null;
+              if (first) {
+                const passed = score >= curriculum.finalQuiz.passingScore && (parts?.dialoguePassed ?? true);
+                if (parts) saveQuizParts(langSlug, level, "final", parts);
+                logActivity("final_quiz", `Quiz final du niveau ${level} : ${score}/${curriculum.finalQuiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel})`, { langCode: curriculum.langCode, level, score, total: curriculum.finalQuiz.questions.length, passed });
+              }
               const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore, parts?.dialoguePassed ?? true);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}

@@ -75,8 +75,9 @@ export async function GET(request: Request) {
           finalQuizPassed: Boolean(p.finalQuizPassed),
           certificateId: p.certificateId || null,
           unlockedLessons: p.unlockedLessons || [],
-          adminPassed: p.adminPassed || [],
+          adminScored: p.adminScored || [],
           quizAttempts: p.quizAttempts || {},
+          practiceBest: p.practiceBest || {},
           updatedAt: p.updatedAt || null,
         },
       };

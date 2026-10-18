@@ -24,10 +24,16 @@ export interface LevelProgress {
   certificateId: string | null;
   /** Lessons the administration (or the teacher) opened for this student, whatever the pacing. */
   unlockedLessons: number[];
-  /** Lessons validated by the administration without the quiz being passed here. */
-  adminPassed: number[];
-  /** How many times each lesson quiz was taken. */
+  /** Lessons whose score the administration set: its decision wins over this device. */
+  adminScored: number[];
+  /** True when the administration set the level's final quiz score. */
+  adminFinal: boolean;
+  /** How many times each lesson quiz was taken (practice included). */
   quizAttempts: Record<number, number>;
+  /** Best score of the practice attempts (after the first one), to inform the administration. */
+  practiceBest: Record<number, number>;
+  /** Set when the administration restarted the level: older progress on a device is then dropped. */
+  resetAt?: string;
 }
 
 function storageKey(langSlug: string, level: number) {
@@ -44,8 +50,10 @@ function emptyProgress(): LevelProgress {
     finalQuizScore: null,
     certificateId: null,
     unlockedLessons: [],
-    adminPassed: [],
+    adminScored: [],
+    adminFinal: false,
     quizAttempts: {},
+    practiceBest: {},
   };
 }
 
@@ -113,11 +121,9 @@ export function markLessonStudied(langSlug: string, level: number, lessonId: num
 }
 
 /**
- * Records a quiz attempt. The rule: the quiz that unlocks the next lesson is the first one PASSED.
- *  - Until it is passed, every attempt counts as an attempt and the best score is kept; a failed
- *    first attempt no longer locks the lesson for good (it used to).
- *  - The attempt that passes is the one recorded (score, date: the pacing clock starts there).
- *  - Once passed, later attempts are practice only and change nothing.
+ * Records a quiz attempt. Only the FIRST attempt is the student's result (it is what the certificate
+ * shows); later attempts are practice. The administration can change a score afterwards, and decides
+ * what happens to a student who failed.
  */
 export function recordQuizResult(
   langSlug: string,
@@ -129,16 +135,17 @@ export function recordQuizResult(
   extraPass: boolean = true
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
+  const first = !(lessonId in progress.quizScores);
+  progress.quizAttempts = { ...progress.quizAttempts, [lessonId]: (progress.quizAttempts?.[lessonId] ?? 0) + 1 };
 
-  if (!progress.completedQuizzes.includes(lessonId)) {
-    progress.quizAttempts = { ...progress.quizAttempts, [lessonId]: (progress.quizAttempts?.[lessonId] ?? 0) + 1 };
-    if (score >= passingScore && extraPass) {
-      progress.quizScores[lessonId] = score;
+  if (first) {
+    progress.quizScores[lessonId] = score;
+    if (score >= passingScore && extraPass && !progress.completedQuizzes.includes(lessonId)) {
       progress.completedQuizzes.push(lessonId);
       progress.completedAt[lessonId] = new Date().toISOString();
-    } else {
-      progress.quizScores[lessonId] = Math.max(score, progress.quizScores[lessonId] ?? 0);
     }
+  } else {
+    progress.practiceBest = { ...progress.practiceBest, [lessonId]: Math.max(score, progress.practiceBest?.[lessonId] ?? 0) };
   }
 
   saveProgress(langSlug, level, progress);
@@ -154,13 +161,10 @@ export function recordFinalQuizResult(
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
 
-  // Same rule as the lesson quizzes: the first pass counts; before that the best score is kept.
-  if (!progress.finalQuizPassed) {
+  if (progress.finalQuizScore === null) {
+    progress.finalQuizScore = score;
     if (score >= passingScore && extraPass) {
-      progress.finalQuizScore = score;
       progress.finalQuizPassed = true;
-    } else {
-      progress.finalQuizScore = Math.max(score, progress.finalQuizScore ?? 0);
     }
   }
 
@@ -168,38 +172,57 @@ export function recordFinalQuizResult(
   return progress;
 }
 
-/**
- * Brings what the server knows (the student's other devices, the administration's changes) into this
- * device's progress. Nothing is ever taken away: lists are merged, passed stays passed.
- */
-export function mergeServerProgress(langSlug: string, level: number, server: Partial<LevelProgress> & { quizScores?: Record<string, number>; completedAt?: Record<string, string> }): LevelProgress {
-  const local = getLevelProgress(langSlug, level);
-  const union = (a: number[] = [], b: number[] = []) => Array.from(new Set([...a, ...b])).sort((x, y) => x - y);
+type ServerProgress = Partial<Omit<LevelProgress, "quizScores" | "completedAt">> & {
+  quizScores?: Record<string, number>;
+  completedAt?: Record<string, string>;
+};
 
-  const adminPassed = union(local.adminPassed, server.adminPassed);
+/**
+ * Brings what the server knows (the student's other devices, the administration's decisions) into this
+ * device's progress. Nothing the student earned is lost, but the administration has the last word: a score
+ * it set, a lesson it opened, a level it restarted.
+ */
+export function mergeServerProgress(langSlug: string, level: number, server: ServerProgress): LevelProgress {
+  let local = getLevelProgress(langSlug, level);
+  // The level was restarted by the administration: this device's older progress no longer counts.
+  if (server.resetAt && local.resetAt !== server.resetAt) local = { ...emptyProgress(), resetAt: server.resetAt };
+
+  const union = (a: number[] = [], b: number[] = []) => Array.from(new Set([...a, ...b])).sort((x, y) => x - y);
+  const adminScored = union(local.adminScored, server.adminScored);
+  const num = (v: unknown) => Number(v);
   const merged: LevelProgress = {
     ...local,
     studiedLessons: union(local.studiedLessons, server.studiedLessons),
     completedQuizzes: union(local.completedQuizzes, server.completedQuizzes),
     unlockedLessons: union(local.unlockedLessons, server.unlockedLessons),
-    adminPassed,
+    adminScored,
+    adminFinal: local.adminFinal || Boolean(server.adminFinal),
     quizScores: { ...(server.quizScores as Record<number, number>), ...local.quizScores },
     completedAt: { ...(server.completedAt as Record<number, string>), ...local.completedAt },
     quizAttempts: { ...local.quizAttempts },
+    practiceBest: { ...local.practiceBest },
     finalQuizPassed: local.finalQuizPassed || Boolean(server.finalQuizPassed),
     finalQuizScore: local.finalQuizScore ?? server.finalQuizScore ?? null,
     certificateId: local.certificateId ?? server.certificateId ?? null,
+    resetAt: server.resetAt ?? local.resetAt,
   };
-  // A quiz passed on another device (or validated by the administration) takes its passing score and date.
-  for (const id of merged.completedQuizzes) {
-    if (!local.completedQuizzes.includes(id)) {
-      const sv = (server.quizScores as Record<string, number> | undefined)?.[id];
-      const sd = (server.completedAt as Record<string, string> | undefined)?.[id];
-      if (typeof sv === "number") merged.quizScores[id] = sv;
-      if (sd) merged.completedAt[id] = sd;
-    }
+  // A score set by the administration replaces whatever this device holds, pass or fail.
+  for (const id of server.adminScored ?? []) {
+    const sv = server.quizScores?.[String(id)];
+    if (typeof sv === "number") merged.quizScores[id] = sv;
+    const sd = server.completedAt?.[String(id)];
+    if (sd) merged.completedAt[id] = sd;
+    else delete merged.completedAt[id];
+    const done = (server.completedQuizzes ?? []).map(num).includes(id);
+    merged.completedQuizzes = merged.completedQuizzes.filter((x) => x !== id);
+    if (done) merged.completedQuizzes.push(id);
   }
-  if (server.finalQuizPassed && !local.finalQuizPassed && typeof server.finalQuizScore === "number") merged.finalQuizScore = server.finalQuizScore;
+  if (server.adminFinal) {
+    merged.finalQuizScore = server.finalQuizScore ?? null;
+    merged.finalQuizPassed = Boolean(server.finalQuizPassed);
+  } else if (server.finalQuizPassed && !local.finalQuizPassed && typeof server.finalQuizScore === "number") {
+    merged.finalQuizScore = server.finalQuizScore;
+  }
 
   saveProgress(langSlug, level, merged);
   return merged;

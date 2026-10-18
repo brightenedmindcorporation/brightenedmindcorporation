@@ -10,33 +10,46 @@ import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
  * percentage and whether the level's certificate is within reach. Used by
  * the teacher and the admin.
  */
-export type DossierAction = "unlock" | "lock" | "validate";
+export type DossierAction = "unlock" | "lock" | "setScore" | "setFinalScore" | "resetLevel";
 
 export default function StudentDossier({
   student,
   levels,
   onClose,
   onAct,
+  canEditScores = false,
 }: {
   student: { name: string; email?: string; studentId?: string; langCode: string };
   /** level number → saved progress */
   levels: Record<string, ProgressDoc | undefined>;
   onClose: () => void;
-  /** Administration / teacher: step in on a lesson (open it, take it back, validate its quiz). */
+  /** Administration / teacher: step in on a lesson (open it, take it back, change a score, restart the level). */
   onAct?: (action: DossierAction, level: number, lessonId: number, score?: number) => Promise<void>;
+  /** Only the administration may change scores or restart a level. */
+  canEditScores?: boolean;
 }) {
   const lang = availableLanguages.find((l) => l.code === student.langCode);
   const [busy, setBusy] = useState<string | null>(null);
-  const act = async (action: DossierAction, level: number, lessonId: number, total: number) => {
+  const act = async (action: DossierAction, level: number, lessonId: number, total: number, current?: number | null) => {
     if (!onAct) return;
     let score: number | undefined;
-    if (action === "validate") {
-      const answer = window.prompt(`Valider le quiz de la leçon ${lessonId} sans le repasser.
-Note à enregistrer (sur ${total}) :`, String(total));
-      if (answer === null) return;
+    if (action === "setScore" || action === "setFinalScore") {
+      const what = action === "setScore" ? `du quiz de la leçon ${lessonId}` : "du quiz final";
+      const answer = window.prompt(
+        `Nouvelle note ${what} (sur ${total}).
+L'étudiant garde sa note de premier essai tant que vous ne la changez pas.`,
+        current != null ? String(current) : ""
+      );
+      if (answer === null || answer.trim() === "") return;
       score = Number(answer);
       if (!Number.isFinite(score)) return;
     } else if (action === "unlock" && !window.confirm(`Ouvrir la leçon ${lessonId} (et son quiz) pour cet étudiant tout de suite ?`)) {
+      return;
+    } else if (
+      action === "resetLevel" &&
+      !window.confirm(`Faire recommencer le niveau ${level} à zéro à cet étudiant ?
+Ses résultats actuels sont archivés, mais ses notes et ses leçons validées repartent de zéro.`)
+    ) {
       return;
     }
     setBusy(`${level}-${lessonId}`);
@@ -89,7 +102,12 @@ Note à enregistrer (sur ${total}) :`, String(total));
                     <h3 className="font-bold text-ink text-lg">
                       Niveau {level} <span className="text-ink-faint font-normal text-sm">· {curriculum.levelTitle}</span>
                     </h3>
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3">
+                      {onAct && canEditScores && (
+                        <button disabled={busy !== null} onClick={() => act("resetLevel", level, 0, 0)} className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:border-red-600/60 hover:text-red-500 disabled:opacity-50">
+                          Faire recommencer ce niveau
+                        </button>
+                      )}
                       <span className="text-sm text-ink-soft">
                         Moyenne actuelle :{" "}
                         <b className={`text-lg ${s.average !== null && s.average >= 70 ? "text-emerald-500" : "text-ink"}`}>
@@ -131,12 +149,15 @@ Note à enregistrer (sur ${total}) :`, String(total));
                               {r.score === null ? (
                                 <span className="text-xs text-ink-faint">Pas passé</span>
                               ) : r.passed ? (
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi{(progress.adminPassed ?? []).includes(r.lessonId) ? " (validé)" : ""}</span>
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi{(progress.adminScored ?? []).includes(r.lessonId) ? " (note fixée par l'admin)" : ""}</span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Pas encore réussi</span>
                               )}
                               {(progress.quizAttempts?.[r.lessonId] ?? 0) > 0 && (
                                 <span className="block text-[11px] text-ink-faint">{progress.quizAttempts![r.lessonId]} essai{progress.quizAttempts![r.lessonId] > 1 ? "s" : ""}</span>
+                              )}
+                              {(progress.practiceBest?.[r.lessonId] ?? null) !== null && (
+                                <span className="block text-[11px] text-ink-faint">Entraînement : meilleur {progress.practiceBest![r.lessonId]}/{r.total}</span>
                               )}
                               {(progress.unlockedLessons ?? []).includes(r.lessonId) && <span className="block text-[11px] text-amber-500">Ouverte manuellement</span>}
                             </td>
@@ -154,9 +175,9 @@ Note à enregistrer (sur ${total}) :`, String(total));
                                       </button>
                                     )
                                   )}
-                                  {!r.passed && (
-                                    <button disabled={busy !== null} onClick={() => act("validate", level, r.lessonId, r.total)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
-                                      <BadgeCheck size={11} /> Valider le quiz
+                                  {canEditScores && (
+                                    <button disabled={busy !== null} onClick={() => act("setScore", level, r.lessonId, r.total, r.score)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                      <BadgeCheck size={11} /> Modifier la note
                                     </button>
                                   )}
                                   {busy === `${level}-${r.lessonId}` && <span className="text-[11px] text-ink-faint">…</span>}
@@ -179,7 +200,15 @@ Note à enregistrer (sur ${total}) :`, String(total));
                               <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Pas encore réussi</span>
                             )}
                           </td>
-                          {onAct && <td className="p-3" />}
+                          {onAct && (
+                            <td className="p-3">
+                              {canEditScores && (
+                                <button disabled={busy !== null} onClick={() => act("setFinalScore", level, 0, s.final.total, s.final.score)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                  <BadgeCheck size={11} /> Modifier la note
+                                </button>
+                              )}
+                            </td>
+                          )}
                         </tr>
                       </tbody>
                     </table>

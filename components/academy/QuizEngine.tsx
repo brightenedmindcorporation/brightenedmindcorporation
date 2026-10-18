@@ -244,18 +244,17 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                   setAnswers(Array(quiz.questions.length).fill(""));
                   setDialogueAnswers(Array(dialogue?.questions.length ?? 0).fill(""));
                   setWritingState(emptyWritingState(writing));
-                  // After a pass, a retake is practice only; after a fail it is a real new attempt.
-                  setPractice(passed || practice);
+                  setPractice(true);
                   setSubmitted(false);
                 }}
                 className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto inline-flex items-center gap-2"
               >
-                <RefreshCw size={15} /> {passed ? "Retake (practice only)" : "Try again"}
+                <RefreshCw size={15} /> Retake (practice only)
               </button>
             </div>
 
             <p className="text-xs text-red-400/80 italic font-medium pt-2 border-t border-line">
-              {passed ? "Note: your passing attempt is recorded in your progress. Retakes are practice only." : "Note: you can try again as many times as you need. The attempt you pass is the one recorded, and it unlocks the next lesson."}
+              Note: Only your first attempt score is recorded in your progress. Retakes are practice only.{!alreadyDone && !passed ? " The administration will review your result and decide what happens next." : ""}
             </p>
           </div>
         )}

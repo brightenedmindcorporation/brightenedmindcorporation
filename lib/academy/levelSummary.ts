@@ -10,8 +10,9 @@ export interface ProgressDoc {
   certificateId?: string | null;
   updatedAt?: string | null;
   unlockedLessons?: number[];
-  adminPassed?: number[];
+  adminScored?: number[];
   quizAttempts?: Record<string, number>;
+  practiceBest?: Record<string, number>;
 }
 
 export interface QuizRow {

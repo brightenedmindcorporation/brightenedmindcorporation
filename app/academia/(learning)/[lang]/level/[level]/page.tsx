@@ -216,6 +216,11 @@ export default function LevelOverviewPage() {
                         <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line inline-flex items-center gap-2">
                           <Lock size={14} /> Locked
                         </button>
+                        {!unlockDate && lesson.id > 1 && progress.quizScores[lesson.id - 1] !== undefined && !progress.completedQuizzes.includes(lesson.id - 1) && (
+                          <p className="text-xs text-ink-faint">
+                            Le quiz {lesson.id - 1} n&apos;a pas été réussi au premier essai : l&apos;administration décide de la suite.
+                          </p>
+                        )}
                         {unlockDate && (
                           <p className="text-xs text-ink-faint">
                             Disponible le {unlockDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}

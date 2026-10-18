@@ -3883,6 +3883,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode }}
               levels={levels}
               onClose={() => setDossierOf(null)}
+              canEditScores
               onAct={async (action, level, lessonId, score) => {
                 const idToken = await auth.currentUser?.getIdToken();
                 const response = await fetch("/api/admin/student-progress", {

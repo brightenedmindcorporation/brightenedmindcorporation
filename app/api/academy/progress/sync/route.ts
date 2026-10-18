@@ -15,29 +15,42 @@ export async function POST(request: Request) {
     const decoded = await getAdminAuth().verifyIdToken(idToken);
     const adminDb = getAdminDb();
 
-    // Never overwrite what the server already knows with a device that knows less: merge.
+    // Never overwrite what the server already knows with a device that knows less: merge. The
+    // administration's decisions (scores it set, lessons it opened, a restart) always win.
     const ref = adminDb.collection("progress").doc(`${decoded.uid}_${langCode}_${level}`);
     const existing = (await ref.get()).data() || {};
+    if (existing.resetAt && progress.resetAt !== existing.resetAt) {
+      // This device still holds progress from before a restart: ignore it, it will be refreshed on the next pull.
+      return NextResponse.json({ status: "stale" });
+    }
     const union = (a: unknown, b: unknown) =>
       Array.from(new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])])).sort((x: any, y: any) => x - y);
-    const adminPassed: number[] = Array.isArray(existing.adminPassed) ? existing.adminPassed : [];
+    const adminScored: number[] = Array.isArray(existing.adminScored) ? existing.adminScored : [];
     const merged = {
       ...progress,
       studiedLessons: union(existing.studiedLessons, progress.studiedLessons),
-      completedQuizzes: union(existing.completedQuizzes, progress.completedQuizzes),
-      // Administration decisions live on the server only: the student's device cannot remove them.
+      completedQuizzes: union(existing.completedQuizzes, progress.completedQuizzes).filter((id: number) => !adminScored.includes(id)),
       unlockedLessons: union(existing.unlockedLessons, progress.unlockedLessons),
-      adminPassed: union(existing.adminPassed, progress.adminPassed),
+      adminScored,
+      adminFinal: Boolean(existing.adminFinal),
       quizScores: { ...(progress.quizScores || {}) },
       completedAt: { ...(existing.completedAt || {}), ...(progress.completedAt || {}) },
       finalQuizPassed: Boolean(existing.finalQuizPassed) || Boolean(progress.finalQuizPassed),
     } as Record<string, any>;
-    // A quiz validated by the administration keeps its recorded score and date.
-    for (const id of adminPassed) {
+    // A score set by the administration keeps its value, date and pass/fail state.
+    for (const id of adminScored) {
       if (existing.quizScores?.[id] !== undefined) merged.quizScores[id] = existing.quizScores[id];
       if (existing.completedAt?.[id]) merged.completedAt[id] = existing.completedAt[id];
+      else delete merged.completedAt[id];
+      if ((existing.completedQuizzes || []).includes(id)) merged.completedQuizzes.push(id);
     }
-    if (existing.finalQuizPassed && !progress.finalQuizPassed) merged.finalQuizScore = existing.finalQuizScore ?? progress.finalQuizScore ?? null;
+    merged.completedQuizzes.sort((x: number, y: number) => x - y);
+    if (existing.adminFinal) {
+      merged.finalQuizScore = existing.finalQuizScore ?? null;
+      merged.finalQuizPassed = Boolean(existing.finalQuizPassed);
+    } else if (existing.finalQuizPassed && !progress.finalQuizPassed) {
+      merged.finalQuizScore = existing.finalQuizScore ?? progress.finalQuizScore ?? null;
+    }
 
     await ref.set(
       {
