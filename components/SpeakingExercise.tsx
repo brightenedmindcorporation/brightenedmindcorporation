@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { sfx } from "@/lib/academy/sfx";
+import { diffAnswer } from "@/lib/academy/writingLab";
 import { Mic } from "lucide-react";
 
 interface SpeakingExerciseProps {
@@ -31,13 +33,21 @@ export default function SpeakingExercise({
     recognition.lang = "es-ES"; // Modifiez selon la langue ciblée
     recognition.interimResults = false;
 
-    recognition.onstart = () => setIsListening(true);
-    recognition.onend = () => setIsListening(false);
+    recognition.onstart = () => {
+      sfx.recordStart();
+      setIsListening(true);
+    };
+    recognition.onend = () => {
+      sfx.recordStop();
+      setIsListening(false);
+    };
 
     recognition.onresult = (event: any) => {
       const current = event.resultIndex;
       const text = event.results[current][0].transcript;
       setTranscript(text);
+      // Close enough to the phrase to repeat? (when there is a phrase to compare with)
+      if (targetText) setTimeout(() => (diffAnswer(targetText, text, /[㐀-鿿]/.test(targetText)).score >= 0.7 ? sfx.correct() : sfx.wrong()), 250);
     };
 
     recognition.start();

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { sfx } from "@/lib/academy/sfx";
 import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } from "lucide-react";
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
@@ -128,6 +129,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
 
   const select = (list: string[], set: (v: string[]) => void) => (i: number, option: string) => {
     if (submitted) return;
+    sfx.tap();
     const updated = [...list];
     updated[i] = option;
     set(updated);
@@ -140,6 +142,9 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     setScore(finalScore);
     setDialogueScore(dScore);
     setSubmitted(true);
+    // Passed or failed (same rule as the result shown below).
+    if (finalScore >= quiz.passingScore && (!useDialogue || dScore >= dialoguePassNeeded)) sfx.success();
+    else sfx.fail();
     onSubmit(
       finalScore,
       useDialogue || useWriting

@@ -5,6 +5,7 @@ import { PenLine, Volume2, CheckCircle2, RotateCcw, Copy, Eye } from "lucide-rea
 import type { Lesson } from "@/content/curriculum/types";
 import { speakPhrase, speakWithDeviceVoice } from "@/lib/academy/deviceSpeech";
 import { CharPalette, ImeInput, ImeTextarea } from "@/components/academy/ImeField";
+import { sfx } from "@/lib/academy/sfx";
 import {
   buildWritingTask,
   diffAnswer,
@@ -81,6 +82,8 @@ function Dictation({ items, langSlug, cjk, chars, corpus, onDone }: { items: { t
     const next = [...results];
     next[i] = res;
     setResults(next);
+    if (res.score >= 0.7) sfx.correct();
+    else sfx.wrong();
     if (next.every((r) => r && r.score >= 0.7)) onDone();
   };
   const retry = (i: number) => {
@@ -154,6 +157,8 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
       return "wrong" as const;
     });
     setState(next);
+    if (next.every((s) => s === "ok")) sfx.correct();
+    else sfx.wrong();
     if (next.every((s) => s === "ok")) onDone();
   };
 
@@ -224,6 +229,8 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
   const check = () => {
     const ok = built.length === item.solution.length && built.every((id, i) => byId.get(id) === byId.get(item.solution[i]));
     setResult(ok ? "ok" : "wrong");
+    if (ok) sfx.correct();
+    else sfx.wrong();
     if (ok) onSolved();
   };
 
@@ -254,6 +261,7 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
           <button
             key={t.id}
             onClick={() => {
+              sfx.tap();
               setBuilt([...built, t.id]);
               setResult("idle");
             }}
@@ -320,7 +328,10 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
   };
 
   const markDone = (step: StepId) => {
-    if (!saved.done[step]) persist({ ...saved, done: { ...saved.done, [step]: true } });
+    if (!saved.done[step]) {
+      sfx.complete();
+      persist({ ...saved, done: { ...saved.done, [step]: true } });
+    }
   };
 
   const steps: { id: StepId; present: boolean }[] = [
