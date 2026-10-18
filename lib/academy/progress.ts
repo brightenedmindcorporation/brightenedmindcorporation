@@ -22,6 +22,12 @@ export interface LevelProgress {
   finalQuizPassed: boolean;
   finalQuizScore: number | null;
   certificateId: string | null;
+  /** Lessons the administration (or the teacher) opened for this student, whatever the pacing. */
+  unlockedLessons: number[];
+  /** Lessons validated by the administration without the quiz being passed here. */
+  adminPassed: number[];
+  /** How many times each lesson quiz was taken. */
+  quizAttempts: Record<number, number>;
 }
 
 function storageKey(langSlug: string, level: number) {
@@ -37,6 +43,9 @@ function emptyProgress(): LevelProgress {
     finalQuizPassed: false,
     finalQuizScore: null,
     certificateId: null,
+    unlockedLessons: [],
+    adminPassed: [],
+    quizAttempts: {},
   };
 }
 
@@ -69,6 +78,8 @@ export function getLessonUnlockDate(progress: LevelProgress, lessonId: number, s
 
 export function isLessonUnlocked(progress: LevelProgress, lessonId: number, studyDays?: number): boolean {
   if (lessonId === 1) return true;
+  // Opened by the administration or the teacher: no prerequisite, no waiting.
+  if ((progress.unlockedLessons ?? []).includes(lessonId)) return true;
   if (!progress.completedQuizzes.includes(lessonId - 1)) return false;
 
   const unlockDate = getLessonUnlockDate(progress, lessonId, studyDays);
@@ -101,7 +112,13 @@ export function markLessonStudied(langSlug: string, level: number, lessonId: num
   return progress;
 }
 
-/** Records a quiz result. Only the first attempt's score counts, matching the original app's rule. */
+/**
+ * Records a quiz attempt. The rule: the quiz that unlocks the next lesson is the first one PASSED.
+ *  - Until it is passed, every attempt counts as an attempt and the best score is kept; a failed
+ *    first attempt no longer locks the lesson for good (it used to).
+ *  - The attempt that passes is the one recorded (score, date: the pacing clock starts there).
+ *  - Once passed, later attempts are practice only and change nothing.
+ */
 export function recordQuizResult(
   langSlug: string,
   level: number,
@@ -113,11 +130,14 @@ export function recordQuizResult(
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
 
-  if (!(lessonId in progress.quizScores)) {
-    progress.quizScores[lessonId] = score;
-    if (score >= passingScore && extraPass && !progress.completedQuizzes.includes(lessonId)) {
+  if (!progress.completedQuizzes.includes(lessonId)) {
+    progress.quizAttempts = { ...progress.quizAttempts, [lessonId]: (progress.quizAttempts?.[lessonId] ?? 0) + 1 };
+    if (score >= passingScore && extraPass) {
+      progress.quizScores[lessonId] = score;
       progress.completedQuizzes.push(lessonId);
       progress.completedAt[lessonId] = new Date().toISOString();
+    } else {
+      progress.quizScores[lessonId] = Math.max(score, progress.quizScores[lessonId] ?? 0);
     }
   }
 
@@ -134,15 +154,55 @@ export function recordFinalQuizResult(
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
 
-  if (progress.finalQuizScore === null) {
-    progress.finalQuizScore = score;
+  // Same rule as the lesson quizzes: the first pass counts; before that the best score is kept.
+  if (!progress.finalQuizPassed) {
     if (score >= passingScore && extraPass) {
+      progress.finalQuizScore = score;
       progress.finalQuizPassed = true;
+    } else {
+      progress.finalQuizScore = Math.max(score, progress.finalQuizScore ?? 0);
     }
   }
 
   saveProgress(langSlug, level, progress);
   return progress;
+}
+
+/**
+ * Brings what the server knows (the student's other devices, the administration's changes) into this
+ * device's progress. Nothing is ever taken away: lists are merged, passed stays passed.
+ */
+export function mergeServerProgress(langSlug: string, level: number, server: Partial<LevelProgress> & { quizScores?: Record<string, number>; completedAt?: Record<string, string> }): LevelProgress {
+  const local = getLevelProgress(langSlug, level);
+  const union = (a: number[] = [], b: number[] = []) => Array.from(new Set([...a, ...b])).sort((x, y) => x - y);
+
+  const adminPassed = union(local.adminPassed, server.adminPassed);
+  const merged: LevelProgress = {
+    ...local,
+    studiedLessons: union(local.studiedLessons, server.studiedLessons),
+    completedQuizzes: union(local.completedQuizzes, server.completedQuizzes),
+    unlockedLessons: union(local.unlockedLessons, server.unlockedLessons),
+    adminPassed,
+    quizScores: { ...(server.quizScores as Record<number, number>), ...local.quizScores },
+    completedAt: { ...(server.completedAt as Record<number, string>), ...local.completedAt },
+    quizAttempts: { ...local.quizAttempts },
+    finalQuizPassed: local.finalQuizPassed || Boolean(server.finalQuizPassed),
+    finalQuizScore: local.finalQuizScore ?? server.finalQuizScore ?? null,
+    certificateId: local.certificateId ?? server.certificateId ?? null,
+  };
+  // A quiz passed on another device (or validated by the administration) takes its passing score and date.
+  for (const id of merged.completedQuizzes) {
+    if (!local.completedQuizzes.includes(id)) {
+      const sv = (server.quizScores as Record<string, number> | undefined)?.[id];
+      const sd = (server.completedAt as Record<string, string> | undefined)?.[id];
+      if (typeof sv === "number") merged.quizScores[id] = sv;
+      if (sd) merged.completedAt[id] = sd;
+    }
+  }
+  if (server.finalQuizPassed && !local.finalQuizPassed && typeof server.finalQuizScore === "number") merged.finalQuizScore = server.finalQuizScore;
+
+  saveProgress(langSlug, level, merged);
+  return merged;
 }
 
 export function getOrCreateCertificateId(

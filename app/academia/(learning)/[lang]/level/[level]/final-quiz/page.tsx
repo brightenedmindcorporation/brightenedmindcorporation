@@ -9,7 +9,7 @@ import { GraduationCap } from "lucide-react";
 import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
-import { syncProgress } from "@/lib/academy/progressSync";
+import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
 import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
@@ -31,6 +31,9 @@ export default function FinalQuizPage() {
   useActiveTime(allowed && curriculum ? `${curriculum?.langCode}-${level}-final` : null);
 
   useEffect(() => {
+    let alive = true;
+    const run = () => {
+    if (!alive) return;
     try {
       const savedStudent = localStorage.getItem("loggedStudent");
       if (!savedStudent) {
@@ -59,7 +62,7 @@ export default function FinalQuizPage() {
         return;
       }
 
-      setAlreadyScore(progress.finalQuizScore);
+      setAlreadyScore(progress.finalQuizPassed ? progress.finalQuizScore : null);
       setAllowed(true);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
@@ -67,6 +70,12 @@ export default function FinalQuizPage() {
     } finally {
       setChecked(true);
     }
+    };
+    // Bring in what the server knows first (other devices, a lesson opened by the administration).
+    pullProgress(langSlug, curriculum?.langCode, level).then(run);
+    return () => {
+      alive = false;
+    };
   }, [router, langSlug, level, base, curriculum?.langCode]);
 
   if (!curriculum) {
@@ -119,11 +128,10 @@ export default function FinalQuizPage() {
             dialogue={getDialogue(langSlug, level, "final") ?? undefined}
             writing={quizWriting(langSlug, curriculum, "final")}
             onSubmit={(score, parts) => {
-              if (parts && alreadyScore === null) saveQuizParts(langSlug, level, "final", parts);
-              if (alreadyScore === null) {
-                const passed = score >= curriculum.finalQuiz.passingScore && (parts?.dialoguePassed ?? true);
-                logActivity("final_quiz", `Quiz final du niveau ${level} : ${score}/${curriculum.finalQuiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel})`, { langCode: curriculum.langCode, level, score, total: curriculum.finalQuiz.questions.length, passed });
-              }
+              if (getLevelProgress(langSlug, level).finalQuizPassed) return; // practice only once passed
+              const passed = score >= curriculum.finalQuiz.passingScore && (parts?.dialoguePassed ?? true);
+              if (parts) saveQuizParts(langSlug, level, "final", parts);
+              logActivity("final_quiz", `Quiz final du niveau ${level} : ${score}/${curriculum.finalQuiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel})`, { langCode: curriculum.langCode, level, score, total: curriculum.finalQuiz.questions.length, passed });
               const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore, parts?.dialoguePassed ?? true);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}

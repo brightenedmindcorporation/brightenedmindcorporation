@@ -1,7 +1,8 @@
 "use client";
 
 import { auth } from "@/lib/firebase";
-import type { LevelProgress } from "./progress";
+import { onAuthStateChanged, type User } from "firebase/auth";
+import { mergeServerProgress, type LevelProgress } from "./progress";
 
 /**
  * Mirrors the (still client-authoritative, see progress.ts) localStorage
@@ -46,5 +47,38 @@ export async function syncCertificateIssued(opts: {
     });
   } catch (error) {
     console.error("Error recording certificate (non-fatal):", error);
+  }
+}
+
+/**
+ * Pulls the saved progress of a level from the server into this device (other devices, decisions of the
+ * administration such as an unlocked lesson). Never throws and never waits long: offline, the pages simply
+ * work from what the device already has.
+ */
+export async function pullProgress(langSlug: string, langCode: string | undefined, level: number): Promise<void> {
+  if (!langCode) return;
+  try {
+    const run = async () => {
+      const user =
+        auth.currentUser ??
+        (await new Promise<User | null>((resolve) => {
+          const unsubscribe = onAuthStateChanged(auth, (u) => {
+            unsubscribe();
+            resolve(u);
+          });
+        }));
+      const idToken = await user?.getIdToken();
+      if (!idToken) return;
+      const response = await fetch(`/api/academy/progress?langCode=${encodeURIComponent(langCode)}&level=${level}`, {
+        headers: { Authorization: `Bearer ${idToken}` },
+        cache: "no-store",
+      });
+      if (!response.ok) return;
+      const { progress } = await response.json();
+      if (progress) mergeServerProgress(langSlug, level, progress);
+    };
+    await Promise.race([run(), new Promise((resolve) => setTimeout(resolve, 3000))]);
+  } catch {
+    // offline or signed out: carry on with local progress
   }
 }

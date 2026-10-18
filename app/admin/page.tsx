@@ -3873,7 +3873,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         </div>
       )}
 
-      {/* ================= MESSAGE TO STUDENTS MODAL ================= */}
+      {/* ================= STUDENT FILE (PROGRESS) MODAL ================= */}
       {dossierOf && (() => {
           const owner = students.find((s) => s.uid === dossierOf.uid && s.langCode === dossierOf.langCode) || students.find((s) => s.uid === dossierOf.uid);
           const levels: Record<string, any> = {};
@@ -3883,6 +3883,17 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode }}
               levels={levels}
               onClose={() => setDossierOf(null)}
+              onAct={async (action, level, lessonId, score) => {
+                const idToken = await auth.currentUser?.getIdToken();
+                const response = await fetch("/api/admin/student-progress", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+                  body: JSON.stringify({ uid: dossierOf.uid, langCode: dossierOf.langCode, level, lessonId, action, score }),
+                });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || "Erreur serveur");
+                await fetchProgress(true);
+              }}
             />
           );
         })()}

@@ -1,6 +1,7 @@
 "use client";
 
-import { X, CheckCircle2, XCircle, Circle, Award } from "lucide-react";
+import { useState } from "react";
+import { X, CheckCircle2, XCircle, Circle, Award, Unlock, Lock, BadgeCheck } from "lucide-react";
 import { availableLanguages, getLevelCurriculum } from "@/content/curriculum";
 import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
 
@@ -9,17 +10,44 @@ import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
  * percentage and whether the level's certificate is within reach. Used by
  * the teacher and the admin.
  */
+export type DossierAction = "unlock" | "lock" | "validate";
+
 export default function StudentDossier({
   student,
   levels,
   onClose,
+  onAct,
 }: {
   student: { name: string; email?: string; studentId?: string; langCode: string };
   /** level number → saved progress */
   levels: Record<string, ProgressDoc | undefined>;
   onClose: () => void;
+  /** Administration / teacher: step in on a lesson (open it, take it back, validate its quiz). */
+  onAct?: (action: DossierAction, level: number, lessonId: number, score?: number) => Promise<void>;
 }) {
   const lang = availableLanguages.find((l) => l.code === student.langCode);
+  const [busy, setBusy] = useState<string | null>(null);
+  const act = async (action: DossierAction, level: number, lessonId: number, total: number) => {
+    if (!onAct) return;
+    let score: number | undefined;
+    if (action === "validate") {
+      const answer = window.prompt(`Valider le quiz de la leçon ${lessonId} sans le repasser.
+Note à enregistrer (sur ${total}) :`, String(total));
+      if (answer === null) return;
+      score = Number(answer);
+      if (!Number.isFinite(score)) return;
+    } else if (action === "unlock" && !window.confirm(`Ouvrir la leçon ${lessonId} (et son quiz) pour cet étudiant tout de suite ?`)) {
+      return;
+    }
+    setBusy(`${level}-${lessonId}`);
+    try {
+      await onAct(action, level, lessonId, score);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[80] bg-black/60 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
@@ -87,6 +115,7 @@ export default function StudentDossier({
                           <th className="p-3">Note</th>
                           <th className="p-3">%</th>
                           <th className="p-3">Résultat</th>
+                          {onAct && <th className="p-3">Actions</th>}
                         </tr>
                       </thead>
                       <tbody>
@@ -102,11 +131,38 @@ export default function StudentDossier({
                               {r.score === null ? (
                                 <span className="text-xs text-ink-faint">Pas passé</span>
                               ) : r.passed ? (
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi</span>
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi{(progress.adminPassed ?? []).includes(r.lessonId) ? " (validé)" : ""}</span>
                               ) : (
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Échoué</span>
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Pas encore réussi</span>
                               )}
+                              {(progress.quizAttempts?.[r.lessonId] ?? 0) > 0 && (
+                                <span className="block text-[11px] text-ink-faint">{progress.quizAttempts![r.lessonId]} essai{progress.quizAttempts![r.lessonId] > 1 ? "s" : ""}</span>
+                              )}
+                              {(progress.unlockedLessons ?? []).includes(r.lessonId) && <span className="block text-[11px] text-amber-500">Ouverte manuellement</span>}
                             </td>
+                            {onAct && (
+                              <td className="p-3">
+                                <div className="flex flex-wrap gap-1.5">
+                                  {r.lessonId > 1 && !r.passed && (
+                                    (progress.unlockedLessons ?? []).includes(r.lessonId) ? (
+                                      <button disabled={busy !== null} onClick={() => act("lock", level, r.lessonId, r.total)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink-soft hover:text-ink disabled:opacity-50">
+                                        <Lock size={11} /> Retirer
+                                      </button>
+                                    ) : (
+                                      <button disabled={busy !== null} onClick={() => act("unlock", level, r.lessonId, r.total)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 disabled:opacity-50">
+                                        <Unlock size={11} /> Ouvrir
+                                      </button>
+                                    )
+                                  )}
+                                  {!r.passed && (
+                                    <button disabled={busy !== null} onClick={() => act("validate", level, r.lessonId, r.total)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                      <BadgeCheck size={11} /> Valider le quiz
+                                    </button>
+                                  )}
+                                  {busy === `${level}-${r.lessonId}` && <span className="text-[11px] text-ink-faint">…</span>}
+                                </div>
+                              </td>
+                            )}
                           </tr>
                         ))}
                         <tr className="border-t-2 border-line bg-surface-alt/60">
@@ -120,9 +176,10 @@ export default function StudentDossier({
                             ) : s.final.passed ? (
                               <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi</span>
                             ) : (
-                              <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Échoué</span>
+                              <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Pas encore réussi</span>
                             )}
                           </td>
+                          {onAct && <td className="p-3" />}
                         </tr>
                       </tbody>
                     </table>

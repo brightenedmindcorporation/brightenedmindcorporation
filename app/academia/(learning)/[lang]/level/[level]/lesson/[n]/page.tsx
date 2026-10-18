@@ -9,7 +9,7 @@ import { PenLine } from "lucide-react";
 import { getLesson, getLevelCurriculum } from "@/content/curriculum";
 import LessonRenderer from "@/components/academy/LessonRenderer";
 import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/academy/progress";
-import { syncProgress } from "@/lib/academy/progressSync";
+import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 
 export default function LessonPage() {
@@ -30,6 +30,9 @@ export default function LessonPage() {
   useActiveTime(unlocked && curriculum ? `${curriculum?.langCode}-${level}-lesson-${lessonId}` : null);
 
   useEffect(() => {
+    let alive = true;
+    const run = () => {
+    if (!alive) return;
     try {
       const savedStudent = localStorage.getItem("loggedStudent");
       if (!savedStudent) {
@@ -65,6 +68,12 @@ export default function LessonPage() {
     } finally {
       setChecked(true);
     }
+    };
+    // Bring in what the server knows first (other devices, a lesson opened by the administration).
+    pullProgress(langSlug, curriculum?.langCode, level).then(run);
+    return () => {
+      alive = false;
+    };
   }, [router, langSlug, level, lessonId, base, curriculum?.langCode]);
 
   if (!lesson) {

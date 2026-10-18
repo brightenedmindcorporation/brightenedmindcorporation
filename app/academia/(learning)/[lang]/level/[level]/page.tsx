@@ -9,6 +9,7 @@ import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum } from "@/content/curriculum";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
+import { pullProgress } from "@/lib/academy/progressSync";
 import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 
@@ -51,6 +52,8 @@ export default function LevelOverviewPage() {
       setAllowed(true);
       setStudyDays(enrollment.studyDays);
       setProgress(getLevelProgress(langSlug, level));
+      // Then bring in what the server knows (another device, a lesson opened by the administration).
+      pullProgress(langSlug, curriculum?.langCode, level).then(() => setProgress(getLevelProgress(langSlug, level)));
       // The admin may have changed the study plan since login.
       refreshLoggedStudent().then((updated) => {
         const fresh = updated?.enrollments?.find((e: any) => e.langCode === curriculum?.langCode && e.status === "Approved");

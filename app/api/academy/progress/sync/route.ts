@@ -15,12 +15,36 @@ export async function POST(request: Request) {
     const decoded = await getAdminAuth().verifyIdToken(idToken);
     const adminDb = getAdminDb();
 
-    await adminDb.collection("progress").doc(`${decoded.uid}_${langCode}_${level}`).set(
+    // Never overwrite what the server already knows with a device that knows less: merge.
+    const ref = adminDb.collection("progress").doc(`${decoded.uid}_${langCode}_${level}`);
+    const existing = (await ref.get()).data() || {};
+    const union = (a: unknown, b: unknown) =>
+      Array.from(new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])])).sort((x: any, y: any) => x - y);
+    const adminPassed: number[] = Array.isArray(existing.adminPassed) ? existing.adminPassed : [];
+    const merged = {
+      ...progress,
+      studiedLessons: union(existing.studiedLessons, progress.studiedLessons),
+      completedQuizzes: union(existing.completedQuizzes, progress.completedQuizzes),
+      // Administration decisions live on the server only: the student's device cannot remove them.
+      unlockedLessons: union(existing.unlockedLessons, progress.unlockedLessons),
+      adminPassed: union(existing.adminPassed, progress.adminPassed),
+      quizScores: { ...(progress.quizScores || {}) },
+      completedAt: { ...(existing.completedAt || {}), ...(progress.completedAt || {}) },
+      finalQuizPassed: Boolean(existing.finalQuizPassed) || Boolean(progress.finalQuizPassed),
+    } as Record<string, any>;
+    // A quiz validated by the administration keeps its recorded score and date.
+    for (const id of adminPassed) {
+      if (existing.quizScores?.[id] !== undefined) merged.quizScores[id] = existing.quizScores[id];
+      if (existing.completedAt?.[id]) merged.completedAt[id] = existing.completedAt[id];
+    }
+    if (existing.finalQuizPassed && !progress.finalQuizPassed) merged.finalQuizScore = existing.finalQuizScore ?? progress.finalQuizScore ?? null;
+
+    await ref.set(
       {
         uid: decoded.uid,
         langCode,
         level,
-        ...progress,
+        ...merged,
         updatedAt: new Date().toISOString(),
       },
       { merge: true }

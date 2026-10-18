@@ -506,17 +506,22 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
 function useStudents() {
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [loading, setLoading] = useState(true);
+  const reload = async (): Promise<StudentRow[]> => {
+    const r = await api("/api/teacher/students");
+    const rows = (r.students || []) as StudentRow[];
+    setStudents(rows);
+    return rows;
+  };
   useEffect(() => {
-    api("/api/teacher/students")
-      .then((r) => setStudents(r.students || []))
+    reload()
       .catch((e) => alert(`Erreur : ${e.message}`))
       .finally(() => setLoading(false));
   }, []);
-  return { students, loading };
+  return { students, loading, reload };
 }
 
 function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
-  const { students, loading } = useStudents();
+  const { students, loading, reload } = useStudents();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState<StudentRow | null>(null);
   const [activityOf, setActivityOf] = useState<StudentRow | null>(null);
@@ -537,6 +542,14 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
           student={{ name: open.name, email: open.email, studentId: open.studentId, langCode: open.langCode }}
           levels={Object.fromEntries(Object.entries(open.levels).map(([lvl, p]) => [lvl, p.doc]))}
           onClose={() => setOpen(null)}
+          onAct={async (action, level, lessonId, score) => {
+            await api("/api/admin/student-progress", {
+              method: "POST",
+              body: JSON.stringify({ uid: open.uid, langCode: open.langCode, level, lessonId, action, score }),
+            });
+            const rows = await reload();
+            setOpen(rows.find((r) => r.uid === open.uid && r.langCode === open.langCode) ?? null);
+          }}
         />
       )}
       <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Rechercher un étudiant…" className={`${input} max-w-sm`} />

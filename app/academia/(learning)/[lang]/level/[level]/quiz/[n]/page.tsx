@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
-import { syncProgress } from "@/lib/academy/progressSync";
+import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
 import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
@@ -32,6 +32,9 @@ export default function QuizPage() {
   useActiveTime(unlocked && curriculum ? `${curriculum?.langCode}-${level}-quiz-${lessonId}` : null);
 
   useEffect(() => {
+    let alive = true;
+    const run = () => {
+    if (!alive) return;
     try {
       const savedStudent = localStorage.getItem("loggedStudent");
       if (!savedStudent) {
@@ -56,7 +59,8 @@ export default function QuizPage() {
         router.push(base);
         return;
       }
-      setAlreadyScore(progress.quizScores[lessonId] ?? null);
+      // Only a PASSED quiz is "already done"; a failed attempt can be taken again for real.
+      setAlreadyScore(progress.completedQuizzes.includes(lessonId) ? progress.quizScores[lessonId] ?? null : null);
       setUnlocked(true);
     } catch (error) {
       console.error("Erreur lors de la vérification de la session :", error);
@@ -64,6 +68,12 @@ export default function QuizPage() {
     } finally {
       setChecked(true);
     }
+    };
+    // Bring in what the server knows first (other devices, a lesson opened by the administration).
+    pullProgress(langSlug, curriculum?.langCode, level).then(run);
+    return () => {
+      alive = false;
+    };
   }, [router, langSlug, level, lessonId, base, curriculum?.langCode]);
 
   if (!quiz || !curriculum) {
@@ -113,12 +123,12 @@ export default function QuizPage() {
             dialogue={getDialogue(langSlug, level, lessonId) ?? undefined}
             writing={quizWriting(langSlug, curriculum, lessonId)}
             onSubmit={(score, parts) => {
-              // Only the first attempt counts, like the score itself.
-              if (parts && alreadyScore === null) saveQuizParts(langSlug, level, lessonId, parts);
-              if (alreadyScore === null) {
-                const passed = score >= quiz.passingScore && (parts?.dialoguePassed ?? true);
-                logActivity("quiz", `Quiz ${lessonId} : ${score}/${quiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel}, niveau ${level})`, { langCode: curriculum.langCode, level, lessonId, score, total: quiz.questions.length, passed });
-              }
+              // Once the quiz is passed, later attempts are practice only and change nothing.
+              const alreadyPassed = getLevelProgress(langSlug, level).completedQuizzes.includes(lessonId);
+              if (alreadyPassed) return;
+              const passed = score >= quiz.passingScore && (parts?.dialoguePassed ?? true);
+              if (parts) saveQuizParts(langSlug, level, lessonId, parts);
+              logActivity("quiz", `Quiz ${lessonId} : ${score}/${quiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel}, niveau ${level})`, { langCode: curriculum.langCode, level, lessonId, score, total: quiz.questions.length, passed });
               const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore, parts?.dialoguePassed ?? true);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}
