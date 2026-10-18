@@ -10,7 +10,7 @@ import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
-import { levelNumber } from "@/lib/academy/levelAccess";
+import { levelNumber, startLevel } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
@@ -122,9 +122,10 @@ export default function Dashboard() {
     if (!activeEnrollment || isOtherProgramCode(activeEnrollment.langCode)) return;
 
     const langSlug = resolveLangSlug(activeEnrollment.langCode);
-    const level1 = getLevelCurriculum(langSlug, 1);
-    const progress = getLevelProgress(langSlug, 1);
-    const studentLevelNum = Number((activeEnrollment.level || "Level 1").slice(-1)) || 1;
+    const studentLevelNum = levelNumber(activeEnrollment.level);
+    // Progress of the level the student is working on (not always level 1).
+    const level1 = getLevelCurriculum(langSlug, studentLevelNum);
+    const progress = getLevelProgress(langSlug, studentLevelNum);
     const curriculumForLiveCheck = getLevelCurriculum(langSlug, studentLevelNum);
     let interval: ReturnType<typeof setInterval> | undefined;
     if (curriculumForLiveCheck) {
@@ -273,6 +274,9 @@ export default function Dashboard() {
   const langInfo = availableLanguages.find((l) => l.slug === langSlug) ?? availableLanguages[0];
   const programLabel = isOtherProgram ? getOtherProgramLabel(activeEnrollment.langCode) ?? activeEnrollment.langCode : langInfo.label;
 
+  // Levels below the one the student registered at are not part of their enrolment.
+  const firstLevel = startLevel(activeEnrollment as any);
+
   // The next level can be requested once the final quiz of the current one is passed.
   const canRequest = (target: number) =>
     !isOtherProgram &&
@@ -311,11 +315,9 @@ export default function Dashboard() {
   };
 
   const handleContinue = () => {
-    const currentLevel = activeEnrollment.level || "Level 1";
-    if (currentLevel === "Level 1") router.push(`/academia/${langSlug}/level/1/lesson/${lastLesson}`);
-    else if (currentLevel === "Level 2") router.push(`/academia/${langSlug}/level/2`);
-    else if (currentLevel === "Level 3") router.push(`/academia/${langSlug}/level/3`);
-    else router.push(`/academia/${langSlug}/level/1`);
+    const current = levelNumber(activeEnrollment.level);
+    // Continue where the student is: the next lesson of their level.
+    router.push(`/academia/${langSlug}/level/${current}/lesson/${lastLesson}`);
   };
 
   return (
@@ -502,7 +504,7 @@ export default function Dashboard() {
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
-                  onClick={() => router.push(`/academia/${langSlug}/level/${(activeEnrollment.level || "Level 1").slice(-1)}/live`)}
+                  onClick={() => router.push(`/academia/${langSlug}/level/${levelNumber(activeEnrollment.level)}/live`)}
                   className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
                 >
                   <span className="relative flex h-2.5 w-2.5">
@@ -617,12 +619,18 @@ export default function Dashboard() {
                   Basics, everyday vocabulary, and simple conversation.
                 </p>
               </div>
-              <button
-                onClick={() => router.push(`/academia/${langSlug}/level/1`)}
-                className="glow-accent mt-6 w-full bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-2.5 rounded-xl text-sm transition"
-              >
-                Open Level 1
-              </button>
+              {firstLevel > 1 ? (
+                <button disabled className="mt-6 w-full py-2.5 rounded-xl text-sm font-bold bg-surface-alt text-ink-faint cursor-not-allowed border border-line">
+                  Not in your enrolment
+                </button>
+              ) : (
+                <button
+                  onClick={() => router.push(`/academia/${langSlug}/level/1`)}
+                  className="glow-accent mt-6 w-full bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-2.5 rounded-xl text-sm transition"
+                >
+                  Open Level 1
+                </button>
+              )}
             </div>
 
             <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
@@ -640,14 +648,14 @@ export default function Dashboard() {
                   if (levelNumber(activeEnrollment.level) >= 2) router.push(`/academia/${langSlug}/level/2`);
                   else if (canRequest(2)) requestLevel();
                 }}
-                disabled={levelNumber(activeEnrollment.level) < 2 && !canRequest(2)}
+                disabled={firstLevel > 2 || (levelNumber(activeEnrollment.level) < 2 && !canRequest(2))}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                  levelNumber(activeEnrollment.level) < 2 && !canRequest(2)
+                  firstLevel > 2 || (levelNumber(activeEnrollment.level) < 2 && !canRequest(2))
                     ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
-                {levelButtonLabel(2, "Open Level 2")}
+                {firstLevel > 2 ? "Not in your enrolment" : levelButtonLabel(2, "Open Level 2")}
               </button>
             </div>
 
@@ -666,14 +674,14 @@ export default function Dashboard() {
                   if (levelNumber(activeEnrollment.level) >= 3) router.push(`/academia/${langSlug}/level/3`);
                   else if (canRequest(3)) requestLevel();
                 }}
-                disabled={levelNumber(activeEnrollment.level) < 3 && !canRequest(3)}
+                disabled={firstLevel > 3 || (levelNumber(activeEnrollment.level) < 3 && !canRequest(3))}
                 className={`mt-6 w-full py-2.5 rounded-xl text-sm font-bold transition ${
-                  levelNumber(activeEnrollment.level) < 3 && !canRequest(3)
+                  firstLevel > 3 || (levelNumber(activeEnrollment.level) < 3 && !canRequest(3))
                     ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >
-                {levelButtonLabel(3, "Open Level 3")}
+                {firstLevel > 3 ? "Not in your enrolment" : levelButtonLabel(3, "Open Level 3")}
               </button>
             </div>
 

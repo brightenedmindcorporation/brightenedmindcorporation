@@ -34,7 +34,12 @@ export async function GET(request: Request) {
     }
 
     const student = studentSnap.data()!;
-    let enrollments: any[] = enrollmentsSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    let enrollments: any[] = enrollmentsSnap.docs.map((d) => {
+      const data = d.data();
+      // A level saved as a bare number (1-3) is read as "Level N", like everywhere else.
+      const level = typeof data.level === "number" ? `Level ${data.level}` : data.level;
+      return { id: d.id, ...data, level };
+    });
 
     // Legacy accounts created before multi-enrollment support carry their
     // single langCode/level/status/matricule directly on students/{uid}.
@@ -44,6 +49,7 @@ export async function GET(request: Request) {
           id: uid,
           langCode: student.langCode,
           level: student.level,
+          startLevel: student.startLevel,
           studyDays: student.studyDays,
           status: student.status,
           matricule: student.matricule,

@@ -1522,6 +1522,28 @@ export default function AdminPage() {
     }
   };
 
+  // Sets the level the student started at (no access to the levels below it).
+  const changeStartLevel = async (student: any, startLevel: number) => {
+    const current = Number(String(student.level ?? "").slice(-1)) || 1;
+    if (startLevel > current) {
+      alert("Le niveau de départ ne peut pas dépasser le niveau actuel. Ouvrez d'abord le niveau voulu.");
+      return;
+    }
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/update-enrollment", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ id: student.id, kind: student.kind, startLevel }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   // Sets the civility (Monsieur / Madame) used to address the student in e-mails.
   const changeGender = async (student: any, gender: "M" | "F") => {
     try {
@@ -2121,6 +2143,22 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           Débloquer le niveau {levelNumber(s.level) + 1}
                         </button>
                       )}
+                    </div>
+                  )}
+                  {!isOtherProgramCode(s.langCode) && (
+                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
+                      <b className="text-ink">Accès aux niveaux :</b>
+                      <span className="text-sm text-ink-soft">du niveau</span>
+                      <select
+                        value={Number(s.startLevel) >= 1 && Number(s.startLevel) <= 3 ? Number(s.startLevel) : 1}
+                        onChange={(e) => changeStartLevel(s, Number(e.target.value))}
+                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      >
+                        <option value={1}>1</option>
+                        <option value={2}>2</option>
+                        <option value={3}>3</option>
+                      </select>
+                      <span className="text-sm text-ink-soft">au niveau {Number(String(s.level ?? "").slice(-1)) || 1}</span>
                     </div>
                   )}
                   {!isOtherProgramCode(s.langCode) && (

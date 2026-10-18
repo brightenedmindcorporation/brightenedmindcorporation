@@ -17,9 +17,10 @@ export async function PATCH(request: Request) {
     }
     await getCaller(bearer(request), ["admin"]);
 
-    const { id, kind, studyDays, gender: rawGender } = await request.json();
+    const { id, kind, studyDays, gender: rawGender, startLevel: rawStart } = await request.json();
+    const start = Number(rawStart);
     const gender = normalizeGender(rawGender);
-    if (!id || (!gender && studyDays !== 3 && studyDays !== 5)) {
+    if (!id || (!gender && !(start >= 1 && start <= 3) && studyDays !== 3 && studyDays !== 5)) {
       return NextResponse.json({ error: "id et studyDays (3 ou 5) ou gender (M ou F) requis." }, { status: 400 });
     }
 
@@ -27,6 +28,14 @@ export async function PATCH(request: Request) {
     const ref = db.collection(kind === "legacyStudent" ? "students" : "enrollments").doc(String(id));
     const snap = await ref.get();
     if (!snap.exists) return NextResponse.json({ error: "Inscription introuvable." }, { status: 404 });
+
+    // The level the student started at: they have no access to the levels below it.
+    if (start >= 1 && start <= 3) {
+      const current = Number(String(snap.data()!.level ?? "").slice(-1)) || 1;
+      if (start > current) return NextResponse.json({ error: "Le niveau de départ ne peut pas dépasser le niveau actuel de l'étudiant." }, { status: 400 });
+      await ref.update({ startLevel: start });
+      if (studyDays !== 3 && studyDays !== 5 && !gender) return NextResponse.json({ status: "success", startLevel: start });
+    }
 
     // Civility (Monsieur / Madame): kept on the enrolment and on the student profile.
     if (gender) {

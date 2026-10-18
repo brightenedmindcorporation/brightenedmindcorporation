@@ -15,3 +15,18 @@ export const levelLabel = (n: number) => `Level ${n}`;
 export function allowedLevel(enrollment: { level?: unknown } | undefined | null): number {
   return levelNumber(enrollment?.level);
 }
+
+/**
+ * The level the student registered at. Someone who registers at level 2 or 3 gets that level (and the
+ * ones the administration opens after it), never the levels below. Enrolments created before this rule
+ * have no start level: they keep access from level 1.
+ */
+export function startLevel(enrollment: { startLevel?: unknown } | undefined | null): number {
+  const n = Number(enrollment?.startLevel);
+  return n >= 1 && n <= 3 ? n : 1;
+}
+
+/** Whether a level is within the student's access: from the level they started at up to the highest unlocked. */
+export function canAccessLevel(enrollment: { level?: unknown; startLevel?: unknown } | undefined | null, level: number): boolean {
+  return level >= startLevel(enrollment) && level <= allowedLevel(enrollment);
+}

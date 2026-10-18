@@ -76,6 +76,8 @@ export async function POST(request: Request) {
         ...(gender ? { gender } : {}),
         langCode,
         level,
+        // The level the student registered at: no access to the levels below it.
+        ...(typeof level === "string" && /[1-3]$/.test(level) ? { startLevel: Number(level.slice(-1)) } : {}),
         studyDays: studyDays === 5 ? 5 : 3,
         ...(source ? { source } : {}),
         status: "Pending",

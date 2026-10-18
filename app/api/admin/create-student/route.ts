@@ -83,7 +83,9 @@ export async function POST(request: Request) {
         name: student.data()?.name || name,
         ...(gender ? { gender } : {}),
         langCode,
-        level,
+        // Same format as a self-registration ("Level 2"), which the rest of the site reads.
+        level: typeof level === "number" ? `Level ${level}` : level,
+        ...(typeof level === "number" ? { startLevel: level } : {}),
         studyDays,
         status: "Approved",
         matricule,

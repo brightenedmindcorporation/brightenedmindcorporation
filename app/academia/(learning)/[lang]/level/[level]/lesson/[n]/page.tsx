@@ -1,7 +1,7 @@
 "use client";
 
 import { useActiveTime } from "@/lib/academy/useActiveTime";
-import { allowedLevel } from "@/lib/academy/levelAccess";
+import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -47,8 +47,8 @@ export default function LessonPage() {
         router.push(`/login?program=${curriculum?.langCode ?? ""}`);
         return;
       }
-      // A level is reachable once the administration has unlocked it for this student.
-      if (level > allowedLevel(enrollment)) {
+      // A level is reachable from the one the student registered at, up to the highest the administration unlocked.
+      if (!canAccessLevel(enrollment, level)) {
         router.push("/academia/dashboard");
         return;
       }
