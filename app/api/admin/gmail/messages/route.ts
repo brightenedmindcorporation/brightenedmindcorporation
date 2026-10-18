@@ -39,6 +39,13 @@ export async function GET(request: Request) {
     return NextResponse.json({ connected: true, configured: true, ...result });
   } catch (error: any) {
     console.error("Error listing Gmail messages:", error);
+    // Google refuses the saved connection (revoked, or expired after 7 days while the app is in "Testing" mode).
+    if (/invalid_grant|unauthorized_client|invalid_client/i.test(String(error?.message || error))) {
+      return NextResponse.json(
+        { error: "La connexion à Gmail a expiré ou a été refusée par Google. Reconnecte ta boîte.", reauth: true, connected: true, configured: true },
+        { status: 401 }
+      );
+    }
     return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });
   }
 }

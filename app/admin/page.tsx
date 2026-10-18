@@ -218,6 +218,9 @@ export default function AdminPage() {
 
   // --- Gmail inbox tab ---
   const [mailConfigured, setMailConfigured] = useState(false);
+  // null until the first answer; then the reason when the mailbox cannot be read (instead of a misleading "not configured").
+  const [mailChecked, setMailChecked] = useState(false);
+  const [mailError, setMailError] = useState<{ message: string; reauth: boolean } | null>(null);
   const [mailConnected, setMailConnected] = useState(false);
   const [mailMessages, setMailMessages] = useState<any[]>([]);
   const [mailLoading, setMailLoading] = useState(false);
@@ -1089,6 +1092,12 @@ export default function AdminPage() {
         headers: { Authorization: `Bearer ${idToken}` },
       });
       const result = await response.json();
+      setMailChecked(true);
+      if (!response.ok) {
+        setMailError({ message: result.error || "Erreur serveur.", reauth: Boolean(result.reauth) });
+      } else {
+        setMailError(null);
+      }
       if (response.ok) {
         setMailConfigured(Boolean(result.configured));
         setMailConnected(Boolean(result.connected));
@@ -1098,6 +1107,8 @@ export default function AdminPage() {
       }
     } catch (error) {
       console.error("Error fetching Gmail messages:", error);
+      setMailChecked(true);
+      setMailError({ message: "Impossible de joindre le serveur. Vérifie ta connexion et réessaie.", reauth: false });
     } finally {
       if (pageToken) setMailLoadingMore(false);
       else if (!silent) setMailLoading(false);
@@ -3452,7 +3463,28 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               </div>
             )}
 
-            {!mailConfigured ? (
+            {!mailChecked ? (
+              <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft">Chargement de ta boîte mail…</div>
+            ) : mailError && mailMessages.length === 0 ? (
+              <div className="p-8 rounded-2xl border border-line bg-surface text-center space-y-4">
+                <p className="text-ink font-bold">Impossible de lire ta boîte mail</p>
+                <p className="text-sm text-ink-soft max-w-xl mx-auto">{mailError.message}</p>
+                <div className="flex flex-wrap justify-center gap-3">
+                  <button onClick={() => fetchMailMessages()} className="px-5 py-2.5 rounded-xl border border-line text-sm font-bold text-ink hover:border-red-600/60">
+                    Réessayer
+                  </button>
+                  {mailError.reauth && (
+                    <button
+                      onClick={connectGmail}
+                      disabled={mailConnecting}
+                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+                    >
+                      <Link2 size={16} /> {mailConnecting ? "Redirection…" : "Reconnecter Gmail"}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ) : !mailConfigured ? (
               <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft">
                 Gmail n'est pas encore configuré côté serveur (variables GMAIL_CLIENT_ID / GMAIL_CLIENT_SECRET / GMAIL_REDIRECT_URI manquantes).
               </div>
