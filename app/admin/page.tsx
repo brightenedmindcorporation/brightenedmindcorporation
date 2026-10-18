@@ -2125,6 +2125,32 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       </select>
                     </div>
                   )}
+                  {!s.lastSignInAt && (
+                    <div className="flex flex-wrap items-center gap-3">
+                      <p className="text-amber-500 text-xs font-semibold">🔑 Ne s&apos;est jamais connecté : il n&apos;a peut-être pas encore choisi son mot de passe.</p>
+                      <button
+                        onClick={async () => {
+                          try {
+                            const idToken = await auth.currentUser?.getIdToken();
+                            const response = await fetch("/api/admin/send-password-link", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+                              body: JSON.stringify({ uid: s.uid || s.id?.split("_")[0] }),
+                            });
+                            const result = await response.json();
+                            if (!response.ok) throw new Error(result.error || "Erreur serveur");
+                            if (result.emailSent) alert("E-mail envoyé avec le lien pour choisir son mot de passe.");
+                            else window.prompt(`L'e-mail n'a pas pu partir${result.emailError ? ` (${result.emailError})` : ""}. Copiez ce lien et envoyez-le-lui par WhatsApp :`, result.link);
+                          } catch (error: any) {
+                            alert(`Erreur : ${error.message || error}`);
+                          }
+                        }}
+                        className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500"
+                      >
+                        Renvoyer le lien du mot de passe
+                      </button>
+                    </div>
+                  )}
                   {s.emailUnverified && (
                     <p className="text-amber-500 text-xs font-semibold">✉ E-mail non confirmé par l'étudiant (information — vous pouvez approuver quand même)</p>
                   )}

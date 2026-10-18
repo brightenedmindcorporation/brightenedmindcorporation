@@ -30,6 +30,7 @@ function RegisterForm() {
   const [email, setEmail] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
   const [level, setLevel] = useState("Level 1");
   const [programCode, setProgramCode] = useState(initialProgram);
   const [studyDays, setStudyDays] = useState<3 | 5>(3);
@@ -47,6 +48,15 @@ function RegisterForm() {
 
     if (email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase()) {
       setError("Les deux adresses e-mail ne sont pas identiques. Vérifiez votre saisie.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Le mot de passe doit contenir au moins 8 caractères.");
+      return;
+    }
+    if (password !== passwordConfirm) {
+      setError("Les deux mots de passe ne sont pas identiques. Vérifiez votre saisie.");
       return;
     }
 
@@ -273,11 +283,25 @@ function RegisterForm() {
             <label className="block text-sm font-medium text-ink-soft mb-1">Mot de passe</label>
             <PasswordInput
               required
-              minLength={6}
+              minLength={8}
               autoComplete="new-password"
               className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+            />
+            <p className="text-xs text-ink-faint mt-1">Au moins 8 caractères. Notez-le bien : il sert à vous connecter.</p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-ink-soft mb-1">Confirmer le mot de passe</label>
+            <PasswordInput
+              required
+              minLength={8}
+              autoComplete="new-password"
+              placeholder="Retapez le mot de passe"
+              className="w-full border border-line bg-surface p-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600"
+              value={passwordConfirm}
+              onChange={(e) => setPasswordConfirm(e.target.value)}
             />
           </div>
 
