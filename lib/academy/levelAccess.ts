@@ -27,6 +27,17 @@ export function startLevel(enrollment: { startLevel?: unknown } | undefined | nu
 }
 
 /** Whether a level is within the student's access: from the level they started at up to the highest unlocked. */
-export function canAccessLevel(enrollment: { level?: unknown; startLevel?: unknown } | undefined | null, level: number): boolean {
+export function canAccessLevel(
+  enrollment: { level?: unknown; startLevel?: unknown; placement?: { status?: string } } | undefined | null,
+  level: number
+): boolean {
+  // A student who is waiting for their placement test (to take it, or to be corrected) has no level yet.
+  if (placementPending(enrollment)) return false;
   return level >= startLevel(enrollment) && level <= allowedLevel(enrollment);
+}
+
+/** True while the student's level is still to be decided: the test is to be taken, or awaits correction. */
+export function placementPending(enrollment: { placement?: { status?: string } } | undefined | null): boolean {
+  const status = enrollment?.placement?.status;
+  return status === "requested" || status === "submitted";
 }

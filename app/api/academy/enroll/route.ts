@@ -28,7 +28,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { idToken, name, gender: rawGender, langCode, level, studyDays, source: rawSource } = await request.json();
+    const { idToken, name, gender: rawGender, langCode, level, studyDays, source: rawSource, placement: wantsPlacement } = await request.json();
     const source = typeof rawSource === "string" && /^[a-z0-9_-]{1,30}$/.test(rawSource) ? rawSource : "";
     const gender = normalizeGender(rawGender);
     if (!idToken || !langCode || !level) {
@@ -75,9 +75,11 @@ export async function POST(request: Request) {
         name,
         ...(gender ? { gender } : {}),
         langCode,
-        level,
+        // A student who does not know their level takes the placement test first and starts at level 1 until it is decided.
+        level: wantsPlacement === true && typeof level === "string" && /[1-3]$/.test(level) ? "Level 1" : level,
         // The level the student registered at: no access to the levels below it.
-        ...(typeof level === "string" && /[1-3]$/.test(level) ? { startLevel: Number(level.slice(-1)) } : {}),
+        ...(wantsPlacement === true ? { startLevel: 1, placement: { status: "requested", requestedAt: new Date().toISOString() } } : {}),
+        ...(wantsPlacement !== true && typeof level === "string" && /[1-3]$/.test(level) ? { startLevel: Number(level.slice(-1)) } : {}),
         studyDays: studyDays === 5 ? 5 : 3,
         ...(source ? { source } : {}),
         status: "Pending",

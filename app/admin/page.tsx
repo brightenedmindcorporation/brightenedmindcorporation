@@ -42,6 +42,8 @@ import VisitsTab from "@/components/admin/VisitsTab";
 import ActivityTab from "@/components/admin/ActivityTab";
 import StatsTab from "@/components/admin/StatsTab";
 import AddStudentModal from "@/components/admin/AddStudentModal";
+import PlacementTab from "@/components/admin/PlacementTab";
+import CorrectionsTab from "@/components/admin/CorrectionsTab";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
@@ -63,7 +65,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1399,7 +1401,7 @@ export default function AdminPage() {
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
     const requestedTab = params.get("tab");
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1934,6 +1936,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "teachers", label: "Professeurs", badge: 0 },
             { id: "visits", label: "Visites", badge: 0 },
             { id: "activity", label: "Activité", badge: 0 },
+            { id: "corrections", label: "Corrections", badge: 0 },
+            { id: "placement", label: "Tests de niveau", badge: 0 },
             { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[]).map((t) => (
             <button
@@ -2500,6 +2504,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "visits" && <VisitsTab />}
         {tab === "activity" && <ActivityTab />}
         {tab === "stats" && <StatsTab scope="admin" />}
+        {tab === "placement" && <PlacementTab />}
+        {tab === "corrections" && <CorrectionsTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

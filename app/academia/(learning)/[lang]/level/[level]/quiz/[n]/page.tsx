@@ -7,7 +7,7 @@ import { useParams, useRouter } from "next/navigation";
 import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/academy/progress";
-import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
+import { pullProgress, submitWritingForReview, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
 import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
@@ -128,6 +128,8 @@ export default function QuizPage() {
               if (first) {
                 const passed = score >= quiz.passingScore && (parts?.dialoguePassed ?? true);
                 if (parts) saveQuizParts(langSlug, level, lessonId, parts);
+                // The written texts go to the teachers for correction; the other questions are graded here.
+                if (parts?.writingItems?.length && curriculum.langCode) submitWritingForReview({ langCode: curriculum.langCode, level, key: lessonId, items: parts.writingItems });
                 logActivity("quiz", `Quiz ${lessonId} : ${score}/${quiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel}, niveau ${level})`, { langCode: curriculum.langCode, level, lessonId, score, total: quiz.questions.length, passed });
               }
               const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore, parts?.dialoguePassed ?? true);

@@ -1,6 +1,8 @@
 "use client";
 
 import StatsTab from "@/components/admin/StatsTab";
+import PlacementTab from "@/components/admin/PlacementTab";
+import CorrectionsTab from "@/components/admin/CorrectionsTab";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { useEffect, useMemo, useState } from "react";
 import { onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -67,7 +69,7 @@ const input =
 const primaryBtn =
   "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition";
 
-type Tab = "news" | "live" | "students" | "stats" | "messages";
+type Tab = "news" | "live" | "students" | "placement" | "corrections" | "stats" | "messages";
 
 export default function TeacherPage() {
   const [checking, setChecking] = useState(true);
@@ -191,6 +193,8 @@ export default function TeacherPage() {
             { id: "news", label: "Actualités" },
             { id: "live", label: "Mes cours en direct" },
             { id: "students", label: "Mes étudiants" },
+            { id: "corrections", label: "Corrections" },
+            { id: "placement", label: "Tests de niveau" },
             { id: "stats", label: "Statistiques" },
             { id: "messages", label: "Messages" },
           ] as { id: Tab; label: string }[]).map((t) => (
@@ -209,6 +213,8 @@ export default function TeacherPage() {
         {tab === "news" && <NewsTab />}
         {tab === "live" && <LiveTab teacher={teacher} />}
         {tab === "students" && <StudentsTab teacher={teacher} />}
+        {tab === "corrections" && <CorrectionsTab getToken={async () => auth.currentUser?.getIdToken()} />}
+        {tab === "placement" && <PlacementTab getToken={async () => auth.currentUser?.getIdToken()} />}
         {tab === "stats" && <StatsTab scope="teacher" getToken={async () => auth.currentUser?.getIdToken()} />}
         {tab === "messages" && <MessagesTab />}
       </div>

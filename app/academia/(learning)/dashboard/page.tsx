@@ -10,7 +10,7 @@ import AcademyHeader from "../components/AcademyHeader";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import { getLevelProgress } from "@/lib/academy/progress";
-import { levelNumber, startLevel } from "@/lib/academy/levelAccess";
+import { levelNumber, startLevel, placementPending } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
@@ -338,6 +338,12 @@ export default function Dashboard() {
 
           <div className="flex items-center gap-2">
             <button
+              onClick={() => router.push("/academia/corrections")}
+              className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line"
+            >
+              ✍️ Mes corrections
+            </button>
+            <button
               onClick={() => setRequestOpen(true)}
               className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line"
             >
@@ -604,8 +610,32 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Placement test: a student who did not pick a level takes the test first */}
+        {!isOtherProgram && placementPending(activeEnrollment as any) && (
+          <div className="mb-6 p-5 rounded-2xl border border-amber-600/40 bg-amber-500/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="font-bold text-ink">
+                {(activeEnrollment as any).placement?.status === "submitted" ? "Votre test de niveau est en cours de correction" : "Passez votre test de niveau"}
+              </p>
+              <p className="text-sm text-ink-soft mt-0.5">
+                {(activeEnrollment as any).placement?.status === "submitted"
+                  ? "L'administration ou un professeur va vous attribuer votre niveau. Vous serez prévenu(e) ici et par e-mail."
+                  : "Vous n'avez pas encore de niveau : le test sert à trouver celui qui vous convient. Vos cours s'ouvriront ensuite."}
+              </p>
+            </div>
+            {(activeEnrollment as any).placement?.status !== "submitted" && (
+              <button
+                onClick={() => router.push(`/academia/placement/${langSlug}`)}
+                className="glow-accent shrink-0 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition"
+              >
+                Passer le test
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Sections des cours */}
-        <div>
+        <div className={!isOtherProgram && placementPending(activeEnrollment as any) ? "opacity-50 pointer-events-none" : ""}>
           <h2 className="text-xl font-black text-ink mb-4">Your {langInfo.label} Courses</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 

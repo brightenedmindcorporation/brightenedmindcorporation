@@ -9,7 +9,7 @@ import { GraduationCap } from "lucide-react";
 import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
 import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
-import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
+import { pullProgress, submitWritingForReview, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
 import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
@@ -133,6 +133,7 @@ export default function FinalQuizPage() {
               if (first) {
                 const passed = score >= curriculum.finalQuiz.passingScore && (parts?.dialoguePassed ?? true);
                 if (parts) saveQuizParts(langSlug, level, "final", parts);
+                if (parts?.writingItems?.length && curriculum.langCode) submitWritingForReview({ langCode: curriculum.langCode, level, key: "final", items: parts.writingItems });
                 logActivity("final_quiz", `Quiz final du niveau ${level} : ${score}/${curriculum.finalQuiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel})`, { langCode: curriculum.langCode, level, score, total: curriculum.finalQuiz.questions.length, passed });
               }
               const updated = recordFinalQuizResult(langSlug, level, score, curriculum.finalQuiz.passingScore, parts?.dialoguePassed ?? true);

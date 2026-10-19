@@ -32,6 +32,8 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [level, setLevel] = useState("Level 1");
+  // "known": the student picks their level; "test": they take the placement test and are given a level.
+  const [levelMode, setLevelMode] = useState<"known" | "test">("known");
   const [programCode, setProgramCode] = useState(initialProgram);
   const [studyDays, setStudyDays] = useState<3 | 5>(3);
   const [loading, setLoading] = useState(false);
@@ -136,6 +138,7 @@ function RegisterForm() {
           })(),
           langCode: programCode,
           level: isLanguageProgram ? level : "N/A",
+          placement: isLanguageProgram && levelMode === "test",
           studyDays: isLanguageProgram ? studyDays : undefined,
         }),
       });
@@ -179,11 +182,21 @@ function RegisterForm() {
             </p>
           )}
           <p className="text-ink-soft text-sm mb-6">
-            {isLanguageProgram
+            {isLanguageProgram && levelMode === "test"
+              ? "Passez maintenant votre test de niveau : il est corrigé par l'administration ou un professeur, qui vous attribue ensuite votre niveau. Vous pouvez aussi le passer plus tard depuis votre espace."
+              : isLanguageProgram
               ? "Payez maintenant pour activer votre compte immédiatement et recevoir votre Student ID tout de suite, ou patientez pour une approbation manuelle par l'administration."
               : "Votre demande a été transmise à l'administration. Vous recevrez un email de confirmation une fois votre inscription approuvée."}
           </p>
           <div className="flex flex-col gap-3">
+            {isLanguageProgram && levelMode === "test" && (
+              <button
+                onClick={() => router.push(`/academia/placement/${availableLanguages.find((l) => l.code === programCode)?.slug ?? ""}`)}
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-5 py-2.5 rounded-lg font-semibold transition"
+              >
+                Passer mon test de niveau maintenant
+              </button>
+            )}
             {isLanguageProgram && (
               <button
                 onClick={() => router.push("/paiement")}
@@ -331,17 +344,36 @@ function RegisterForm() {
 
           {isLanguageProgram && (
             <>
-              <div>
-                <label className="block text-sm font-medium text-ink-soft mb-1">Niveau</label>
-                <select
-                  className="w-full border border-line bg-surface p-3 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                >
-                  <option value="Level 1">Niveau 1</option>
-                  <option value="Level 2">Niveau 2</option>
-                  <option value="Level 3">Niveau 3</option>
-                </select>
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-ink-soft">Votre niveau</label>
+                <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer ${levelMode === "known" ? "border-red-600 bg-red-600/5" : "border-line"}`}>
+                  <input type="radio" name="levelMode" className="mt-1" checked={levelMode === "known"} onChange={() => setLevelMode("known")} />
+                  <span className="flex-1 text-sm">
+                    <b>Je connais mon niveau</b>
+                    <select
+                      className="mt-2 w-full border border-line bg-surface p-2.5 rounded-lg text-ink focus:outline-none focus:ring-2 focus:ring-red-600"
+                      value={level}
+                      onChange={(e) => {
+                        setLevel(e.target.value);
+                        setLevelMode("known");
+                      }}
+                    >
+                      <option value="Level 1">Niveau 1 : débutant</option>
+                      <option value="Level 2">Niveau 2 : intermédiaire</option>
+                      <option value="Level 3">Niveau 3 : avancé</option>
+                    </select>
+                  </span>
+                </label>
+                <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer ${levelMode === "test" ? "border-red-600 bg-red-600/5" : "border-line"}`}>
+                  <input type="radio" name="levelMode" className="mt-1" checked={levelMode === "test"} onChange={() => setLevelMode("test")} />
+                  <span className="text-sm">
+                    <b>Je ne connais pas mon niveau</b>
+                    <span className="block text-xs text-ink-faint mt-1">
+                      Vous passez un test de niveau juste après l&apos;inscription. L&apos;administration ou un professeur le corrige et vous attribue le niveau qui vous convient.
+                    </span>
+                  </span>
+                </label>
+                <p className="text-xs text-ink-faint">Vous accédez à votre niveau, pas aux niveaux inférieurs. Le niveau suivant s&apos;ouvre quand vous réussissez le test final.</p>
               </div>
 
               <div>

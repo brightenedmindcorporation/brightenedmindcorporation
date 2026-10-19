@@ -82,3 +82,32 @@ export async function pullProgress(langSlug: string, langCode: string | undefine
     // offline or signed out: carry on with local progress
   }
 }
+
+/** Hands the written part of a quiz to the teachers for correction (first attempt only). Fire-and-forget. */
+export async function submitWritingForReview(opts: {
+  langCode: string;
+  level: number;
+  key: number | "final";
+  items: { kind: string; prompt: string; expected?: string; text: string }[];
+}) {
+  try {
+    const user =
+      auth.currentUser ??
+      (await new Promise<User | null>((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (u) => {
+          unsubscribe();
+          resolve(u);
+        });
+      }));
+    if (!user || opts.items.length === 0) return;
+    const idToken = await user.getIdToken();
+    await fetch("/api/academy/writing/submit", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+      body: JSON.stringify({ ...opts, key: String(opts.key) }),
+      keepalive: true,
+    });
+  } catch (error) {
+    console.error("Writing submission failed (non-fatal):", error);
+  }
+}

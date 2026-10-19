@@ -6,7 +6,7 @@ import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } fro
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
-import QuizWritingStep, { emptyWritingState, writingMissing, writingSummary, type QuizWriting } from "@/components/academy/QuizWritingStep";
+import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writingSummary, type QuizWriting, type WritingItem } from "@/components/academy/QuizWritingStep";
 
 /** What the student did in the extra steps of a quiz. */
 export interface QuizParts {
@@ -15,6 +15,8 @@ export interface QuizParts {
   /** Heard-conversation questions answered well enough (at least 60 %). */
   dialoguePassed: boolean;
   writing: string;
+  /** The texts written, structured for the teacher who corrects them. */
+  writingItems?: WritingItem[];
 }
 
 export type { QuizWriting };
@@ -148,7 +150,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     onSubmit(
       finalScore,
       useDialogue || useWriting
-        ? { dialogueScore: dScore, dialogueTotal, dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded, writing: useWriting ? writingSummary(useWriting, writingState) : "" }
+        ? { dialogueScore: dScore, dialogueTotal, dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded, writing: useWriting ? writingSummary(useWriting, writingState) : "", writingItems: useWriting ? writingItems(useWriting, writingState) : undefined }
         : undefined
     );
   };

@@ -60,6 +60,24 @@ export function writingMissing(w: QuizWriting, s: WritingState): string[] {
   return missing;
 }
 
+/** What a teacher reads and corrects: every text the student wrote, with what it was an answer to. */
+export interface WritingItem {
+  kind: "dictation" | "reply" | "free";
+  /** The instruction or question the student answered. */
+  prompt: string;
+  /** For a dictation: the sentence that was dictated. */
+  expected?: string;
+  text: string;
+}
+
+export function writingItems(w: QuizWriting, s: WritingState): WritingItem[] {
+  return [
+    ...w.dictation.map((d, i): WritingItem => ({ kind: "dictation", prompt: "Dictée", expected: d.text, text: s.dictation[i] ?? "" })),
+    ...w.replies.map((r, i): WritingItem => ({ kind: "reply", prompt: r.question, text: s.replies[i] ?? "" })),
+    { kind: "free", prompt: w.topic, text: s.free },
+  ];
+}
+
 /** One text to save with the quiz. */
 export function writingSummary(w: QuizWriting, s: WritingState): string {
   return [
