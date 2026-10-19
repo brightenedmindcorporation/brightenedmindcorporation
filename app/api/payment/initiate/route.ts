@@ -80,7 +80,6 @@ export async function POST(request: Request) {
         status: "success",
         message: "Paiement confirmé (mode simulation — FlexPay pas encore configuré)",
         reference,
-        matricule: confirmation.matricule,
       });
     }
 

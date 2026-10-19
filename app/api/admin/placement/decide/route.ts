@@ -13,7 +13,10 @@ export const dynamic = "force-dynamic";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bmcorporation-cd.com";
 
-/** The administration or a teacher gives the student their starting level after reading the test. */
+/**
+ * The administration gives the student their starting level after reading the test. A teacher can only
+ * RECOMMEND a level: the decision stays with the administration.
+ */
 export async function POST(request: Request) {
   try {
     if (!isAdminConfigured()) return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
@@ -30,6 +33,22 @@ export async function POST(request: Request) {
     if (!test) return NextResponse.json({ error: "Test introuvable." }, { status: 404 });
     if (caller.role === "teacher" && !isTeachersStudent(caller, { langCode: test.langCode, teacherUid: test.teacherUid })) {
       return NextResponse.json({ error: "Ce test ne fait pas partie de vos étudiants." }, { status: 403 });
+    }
+
+    if (caller.role === "teacher") {
+      await testRef.update({ recommendation: { level, comment, by: caller.name || caller.email, at: new Date().toISOString() } });
+      try {
+        await createNotification({
+          audience: "admin",
+          type: "placement-recommendation",
+          title: "Recommandation d'un professeur",
+          message: `${caller.name || caller.email} recommande le niveau ${level} pour ${test.name} (${test.langCode}).`,
+          link: "/admin?tab=placement",
+        });
+      } catch (error) {
+        console.error("Recommendation notification failed (non-fatal):", error);
+      }
+      return NextResponse.json({ ok: true, recommended: true });
     }
 
     const enrollmentRef = db.collection("enrollments").doc(id);

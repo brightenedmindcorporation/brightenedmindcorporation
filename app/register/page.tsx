@@ -183,9 +183,9 @@ function RegisterForm() {
           )}
           <p className="text-ink-soft text-sm mb-6">
             {isLanguageProgram && levelMode === "test"
-              ? "Passez maintenant votre test de niveau : il est corrigé par l'administration ou un professeur, qui vous attribue ensuite votre niveau. Vous pouvez aussi le passer plus tard depuis votre espace."
+              ? "Passez maintenant votre test de niveau : il est corrigé par l'administration, qui vous attribue ensuite votre niveau. Vous pouvez aussi le passer plus tard depuis votre espace."
               : isLanguageProgram
-              ? "Payez maintenant pour activer votre compte immédiatement et recevoir votre Student ID tout de suite, ou patientez pour une approbation manuelle par l'administration."
+              ? "Vous pouvez régler votre formation en ligne dès maintenant. Dans tous les cas, votre compte est activé (et votre Student ID envoyé) après validation par l'administration."
               : "Votre demande a été transmise à l'administration. Vous recevrez un email de confirmation une fois votre inscription approuvée."}
           </p>
           <div className="flex flex-col gap-3">
@@ -202,7 +202,7 @@ function RegisterForm() {
                 onClick={() => router.push("/paiement")}
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-5 py-2.5 rounded-lg font-semibold transition"
               >
-                Payer et activer mon compte
+                Payer ma formation en ligne
               </button>
             )}
             <button
@@ -369,7 +369,7 @@ function RegisterForm() {
                   <span className="text-sm">
                     <b>Je ne connais pas mon niveau</b>
                     <span className="block text-xs text-ink-faint mt-1">
-                      Vous passez un test de niveau juste après l&apos;inscription. L&apos;administration ou un professeur le corrige et vous attribue le niveau qui vous convient.
+                      Vous passez un test de niveau juste après l&apos;inscription. L&apos;administration le corrige et vous attribue le niveau qui vous convient.
                     </span>
                   </span>
                 </label>

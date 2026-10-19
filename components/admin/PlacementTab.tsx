@@ -14,7 +14,11 @@ interface Test {
   submittedAt: string;
   byLevel: Record<string, { score: number; total: number }>;
   suggestedLevel: number;
-  answers: { id: string; level: number; question: string; chosen: string; correct: string; ok: boolean }[];
+  reading?: { score: number; total: number };
+  listening?: { score: number; total: number };
+  answers: { id: string; section?: string; level: number; question: string; chosen: string; correct: string; ok: boolean }[];
+  readAloud?: { transcript: string; score: number | null; audioUrl: string | null; skipped: boolean; expected: string };
+  recommendation?: { level: number; comment: string; by: string };
   writing: string;
   decidedLevel?: number;
   comment?: string;
@@ -24,7 +28,7 @@ interface Test {
 const date = (iso: string) => new Date(iso).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
 
 /** Placement tests to read: automatic scores per level, the written presentation, and the level to give. */
-export default function PlacementTab({ getToken }: { getToken?: () => Promise<string | undefined> }) {
+export default function PlacementTab({ getToken, teacher = false }: { getToken?: () => Promise<string | undefined>; teacher?: boolean }) {
   const [tests, setTests] = useState<Test[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"todo" | "done">("todo");
@@ -52,7 +56,10 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
 
   const decide = async (t: Test) => {
     const chosen = level[t.id] ?? t.suggestedLevel;
-    if (!confirm(`Attribuer le niveau ${chosen} à ${t.name} ?\nL'étudiant est prévenu dans son espace et par e-mail.`)) return;
+    const question = teacher
+      ? `Envoyer à l'administration votre recommandation : niveau ${chosen} pour ${t.name} ?\nC'est l'administration qui attribue le niveau.`
+      : `Attribuer le niveau ${chosen} à ${t.name} ?\nL'étudiant est prévenu dans son espace et par e-mail.`;
+    if (!confirm(question)) return;
     setBusy(t.id);
     try {
       const response = await fetch("/api/admin/placement/decide", {
@@ -62,6 +69,7 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      if (result.recommended) alert("Votre recommandation a été envoyée à l'administration.");
       setOpen(null);
       await load();
     } catch (e: any) {
@@ -95,7 +103,11 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
             {label}
           </button>
         ))}
-        <p className="text-xs text-ink-soft">Le niveau suggéré vient des notes automatiques ; vous décidez après avoir lu le texte de l&apos;étudiant.</p>
+        <p className="text-xs text-ink-soft">
+          {teacher
+            ? "Le niveau suggéré vient des notes automatiques. Vous pouvez recommander un niveau : l'administration décide."
+            : "Le niveau suggéré vient des notes automatiques ; vous décidez après avoir lu, écouté et lu le texte de l'étudiant."}
+        </p>
       </div>
 
       {shown.length === 0 && <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">{filter === "todo" ? "Aucun test à corriger." : "Aucun test corrigé pour le moment."}</div>}
@@ -121,6 +133,16 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
                     N{l} : <b className="text-ink">{t.byLevel?.[l] ? `${t.byLevel[l].score}/${t.byLevel[l].total}` : "—"}</b>
                   </span>
                 ))}
+                {t.reading && (
+                  <span className="px-2.5 py-1 rounded-full border border-line bg-surface-alt text-ink-soft">
+                    Lecture : <b className="text-ink">{t.reading.score}/{t.reading.total}</b>
+                  </span>
+                )}
+                {t.listening && (
+                  <span className="px-2.5 py-1 rounded-full border border-line bg-surface-alt text-ink-soft">
+                    Écoute : <b className="text-ink">{t.listening.score}/{t.listening.total}</b>
+                  </span>
+                )}
                 <span className="px-2.5 py-1 rounded-full bg-red-600 text-white">
                   {t.status === "decided" ? `Niveau donné : ${t.decidedLevel}` : `Suggéré : niveau ${t.suggestedLevel}`}
                 </span>
@@ -129,6 +151,24 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
 
             {isOpen && (
               <div className="border-t border-line p-4 space-y-5">
+                <div className="space-y-2">
+                  <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">Lecture à voix haute</p>
+                  {t.readAloud?.skipped && !t.readAloud.audioUrl ? (
+                    <p className="text-sm text-amber-500">L&apos;étudiant n&apos;a pas pu utiliser le micro et a passé cette partie.</p>
+                  ) : (
+                    <>
+                      {t.readAloud?.audioUrl && <audio controls src={t.readAloud.audioUrl} className="w-full" />}
+                      <p className="text-xs text-ink-faint">
+                        Texte à lire : <span translate="no" className="notranslate text-ink-soft">{t.readAloud?.expected}</span>
+                      </p>
+                      <p className="text-xs text-ink-faint">
+                        Compris par le micro : <span translate="no" className="notranslate text-ink-soft">{t.readAloud?.transcript || "(rien)"}</span>
+                        {t.readAloud?.score != null && <b className="text-ink"> · ressemblance {t.readAloud.score} %</b>}
+                      </p>
+                    </>
+                  )}
+                </div>
+
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Texte de présentation</p>
                   <p translate="no" className="notranslate whitespace-pre-wrap rounded-xl bg-surface-alt border border-line p-3 text-ink">{t.writing || "—"}</p>
@@ -139,7 +179,7 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
                   <div className="rounded-xl border border-line divide-y divide-line max-h-72 overflow-y-auto">
                     {t.answers.map((a, i) => (
                       <div key={a.id} className="p-2.5 text-sm flex gap-3">
-                        <span className="text-ink-faint w-6 shrink-0">N{a.level}</span>
+                        <span className="text-ink-faint w-6 shrink-0">{a.section === "reading" ? "Lec" : a.section === "listening" ? "Éc" : `N${a.level}`}</span>
                         <span translate="no" className="notranslate flex-1 text-ink-soft">
                           {i + 1}. {a.question}
                           <span className="block">
@@ -170,12 +210,18 @@ export default function PlacementTab({ getToken }: { getToken?: () => Promise<st
                       placeholder="Un mot pour l'étudiant (facultatif) : points forts, conseils…"
                       className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                     />
+                    {t.recommendation && (
+                      <p className="text-sm text-amber-500">
+                        Recommandation de {t.recommendation.by} : niveau {t.recommendation.level}
+                        {t.recommendation.comment ? ` — « ${t.recommendation.comment} »` : ""}
+                      </p>
+                    )}
                     <button
                       onClick={() => decide(t)}
                       disabled={busy === t.id}
                       className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold"
                     >
-                      {busy === t.id ? "Enregistrement…" : `Attribuer le niveau ${chosen}`}
+                      {busy === t.id ? "Enregistrement…" : teacher ? `Recommander le niveau ${chosen}` : `Attribuer le niveau ${chosen}`}
                     </button>
                   </div>
                 ) : (

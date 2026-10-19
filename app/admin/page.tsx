@@ -2178,6 +2178,9 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       </select>
                     </div>
                   )}
+                  {s.paid && s.status !== "Approved" && (
+                    <p className="text-emerald-500 text-xs font-semibold">💰 Paiement reçu : l&apos;inscription attend votre approbation.</p>
+                  )}
                   {!s.lastSignInAt && (
                     <div className="flex flex-wrap items-center gap-3">
                       <p className="text-amber-500 text-xs font-semibold">🔑 Ne s&apos;est jamais connecté : il n&apos;a peut-être pas encore choisi son mot de passe.</p>

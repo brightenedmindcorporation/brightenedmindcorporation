@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { availableLanguages } from "@/content/curriculum";
 import { buildPlacementTest, gradePlacement, WRITING_MIN } from "@/lib/academy/placement";
+import { clipUrl, dialogueClipText } from "@/lib/academy/audioClips";
+import { diffAnswer } from "@/lib/academy/writingLab";
 import { createNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
@@ -32,15 +34,25 @@ export async function GET(request: Request) {
     if (ctx.placement.status !== "requested") {
       return NextResponse.json({ status: ctx.placement.status, level: ctx.placement.level ?? null, comment: ctx.placement.comment ?? null });
     }
-    const questions = buildPlacementTest(ctx.lang.slug, ctx.decoded.uid).map(({ answer, ...q }) => q);
-    return NextResponse.json({ status: "requested", questions, writingMin: WRITING_MIN, langSlug: ctx.lang.slug });
+    const test = buildPlacementTest(ctx.lang.slug, ctx.decoded.uid);
+    if (!test) return NextResponse.json({ error: "Test indisponible pour cette langue." }, { status: 404 });
+    return NextResponse.json({
+      status: "requested",
+      langSlug: ctx.lang.slug,
+      questions: test.questions.map(({ answer, ...q }) => q),
+      reading: { title: test.content.reading.title, paragraphs: test.content.reading.paragraphs },
+      readAloud: test.content.readAloud,
+      // The conversation is only given as audio: the text is not sent.
+      listening: test.content.listening.lines.map((text, i) => ({ url: clipUrl(ctx.lang.slug, dialogueClipText(i % 2 === 0 ? "A" : "B", text)) })),
+      writingMin: WRITING_MIN,
+    });
   } catch (error: any) {
     console.error("Placement GET failed:", error);
     return NextResponse.json({ error: error?.message || "Erreur serveur." }, { status: 500 });
   }
 }
 
-/** The student hands in the test: graded here (the answers never leave the server), then sent to be reviewed. */
+/** The student hands in the test: graded here (the answers never leave the server), then sent to the administration. */
 export async function POST(request: Request) {
   try {
     if (!isAdminConfigured()) return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
@@ -50,11 +62,25 @@ export async function POST(request: Request) {
     if ("error" in ctx) return ctx.error;
     if (ctx.placement.status !== "requested") return NextResponse.json({ error: "Ce test a déjà été envoyé." }, { status: 409 });
 
+    const test = buildPlacementTest(ctx.lang.slug, ctx.decoded.uid);
+    if (!test) return NextResponse.json({ error: "Test indisponible pour cette langue." }, { status: 404 });
+
     const answers: Record<string, string> =
       body.answers && typeof body.answers === "object" ? Object.fromEntries(Object.entries(body.answers).map(([k, v]) => [k, String(v)])) : {};
     const writing = typeof body.writing === "string" ? body.writing.trim().slice(0, 4000) : "";
-    const questions = buildPlacementTest(ctx.lang.slug, ctx.decoded.uid);
-    const grade = gradePlacement(questions, answers);
+    const grade = gradePlacement(test.questions, answers);
+
+    // Reading aloud: what the browser's speech recognition heard, compared with the passage; and the recording, for the reviewer to listen to.
+    const spoken = body.readAloud && typeof body.readAloud === "object" ? body.readAloud : {};
+    const transcript = typeof spoken.transcript === "string" ? spoken.transcript.slice(0, 1500) : "";
+    const cjk = ctx.lang.slug === "chinese";
+    const readAloud = {
+      transcript,
+      score: transcript ? Math.round(diffAnswer(test.content.readAloud, transcript, cjk).score * 100) : null,
+      audioUrl: typeof spoken.audioUrl === "string" && spoken.audioUrl.startsWith("https://res.cloudinary.com/") ? spoken.audioUrl : null,
+      skipped: spoken.skipped === true,
+    };
+
     const now = new Date().toISOString();
     const profile = (await ctx.db.collection("students").doc(ctx.decoded.uid).get()).data();
     const name = ctx.enrollment.name || profile?.name || ctx.decoded.email || "";
@@ -68,9 +94,20 @@ export async function POST(request: Request) {
       status: "submitted",
       submittedAt: now,
       byLevel: grade.byLevel,
+      reading: grade.reading,
+      listening: grade.listening,
       suggestedLevel: grade.suggestedLevel,
       // What the student chose for each question, with the right answer, for the reviewer.
-      answers: questions.map((q) => ({ id: q.id, level: q.level, question: q.question, chosen: answers[q.id] ?? "", correct: q.answer, ok: answers[q.id] === q.answer })),
+      answers: test.questions.map((q) => ({
+        id: q.id,
+        section: q.section,
+        level: q.level,
+        question: q.question,
+        chosen: answers[q.id] ?? "",
+        correct: q.answer,
+        ok: answers[q.id] === q.answer,
+      })),
+      readAloud: { ...readAloud, expected: test.content.readAloud },
       writing,
     });
     await ctx.enrollmentRef.update({ placement: { ...ctx.placement, status: "submitted", submittedAt: now, suggestedLevel: grade.suggestedLevel } });
@@ -80,7 +117,7 @@ export async function POST(request: Request) {
         audience: "admin",
         type: "placement-submitted",
         title: "Test de niveau à corriger",
-        message: `${name} (${ctx.lang.label}) a passé le test de niveau : niveau suggéré ${grade.suggestedLevel}.`,
+        message: `${name} (${ctx.lang.label}) a passé le test de niveau : niveau suggéré ${grade.suggestedLevel}. Il attend votre décision.`,
         link: "/admin?tab=placement",
       });
     } catch (error) {

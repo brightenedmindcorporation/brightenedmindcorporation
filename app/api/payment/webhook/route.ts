@@ -29,9 +29,9 @@ export async function POST(request: Request) {
     });
 
     if (result.ok) {
-      console.log(`✅ Inscription activée pour ${paymentRef} — matricule ${result.matricule}`);
+      console.log(`✅ Paiement reçu pour ${paymentRef} — l'inscription attend l'approbation de l'administration`);
       return NextResponse.json(
-        { status: "success", message: "Transaction validée, matricule généré et e-mail envoyé", matricule: result.matricule },
+        { status: "success", message: "Transaction validée : l'inscription attend l'approbation de l'administration" },
         { status: 200 }
       );
     }

@@ -214,7 +214,7 @@ export default function TeacherPage() {
         {tab === "live" && <LiveTab teacher={teacher} />}
         {tab === "students" && <StudentsTab teacher={teacher} />}
         {tab === "corrections" && <CorrectionsTab getToken={async () => auth.currentUser?.getIdToken()} />}
-        {tab === "placement" && <PlacementTab getToken={async () => auth.currentUser?.getIdToken()} />}
+        {tab === "placement" && <PlacementTab teacher getToken={async () => auth.currentUser?.getIdToken()} />}
         {tab === "stats" && <StatsTab scope="teacher" getToken={async () => auth.currentUser?.getIdToken()} />}
         {tab === "messages" && <MessagesTab />}
       </div>

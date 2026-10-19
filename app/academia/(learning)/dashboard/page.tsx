@@ -619,7 +619,7 @@ export default function Dashboard() {
               </p>
               <p className="text-sm text-ink-soft mt-0.5">
                 {(activeEnrollment as any).placement?.status === "submitted"
-                  ? "L'administration ou un professeur va vous attribuer votre niveau. Vous serez prévenu(e) ici et par e-mail."
+                  ? "L'administration va vous attribuer votre niveau. Vous serez prévenu(e) ici et par e-mail."
                   : "Vous n'avez pas encore de niveau : le test sert à trouver celui qui vous convient. Vos cours s'ouvriront ensuite."}
               </p>
             </div>

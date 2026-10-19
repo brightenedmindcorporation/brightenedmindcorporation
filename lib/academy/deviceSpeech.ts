@@ -5,7 +5,7 @@ import { playClip, stopClip } from "./lessonAudioPlayer";
 // Maps our URL language slugs to BCP-47 tags for the Web Speech API.
 // Without this, every language's "Listen" buttons were reading the text
 // aloud with an English voice.
-const SPEECH_LANG: Record<string, string> = {
+export const SPEECH_LANG: Record<string, string> = {
   english: "en-US",
   french: "fr-FR",
   swahili: "sw-KE",

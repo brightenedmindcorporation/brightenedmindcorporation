@@ -86,6 +86,19 @@ export async function collectTexts(lang) {
       });
     }
   }
+  // Placement test: the conversation of the listening part (same two voices as the quiz conversations).
+  const placementFile = path.join(ROOT, "content", "placement", `${lang}.ts`);
+  if (fs.existsSync(placementFile)) {
+    const mod = await import(pathToFileURL(placementFile).href);
+    (mod.default?.listening?.lines || []).forEach((line, i) => {
+      const text = line.trim();
+      if (!text) return;
+      const speaker = i % 2 === 0 ? "A" : "B";
+      const id = clipId(lang, dialogueClipText(speaker, text));
+      texts.set(id, text);
+      if (speaker === "B") voiceOverride.set(id, VOICES_B[lang]);
+    });
+  }
   for (const level of [1, 2, 3]) {
     const file = path.join(ROOT, "content", "curriculum", lang, `level${level}.ts`);
     const mod = await import(pathToFileURL(file).href);

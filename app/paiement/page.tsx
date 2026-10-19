@@ -158,7 +158,7 @@ export default function PaymentPage() {
             <div className="w-10 h-10 border-4 border-red-600 border-t-transparent rounded-full animate-spin mx-auto" />
             <h2 className="text-xl font-bold text-ink">En attente de confirmation…</h2>
             <p className="text-ink-soft text-sm max-w-sm mx-auto">
-              Vérifiez votre téléphone : une demande de confirmation Mobile Money a été envoyée au numéro {phone}. Approuvez-la pour activer votre compte.
+              Vérifiez votre téléphone : une demande de confirmation Mobile Money a été envoyée au numéro {phone}. Approuvez-la pour valider votre paiement.
             </p>
           </div>
         ) : status === "success" ? (
@@ -168,20 +168,14 @@ export default function PaymentPage() {
             </div>
             <h2 className="text-2xl font-bold text-emerald-400">Paiement Reçu avec Succès !</h2>
             <p className="text-ink-soft text-sm">
-              Votre transaction a été validée. Votre compte est maintenant activé.
+              Votre transaction a été validée. Votre inscription doit maintenant être <b>approuvée par l&apos;administration</b> : vous recevrez votre Student ID et un e-mail dès que ce sera fait, et vous pourrez alors vous connecter.
             </p>
-            {matricule && (
-              <div className="bg-surface-alt border border-emerald-700/50 rounded-xl p-4 inline-block">
-                <p className="text-xs text-ink-faint mb-1">Votre Student ID</p>
-                <p className="text-2xl font-black text-emerald-400 font-mono tracking-wider">{matricule}</p>
-              </div>
-            )}
             <div>
               <Link
                 href="/login"
                 className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition mt-4"
               >
-                Me connecter à mon Espace Élève
+                Aller à la page de connexion
               </Link>
             </div>
           </div>

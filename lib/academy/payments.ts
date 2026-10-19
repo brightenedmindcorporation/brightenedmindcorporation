@@ -2,7 +2,7 @@ import { mailFrom } from "@/lib/mailFrom";
 import "server-only";
 import { Resend } from "resend";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
-import { generateMatriculeAdmin } from "@/lib/academy/matricule-admin";
+import { createNotification } from "@/lib/notifications";
 import { sendWithText } from "@/lib/mailText";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
@@ -17,7 +17,7 @@ export interface GatewayCallbackPayload {
 }
 
 export type ConfirmPaymentResult =
-  | { ok: true; matricule: string; alreadyProcessed?: boolean }
+  | { ok: true; alreadyProcessed?: boolean }
   | { ok: false; reason: "admin-not-configured" | "not-found" | "gateway-rejected" };
 
 function isGatewaySuccess(status: string): boolean {
@@ -27,23 +27,16 @@ function isGatewaySuccess(status: string): boolean {
   return normalized === "SUCCESS" || normalized === "APPROVED" || normalized === "00" || normalized === "0";
 }
 
-async function sendMatriculeEmail(email: string, amount: number | undefined, currency: string | undefined, matricule: string) {
+async function sendPaymentReceivedEmail(email: string, amount: number | undefined, currency: string | undefined) {
   const { error } = await sendWithText(resend, {
     from: mailFrom("Brightened Mind Academia"),
     to: email,
-    subject: "Confirmation d'inscription & Votre Student ID BMCA",
+    subject: "Paiement reçu — votre inscription sera validée par l'administration",
     html: `
       <div style="font-family: sans-serif; padding: 20px; color: #333; max-width: 600px; margin: 0 auto; border: 1px solid #eee; border-radius: 10px;">
-        <h2 style="color: #111;">Bienvenue chez Brightened Mind Corporation !</h2>
-        <p>Votre paiement de <strong>${amount ?? "-"} ${currency || "USD"}</strong> a été reçu avec succès.</p>
-
-        <p>Voici votre identifiant d'accès officiel :</p>
-        <div style="background: #111; color: #ef4444; padding: 18px; border-radius: 8px; text-align: center; font-size: 26px; font-weight: bold; font-family: monospace; letter-spacing: 2px;">
-          ${matricule}
-        </div>
-
-        <p style="margin-top: 20px;">Conservez précieusement ce Student ID, il vous permettra d'accéder à tous vos cours sur l'Espace Academia.</p>
-
+        <h2 style="color: #111;">Merci pour votre paiement !</h2>
+        <p>Votre paiement de <strong>${amount ?? "-"} ${currency || "USD"}</strong> a bien été reçu.</p>
+        <p>Votre inscription doit maintenant être <strong>validée par l'administration</strong>. Dès que c'est fait, vous recevrez votre Student ID et vous pourrez vous connecter à votre espace.</p>
         <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
         <p style="font-size: 12px; color: #777; text-align: center;">Brightened Mind Corporation — Service Admission</p>
       </div>
@@ -55,8 +48,9 @@ async function sendMatriculeEmail(email: string, amount: number | undefined, cur
 /**
  * Confirms a payment referenced by `reference` (the doc id of
  * payments/{reference}, created by /api/payment/initiate) and, on success,
- * persists the enrollment to Firestore and generates the student's real
- * matricule. Shared by /api/payment/webhook (the real gateway callback
+ * records the payment on the enrollment. A payment NEVER activates an
+ * account by itself: the enrollment stays "Pending" until the administration
+ * approves it (the Student ID is generated at that moment). Shared by /api/payment/webhook (the real gateway callback
  * target) and /api/payment/initiate (which calls this inline today since
  * the real gateway call is still commented out — see that route).
  *
@@ -94,8 +88,8 @@ export async function confirmPayment(
     matricule?: string;
   };
 
-  if (data.status === "paid" && data.matricule) {
-    return { ok: true, matricule: data.matricule, alreadyProcessed: true };
+  if (data.status === "paid") {
+    return { ok: true, alreadyProcessed: true };
   }
 
   if (!isGatewaySuccess(payload.status)) {
@@ -103,51 +97,50 @@ export async function confirmPayment(
     return { ok: false, reason: "gateway-rejected" };
   }
 
-  const matricule = await generateMatriculeAdmin(data.langCode);
   const now = new Date();
+  const enrollmentRef = adminDb.collection("enrollments").doc(`${data.uid}_${data.langCode}`);
 
   await adminDb.runTransaction(async (tx) => {
+    const enrollment = await tx.get(enrollmentRef);
     tx.update(paymentRef, {
       status: "paid",
-      matricule,
       transactionId: payload.transactionId ?? null,
       confirmedAt: now,
     });
-
+    // The payment is recorded on the enrolment; its status is never changed here.
     tx.set(
-      adminDb.collection("enrollments").doc(`${data.uid}_${data.langCode}`),
+      enrollmentRef,
       {
         uid: data.uid,
         langCode: data.langCode,
-        level: data.level,
-        // Must match the status value the approve-enrollment route and
-        // the login/dashboard/level gating logic check for — a payment
-        // is itself the approval, so it goes straight to "Approved"
-        // rather than a separate "paid" status those paths don't know.
-        status: "Approved",
-        matricule,
-        createdAt: now,
-        approvedAt: now,
+        paid: true,
+        paidAt: now.toISOString(),
         paymentRef: reference,
-        source: "payment",
+        ...(enrollment.exists ? {} : { level: data.level, status: "Pending", matricule: "", createdAt: now.toISOString(), source: "payment" }),
       },
-      { merge: true }
-    );
-
-    tx.set(
-      adminDb.collection("students").doc(data.uid),
-      { status: "Approved", matricule },
       { merge: true }
     );
   });
 
+  try {
+    await createNotification({
+      audience: "admin",
+      type: "payment-received",
+      title: "Paiement reçu : inscription à approuver",
+      message: `${data.studentName || payload.customerEmail || data.uid} a payé (${payload.amount ?? "-"} ${payload.currency || "USD"}) — ${data.langCode}. Son inscription attend votre approbation.`,
+      link: "/admin?tab=students",
+    });
+  } catch (notifError) {
+    console.error("[payments] Admin notification failed (non-fatal):", notifError);
+  }
+
   if (payload.customerEmail) {
     try {
-      await sendMatriculeEmail(payload.customerEmail, payload.amount, payload.currency, matricule);
+      await sendPaymentReceivedEmail(payload.customerEmail, payload.amount, payload.currency);
     } catch (emailError) {
       console.error("[payments] Email send failed (non-fatal):", emailError);
     }
   }
 
-  return { ok: true, matricule };
+  return { ok: true };
 }
