@@ -278,7 +278,7 @@ export const chineseLevel1: LevelCurriculum = {
 
 你好！我叫大卫。你叫什么名字？你好大卫，我叫萨拉。很高兴认识你。`,
       videoTopic: "Réviser le vocabulaire et la conversation de base du Niveau 1 en chinois.",
-      videoUrl: "https://www.youtube.com/watch?v=hiycDDB4T5c",
+      videoUrl: "https://www.youtube.com/watch?v=eKyE5UeYUuA",
       readingTitle: "上个星期日，凯文和家人去城里看叔叔。(Dimanche dernier, Kevin est allé en ville voir son oncle avec sa famille.)",
       reading: ["出门前，他吃了面包和茶。(Avant de partir, il a mangé du pain et bu du thé.)", "到了以后，凯文礼貌地问候了所有人。(En arrivant, Kevin a salué tout le monde poliment.)"],
       readingSpeakText: `上个星期日，凯文和家人去城里看叔叔。出门前，他吃了面包和茶。`,

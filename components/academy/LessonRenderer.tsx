@@ -78,12 +78,19 @@ function VideoCard({ lesson, statsKey }: { lesson: Lesson; statsKey?: string }) 
   const embedUrl = lesson.videoUrl ? getEmbedUrl(lesson.videoUrl) : null;
   const frame = useRef<HTMLIFrameElement>(null);
   // Plays, time watched and drop-off of the lesson video (anonymous statistics for the administration).
-  useYouTubeMeter(frame, "lesson", statsKey ?? "", lesson.title, Boolean(embedUrl && statsKey && /youtube/.test(embedUrl)));
+  const [failed, setFailed] = useState(false);
+  useYouTubeMeter(frame, "lesson", statsKey ?? "", lesson.title, Boolean(embedUrl && /youtube/.test(embedUrl)), () => setFailed(true));
 
   return (
     <Card>
       <CardTitle icon={PlayCircle}>Video</CardTitle>
-      {embedUrl ? (
+      {embedUrl && failed ? (
+        <div className="mt-4 rounded-2xl border border-line bg-surface-alt p-6 text-center space-y-3">
+          <p className="font-bold text-ink">Cette vidéo n&apos;est pas disponible pour le moment.</p>
+          <p className="text-sm text-ink-soft">{lesson.videoTopic}</p>
+          <p className="text-xs text-ink-faint">Le reste de la leçon (texte, audio, exercices) fonctionne normalement. L&apos;administration a été informée.</p>
+        </div>
+      ) : embedUrl ? (
         <div
           className="mt-4 aspect-video rounded-2xl overflow-hidden border border-line bg-black"
           onContextMenu={(e) => e.preventDefault()}

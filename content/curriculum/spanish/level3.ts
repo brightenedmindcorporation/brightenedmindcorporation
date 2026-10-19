@@ -26,7 +26,7 @@ Segundo condicional, para algo poco probable o hipotético. Si tuviera más tiem
 
 Usos empresariales. Los condicionales son comunes en negociaciones y planificación.`,
       videoTopic: "Comparar el primer y el segundo condicional en una negociación empresarial.",
-      videoUrl: "https://www.youtube.com/watch?v=G2iihnuAsQE",
+      videoUrl: "https://www.youtube.com/watch?v=aI-pzmJ8ftY",
       readingTitle: "Una Negociación en la Empresa Brightened Mind",
       reading: [
         "Durante la reunión, el proveedor dijo, “Si pide más unidades, le ofreceremos un descuento.”",

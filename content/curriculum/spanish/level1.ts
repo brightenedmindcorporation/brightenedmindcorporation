@@ -100,7 +100,7 @@ Frases útiles: este es mi padre. Mi madre es muy amable. Tengo un hermano y dos
 
 Ejemplo: vivo con mi familia. Mi padre trabaja en una oficina.`,
       videoTopic: "Aprender el vocabulario de la familia.",
-      videoUrl: "https://www.youtube.com/watch?v=FZTOI0WhFNQ",
+      videoUrl: "https://www.youtube.com/watch?v=zqzxzKBPPJ4",
       readingTitle: "Me llamo Juan.",
       reading: ["Vivo con mis padres y mi hermana.", "Mi padre es médico.", "Mi madre es muy cariñosa.", "Me encanta pasar tiempo con mi familia."],
       readingSpeakText: `Me llamo Juan. Vivo con mis padres y mi hermana. Mi padre es médico. Mi madre es muy cariñosa.`,
@@ -120,7 +120,7 @@ Ejemplo: vivo con mi familia. Mi padre trabaja en una oficina.`,
 
 Frases útiles: este es mi libro. Escribo con un bolígrafo. La silla es azul.`,
       videoTopic: "Aprender objetos comunes y su pronunciación.",
-      videoUrl: "https://www.youtube.com/watch?v=8fKhTpda1y8",
+      videoUrl: "https://www.youtube.com/watch?v=rqX2AN-sVSA",
       readingTitle: "Me llamo Pedro.",
       reading: ["Cada día voy a la escuela con mi mochila y mi cuaderno.", "Uso un bolígrafo para escribir en mi libro.", "Mi teléfono está en mi mochila.", "Me siento en una silla y estudio cada mañana."],
       readingSpeakText: `Me llamo Pedro. Cada día voy a la escuela con mi mochila y mi cuaderno.`,
@@ -164,7 +164,7 @@ Meses del año: enero, febrero, marzo, abril, mayo, junio, julio, agosto, septie
 
 Frases útiles: hoy es lunes. Mi cumpleaños es en julio.`,
       videoTopic: "Aprender los días, los meses y cómo decir las fechas.",
-      videoUrl: "https://www.youtube.com/watch?v=w2nQ1c98tgk",
+      videoUrl: "https://www.youtube.com/watch?v=U76dqwEjsP0",
       readingTitle: "Me llamo Kevin.",
       reading: [
         "Hoy es viernes 12 de junio. Me levanto temprano cada mañana.",

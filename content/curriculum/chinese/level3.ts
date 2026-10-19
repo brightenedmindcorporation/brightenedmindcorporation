@@ -79,7 +79,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 好，我们成交了。`,
       videoTopic: "观察一场商业谈判。",
-      videoUrl: "https://www.youtube.com/watch?v=vSbKbh-mV8U",
+      videoUrl: "https://www.youtube.com/watch?v=idzETSmJ310",
       readingTitle: "李经理和一家工厂谈判价格。(Mme Li a négocié le prix avec une usine.)",
       reading: [
         "工厂的报价比预算高。(L'offre de l'usine était plus élevée que le budget.)",

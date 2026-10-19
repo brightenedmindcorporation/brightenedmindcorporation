@@ -161,7 +161,7 @@ Kuandika kumbukumbu za mkutano. Kumbukumbu zinaandika yaliyojadiliwa na kuamuliw
 
 Maneno ya muhimu. Lengo la ripoti hii ni... Takwimu zinaonyesha kuwa... Kutokana na matokeo haya, tunapendekeza...`,
       videoTopic: "Ona jinsi ripoti ya kibiashara inavyopangwa kuanzia utangulizi hadi mapendekezo.",
-      videoUrl: "https://www.youtube.com/watch?v=7j71KF6osi8",
+      videoUrl: "https://www.youtube.com/watch?v=odbsGjQFDu0",
       readingTitle: "Ripoti Kuhusu Kuridhika kwa Wateja",
       reading: [
         "Lengo la ripoti hii ni kutathmini kuridhika kwa wateja katika robo iliyopita.",

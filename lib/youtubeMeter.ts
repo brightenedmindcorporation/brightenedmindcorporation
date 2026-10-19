@@ -9,7 +9,10 @@ interface YTPlayer {
   destroy(): void;
 }
 interface YTApi {
-  Player: new (el: HTMLIFrameElement, opts: { events: { onStateChange: (e: { data: number }) => void } }) => YTPlayer;
+  Player: new (
+    el: HTMLIFrameElement,
+    opts: { events: { onStateChange: (e: { data: number }) => void; onError?: (e: { data: number }) => void } }
+  ) => YTPlayer;
 }
 declare global {
   interface Window {
@@ -41,7 +44,15 @@ function loadYouTubeApi(): Promise<YTApi> {
  * Counts plays, watched time and drop-off of a YouTube embed (the iframe must carry enablejsapi=1).
  * Statistics are best-effort: if the YouTube API cannot load, the video simply is not measured.
  */
-export function useYouTubeMeter(iframe: RefObject<HTMLIFrameElement | null>, type: TrackedType, key: string, title: string, enabled: boolean) {
+export function useYouTubeMeter(
+  iframe: RefObject<HTMLIFrameElement | null>,
+  type: TrackedType,
+  key: string,
+  title: string,
+  enabled: boolean,
+  /** Called when YouTube cannot play the video (removed, private, embedding disabled, region…). */
+  onError?: () => void
+) {
   useEffect(() => {
     const el = iframe.current;
     if (!enabled || !el) return;
@@ -71,6 +82,7 @@ export function useYouTubeMeter(iframe: RefObject<HTMLIFrameElement | null>, typ
         if (cancelled) return;
         player = new YT.Player(el, {
           events: {
+            onError: () => onError?.(),
             onStateChange: (e) => {
               if (e.data === 1) {
                 meter.start();

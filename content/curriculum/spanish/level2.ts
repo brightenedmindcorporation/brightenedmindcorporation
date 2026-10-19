@@ -30,7 +30,7 @@ Concordancia. Un sujeto singular lleva un verbo singular: ella trabaja en un hos
 
 Errores comunes. Incorrecto: los niños juega afuera. Correcto: los niños juegan afuera.`,
       videoTopic: "Repasar la estructura de la oración y la concordancia con ejemplos.",
-      videoUrl: "https://www.youtube.com/watch?v=bDLN4XmBUZU",
+      videoUrl: "https://www.youtube.com/watch?v=mci8opKPsJI",
       readingTitle: "Me llamo Grace.",
       reading: [
         "Ahora estoy estudiando español de nivel intermedio.",
