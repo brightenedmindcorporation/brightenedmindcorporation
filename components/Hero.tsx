@@ -9,7 +9,7 @@ import BmLogo from "./BmLogo";
 export default function Hero() {
   return (
     <FadeIn>
-    <section className="relative pt-44 pb-32 bg-page overflow-hidden">
+    <section className="relative pt-32 md:pt-44 pb-20 md:pb-32 bg-page overflow-hidden">
 
       {/* Decorative background */}
 
@@ -20,7 +20,7 @@ export default function Hero() {
       border-[40px] md:border-[70px]
       border-red-600 rounded-full opacity-[0.07] blur-[2px]"></div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-8 grid lg:grid-cols-2 gap-14 lg:gap-20 items-center relative z-10">
+      <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center relative z-10 [&>*]:min-w-0">
 
         {/* LEFT */}
 
@@ -32,11 +32,11 @@ export default function Hero() {
 
           <BmLogo size={100} />
 
-          <span className="mt-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-700/40 bg-red-500/5 text-red-400 text-xs font-semibold tracking-[0.2em] uppercase">
+          <span className="mt-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-700/40 bg-red-500/5 text-red-400 text-xs font-semibold tracking-[0.12em] sm:tracking-[0.2em] uppercase">
             Groupe multidisciplinaire
           </span>
 
-          <h1 className="mt-6 text-6xl lg:text-7xl font-black leading-[1.05] text-ink">
+          <h1 className="mt-6 text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.05] text-ink break-words">
   FORMER.
   <br />
   <span className="text-gradient-red">
@@ -46,7 +46,7 @@ export default function Hero() {
   VALORISER.
 </h1>
 
-          <p className="mt-8 text-ink-soft leading-9 text-lg max-w-xl font-sans">
+          <p className="mt-8 text-ink-soft leading-8 md:leading-9 text-base md:text-lg max-w-xl font-sans">
   Brightened Mind Corporation développe le capital humain
   en proposant des solutions innovantes en communication,
   placement de personnel domestique et formation professionnelle.

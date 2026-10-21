@@ -93,7 +93,7 @@ export default function CommunicationPage() {
           <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/5 text-red-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-red-700/40">
             BM CORPORATION
           </span>
-          <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
+          <h1 className="text-4xl min-[400px]:text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             L'Agence de <span className="text-gradient-red">Communication</span> Intégrale
           </h1>
           <p className="text-xl text-ink-soft mb-10 leading-relaxed max-w-2xl mx-auto">
@@ -151,7 +151,7 @@ export default function CommunicationPage() {
       {/* CALL TO ACTION */}
       <section className="bg-surface-sunken py-24 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-ink mb-6">
+          <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-extrabold text-ink mb-6">
             Vous avez un projet en tête ?
           </h2>
           <p className="text-xl text-ink-soft mb-10 max-w-2xl mx-auto">

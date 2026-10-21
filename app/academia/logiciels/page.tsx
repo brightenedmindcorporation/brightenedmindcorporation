@@ -77,7 +77,7 @@ export default function LogicielsPage() {
           <div className="flex justify-center mb-4">
             <svg className="w-9 h-9 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}><path d="M9 12h6M9 16h6M9 8h2M7 4h10a2 2 0 0 1 2 2v13l-3-2-2 2-2-2-2 2-2-2-3 2V6a2 2 0 0 1 2-2z"/></svg>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
+          <h1 className="text-3xl min-[400px]:text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             Formation <span className="text-gradient-red">Logiciels de Gestion</span>
           </h1>
           <p className="text-xl text-ink-soft mb-8 leading-relaxed max-w-2xl mx-auto">
@@ -155,7 +155,7 @@ export default function LogicielsPage() {
 
       <section className="bg-surface-sunken py-20 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-ink mb-6">Prêt à maîtriser vos outils de gestion ?</h2>
+          <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-extrabold text-ink mb-6">Prêt à maîtriser vos outils de gestion ?</h2>
           <p className="text-xl text-ink-soft mb-8 max-w-2xl mx-auto">
             Contactez notre équipe pédagogique au <span className="text-ink font-bold">{phoneOfficial}</span> ou sur
             WhatsApp pour réserver votre première session.

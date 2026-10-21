@@ -42,7 +42,7 @@ export default function Stats() {
               className="bg-surface/60 border border-line hover:border-red-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
             >
 
-              <h2 className="text-5xl font-black text-gradient-red">
+              <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black text-gradient-red">
                 {stat.number}
               </h2>
 

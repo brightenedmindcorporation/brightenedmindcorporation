@@ -46,7 +46,7 @@ export default function Departments() {
               Nos Départements
             </p>
 
-            <h2 className="text-5xl font-black mt-6 text-ink leading-tight">
+            <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black mt-6 text-ink leading-tight">
               Trois expertises.
               <br />
               <span className="text-gradient-red">

@@ -61,7 +61,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
           }`}
         >
           <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <Link href="/" className="flex items-center gap-2 text-xl font-extrabold tracking-tight text-ink">
+            <Link href="/" className="flex items-center gap-2 text-base min-[400px]:text-xl font-extrabold tracking-tight text-ink whitespace-nowrap">
               <BmLogo size={40} />
               BM <span className="text-gradient-red">Corporation</span>
             </Link>

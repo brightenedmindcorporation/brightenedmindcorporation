@@ -79,7 +79,7 @@ export default function ChineseCoursePage() {
           <div className="flex justify-center mb-4">
             <span className="text-4xl">🇨🇳</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
+          <h1 className="text-3xl min-[400px]:text-4xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
             Apprendre le <span className="text-gradient-red">Chinois</span> (Mandarin) en Ligne
           </h1>
           <p className="text-xl text-ink-soft mb-8 leading-relaxed max-w-2xl mx-auto">
@@ -221,7 +221,7 @@ export default function ChineseCoursePage() {
       {/* CALL TO ACTION */}
       <section className="bg-surface-sunken py-20 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-4xl font-extrabold text-ink mb-6">
+          <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-extrabold text-ink mb-6">
             Prêt à apprendre le Chinois ?
           </h2>
           <p className="text-xl text-ink-soft mb-8 max-w-2xl mx-auto">

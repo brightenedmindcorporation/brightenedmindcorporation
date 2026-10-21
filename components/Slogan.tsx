@@ -12,7 +12,7 @@ export default function Slogan() {
 
         <div className="divider-red w-16 mx-auto mt-5" />
 
-        <h2 className="text-5xl font-black mt-6 leading-tight">
+        <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black mt-6 leading-tight">
           FORMER.
           <br />
           CONNECTER.

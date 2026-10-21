@@ -41,7 +41,7 @@ export default function Testimonials() {
             Témoignages
           </p>
 
-          <h2 className="text-5xl font-black mt-5 text-ink">
+          <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black mt-5 text-ink">
             Ils nous font confiance
           </h2>
 

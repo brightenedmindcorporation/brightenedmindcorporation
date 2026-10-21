@@ -22,7 +22,7 @@ export default function Vision() {
             Notre vision
           </p>
 
-          <h2 className="text-5xl font-bold mt-6 text-ink leading-tight">
+          <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-bold mt-6 text-ink leading-tight">
 
             Éclairer les esprits.
             <br />

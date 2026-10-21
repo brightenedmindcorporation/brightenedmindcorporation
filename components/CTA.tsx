@@ -28,7 +28,7 @@ export default function CTA() {
             Collaborons ensemble
           </p>
 
-          <h2 className="text-5xl md:text-6xl font-black mt-6 leading-tight">
+          <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl md:text-6xl font-black mt-6 leading-tight">
 
             Construisons quelque chose
             <br />

@@ -12,7 +12,7 @@ export default function Identity() {
 
           <p className="uppercase tracking-[3px] text-white/80 text-xs font-semibold mb-4 relative">Vision</p>
 
-          <h2 className="text-4xl font-bold mb-6 relative">
+          <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-bold mb-6 relative">
             Notre Vision
           </h2>
 
@@ -30,7 +30,7 @@ export default function Identity() {
 
           <p className="uppercase tracking-[3px] text-red-500 text-xs font-semibold mb-4 relative">Mission</p>
 
-          <h2 className="text-4xl font-bold mb-6 relative">
+          <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-bold mb-6 relative">
             Notre Mission
           </h2>
 

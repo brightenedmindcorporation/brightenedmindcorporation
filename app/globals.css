@@ -226,3 +226,31 @@ body {
   background: none !important;
   box-shadow: none !important;
 }
+
+/* Phones: nothing may be wider than the screen. Grid and flex children can shrink below the width of
+   their content (a long word or a big title no longer stretches the whole page), media never overflows,
+   and long words wrap instead of pushing the layout. */
+html,
+body {
+  max-width: 100%;
+  overflow-x: clip;
+}
+.grid > * {
+  min-width: 0;
+}
+img,
+svg,
+video,
+canvas,
+iframe {
+  max-width: 100%;
+}
+h1,
+h2,
+h3,
+p,
+li,
+td,
+th {
+  overflow-wrap: break-word;
+}

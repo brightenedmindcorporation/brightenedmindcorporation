@@ -36,7 +36,7 @@ export default function WhyChooseUs() {
             Pourquoi Nous Choisir
           </p>
 
-          <h2 className="text-5xl font-black mt-5">
+          <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black mt-5">
             Ce qui nous distingue
           </h2>
 

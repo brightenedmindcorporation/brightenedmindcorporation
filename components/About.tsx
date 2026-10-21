@@ -52,7 +52,7 @@ export default function About() {
             À propos
           </p>
 
-          <h2 className="text-5xl font-black mt-6 text-ink leading-tight">
+          <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black mt-6 text-ink leading-tight">
 
             Construire un avenir
             <span className="text-gradient-red"> durable</span>
