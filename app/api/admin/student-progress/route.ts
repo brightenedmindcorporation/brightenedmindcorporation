@@ -73,13 +73,16 @@ export async function POST(request: Request) {
       const total = quiz?.questions.length ?? 0;
       const raw = Number(body.score);
       if (!quiz || !Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
-      const score = Math.max(0, Math.min(total, Math.round(raw)));
-      const passed = score >= quiz.passingScore;
+      // The administration marks out of 100 (écoute + questions + écrit); the questions' score follows it.
+      const percent = Math.max(0, Math.min(100, Math.round(raw)));
+      const score = Math.round((percent / 100) * total);
+      const passed = percent >= (quiz.passingScore / total) * 100;
       const existing = (await ref.get()).data() || {};
       await ref.set(
         {
           ...base,
           quizScores: { [lessonId]: score },
+          adminPercent: { [lessonId]: percent },
           adminScored: FieldValue.arrayUnion(lessonId),
           studiedLessons: FieldValue.arrayUnion(lessonId),
           completedQuizzes: passed ? FieldValue.arrayUnion(lessonId) : FieldValue.arrayRemove(lessonId),
@@ -88,16 +91,17 @@ export async function POST(request: Request) {
         { merge: true }
       );
       title = "Note mise à jour";
-      message = `Votre note du quiz de la leçon ${lessonId} a été fixée à ${score}/${total} par ${who}${passed ? " : la leçon suivante est disponible." : "."}`;
+      message = `Votre note du quiz de la leçon ${lessonId} a été fixée à ${percent}/100 par ${who}${passed ? " : la leçon suivante est disponible." : "."}`;
     } else if (action === "setFinalScore") {
       const total = curriculum.finalQuiz.questions.length;
       const raw = Number(body.score);
       if (!Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
-      const score = Math.max(0, Math.min(total, Math.round(raw)));
-      const passed = score >= curriculum.finalQuiz.passingScore;
-      await ref.set({ ...base, finalQuizScore: score, finalQuizPassed: passed, adminFinal: true }, { merge: true });
+      const percent = Math.max(0, Math.min(100, Math.round(raw)));
+      const score = Math.round((percent / 100) * total);
+      const passed = percent >= (curriculum.finalQuiz.passingScore / total) * 100;
+      await ref.set({ ...base, finalQuizScore: score, finalQuizPassed: passed, adminFinal: true, adminPercent: { final: percent } }, { merge: true });
       title = "Note mise à jour";
-      message = `Votre note du quiz final du niveau ${level} a été fixée à ${score}/${total} par ${who}${passed ? " : votre certificat est disponible." : "."}`;
+      message = `Votre note du quiz final du niveau ${level} a été fixée à ${percent}/100 par ${who}${passed ? " : votre certificat est disponible." : "."}`;
       if (passed) await sendLevelInvitation(uid, langCode, level).catch((e) => console.error("Level invitation failed (non-fatal):", e));
     } else {
       // resetLevel: keep an archive of the old results, then start from zero.
@@ -109,6 +113,8 @@ export async function POST(request: Request) {
         studiedLessons: old.studiedLessons || [],
         completedQuizzes: old.completedQuizzes || [],
         quizScores: old.quizScores || {},
+        quizParts: old.quizParts || {},
+        adminPercent: old.adminPercent || {},
         finalQuizScore: old.finalQuizScore ?? null,
         finalQuizPassed: Boolean(old.finalQuizPassed),
         certificateId: old.certificateId || null,
@@ -132,6 +138,8 @@ export async function POST(request: Request) {
         adminFinal: false,
         quizAttempts: {},
         practiceBest: {},
+        quizParts: {},
+        adminPercent: {},
       });
       title = "Niveau à recommencer";
       message = `${who === "l'administration" ? "L'administration" : "Votre professeur"} vous demande de recommencer le niveau ${level} depuis le début. Vos résultats précédents sont archivés.`;

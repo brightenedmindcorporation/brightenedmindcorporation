@@ -12,6 +12,8 @@
 // structural improvement (no more key collisions, one JSON blob instead of
 // a dozen loose keys) rather than an anti-cheat fix.
 
+import type { QuizPartsRecord } from "@/lib/academy/quizScoring";
+
 export interface LevelProgress {
   /** Lessons the student has opened and studied (a lesson is studied before its quiz). */
   studiedLessons: number[];
@@ -34,6 +36,12 @@ export interface LevelProgress {
   practiceBest: Record<number, number>;
   /** Set when the administration restarted the level: older progress on a device is then dropped. */
   resetAt?: string;
+  /** What the student did in each part of the first attempt (key: lesson id, or "final"). */
+  quizParts: Record<string, QuizPartsRecord>;
+  /** Marks out of 100 set by the administration (key: lesson id, or "final"). */
+  adminPercent: Record<string, number>;
+  /** Teacher's marks out of 10 for the written parts (key: lesson id, or "final"). Filled by the server. */
+  writingMarks: Record<string, number>;
 }
 
 function storageKey(langSlug: string, level: number) {
@@ -54,6 +62,9 @@ function emptyProgress(): LevelProgress {
     adminFinal: false,
     quizAttempts: {},
     practiceBest: {},
+    quizParts: {},
+    adminPercent: {},
+    writingMarks: {},
   };
 }
 
@@ -132,7 +143,9 @@ export function recordQuizResult(
   score: number,
   passingScore: number,
   /** False when another part of the quiz (the conversation) was failed. */
-  extraPass: boolean = true
+  extraPass: boolean = true,
+  /** What was done in each part (kept for the first attempt only). */
+  partsRecord?: QuizPartsRecord
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
   const first = !(lessonId in progress.quizScores);
@@ -140,6 +153,7 @@ export function recordQuizResult(
 
   if (first) {
     progress.quizScores[lessonId] = score;
+    if (partsRecord) progress.quizParts = { ...progress.quizParts, [lessonId]: partsRecord };
     if (score >= passingScore && extraPass && !progress.completedQuizzes.includes(lessonId)) {
       progress.completedQuizzes.push(lessonId);
       progress.completedAt[lessonId] = new Date().toISOString();
@@ -157,12 +171,14 @@ export function recordFinalQuizResult(
   level: number,
   score: number,
   passingScore: number,
-  extraPass: boolean = true
+  extraPass: boolean = true,
+  partsRecord?: QuizPartsRecord
 ): LevelProgress {
   const progress = getLevelProgress(langSlug, level);
 
   if (progress.finalQuizScore === null) {
     progress.finalQuizScore = score;
+    if (partsRecord) progress.quizParts = { ...progress.quizParts, final: partsRecord };
     if (score >= passingScore && extraPass) {
       progress.finalQuizPassed = true;
     }
@@ -176,6 +192,7 @@ type ServerProgress = Partial<Omit<LevelProgress, "quizScores" | "completedAt">>
   quizScores?: Record<string, number>;
   completedAt?: Record<string, string>;
 };
+// (the server's marks and parts arrive in the same shape)
 
 /**
  * Brings what the server knows (the student's other devices, the administration's decisions) into this
@@ -201,6 +218,10 @@ export function mergeServerProgress(langSlug: string, level: number, server: Ser
     completedAt: { ...(server.completedAt as Record<number, string>), ...local.completedAt },
     quizAttempts: { ...local.quizAttempts },
     practiceBest: { ...local.practiceBest },
+    // The first attempt's parts: this device's or, failing that, the server's. The administration's marks win.
+    quizParts: { ...(server.quizParts || {}), ...local.quizParts },
+    adminPercent: { ...(server.adminPercent || {}) },
+    writingMarks: { ...(server.writingMarks || {}) },
     finalQuizPassed: local.finalQuizPassed || Boolean(server.finalQuizPassed),
     finalQuizScore: local.finalQuizScore ?? server.finalQuizScore ?? null,
     certificateId: local.certificateId ?? server.certificateId ?? null,

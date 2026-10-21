@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { loadWritingMarks } from "@/lib/academy/writingMarks";
 
 // GET routes are cached by Next.js by default unless marked dynamic — this
 // serves live admin data and must never be stale.
@@ -22,7 +23,8 @@ export async function GET(request: Request) {
 
     const adminDb = getAdminDb();
     const snap = await adminDb.collection("progress").get();
-    const progress = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    const marks = await loadWritingMarks(adminDb).catch(() => new Map<string, Record<string, number>>());
+    const progress = snap.docs.map((doc) => ({ id: doc.id, ...doc.data(), writingMarks: marks.get(doc.id) || {} }));
 
     return NextResponse.json({ progress });
   } catch (error: any) {

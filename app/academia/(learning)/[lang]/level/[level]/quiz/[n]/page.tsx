@@ -132,7 +132,7 @@ export default function QuizPage() {
                 if (parts?.writingItems?.length && curriculum.langCode) submitWritingForReview({ langCode: curriculum.langCode, level, key: lessonId, items: parts.writingItems });
                 logActivity("quiz", `Quiz ${lessonId} : ${score}/${quiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel}, niveau ${level})`, { langCode: curriculum.langCode, level, lessonId, score, total: quiz.questions.length, passed });
               }
-              const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore, parts?.dialoguePassed ?? true);
+              const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore, parts?.dialoguePassed ?? true, parts?.record);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}
           />

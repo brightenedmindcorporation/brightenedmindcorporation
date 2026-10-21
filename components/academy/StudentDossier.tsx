@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { X, CheckCircle2, XCircle, Circle, Award, Unlock, Lock, BadgeCheck } from "lucide-react";
+import { X, CheckCircle2, XCircle, Circle, Award, Unlock, Lock, BadgeCheck, Printer } from "lucide-react";
 import { availableLanguages, getLevelCurriculum } from "@/content/curriculum";
 import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
+import { printDossier } from "@/lib/academy/dossierPrint";
+import type { PartLine, QuizMark } from "@/lib/academy/quizScoring";
 
 /**
  * A student's file: for each level, every quiz with its score, the running
@@ -11,6 +13,38 @@ import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
  * the teacher and the admin.
  */
 export type DossierAction = "unlock" | "lock" | "setScore" | "setFinalScore" | "resetLevel";
+
+const lineOf = (mark: QuizMark, key: PartLine["key"]) => mark.lines.find((l) => l.key === key);
+
+/** The four mark cells of a quiz row: écoute, questions, écrit and the total out of 100. */
+function PartCells({ mark, taken, review }: { mark: QuizMark; taken: boolean; review?: boolean }) {
+  if (!taken && mark.percent === null) return <><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td></>;
+  const part = (key: PartLine["key"]) => {
+    const l = lineOf(mark, key);
+    if (!l) return <span className="text-ink-faint">—</span>;
+    return (
+      <>
+        <span className="font-mono">{l.detail}</span>
+        {l.got !== null && <span className="block text-[11px] text-ink-faint">{l.got}/{l.max}</span>}
+      </>
+    );
+  };
+  return (
+    <>
+      <td className="p-3">{part("listen")}</td>
+      <td className="p-3">{part("quiz")}</td>
+      <td className="p-3">{part("write")}</td>
+      <td className="p-3">
+        <b className={`text-base ${mark.percent !== null && mark.percent >= 60 ? "text-emerald-500" : "text-ink"}`}>{mark.percent !== null ? `${mark.percent}` : "—"}</b>
+        <span className="text-ink-faint">/100</span>
+        {mark.provisional && <span className="block text-[11px] text-amber-500">provisoire : écrit à corriger</span>}
+        {mark.byAdmin && <span className="block text-[11px] text-ink-faint">fixée par l&apos;admin</span>}
+        {mark.legacy && !mark.byAdmin && <span className="block text-[11px] text-ink-faint">ancien format (questions seules)</span>}
+        {review && <span className="block text-[11px] text-amber-500">écoute non enregistrée : à vérifier</span>}
+      </td>
+    </>
+  );
+}
 
 export default function StudentDossier({
   student,
@@ -30,13 +64,13 @@ export default function StudentDossier({
 }) {
   const lang = availableLanguages.find((l) => l.code === student.langCode);
   const [busy, setBusy] = useState<string | null>(null);
-  const act = async (action: DossierAction, level: number, lessonId: number, total: number, current?: number | null) => {
+  const act = async (action: DossierAction, level: number, lessonId: number, _total: number, current?: number | null) => {
     if (!onAct) return;
     let score: number | undefined;
     if (action === "setScore" || action === "setFinalScore") {
       const what = action === "setScore" ? `du quiz de la leçon ${lessonId}` : "du quiz final";
       const answer = window.prompt(
-        `Nouvelle note ${what} (sur ${total}).
+        `Nouvelle note ${what} (sur 100 : écoute 30 + questions 40 + écrit 30).
 L'étudiant garde sa note de premier essai tant que vous ne la changez pas.`,
         current != null ? String(current) : ""
       );
@@ -62,6 +96,17 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
     }
   };
 
+  /** Prints the file (A4) for the given levels. */
+  const print = (wanted: number[]) => {
+    if (!lang) return;
+    const sections = wanted.flatMap((level) => {
+      const curriculum = getLevelCurriculum(lang.slug, level);
+      const progress = levels[String(level)] ?? levels[level as unknown as string];
+      return curriculum && progress ? [{ level, curriculum, progress, summary: summarizeLevel(curriculum, progress) }] : [];
+    });
+    printDossier({ student, langLabel: lang.label, sections });
+  };
+
   return (
     <div className="fixed inset-0 z-[80] bg-black/60 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
       <div className="w-full max-w-3xl my-8 bg-surface border border-line rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -74,9 +119,16 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
               {student.studentId ? ` · ${student.studentId}` : ""}
             </p>
           </div>
-          <button onClick={onClose} aria-label="Fermer" className="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-surface-alt">
-            <X size={18} />
-          </button>
+          <div className="flex items-center gap-2">
+            {lang && (
+              <button onClick={() => print([1, 2, 3])} className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500">
+                <Printer size={14} /> Imprimer la fiche
+              </button>
+            )}
+            <button onClick={onClose} aria-label="Fermer" className="p-2 rounded-lg text-ink-soft hover:text-ink hover:bg-surface-alt">
+              <X size={18} />
+            </button>
+          </div>
         </div>
 
         <div className="p-6 space-y-8">
@@ -103,6 +155,9 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                       Niveau {level} <span className="text-ink-faint font-normal text-sm">· {curriculum.levelTitle}</span>
                     </h3>
                     <div className="flex flex-wrap items-center gap-3">
+                      <button onClick={() => print([level])} className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:text-ink">
+                        <Printer size={12} /> Imprimer ce niveau
+                      </button>
                       {onAct && canEditScores && (
                         <button disabled={busy !== null} onClick={() => act("resetLevel", level, 0, 0)} className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:border-red-600/60 hover:text-red-500 disabled:opacity-50">
                           Faire recommencer ce niveau
@@ -130,8 +185,10 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                         <tr className="text-left text-xs text-ink-soft uppercase tracking-wide bg-surface-alt">
                           <th className="p-3">Leçon / quiz</th>
                           <th className="p-3">Étudiée</th>
-                          <th className="p-3">Note</th>
-                          <th className="p-3">%</th>
+                          <th className="p-3">Écoute <span className="font-normal normal-case">/30</span></th>
+                          <th className="p-3">Questions <span className="font-normal normal-case">/40</span></th>
+                          <th className="p-3">Écrit <span className="font-normal normal-case">/30</span></th>
+                          <th className="p-3">Note /100</th>
                           <th className="p-3">Résultat</th>
                           {onAct && <th className="p-3">Actions</th>}
                         </tr>
@@ -143,8 +200,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                               <span className="font-semibold text-ink">{r.lessonId}.</span> {r.title}
                             </td>
                             <td className="p-3">{r.studied ? <CheckCircle2 size={15} className="text-emerald-500" /> : <Circle size={15} className="text-ink-faint" />}</td>
-                            <td className="p-3 font-mono">{r.score !== null ? `${r.score}/${r.total}` : "—"}</td>
-                            <td className="p-3">{r.score !== null && r.total ? `${Math.round((r.score / r.total) * 100)} %` : "—"}</td>
+                            <PartCells mark={r.mark} taken={r.score !== null} review={r.mark.legacy && !r.passed && r.score !== null && !(progress.adminScored ?? []).includes(r.lessonId)} />
                             <td className="p-3">
                               {r.score === null ? (
                                 <span className="text-xs text-ink-faint">Pas passé</span>
@@ -176,7 +232,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                                     )
                                   )}
                                   {canEditScores && (
-                                    <button disabled={busy !== null} onClick={() => act("setScore", level, r.lessonId, r.total, r.score)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                    <button disabled={busy !== null} onClick={() => act("setScore", level, r.lessonId, r.total, r.mark.percent)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
                                       <BadgeCheck size={11} /> Modifier la note
                                     </button>
                                   )}
@@ -189,8 +245,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                         <tr className="border-t-2 border-line bg-surface-alt/60">
                           <td className="p-3 font-bold text-ink">Quiz final du niveau</td>
                           <td className="p-3" />
-                          <td className="p-3 font-mono">{s.final.score !== null ? `${s.final.score}/${s.final.total}` : "—"}</td>
-                          <td className="p-3">{s.final.score !== null && s.final.total ? `${Math.round((s.final.score / s.final.total) * 100)} %` : "—"}</td>
+                          <PartCells mark={s.final.mark} taken={s.final.score !== null} />
                           <td className="p-3">
                             {s.final.score === null ? (
                               <span className="text-xs text-ink-faint">Pas passé</span>
@@ -203,7 +258,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                           {onAct && (
                             <td className="p-3">
                               {canEditScores && (
-                                <button disabled={busy !== null} onClick={() => act("setFinalScore", level, 0, s.final.total, s.final.score)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                <button disabled={busy !== null} onClick={() => act("setFinalScore", level, 0, s.final.total, s.final.mark.percent)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
                                   <BadgeCheck size={11} /> Modifier la note
                                 </button>
                               )}

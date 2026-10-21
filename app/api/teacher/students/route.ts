@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller, isTeachersStudent, canTeach } from "@/lib/teacherAuth";
+import { loadWritingMarks } from "@/lib/academy/writingMarks";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export async function GET(request: Request) {
       db.collection("progress").get(),
     ]);
 
+    const marks = await loadWritingMarks(db).catch(() => new Map<string, Record<string, number>>());
     const students = new Map<string, any>(); // key: uid_langCode
     for (const d of enrollSnap.docs) {
       const e = d.data();
@@ -78,6 +80,9 @@ export async function GET(request: Request) {
           adminScored: p.adminScored || [],
           quizAttempts: p.quizAttempts || {},
           practiceBest: p.practiceBest || {},
+          quizParts: p.quizParts || {},
+          adminPercent: p.adminPercent || {},
+          writingMarks: marks.get(d.id) || {},
           updatedAt: p.updatedAt || null,
         },
       };

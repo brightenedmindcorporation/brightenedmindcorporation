@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
+import { loadWritingMarks } from "@/lib/academy/writingMarks";
 
 export const dynamic = "force-dynamic";
 
@@ -14,8 +15,13 @@ export async function GET(request: Request) {
     const langCode = url.searchParams.get("langCode");
     const level = url.searchParams.get("level");
     if (!langCode || !level) return NextResponse.json({ error: "langCode et level requis." }, { status: 400 });
-    const snap = await getAdminDb().collection("progress").doc(`${decoded.uid}_${langCode}_${level}`).get();
-    return NextResponse.json({ progress: snap.exists ? snap.data() : null });
+    const db = getAdminDb();
+    const id = `${decoded.uid}_${langCode}_${level}`;
+    const snap = await db.collection("progress").doc(id).get();
+    if (!snap.exists) return NextResponse.json({ progress: null });
+    // The teachers' marks for the written parts (they count in the level's average).
+    const marks = await loadWritingMarks(db, decoded.uid).catch(() => new Map<string, Record<string, number>>());
+    return NextResponse.json({ progress: { ...snap.data(), writingMarks: marks.get(id) || {} } });
   } catch {
     return NextResponse.json({ progress: null }, { status: 401 });
   }

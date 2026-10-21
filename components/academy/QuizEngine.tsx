@@ -6,6 +6,7 @@ import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } fro
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
+import { computeQuizMark, type QuizPartsRecord } from "@/lib/academy/quizScoring";
 import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writingSummary, type QuizWriting, type WritingItem } from "@/components/academy/QuizWritingStep";
 
 /** What the student did in the extra steps of a quiz. */
@@ -17,6 +18,8 @@ export interface QuizParts {
   writing: string;
   /** The texts written, structured for the teacher who corrects them. */
   writingItems?: WritingItem[];
+  /** The parts of this attempt, ready to be saved for the mark out of 100. */
+  record: QuizPartsRecord;
 }
 
 export type { QuizWriting };
@@ -147,14 +150,22 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     // Passed or failed (same rule as the result shown below).
     if (finalScore >= quiz.passingScore && (!useDialogue || dScore >= dialoguePassNeeded)) sfx.success();
     else sfx.fail();
-    onSubmit(
-      finalScore,
-      useDialogue || useWriting
-        ? { dialogueScore: dScore, dialogueTotal, dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded, writing: useWriting ? writingSummary(useWriting, writingState) : "", writingItems: useWriting ? writingItems(useWriting, writingState) : undefined }
-        : undefined
-    );
+    onSubmit(finalScore, {
+      dialogueScore: dScore,
+      dialogueTotal,
+      dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded,
+      writing: useWriting ? writingSummary(useWriting, writingState) : "",
+      writingItems: useWriting ? writingItems(useWriting, writingState) : undefined,
+      record: { quiz: [finalScore, quiz.questions.length], ...(useDialogue ? { listen: [dScore, dialogueTotal] as [number, number] } : {}), ...(useWriting ? { write: true } : {}) },
+    });
   };
 
+  // The mark out of 100 of this attempt (the written part waits for the teacher).
+  const mark = computeQuizMark({
+    parts: { quiz: [score, quiz.questions.length], ...(useDialogue ? { listen: [dialogueScore, dialogueTotal] as [number, number] } : {}), ...(useWriting ? { write: true } : {}) },
+    rawScore: score,
+    rawTotal: quiz.questions.length,
+  });
   const dialoguePassed = !useDialogue || dialogueScore >= dialoguePassNeeded;
   const mainPassed = score >= quiz.passingScore;
   const passed = mainPassed && dialoguePassed;
@@ -231,7 +242,14 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                     (minimum {dialoguePassNeeded})
                   </p>
                 )}
-                {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée.</p>}
+                {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée : un professeur la corrigera (30 points).</p>}
+                {mark.percent !== null && (
+                  <p className="text-sm font-bold mt-2 text-ink">
+                    Note : <span className="text-lg">{mark.percent}/100</span>
+                    {mark.provisional && <span className="ml-2 text-xs font-semibold text-amber-500">provisoire : la rédaction n&apos;est pas encore corrigée</span>}
+                  </p>
+                )}
+                <p className="text-xs text-ink-soft mt-0.5">{mark.lines.map((l) => `${l.label} ${l.detail}`).join(" · ")}</p>
                 <p className="mt-2 font-semibold text-sm">
                   {passed ? (
                     <span className="text-emerald-400 inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> Passed! Great job.</span>

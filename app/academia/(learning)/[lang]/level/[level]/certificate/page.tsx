@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Trophy, XCircle, CheckCircle2 } from "lucide-react";
 import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
 import { pullProgress } from "@/lib/academy/progressSync";
+import { summarizeLevel } from "@/lib/academy/levelSummary";
 import { getLevelProgress, getOrCreateCertificateId } from "@/lib/academy/progress";
 import { syncCertificateIssued } from "@/lib/academy/progressSync";
 import CertificateButton from "@/components/academy/CertificateButton";
@@ -58,23 +59,8 @@ export default function CertificatePage() {
 
     setEligible(true);
 
-    let totalScore = 0;
-    let totalPossible = 0;
-
-    for (const quiz of curriculum.quizzes) {
-      const score = progress.quizScores[quiz.lessonId];
-      if (score !== undefined) {
-        totalScore += score;
-        totalPossible += quiz.questions.length;
-      }
-    }
-
-    if (progress.finalQuizScore !== null) {
-      totalScore += progress.finalQuizScore;
-      totalPossible += curriculum.finalQuiz.questions.length;
-    }
-
-    setAverage(totalPossible > 0 ? Math.round((totalScore / totalPossible) * 100) : 0);
+    // Same maths as the student's file: every quiz out of 100 (écoute, questions, écrit), then the mean.
+    setAverage(summarizeLevel(curriculum, progress as any).average ?? 0);
     // Le Student ID (matricule d'inscription) et le numéro du certificat
     // sont deux identifiants distincts. Le numéro est attribué une seule
     // fois côté serveur ; repli local seulement si le serveur est injoignable.

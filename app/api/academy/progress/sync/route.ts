@@ -34,9 +34,13 @@ export async function POST(request: Request) {
       adminScored,
       adminFinal: Boolean(existing.adminFinal),
       quizScores: { ...(progress.quizScores || {}) },
+      // The first attempt's parts are kept; the administration's marks and the teachers' marks are never taken from a device.
+      quizParts: { ...(progress.quizParts || {}), ...(existing.quizParts || {}) },
+      adminPercent: existing.adminPercent || {},
       completedAt: { ...(existing.completedAt || {}), ...(progress.completedAt || {}) },
       finalQuizPassed: Boolean(existing.finalQuizPassed) || Boolean(progress.finalQuizPassed),
     } as Record<string, any>;
+    delete merged.writingMarks;
     // A score set by the administration keeps its value, date and pass/fail state.
     for (const id of adminScored) {
       if (existing.quizScores?.[id] !== undefined) merged.quizScores[id] = existing.quizScores[id];
