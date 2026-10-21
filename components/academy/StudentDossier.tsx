@@ -110,7 +110,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
 
   return (
     <div className="fixed inset-0 z-[80] bg-black/60 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
-      <div className="w-full max-w-3xl my-8 bg-surface border border-line rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+      <div className="w-full max-w-[min(96vw,1400px)] my-6 bg-surface border border-line rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 p-6 border-b border-line">
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-red-500">Dossier de l'étudiant</p>
@@ -180,8 +180,8 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                     </div>
                   </div>
 
-                  <div className="border border-line rounded-2xl overflow-hidden">
-                    <table className="w-full text-sm">
+                  <div className="border border-line rounded-2xl overflow-x-auto">
+                    <table className="w-full min-w-[900px] text-sm">
                       <thead>
                         <tr className="text-left text-xs text-ink-soft uppercase tracking-wide bg-surface-alt">
                           <th className="p-3">Leçon / quiz</th>
