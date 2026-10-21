@@ -25,6 +25,8 @@ interface Review {
 export default function CorrectionsPage() {
   const router = useRouter();
   const [reviews, setReviews] = useState<Review[] | null>(null);
+  // Back to the page the student came from, or to their space when this page was opened directly.
+  const goBack = () => (window.history.length > 1 ? router.back() : router.push("/academia/dashboard"));
 
   useEffect(() => {
     (async () => {
@@ -54,9 +56,9 @@ export default function CorrectionsPage() {
     <main className="min-h-screen bg-surface-sunken text-ink px-4 py-10">
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
-          <Link href="/academia/dashboard" className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface px-4 py-2 rounded-xl border border-line">
-            ← Mon espace
-          </Link>
+          <button onClick={goBack} className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface px-4 py-2 rounded-xl border border-line">
+            ← Retour
+          </button>
         </div>
         <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
           <h1 className="text-3xl font-black">Mes corrections</h1>
@@ -100,6 +102,9 @@ export default function CorrectionsPage() {
             })}
           </div>
         ))}
+        <button onClick={goBack} className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface px-4 py-2 rounded-xl border border-line">
+          ← Retour
+        </button>
       </div>
     </main>
   );

@@ -18,7 +18,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       return NextResponse.json({ error: "Non autorisé." }, { status: 403 });
     }
 
-    await ref.update({ read: true });
+    await ref.update({ read: true, readAt: new Date().toISOString() });
     return NextResponse.json({ status: "success" });
   } catch (error: any) {
     console.error("Error marking student notification read:", error);

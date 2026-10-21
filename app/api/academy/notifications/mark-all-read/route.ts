@@ -15,7 +15,7 @@ export async function POST(request: Request) {
     const unread = snap.docs.filter((doc) => doc.data().read === false);
     if (unread.length > 0) {
       const batch = adminDb.batch();
-      unread.forEach((doc) => batch.update(doc.ref, { read: true }));
+      unread.forEach((doc) => batch.update(doc.ref, { read: true, readAt: new Date().toISOString() }));
       await batch.commit();
     }
 

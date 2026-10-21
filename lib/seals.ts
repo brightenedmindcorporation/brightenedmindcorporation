@@ -119,3 +119,44 @@ export function sealSvg(kind: SealKind, opts: SealOptions = {}): string {
   const wrapped = opts.worn ? `<g transform="rotate(-4 ${C} ${C})" filter="url(#${p}-worn)" opacity="0.92">${body}</g>` : body;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="${size}" height="${size}" role="img" aria-label="Sceau ${esc(info.label)}">${filter ? `<defs>${filter}</defs>` : ""}${wrapped}</svg>`;
 }
+
+/** What the cachet (rectangular stamp) says on its second line. */
+const CACHET_TITLE: Record<SealKind, string> = {
+  company: "L'ADMINISTRATION",
+  academia: "BM ACADEMIA",
+  communication: "BM COMMUNICATION",
+  domestica: "BM DOMESTICA",
+};
+
+/**
+ * The cachet: the rectangular stamp with the date line, for letters, receipts and certificates. Same family as the
+ * seals (double frame, the logo's half-circles); the date is left blank to be filled in by hand or by the system.
+ */
+export function cachetSvg(kind: SealKind, opts: SealOptions & { date?: string } = {}): string {
+  const info = SEAL_INFO[kind];
+  const ink = opts.ink ?? info.ink;
+  const p = opts.idPrefix ?? `cachet-${kind}`;
+  const width = opts.size ?? 560;
+  const font = `font-family="Georgia, 'Times New Roman', serif"`;
+  const fit = (text: string, x: number, y: number, size: number, length: number, weight = 700, spacing = 1) =>
+    `<text x="${x}" y="${y}" text-anchor="middle" ${font} font-weight="${weight}" font-size="${size}" letter-spacing="${spacing}" textLength="${length}" lengthAdjust="spacingAndGlyphs" fill="${ink}">${esc(text)}</text>`;
+  const date = opts.date ?? "";
+  const body =
+    `<rect x="6" y="6" width="548" height="268" rx="26" fill="none" stroke="${ink}" stroke-width="6"/>` +
+    `<rect x="17" y="17" width="526" height="246" rx="18" fill="none" stroke="${ink}" stroke-width="1.6"/>` +
+    `<g>${emblem(84, 132, 0.95, ink)}</g>` +
+    `<path d="M 150,36 V 244" stroke="${ink}" stroke-width="1.6"/>` +
+    fit("BRIGHTENED MIND CORPORATION", 345, 76, 24, 370) +
+    `<path d="M 170,92 H 520" stroke="${ink}" stroke-width="2.4"/>` +
+    fit(CACHET_TITLE[kind], 345, 134, 33, 330, 800, 3) +
+    fit("bmcorporation-cd.com", 345, 168, 18, 250, 600, 1) +
+    `<path d="M 170,186 H 520" stroke="${ink}" stroke-width="1.2"/>` +
+    (date
+      ? fit(`Fait le ${date}`, 345, 224, 22, 300, 700, 1)
+      : `<text x="170" y="224" ${font} font-size="21" font-weight="600" fill="${ink}">Fait le</text><path d="M 250,226 H 290 M 304,226 H 344 M 358,226 H 440" stroke="${ink}" stroke-width="1.6"/><text x="296" y="224" ${font} font-size="22" fill="${ink}">/</text><text x="350" y="224" ${font} font-size="22" fill="${ink}">/</text>`);
+  const filter = opts.worn
+    ? `<defs><filter id="${p}-worn" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="11" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -9 5.7" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in"/></filter></defs>`
+    : "";
+  const wrapped = opts.worn ? `<g transform="rotate(-2.5 280 140)" filter="url(#${p}-worn)" opacity="0.92">${body}</g>` : body;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 280" width="${width}" height="${width / 2}" role="img" aria-label="Cachet ${esc(info.label)}">${filter}${wrapped}</svg>`;
+}

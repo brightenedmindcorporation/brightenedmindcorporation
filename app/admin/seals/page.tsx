@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "@/lib/firebase";
-import { SEAL_INFO, sealSvg, type SealKind } from "@/lib/seals";
+import { SEAL_INFO, cachetSvg, sealSvg, type SealKind } from "@/lib/seals";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const KINDS: SealKind[] = ["company", "academia", "communication", "domestica"];
@@ -96,6 +96,43 @@ export default function SealsPage() {
             );
           })}
         </div>
+
+        <div>
+          <h2 className="text-xl font-black mb-3">Cachets (avec la date)</h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {KINDS.map((kind) => (
+              <div key={kind} className="bg-white text-neutral-900 rounded-2xl border border-line p-4 flex flex-col items-center gap-3 shadow-sm">
+                <div className="w-full" dangerouslySetInnerHTML={{ __html: cachetSvg(kind, { ink: mono ? "#111111" : undefined, worn, size: 300, idPrefix: `cv-${kind}` }) }} />
+                <p className="font-bold text-sm">{SEAL_INFO[kind].label}</p>
+                <div className="flex gap-2">
+                  {[
+                    ["SVG", `/seals/cachet-${kind}${mono ? "-nb" : ""}.svg`],
+                    ["PNG", `/seals/cachet-${kind}${mono ? "-nb" : ""}.png`],
+                  ].map(([label, href]) => (
+                    <a key={label} href={href} download className="text-xs font-bold px-3 py-1.5 rounded-lg border border-neutral-300 hover:border-red-600">
+                      {label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="max-w-md">
+          <h2 className="text-xl font-black mb-3">Signature</h2>
+          <div className="bg-white text-neutral-900 rounded-2xl border border-line p-4 flex flex-col items-center gap-3 shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/seals/signature-jordi-mukosa.png" alt="Signature de Jordi Mukosa" className="w-56" />
+            <p className="font-bold text-sm">Jordi Mukosa</p>
+            <a href="/seals/signature-jordi-mukosa.png" download className="text-xs font-bold px-3 py-1.5 rounded-lg bg-red-600 text-white">PNG sans fond</a>
+          </div>
+        </div>
+
+        <p className="text-sm text-ink-soft">
+          Les PNG sans fond (2000 px et plus) sont dans le dossier <code>public/seals</code> du projet, avec les versions noir et blanc (<code>-nb</code>) et tampon encré (<code>-tampon</code>).{" "}
+          <Link href="/admin/journal" className="text-red-500 font-bold">Journal des notifications →</Link>
+        </p>
 
         <section className="bg-surface border border-line rounded-2xl p-6 text-sm text-ink-soft space-y-2 max-w-3xl">
           <h2 className="font-bold text-ink text-base">Ce que j&apos;ai amélioré par rapport à un sceau classique</h2>
