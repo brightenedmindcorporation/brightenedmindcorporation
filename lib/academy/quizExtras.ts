@@ -2,6 +2,7 @@ import type { LevelCurriculum } from "@/content/curriculum/types";
 import { getDialogue } from "@/content/dialogues";
 import { isCjkText, lessonChars, wordsOf } from "./writingLab";
 import type { QuizWriting, QuizParts } from "@/components/academy/QuizEngine";
+import type { QuizReading } from "@/components/academy/QuizReadingStep";
 
 /** Picks up to `n` items spread across the list. */
 function spread<T>(items: T[], n: number): T[] {
@@ -49,6 +50,33 @@ export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: 
     corpus: cjk ? [lesson.title, lesson.subtitle, lesson.speakingTopic, ...lesson.sections.flatMap((x) => [x.heading, ...x.body]), ...lesson.reading, ...lesson.exercises, ...lines.map((l) => l.text)] : undefined,
     chars: cjk ? Array.from(new Set([...lessonChars(lesson), ...Array.from(lines.map((l) => l.text).join("")).filter((c) => isCjkText(c))])) : undefined,
   };
+}
+
+/**
+ * The reading-aloud part of a quiz: one or two clean lines of the quiz's own conversation (or, failing that, a
+ * line of the lesson's reading without its French translation), short enough to read in a few seconds.
+ */
+export function quizReading(langSlug: string, curriculum: LevelCurriculum, key: number | "final"): QuizReading | undefined {
+  const lesson = key === "final" ? curriculum.lessons[curriculum.lessons.length - 1] : curriculum.lessons.find((l) => l.id === key);
+  if (!lesson) return undefined;
+  const lines = getDialogue(langSlug, curriculum.level, key)?.lines ?? [];
+  const cjk = langSlug === "chinese" || lines.some((l) => isCjkText(l.text));
+  const size = (t: string) => wordsOf(t, cjk).length;
+  const SPELLED = /@|arobase|arroba|\bdot\b|ponto|punto|小老鼠|\b[A-Za-z]\s?[,，-]\s?[A-Za-z]\s?[,，-]\s?[A-Za-z]\b/i;
+  const clean = (t: string) => !SPELLED.test(t) && !/\d{3,}/.test(t);
+  const [min, max] = cjk ? [8, 40] : [5, 24];
+
+  const texts = lines.map((l) => l.text).filter(clean);
+  // Two neighbouring lines make a more natural passage; one long enough line is fine too.
+  for (let i = 0; i < texts.length; i++) {
+    const pair = `${texts[i]} ${texts[i + 1] ?? ""}`.trim();
+    if (texts[i + 1] && size(pair) >= min && size(pair) <= max) return { text: pair, cjk };
+  }
+  const single = texts.find((t) => size(t) >= min && size(t) <= max);
+  if (single) return { text: single, cjk };
+
+  const fromReading = lesson.reading.map((r) => r.replace(/\s*[(（][^)）]*[)）]\s*/g, " ").trim()).find((t) => clean(t) && size(t) >= min && size(t) <= max + 10);
+  return fromReading ? { text: fromReading, cjk: cjk || isCjkText(fromReading) } : undefined;
 }
 
 /** Keeps the student's written answer and conversation result on this device. */

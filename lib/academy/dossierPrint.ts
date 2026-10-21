@@ -5,7 +5,7 @@ import { sealSvg } from "@/lib/seals";
 
 const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
-const cell = (mark: QuizMark, key: "listen" | "quiz" | "write") => {
+const cell = (mark: QuizMark, key: "listen" | "quiz" | "read" | "write") => {
   const line = mark.lines.find((l) => l.key === key);
   return line ? `${esc(line.detail)}<small> (${line.got ?? "—"}/${line.max})</small>` : "—";
 };
@@ -18,7 +18,7 @@ function levelSection(curriculum: LevelCurriculum, progress: ProgressDoc, s: Lev
         r.score === null ? "Pas passé" : r.passed ? "Réussi" : "Pas encore réussi";
       const note = m.percent === null ? "—" : `<b>${m.percent}/100</b>${m.provisional ? "<small> provisoire</small>" : ""}${m.byAdmin ? "<small> fixée par l'administration</small>" : ""}${m.legacy && !m.byAdmin ? "<small> ancien format</small>" : ""}`;
       const attempts = progress.quizAttempts?.[r.lessonId];
-      return `<tr><td>${r.lessonId}. ${esc(r.title)}</td><td>${cell(m, "listen")}</td><td>${r.score === null ? "—" : cell(m, "quiz")}</td><td>${cell(m, "write")}</td><td>${note}</td><td>${result}${attempts ? `<small> · ${attempts} essai${attempts > 1 ? "s" : ""}</small>` : ""}</td></tr>`;
+      return `<tr><td>${r.lessonId}. ${esc(r.title)}</td><td>${cell(m, "listen")}</td><td>${r.score === null ? "—" : cell(m, "quiz")}</td><td>${cell(m, "read")}</td><td>${cell(m, "write")}</td><td>${note}</td><td>${result}${attempts ? `<small> · ${attempts} essai${attempts > 1 ? "s" : ""}</small>` : ""}</td></tr>`;
     })
     .join("");
   const f = s.final;
@@ -26,9 +26,9 @@ function levelSection(curriculum: LevelCurriculum, progress: ProgressDoc, s: Lev
   return `<section>
     <h2>Niveau ${level} — ${esc(curriculum.levelTitle)}</h2>
     <table>
-      <thead><tr><th>Leçon / quiz</th><th>Écoute</th><th>Questions</th><th>Écrit</th><th>Note /100</th><th>Résultat</th></tr></thead>
+      <thead><tr><th>Leçon / quiz</th><th>Écoute /25</th><th>Questions /30</th><th>Lecture /20</th><th>Écrit /25</th><th>Note /100</th><th>Résultat</th></tr></thead>
       <tbody>${rows}
-        <tr class="final"><td>Quiz final du niveau</td><td>${cell(f.mark, "listen")}</td><td>${f.score === null ? "—" : cell(f.mark, "quiz")}</td><td>${cell(f.mark, "write")}</td><td>${finalNote}</td><td>${f.score === null ? "Pas passé" : f.passed ? "Réussi" : "Pas encore réussi"}</td></tr>
+        <tr class="final"><td>Quiz final du niveau</td><td>${cell(f.mark, "listen")}</td><td>${f.score === null ? "—" : cell(f.mark, "quiz")}</td><td>${cell(f.mark, "read")}</td><td>${cell(f.mark, "write")}</td><td>${finalNote}</td><td>${f.score === null ? "Pas passé" : f.passed ? "Réussi" : "Pas encore réussi"}</td></tr>
       </tbody>
     </table>
     <p class="avg">Moyenne du niveau : <b>${s.average !== null ? `${s.average} %` : "—"}</b> · ${s.quizzesTaken}/${s.rows.length} quiz de leçon passés · Certificat : <b>${s.eligible ? "obtenu / disponible" : "pas encore"}</b></p>
@@ -84,7 +84,7 @@ export function printDossier(opts: {
   <div><b>E-mail :</b> ${esc(opts.student.email || "—")}</div><div><b>Matricule :</b> ${esc(opts.student.studentId || "—")}</div>
 </div>
 ${body || "<p>Aucun résultat à afficher.</p>"}
-<p class="legend">Chaque quiz est noté sur 100 : écoute 30 points, questions 40 points, écrit 30 points (corrigé par un professeur). Seul le premier essai est enregistré ; les essais suivants sont de l'entraînement. « Provisoire » : l'écrit n'est pas encore corrigé.</p>
+<p class="legend">Chaque quiz est noté sur 100 : écoute 25 points, questions 30 points, lecture à voix haute (micro) 20 points, écrit 25 points (corrigé par un professeur). Seul le premier essai est enregistré ; les essais suivants sont de l'entraînement. « Provisoire » : l'écrit n'est pas encore corrigé.</p>
 <footer>
   <div class="seals">${sealSvg("company", { size: 120, idPrefix: "p-company", worn: false })}${sealSvg("academia", { size: 120, idPrefix: "p-academia" })}</div>
   <div class="sign">Cachet et signature de l'administration</div>

@@ -18,7 +18,7 @@ const lineOf = (mark: QuizMark, key: PartLine["key"]) => mark.lines.find((l) => 
 
 /** The four mark cells of a quiz row: écoute, questions, écrit and the total out of 100. */
 function PartCells({ mark, taken, review }: { mark: QuizMark; taken: boolean; review?: boolean }) {
-  if (!taken && mark.percent === null) return <><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td></>;
+  if (!taken && mark.percent === null) return <><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td><td className="p-3">—</td></>;
   const part = (key: PartLine["key"]) => {
     const l = lineOf(mark, key);
     if (!l) return <span className="text-ink-faint">—</span>;
@@ -33,6 +33,7 @@ function PartCells({ mark, taken, review }: { mark: QuizMark; taken: boolean; re
     <>
       <td className="p-3">{part("listen")}</td>
       <td className="p-3">{part("quiz")}</td>
+      <td className="p-3">{part("read")}</td>
       <td className="p-3">{part("write")}</td>
       <td className="p-3">
         <b className={`text-base ${mark.percent !== null && mark.percent >= 60 ? "text-emerald-500" : "text-ink"}`}>{mark.percent !== null ? `${mark.percent}` : "—"}</b>
@@ -70,7 +71,7 @@ export default function StudentDossier({
     if (action === "setScore" || action === "setFinalScore") {
       const what = action === "setScore" ? `du quiz de la leçon ${lessonId}` : "du quiz final";
       const answer = window.prompt(
-        `Nouvelle note ${what} (sur 100 : écoute 30 + questions 40 + écrit 30).
+        `Nouvelle note ${what} (sur 100 : écoute 25 + questions 30 + lecture 20 + écrit 25).
 L'étudiant garde sa note de premier essai tant que vous ne la changez pas.`,
         current != null ? String(current) : ""
       );
@@ -185,9 +186,10 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                         <tr className="text-left text-xs text-ink-soft uppercase tracking-wide bg-surface-alt">
                           <th className="p-3">Leçon / quiz</th>
                           <th className="p-3">Étudiée</th>
-                          <th className="p-3">Écoute <span className="font-normal normal-case">/30</span></th>
-                          <th className="p-3">Questions <span className="font-normal normal-case">/40</span></th>
-                          <th className="p-3">Écrit <span className="font-normal normal-case">/30</span></th>
+                          <th className="p-3">Écoute <span className="font-normal normal-case">/25</span></th>
+                          <th className="p-3">Questions <span className="font-normal normal-case">/30</span></th>
+                          <th className="p-3">Lecture <span className="font-normal normal-case">/20</span></th>
+                          <th className="p-3">Écrit <span className="font-normal normal-case">/25</span></th>
                           <th className="p-3">Note /100</th>
                           <th className="p-3">Résultat</th>
                           {onAct && <th className="p-3">Actions</th>}

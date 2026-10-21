@@ -12,7 +12,7 @@ import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress"
 import { pullProgress, submitWritingForReview, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
-import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
+import { quizReading, quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
 
 export default function FinalQuizPage() {
   const router = useRouter();
@@ -127,6 +127,7 @@ export default function FinalQuizPage() {
             langSlug={langSlug}
             dialogue={getDialogue(langSlug, level, "final") ?? undefined}
             writing={quizWriting(langSlug, curriculum, "final")}
+            reading={quizReading(langSlug, curriculum, "final")}
             onSubmit={(score, parts) => {
               // Only the first attempt is the result; later ones are practice.
               const first = getLevelProgress(langSlug, level).finalQuizScore === null;

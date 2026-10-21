@@ -10,7 +10,7 @@ import { getLevelProgress, isLessonUnlocked, recordQuizResult } from "@/lib/acad
 import { pullProgress, submitWritingForReview, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
-import { quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
+import { quizReading, quizWriting, saveQuizParts } from "@/lib/academy/quizExtras";
 import { useEffect, useState } from "react";
 
 export default function QuizPage() {
@@ -122,6 +122,7 @@ export default function QuizPage() {
             langSlug={langSlug}
             dialogue={getDialogue(langSlug, level, lessonId) ?? undefined}
             writing={quizWriting(langSlug, curriculum, lessonId)}
+            reading={quizReading(langSlug, curriculum, lessonId)}
             onSubmit={(score, parts) => {
               // Only the first attempt is the result (and what the certificate shows); later ones are practice.
               const first = getLevelProgress(langSlug, level).quizScores[lessonId] === undefined;

@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import { sfx } from "@/lib/academy/sfx";
-import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine } from "lucide-react";
+import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine, Mic } from "lucide-react";
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
 import { computeQuizMark, type QuizPartsRecord } from "@/lib/academy/quizScoring";
+import QuizReadingStep, { emptyReadingState, readingDone, type QuizReading } from "@/components/academy/QuizReadingStep";
 import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writingSummary, type QuizWriting, type WritingItem } from "@/components/academy/QuizWritingStep";
 
 /** What the student did in the extra steps of a quiz. */
@@ -34,6 +35,8 @@ interface QuizEngineProps {
   langSlug?: string;
   /** Step 3: a short written production. */
   writing?: QuizWriting;
+  /** Reading aloud with the microphone. */
+  reading?: QuizReading;
 }
 
 function StepTitle({ n, icon: Icon, title, hint }: { n: number; icon: React.ComponentType<{ size?: number }>; title: string; hint: string }) {
@@ -109,7 +112,7 @@ function Questions({
   );
 }
 
-export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing }: QuizEngineProps) {
+export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing, reading }: QuizEngineProps) {
   const alreadyDone = alreadyScore !== null;
   // A quiz already taken only shows its main questions (the extra steps
   // were not part of it, or are not stored); a practice retake shows all.
@@ -117,6 +120,8 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const withExtras = !alreadyDone || practice;
   const useDialogue = withExtras ? dialogue : undefined;
   const useWriting = withExtras ? writing : undefined;
+  const useReading = withExtras ? reading : undefined;
+  const [readingState, setReadingState] = useState(emptyReadingState);
 
   const [answers, setAnswers] = useState<string[]>(Array(quiz.questions.length).fill(""));
   const [dialogueAnswers, setDialogueAnswers] = useState<string[]>(Array(dialogue?.questions.length ?? 0).fill(""));
@@ -130,7 +135,8 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const writingGaps = useWriting ? writingMissing(useWriting, writingState) : [];
   const writingOk = writingGaps.length === 0;
   const allAnswered = !answers.includes("") && !(useDialogue && dialogueAnswers.includes(""));
-  const ready = allAnswered && writingOk;
+  const readingOk = !useReading || readingDone(readingState);
+  const ready = allAnswered && writingOk && readingOk;
 
   const select = (list: string[], set: (v: string[]) => void) => (i: number, option: string) => {
     if (submitted) return;
@@ -156,13 +162,23 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
       dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded,
       writing: useWriting ? writingSummary(useWriting, writingState) : "",
       writingItems: useWriting ? writingItems(useWriting, writingState) : undefined,
-      record: { quiz: [finalScore, quiz.questions.length], ...(useDialogue ? { listen: [dScore, dialogueTotal] as [number, number] } : {}), ...(useWriting ? { write: true } : {}) },
+      record: {
+        quiz: [finalScore, quiz.questions.length],
+        ...(useDialogue ? { listen: [dScore, dialogueTotal] as [number, number] } : {}),
+        ...(useReading ? { read: [readingState.percent ?? 0, 100] as [number, number] } : {}),
+        ...(useWriting ? { write: true } : {}),
+      },
     });
   };
 
   // The mark out of 100 of this attempt (the written part waits for the teacher).
   const mark = computeQuizMark({
-    parts: { quiz: [score, quiz.questions.length], ...(useDialogue ? { listen: [dialogueScore, dialogueTotal] as [number, number] } : {}), ...(useWriting ? { write: true } : {}) },
+    parts: {
+      quiz: [score, quiz.questions.length],
+      ...(useDialogue ? { listen: [dialogueScore, dialogueTotal] as [number, number] } : {}),
+      ...(useReading ? { read: [readingState.percent ?? 0, 100] as [number, number] } : {}),
+      ...(useWriting ? { write: true } : {}),
+    },
     rawScore: score,
     rawTotal: quiz.questions.length,
   });
@@ -174,6 +190,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const missing = [
     useDialogue && dialogueAnswers.includes("") ? "la conversation" : null,
     answers.includes("") ? "les questions" : null,
+    !readingOk ? "la lecture à voix haute" : null,
     !writingOk ? `la rédaction (${writingGaps.join(", ")})` : null,
   ].filter(Boolean);
 
@@ -193,11 +210,18 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
       )}
 
       <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-8">
-        {(useDialogue || useWriting) && (
+        {(useDialogue || useWriting || useReading) && (
           <StepTitle n={++step} icon={ListChecks} title="Questions du quiz" hint="Répondez à toutes les questions." />
         )}
         <Questions questions={quiz.questions} answers={answers} submitted={submitted} onSelect={select(answers, setAnswers)} />
       </div>
+
+      {useReading && (
+        <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-5">
+          <StepTitle n={++step} icon={Mic} title="Lecture à voix haute" hint="Lisez le texte ci-dessous avec le micro, d'une voix claire. Le site compare ce qu'il entend avec le texte (20 points)." />
+          <QuizReadingStep reading={useReading} state={readingState} onChange={setReadingState} submitted={submitted} langSlug={langSlug} />
+        </div>
+      )}
 
       {useWriting && (
         <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-5">
@@ -242,7 +266,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                     (minimum {dialoguePassNeeded})
                   </p>
                 )}
-                {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée : un professeur la corrigera (30 points).</p>}
+                {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée : un professeur la corrigera (25 points).</p>}
                 {mark.percent !== null && (
                   <p className="text-sm font-bold mt-2 text-ink">
                     Note : <span className="text-lg">{mark.percent}/100</span>
@@ -269,6 +293,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                   setAnswers(Array(quiz.questions.length).fill(""));
                   setDialogueAnswers(Array(dialogue?.questions.length ?? 0).fill(""));
                   setWritingState(emptyWritingState(writing));
+                  setReadingState(emptyReadingState());
                   setPractice(true);
                   setSubmitted(false);
                 }}
