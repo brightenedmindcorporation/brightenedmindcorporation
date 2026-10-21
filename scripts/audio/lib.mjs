@@ -88,6 +88,12 @@ export async function collectTexts(lang) {
       });
     }
   }
+  // Practice sentences of the writing exercises: the first two of each lesson are dictated.
+  const exercisesFile = path.join(ROOT, "content", "exercises", `${lang}.ts`);
+  if (fs.existsSync(exercisesFile)) {
+    const mod = await import(pathToFileURL(exercisesFile).href);
+    for (const sentences of Object.values(mod.default || {})) for (const sentence of sentences.slice(0, 2)) add(sentence);
+  }
   // Placement test: the conversation of the listening part (same two voices as the quiz conversations).
   const placementFile = path.join(ROOT, "content", "placement", `${lang}.ts`);
   if (fs.existsSync(placementFile)) {

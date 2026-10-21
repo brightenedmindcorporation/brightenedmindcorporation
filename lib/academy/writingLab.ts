@@ -1,5 +1,7 @@
 import { extractSpeechText } from "./audioClips";
 import type { Lesson } from "@/content/curriculum/types";
+import { getLevelCurriculum } from "@/content/curriculum";
+import { getExerciseSentences } from "@/content/exercises";
 
 // Writing practice generated from the lesson itself, so every lesson of every
 // language gets exercises without hand-writing hundreds of them: the reading
@@ -292,6 +294,17 @@ export function lessonChars(lesson: Lesson): string[] {
   return [...Array.from(seen), "，", "。", "？", "！"];
 }
 
+/** The level a lesson belongs to (lesson ids repeat from one level to the next). */
+function levelOf(langSlug: string, lesson: Lesson): number | null {
+  for (const level of [1, 2, 3]) if (getLevelCurriculum(langSlug, level)?.lessons.some((l) => l === lesson)) return level;
+  // (Not the same object, e.g. rebuilt: match on id and title, the level whose lesson also has the same reading.)
+  for (const level of [1, 2, 3]) {
+    const found = getLevelCurriculum(langSlug, level)?.lessons.find((l) => l.id === lesson.id && l.title === lesson.title && l.reading[0] === lesson.reading[0]);
+    if (found) return level;
+  }
+  return null;
+}
+
 export function buildWritingTask(langSlug: string, lesson: Lesson): WritingTask {
   const readingLines = lesson.reading.map(extractSpeechText).filter(Boolean);
   const cjk = langSlug === "chinese" || readingLines.some(isCjkText);
@@ -301,20 +314,32 @@ export function buildWritingTask(langSlug: string, lesson: Lesson): WritingTask 
   // Long numbers and e-mail addresses make poor dictation: use them only if nothing else fits.
   const dictable = readingLines.filter((l) => (cjk ? size(l) >= 4 && size(l) <= 45 : size(l) >= 3 && size(l) <= 25));
   const clean = dictable.filter((l) => !/\d{4,}|@/.test(l));
-  const dictation = spread(clean.length ? clean : dictable, 2).map((text) => ({ text }));
+  let dictation = spread(clean.length ? clean : dictable, 2).map((text) => ({ text }));
 
   const sentences = Array.from(new Set(readingLines.flatMap(splitSentences))).filter((s) =>
     cjk ? size(s) >= 5 && size(s) <= 30 : size(s) >= 4 && size(s) <= 16
   );
 
-  const cloze = spread(sentences, 3)
+  let cloze = spread(sentences, 3)
     .map((s) => buildCloze(s, cjk))
     .filter((c): c is ClozeItem => c !== null);
 
   const orderPool = sentences.filter((s) => (cjk ? size(s) >= 6 && size(s) <= 16 : size(s) >= 5 && size(s) <= 12));
-  const order = spread(orderPool.length ? orderPool : sentences, 2)
+  let order = spread(orderPool.length ? orderPool : sentences, 2)
     .map((s) => buildOrder(s, cjk))
     .filter((o): o is OrderItem => o !== null);
+
+  // The lesson's own practice sentences (not taken from its text) replace the ones cut from the reading,
+  // so the exercises test the skill and not the memory of the page. Each kind falls back if its sentences do not fit.
+  const level = levelOf(langSlug, lesson);
+  const own = level ? getExerciseSentences(langSlug, level, lesson.id) : null;
+  if (own) {
+    const ownCloze = own.slice(2, 5).map((s) => buildCloze(s, cjk)).filter((c): c is ClozeItem => c !== null);
+    const ownOrder = own.slice(5, 7).map((s) => buildOrder(s, cjk)).filter((o): o is OrderItem => o !== null);
+    dictation = own.slice(0, 2).map((text) => ({ text }));
+    if (ownCloze.length >= 2) cloze = ownCloze;
+    if (ownOrder.length >= 1) order = ownOrder;
+  }
 
   return {
     cjk,
