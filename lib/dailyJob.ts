@@ -15,14 +15,37 @@ const DAY = 86_400_000;
 
 export interface ReminderSettings {
   enabled: boolean;
-  /** Days without any activity before a reminder is sent. */
+  /** Days without any activity before a reminder is sent (typed freely by the administration: 1 to 365). */
   afterDays: number;
+  /** Minimum days between two reminders to the same student (1 to 90). */
+  repeatDays: number;
+  /** Most reminders one student ever gets (1 to 30). */
+  maxReminders: number;
 }
+
+const clamp = (value: unknown, min: number, max: number, fallback: number) => {
+  const n = Math.round(Number(value));
+  return Number.isFinite(n) && n > 0 ? Math.min(max, Math.max(min, n)) : fallback;
+};
 
 export async function getReminderSettings(): Promise<ReminderSettings> {
   const snap = await getAdminDb().collection("system").doc("reminders").get();
   const d = snap.data() || {};
-  return { enabled: d.enabled !== false, afterDays: Math.min(60, Math.max(3, Number(d.afterDays) || 7)) };
+  return {
+    enabled: d.enabled !== false,
+    afterDays: clamp(d.afterDays, 1, 365, 7),
+    repeatDays: clamp(d.repeatDays, 1, 90, 7),
+    maxReminders: clamp(d.maxReminders, 1, 30, 4),
+  };
+}
+
+/** Normalises settings typed by the administration. */
+export function cleanReminderSettings(input: { afterDays?: unknown; repeatDays?: unknown; maxReminders?: unknown }) {
+  const out: Record<string, number> = {};
+  if (input.afterDays !== undefined) out.afterDays = clamp(input.afterDays, 1, 365, 7);
+  if (input.repeatDays !== undefined) out.repeatDays = clamp(input.repeatDays, 1, 90, 7);
+  if (input.maxReminders !== undefined) out.maxReminders = clamp(input.maxReminders, 1, 30, 4);
+  return out;
 }
 
 /** Sends the "we miss you" reminders to inactive students (at most 25 per run, 4 per student, one a week). */
@@ -59,9 +82,9 @@ async function sendReminders(settings: ReminderSettings): Promise<{ sent: number
     const seen = Math.max(s.lastSeenAt ? new Date(s.lastSeenAt).getTime() : 0, lastSignIn.get(uid) ?? 0);
     const inactiveDays = (now - (seen || baseline.get(uid)!)) / DAY;
     const neverCame = seen === 0;
-    if (inactiveDays < (neverCame ? 3 : settings.afterDays)) continue;
+    if (inactiveDays < (neverCame ? Math.min(3, settings.afterDays) : settings.afterDays)) continue;
     const lastReminder = s.lastReminderAt ? new Date(s.lastReminderAt).getTime() : 0;
-    if (now - lastReminder < 6.5 * DAY || (s.reminderCount || 0) >= 4) {
+    if (now - lastReminder < (settings.repeatDays - 0.5) * DAY || (s.reminderCount || 0) >= settings.maxReminders) {
       skipped++;
       continue;
     }
@@ -220,4 +243,55 @@ export function maybeRunDailyJob(): void {
   if (localHour < 8) return;
   checkedDay = today;
   void runDailyJob(false).catch((error) => console.error("Daily job failed (non-fatal):", error));
+}
+
+/**
+ * Follows up ONE student right now (the "Relancer" button): an e-mail and a notification, whatever the
+ * automatic rules say. The administration can add a personal message.
+ */
+export async function sendFollowUp(uid: string, opts: { message?: string; by?: string } = {}): Promise<{ emailSent: boolean; emailError: string }> {
+  const db = getAdminDb();
+  const profile = (await db.collection("students").doc(uid).get()).data();
+  if (!profile) throw new Error("Étudiant introuvable.");
+  const email = String(profile.email || "");
+  let seen = profile.lastSeenAt ? new Date(profile.lastSeenAt).getTime() : 0;
+  try {
+    const u = await getAdminAuth().getUser(uid);
+    if (u.metadata.lastSignInTime) seen = Math.max(seen, new Date(u.metadata.lastSignInTime).getTime());
+  } catch {
+    // the sign-in date is optional
+  }
+  const days = seen ? Math.floor((Date.now() - seen) / DAY) : null;
+  const custom = (opts.message || "").trim().slice(0, 1500);
+  const body =
+    custom ||
+    (days === null
+      ? "Votre inscription est validée, mais vous ne vous êtes pas encore connecté. Votre premier cours est prêt : il suffit de vous connecter avec l'adresse e-mail de votre inscription."
+      : `Cela fait ${days} jour${days > 1 ? "s" : ""} que nous ne vous avons pas vu sur BM Academia. Votre progression est sauvegardée : vous pouvez reprendre exactement là où vous vous êtes arrêté.`);
+
+  let emailSent = false;
+  let emailError = "";
+  if (email && process.env.RESEND_API_KEY) {
+    const { error } = await sendWithText(new Resend(process.env.RESEND_API_KEY), {
+      from: mailFrom("BM Academia"),
+      to: email,
+      replyTo: "info@bmcorporation-cd.com",
+      subject: "Votre formation BM Academia vous attend",
+      html: `<div style="font-family: sans-serif; max-width: 560px; color: #333;">
+        <h2 style="color: #7a1f2b; margin: 0 0 12px;">${greeting(profile.name, profile.gender)}</h2>
+        <p style="white-space: pre-line;">${body.replace(/</g, "&lt;")}</p>
+        <p style="margin: 24px 0;"><a href="${SITE_URL}/academia/dashboard" style="background: #7a1f2b; color: #fff; padding: 12px 24px; border-radius: 10px; text-decoration: none; font-weight: bold;">Reprendre ma formation</a></p>
+        <p style="font-size: 13px; color: #666;">Si quelque chose vous bloque, répondez simplement à ce message : nous sommes là pour vous aider.</p>
+      </div>`,
+    });
+    emailSent = !error;
+    if (error) emailError = String((error as any).message || error);
+  } else {
+    emailError = email ? "Envoi d'e-mails non configuré." : "Cet étudiant n'a pas d'adresse e-mail.";
+  }
+
+  await createNotification({ audience: uid, type: "reminder", title: "Votre formation vous attend", message: body, link: "/academia/dashboard" });
+  await logActivitySafe(uid, "reminder", `Relance manuelle${opts.by ? ` par ${opts.by}` : ""}${custom ? " (message personnel)" : ""}`, {});
+  await db.collection("students").doc(uid).set({ lastReminderAt: new Date().toISOString(), reminderCount: FieldValue.increment(1) }, { merge: true });
+  return { emailSent, emailError };
 }

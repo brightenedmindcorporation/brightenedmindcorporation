@@ -63,6 +63,8 @@ export async function GET(request: Request) {
           loginCount: s.loginCount || 0,
           sessionCount: s.sessionCount || 0,
           stats: s.activityStats || {},
+          reminderCount: s.reminderCount || 0,
+          lastReminderAt: s.lastReminderAt || null,
         };
       });
     return NextResponse.json({ students: rows, alerts: { stuck: await findStuckQuizzes() } });

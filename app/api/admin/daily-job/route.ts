@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
-import { getReminderSettings, runDailyJob } from "@/lib/dailyJob";
+import { cleanReminderSettings, getReminderSettings, runDailyJob } from "@/lib/dailyJob";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
   }
 }
 
-/** PATCH { enabled?, afterDays? } changes the reminder settings. */
+/** PATCH { enabled?, afterDays?, repeatDays?, maxReminders? } changes the reminder settings (days typed freely). */
 export async function PATCH(request: Request) {
   try {
     if (!isAdminConfigured()) return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
@@ -30,7 +30,7 @@ export async function PATCH(request: Request) {
     const body = await request.json();
     const update: Record<string, unknown> = {};
     if (typeof body.enabled === "boolean") update.enabled = body.enabled;
-    if (body.afterDays !== undefined) update.afterDays = Math.min(60, Math.max(3, Number(body.afterDays) || 7));
+    Object.assign(update, cleanReminderSettings(body));
     await getAdminDb().collection("system").doc("reminders").set(update, { merge: true });
     return NextResponse.json({ settings: await getReminderSettings() });
   } catch (error) {
