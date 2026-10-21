@@ -8,6 +8,7 @@ import NarrationPlayer from "@/components/academy/NarrationPlayer";
 import WritingLab from "@/components/academy/WritingLab";
 import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
 import { useYouTubeMeter } from "@/lib/youtubeMeter";
+import ListenButton from "@/components/academy/ListenButton";
 import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
@@ -54,14 +55,12 @@ function CardTitle({ icon: Icon, children }: { icon: React.ComponentType<{ size?
 
 function SpeakIconButton({ text, langSlug }: { text: string; langSlug: string }) {
   return (
-    <button
-      onClick={() => speak(text, langSlug)}
-      aria-label="Écouter cette phrase"
+    <ListenButton
+      play={(id) => speak(text, langSlug, id)}
       title="Écouter cette phrase"
+      size={13}
       className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition mt-0.5"
-    >
-      <Volume2 size={13} />
-    </button>
+    />
   );
 }
 

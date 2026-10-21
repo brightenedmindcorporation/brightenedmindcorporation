@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { PenLine, Volume2, CheckCircle2, RotateCcw, Copy, Eye } from "lucide-react";
 import type { Lesson } from "@/content/curriculum/types";
 import { speakPhrase, speakWithDeviceVoice } from "@/lib/academy/deviceSpeech";
+import ListenButton from "@/components/academy/ListenButton";
 import { CharPalette, ImeInput, ImeTextarea } from "@/components/academy/ImeField";
 import { sfx } from "@/lib/academy/sfx";
 import {
@@ -99,9 +100,7 @@ function Dictation({ items, langSlug, cjk, chars, corpus, onDone }: { items: { t
         return (
           <div key={i} className="rounded-2xl border border-line bg-surface-alt p-4 space-y-3">
             <div className="flex flex-wrap items-center gap-2">
-              <button onClick={() => speakPhrase(item.text, langSlug)} className={primaryBtn}>
-                <Volume2 size={15} /> Écouter la phrase {i + 1}
-              </button>
+              <ListenButton play={(id) => speakPhrase(item.text, langSlug, id)} label={`Écouter la phrase ${i + 1}`} className={primaryBtn} />
               <span className="text-xs text-ink-faint">Écoutez autant de fois que nécessaire, puis écrivez ce que vous entendez.</span>
             </div>
             {!res ? (
@@ -492,14 +491,14 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               <span className={`text-sm font-bold ${length >= task.goal ? "text-emerald-500" : "text-ink-soft"}`}>
                 {length}/{task.goal} {task.cjk ? "caractères" : "mots"}
               </span>
-              <button
-                onClick={() => speakWithDeviceVoice(saved.draft, langSlug)}
+              <ListenButton
+                play={(id) => speakWithDeviceVoice(saved.draft, langSlug, { id })}
                 disabled={!saved.draft.trim()}
                 className={ghostBtn}
                 title="Écouter votre texte lu par une voix de synthèse"
-              >
-                <Volume2 size={14} /> Écouter mon texte
-              </button>
+                label="Écouter mon texte"
+                size={14}
+              />
               <button
                 onClick={async () => {
                   try {

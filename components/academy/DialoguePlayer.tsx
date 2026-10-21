@@ -48,12 +48,12 @@ export default function DialoguePlayer({
 
   const playLine = async (index: number, myRun: number) => {
     const line = dialogue.lines[index];
-    const blob = await getClipBlob(clipUrl(langSlug, dialogueClipText(line.speaker, line.text)));
+    const blob = await getClipBlob(clipUrl(langSlug, dialogueClipText(line.voice, line.text)));
     if (run.current !== myRun) return;
     if (!blob) {
       // The device's voice can stay silent forever (no voice for the language): never wait more than a few seconds.
       await Promise.race([
-        speakWithDeviceVoice(line.text, langSlug, { pitch: line.speaker === "A" ? 1.15 : 0.8 }),
+        speakWithDeviceVoice(line.text, langSlug, { pitch: line.voice === "A" ? 1.15 : 0.8 }),
         new Promise((r) => setTimeout(r, 3000 + line.text.length * 350)),
       ]);
       return;

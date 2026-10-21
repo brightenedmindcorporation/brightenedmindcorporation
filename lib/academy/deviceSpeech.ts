@@ -1,6 +1,6 @@
 "use client";
 
-import { playClip, stopClip } from "./lessonAudioPlayer";
+import { claimPlayback, playClip, releasePlayback, stopClip } from "./lessonAudioPlayer";
 
 // Maps our URL language slugs to BCP-47 tags for the Web Speech API.
 // Without this, every language's "Listen" buttons were reading the text
@@ -31,9 +31,12 @@ function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
 }
 
 /** The device's own voice — only the fallback when no recording is available. */
-export function speakWithDeviceVoice(text: string, langSlug: string, opts: { pitch?: number } = {}): Promise<void> {
+export function speakWithDeviceVoice(text: string, langSlug: string, opts: { pitch?: number; id?: string } = {}): Promise<void> {
   if (!("speechSynthesis" in window)) return Promise.resolve();
-  window.speechSynthesis.cancel();
+  // A button that can show Stop (it has an id) takes over playback; the others just cancel what was speaking.
+  const stop = () => window.speechSynthesis.cancel();
+  if (opts.id) claimPlayback(stop, opts.id);
+  else window.speechSynthesis.cancel();
   const speech = new SpeechSynthesisUtterance(text);
   const langTag = SPEECH_LANG[langSlug] ?? "en-US";
   speech.lang = langTag;
@@ -44,18 +47,22 @@ export function speakWithDeviceVoice(text: string, langSlug: string, opts: { pit
   speech.volume = 1;
   // Resolves when the voice has finished, so a conversation can chain lines.
   return new Promise((resolve) => {
-    speech.onend = () => resolve();
-    speech.onerror = () => resolve();
+    const done = () => {
+      if (opts.id) releasePlayback(stop);
+      resolve();
+    };
+    speech.onend = done;
+    speech.onerror = done;
     window.speechSynthesis.speak(speech);
   });
 }
 
 /** Recorded clip first (works offline once downloaded/played); the device's
  * voice only when no clip is available. */
-export async function speakPhrase(text: string, langSlug: string) {
+export async function speakPhrase(text: string, langSlug: string, id?: string) {
   if ("speechSynthesis" in window) window.speechSynthesis.cancel();
-  const played = await playClip(langSlug, text);
-  if (!played) speakWithDeviceVoice(text, langSlug);
+  const played = await playClip(langSlug, text, id);
+  if (!played) speakWithDeviceVoice(text, langSlug, { id });
 }
 
 export function stopSpeaking() {

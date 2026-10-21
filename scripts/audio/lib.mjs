@@ -79,7 +79,9 @@ export async function collectTexts(lang) {
       d.lines.forEach((line, i) => {
         const text = line.trim();
         if (!text) return;
-        const speaker = i % 2 === 0 ? "A" : "B";
+        // Conversations flagged `swap` are read with the two voices exchanged (names match the voices).
+        const position = i % 2 === 0 ? "A" : "B";
+        const speaker = d.swap ? (position === "A" ? "B" : "A") : position;
         const id = clipId(lang, dialogueClipText(speaker, text));
         texts.set(id, text);
         if (speaker === "B") voiceOverride.set(id, VOICES_B[lang]);

@@ -5,6 +5,7 @@ import type { RawDialogue } from "./types";
 const data: Record<string, RawDialogue> = {
   // ---------------- Nivel 1 ----------------
   "1-1": {
+    swap: true,
     lines: [
       "¡Buenos días! Me llamo Tom. ¿Cómo te llamas?",
       "Buenos días, Tom. Soy Ana. Mucho gusto.",
@@ -20,6 +21,7 @@ const data: Record<string, RawDialogue> = {
     ],
   },
   "1-2": {
+    swap: true,
     lines: [
       "Hola. ¿Puede deletrear su nombre, por favor?",
       "Sí. Es S, A, R, A, H. Sarah.",
@@ -235,6 +237,7 @@ const data: Record<string, RawDialogue> = {
     ],
   },
   "2-3": {
+    swap: true,
     lines: [
       "Hola, creo que no nos conocemos. Soy Daniel.",
       "Mucho gusto, Daniel. Soy Rosa. ¿Cómo conoces a la anfitriona?",

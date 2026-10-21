@@ -5,6 +5,7 @@ import type { RawDialogue } from "./types";
 const data: Record<string, RawDialogue> = {
   // ---------------- 第一级 ----------------
   "1-1": {
+    swap: true,
     lines: [
       "早上好！我叫汤姆。你叫什么名字？",
       "早上好，汤姆。我叫安娜。很高兴认识你。",
@@ -20,6 +21,7 @@ const data: Record<string, RawDialogue> = {
     ],
   },
   "1-2": {
+    swap: true,
     lines: [
       "你好。请问你的名字怎么拼？",
       "好的。S，A，R，A，H。莎拉。",
@@ -235,6 +237,7 @@ const data: Record<string, RawDialogue> = {
     ],
   },
   "2-3": {
+    swap: true,
     lines: [
       "你好，我想我们还没见过。我叫大卫。",
       "很高兴认识你，大卫。我叫罗斯。你怎么认识女主人的？",

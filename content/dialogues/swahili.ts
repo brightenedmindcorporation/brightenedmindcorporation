@@ -6,6 +6,7 @@ import type { RawDialogue } from "./types";
 const data: Record<string, RawDialogue> = {
   // ---------------- Kiwango cha 1 ----------------
   "1-1": {
+    swap: true,
     lines: [
       "Habari za asubuhi! Jina langu ni Tom. Wewe unaitwa nani?",
       "Nzuri, Tom. Mimi ni Ana. Nimefurahi kukutana nawe.",
@@ -21,6 +22,7 @@ const data: Record<string, RawDialogue> = {
     ],
   },
   "1-2": {
+    swap: true,
     lines: [
       "Hujambo. Unaweza kutamka herufi za jina lako, tafadhali?",
       "Ndiyo. Ni S, A, R, A, H. Sarah.",
@@ -236,6 +238,7 @@ const data: Record<string, RawDialogue> = {
     ],
   },
   "2-3": {
+    swap: true,
     lines: [
       "Hujambo, nadhani hatujakutana. Mimi ni Daudi.",
       "Nimefurahi, Daudi. Mimi ni Rosa. Unamjuaje mwenyeji wa sherehe?",

@@ -29,13 +29,13 @@ export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: 
   // Spelled letters and e-mail addresses ("sarah point brown arobase…") are no fair dictation.
   const SPELLED = /@|arobase|arroba|\bdot\b|ponto|punto|小老鼠|\b[A-Za-z]\s?[,，-]\s?[A-Za-z]\s?[,，-]\s?[A-Za-z]\b/i;
   const dictable = lines.filter((l) => !SPELLED.test(l.text) && !/\d{3,}/.test(l.text) && (cjk ? size(l.text) >= 4 && size(l.text) <= 24 : size(l.text) >= 3 && size(l.text) <= 16));
-  const dictation = spread(dictable, 2).map((l) => ({ speaker: l.speaker, text: l.text }));
+  const dictation = spread(dictable, 2).map((l) => ({ speaker: l.voice, text: l.text }));
 
   // Questions heard in the conversation (a line can hold several sentences: keep the questions).
   const asked: { speaker: "A" | "B"; question: string; line: string }[] = [];
   for (const l of lines) {
     const sentences = l.text.split(/(?<=[.!?。！？…])\s*/u).map((x) => x.trim()).filter(Boolean);
-    for (const sentence of sentences) if (QUESTION_END.test(sentence) && size(sentence) >= 2) asked.push({ speaker: l.speaker, question: sentence, line: l.text });
+    for (const sentence of sentences) if (QUESTION_END.test(sentence) && size(sentence) >= 2) asked.push({ speaker: l.voice, question: sentence, line: l.text });
   }
   const replies = spread(asked, 2);
 

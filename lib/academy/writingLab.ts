@@ -25,8 +25,39 @@ export interface Word {
   key: string;
 }
 
-/** Words of a text; for Chinese every character is a token. */
-export function wordsOf(text: string, cjk: boolean): Word[] {
+// English contractions and their long forms: "I'm" and "I am" are the same answer, whichever the dictation says.
+const IRREGULAR: Record<string, string[]> = {
+  "can't": ["cannot"],
+  "cannot": ["cannot"],
+  "won't": ["will", "not"],
+  "shan't": ["shall", "not"],
+  "let's": ["let", "us"],
+  "ain't": ["is", "not"],
+  "i'm": ["i", "am"],
+};
+const BE_PRONOUNS = /^(he|she|it|that|there|here|what|who|where|how|when|why)'s$/;
+
+/** "I'm" -> ["I", "am"], "don't" -> ["do", "not"]… (words that are not English contractions come back unchanged). */
+function expandContraction(word: string): string[] {
+  const k = word.toLowerCase();
+  if (IRREGULAR[k]) return word.length && /^[A-Z]/.test(word) && k !== "cannot" ? IRREGULAR[k].map((x, i) => (i === 0 ? x[0].toUpperCase() + x.slice(1) : x)) : IRREGULAR[k];
+  const be = k.match(BE_PRONOUNS);
+  if (be) return [word.slice(0, -2), "is"];
+  const m = word.match(/^([A-Za-z]+)('re|'ve|'ll|'m)$/i);
+  if (m) {
+    const long: Record<string, string> = { "'re": "are", "'ve": "have", "'ll": "will", "'m": "am" };
+    return [m[1], long[m[2].toLowerCase()]];
+  }
+  const n = word.match(/^([A-Za-z]+)n't$/i);
+  if (n) {
+    const stem = n[1].toLowerCase();
+    return [stem === "ca" ? "can" : n[1], "not"];
+  }
+  return [word];
+}
+
+/** Words of a text; for Chinese every character is a token. `expand` turns English contractions into their long form. */
+export function wordsOf(text: string, cjk: boolean, expand = false): Word[] {
   if (cjk) {
     return Array.from(text)
       .filter((c) => LETTER_OR_DIGIT.test(c))
@@ -37,6 +68,7 @@ export function wordsOf(text: string, cjk: boolean): Word[] {
     .split(/\s+/)
     .map((w) => w.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ""))
     .filter(Boolean)
+    .flatMap((w) => (expand ? expandContraction(w) : [w]))
     .map((w) => ({ raw: w, key: w.toLowerCase() }));
 }
 
@@ -55,8 +87,9 @@ export interface DiffOp {
  * Capital letters and punctuation are not judged here.
  */
 export function diffAnswer(expected: string, typed: string, cjk: boolean): { ops: DiffOp[]; score: number } {
-  const a = wordsOf(expected, cjk);
-  const b = wordsOf(typed, cjk);
+  // Contractions count as their long form on both sides ("I'm" = "I am").
+  const a = wordsOf(expected, cjk, true);
+  const b = wordsOf(typed, cjk, true);
   const fa = a.map((w) => foldAccents(w.key));
   const fb = b.map((w) => foldAccents(w.key));
 

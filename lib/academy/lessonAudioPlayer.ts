@@ -18,22 +18,42 @@ function cacheSupported(): boolean {
 // Only one thing speaks at a time: whoever starts claims playback and the
 // previous player (phrase clip, narration player, device voice) is stopped.
 let stopActive: (() => void) | null = null;
+// Who is speaking right now (the id of the button that started it), so each speaker button can show Stop.
+let owner: string | null = null;
+const listeners = new Set<(owner: string | null) => void>();
+const emit = () => listeners.forEach((l) => l(owner));
 
-export function claimPlayback(stop: () => void) {
+/** Calls back with the id of the button that is playing (null when nothing plays). */
+export function subscribePlayback(listener: (owner: string | null) => void): () => void {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+export function claimPlayback(stop: () => void, id?: string) {
   const previous = stopActive;
   stopActive = stop;
+  owner = id ?? null;
   if (previous && previous !== stop) previous();
   if (typeof window !== "undefined" && "speechSynthesis" in window) window.speechSynthesis.cancel();
+  emit();
 }
 
 export function releasePlayback(stop: () => void) {
-  if (stopActive === stop) stopActive = null;
+  if (stopActive === stop) {
+    stopActive = null;
+    owner = null;
+    emit();
+  }
 }
 
 export function stopClip() {
   const stop = stopActive;
   stopActive = null;
+  owner = null;
   stop?.();
+  emit();
 }
 
 /** The clip's audio as a Blob (from the cache if present, else the network,
@@ -58,7 +78,7 @@ export async function getClipBlob(url: string): Promise<Blob | null> {
 
 /** Plays the short clip for `text`; returns false (so the caller can fall
  * back to speech synthesis) when no clip could be played. */
-export async function playClip(langSlug: string, text: string): Promise<boolean> {
+export async function playClip(langSlug: string, text: string, id?: string): Promise<boolean> {
   const blob = await getClipBlob(clipUrl(langSlug, text));
   if (!blob) return false;
   const objectUrl = URL.createObjectURL(blob);
@@ -68,7 +88,7 @@ export async function playClip(langSlug: string, text: string): Promise<boolean>
     URL.revokeObjectURL(objectUrl);
     releasePlayback(stop);
   };
-  claimPlayback(stop);
+  claimPlayback(stop, id);
   audio.onended = stop;
   try {
     await audio.play();

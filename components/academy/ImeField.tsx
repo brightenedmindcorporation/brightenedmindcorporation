@@ -13,6 +13,25 @@ import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
  * composition, and once when a character is chosen. When the page itself changes the text (a
  * character tapped in the palette, a reset), the field is updated — never during a composition.
  */
+/** Short message under the page when a copy/paste attempt is refused. */
+function showNotice(text: string) {
+  if (typeof document === "undefined") return;
+  document.getElementById("bm-nopaste")?.remove();
+  const el = document.createElement("div");
+  el.id = "bm-nopaste";
+  el.textContent = text;
+  el.setAttribute("role", "status");
+  el.style.cssText =
+    "position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:9999;background:#111;color:#fff;padding:10px 16px;border-radius:12px;font:600 14px system-ui,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.35);max-width:90vw;text-align:center";
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 2400);
+}
+
+function blockClipboard(e: { preventDefault: () => void }) {
+  e.preventDefault();
+  showNotice("Copier-coller désactivé : écrivez vous-même votre réponse.");
+}
+
 function useImeField<T extends HTMLInputElement | HTMLTextAreaElement>(value: string, onValueChange: (v: string) => void) {
   const ref = useRef<T>(null);
   const composing = useRef(false);
@@ -30,6 +49,15 @@ function useImeField<T extends HTMLInputElement | HTMLTextAreaElement>(value: st
   return {
     ref,
     defaultValue: initial.current,
+    // Writing exercises must be typed: pasting, dropping text, copying and cutting are refused in every language.
+    onPaste: blockClipboard,
+    onCopy: blockClipboard,
+    onCut: blockClipboard,
+    onDrop: blockClipboard,
+    onBeforeInput: (e: { nativeEvent: Event; preventDefault: () => void }) => {
+      const type = (e.nativeEvent as InputEvent).inputType || "";
+      if (type === "insertFromPaste" || type === "insertFromDrop" || type === "insertFromYank" || type === "insertFromPasteAsQuotation") blockClipboard(e);
+    },
     onChange: (e: { target: { value: string } }) => {
       if (!composing.current) report.current(e.target.value);
     },

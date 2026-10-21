@@ -1,7 +1,7 @@
 "use client";
 
-import { Volume2 } from "lucide-react";
 import { speakPhrase } from "@/lib/academy/deviceSpeech";
+import ListenButton from "@/components/academy/ListenButton";
 
 /** Small round speaker button that plays the recording of one phrase. */
 export default function SpeakIcon({
@@ -16,14 +16,11 @@ export default function SpeakIcon({
   className?: string;
 }) {
   return (
-    <button
-      type="button"
-      onClick={() => speakPhrase(text, langSlug)}
-      aria-label={label}
+    <ListenButton
+      play={(id) => speakPhrase(text, langSlug, id)}
       title={label}
+      size={13}
       className={`inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition ${className}`}
-    >
-      <Volume2 size={13} />
-    </button>
+    />
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Volume2, Lightbulb } from "lucide-react";
+import { Lightbulb } from "lucide-react";
+import ListenButton from "@/components/academy/ListenButton";
 import { CharPalette, ImeTextarea } from "@/components/academy/ImeField";
 import { DiffView } from "@/components/academy/WritingLab";
 import { dialogueClipText } from "@/lib/academy/audioClips";
@@ -92,9 +93,9 @@ const field =
 const listenBtn =
   "inline-flex items-center gap-2 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition shrink-0";
 
-async function playLine(langSlug: string, speaker: "A" | "B", text: string) {
-  const ok = await playClip(langSlug, dialogueClipText(speaker, text));
-  if (!ok) speakWithDeviceVoice(text, langSlug, { pitch: speaker === "A" ? 1.15 : 0.8 });
+async function playLine(langSlug: string, speaker: "A" | "B", text: string, id: string) {
+  const ok = await playClip(langSlug, dialogueClipText(speaker, text), id);
+  if (!ok) speakWithDeviceVoice(text, langSlug, { pitch: speaker === "A" ? 1.15 : 0.8, id });
 }
 
 function Part({ n, title, hint, children }: { n: string; title: string; hint: string; children: React.ReactNode }) {
@@ -153,9 +154,7 @@ export default function QuizWritingStep({
             const typed = state.dictation[i] ?? "";
             return (
               <div key={i} className="space-y-2">
-                <button type="button" onClick={() => playLine(langSlug, d.speaker, d.text)} className={listenBtn}>
-                  <Volume2 size={15} /> Phrase {i + 1}
-                </button>
+                <ListenButton play={(id) => playLine(langSlug, d.speaker, d.text, id)} label={`Phrase ${i + 1}`} className={listenBtn} />
                 <ImeTextarea
                   value={typed}
                   onValueChange={(v) => setDictation(i, v)}
@@ -185,9 +184,7 @@ export default function QuizWritingStep({
           {writing.replies.map((r, i) => (
             <div key={i} className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
-                <button type="button" onClick={() => playLine(langSlug, r.speaker, r.line)} className={listenBtn} aria-label="Écouter la question">
-                  <Volume2 size={15} /> Écouter
-                </button>
+                <ListenButton play={(id) => playLine(langSlug, r.speaker, r.line, id)} label="Écouter" title="Écouter la question" className={listenBtn} />
                 <p translate="no" className="notranslate font-semibold text-ink">{r.question}</p>
               </div>
               <ImeTextarea

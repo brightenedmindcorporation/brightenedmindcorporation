@@ -2,7 +2,12 @@ import type { QuizQuestion } from "../curriculum/types";
 
 /** A short conversation between two people, heard (not read) in a quiz. */
 export interface Dialogue {
-  lines: { speaker: "A" | "B"; text: string }[];
+  /**
+   * `speaker` is the position in the conversation (A speaks first); `voice` is who reads the line aloud. They are the
+   * same, except in the conversations where the names require swapping the voices (a man's name read by the
+   * man's voice, a woman's by the woman's).
+   */
+  lines: { speaker: "A" | "B"; voice: "A" | "B"; text: string }[];
   /** Comprehension questions about what was said. */
   questions: QuizQuestion[];
 }
@@ -14,6 +19,8 @@ export interface Dialogue {
  *    the options is shuffled when the dialogue is built.
  */
 export interface RawDialogue {
+  /** Swap the two voices (A is read by the second voice, B by the first): when A has a man's name and B a woman's. */
+  swap?: boolean;
   lines: string[];
   q: string[][];
 }
@@ -44,7 +51,10 @@ export function buildDialogues(raw: Record<string, RawDialogue>): Record<string,
   const out: Record<string, Dialogue> = {};
   for (const [key, d] of Object.entries(raw)) {
     out[key] = {
-      lines: d.lines.map((text, i) => ({ speaker: i % 2 === 0 ? "A" : "B", text })),
+      lines: d.lines.map((text, i) => {
+        const speaker = i % 2 === 0 ? "A" : "B";
+        return { speaker, voice: d.swap ? (speaker === "A" ? "B" : "A") : speaker, text } as Dialogue["lines"][number];
+      }),
       questions: d.q.map(([question, answer, ...wrong]) => ({
         question,
         answer,
