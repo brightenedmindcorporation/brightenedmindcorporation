@@ -1,6 +1,7 @@
 import jsPDF from "jspdf";
 import { addWatermark, loadLogo } from "./pdfBranding";
 import { getCachedDocumentSettings, type DocumentSettings } from "./documentSettings";
+import { loadStampImages } from "./pdfSeals";
 
 export interface CertificateOpts {
   studentName: string;
@@ -79,6 +80,17 @@ async function buildCertificateDoc(opts: CertificateOpts): Promise<jsPDF> {
   if (studentId) {
     doc.setFontSize(11);
     doc.text(`${cfg.studentIdLabel}: ${studentId}`, 148, 159, { align: "center" });
+  }
+
+  // The administration's seal (centre), cachet and the director's signature (left, over the first line).
+  try {
+    const stamps = await loadStampImages(new Date().toLocaleDateString("fr-FR"));
+    doc.addImage(stamps.seal, "PNG", 131, 162, 35, 35, "seal", "FAST");
+    doc.addImage(stamps.cachet, "PNG", 47, 146, 48, 24, "cachet", "FAST");
+    // The signature is only placed over the name it belongs to.
+    if (stamps.signature && /mukosa/i.test(cfg.signatory1.name)) doc.addImage(stamps.signature, "PNG", 56, 136, 34, 35.5, "signature", "FAST");
+  } catch (error) {
+    console.error("Seal images unavailable (the certificate is still issued):", error);
   }
 
   doc.line(50, 172, 95, 172);

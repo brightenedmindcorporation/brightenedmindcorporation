@@ -1,7 +1,7 @@
 import type { LevelCurriculum } from "@/content/curriculum/types";
 import type { LevelSummary, ProgressDoc } from "@/lib/academy/levelSummary";
 import type { QuizMark } from "@/lib/academy/quizScoring";
-import { sealSvg } from "@/lib/seals";
+import { cachetSvg, sealSvg } from "@/lib/seals";
 
 const esc = (s: unknown) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
@@ -71,8 +71,10 @@ export function printDossier(opts: {
   .legend { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #555; margin-top: 14px; }
   section { break-inside: avoid; }
   footer { margin-top: 26px; display: flex; justify-content: space-between; align-items: flex-end; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
-  .sign { width: 220px; border-top: 1px solid #333; padding-top: 4px; text-align: center; margin-top: 70px; }
-  .seals { display: flex; gap: 6px; align-items: center; }
+  .sign { position: relative; width: 250px; text-align: center; }
+  .sign .cachet { width: 240px; display: block; }
+  .sign img.signature { position: absolute; left: 70px; top: -26px; width: 105px; mix-blend-mode: multiply; }
+  .sign .name { border-top: 1px solid #333; margin-top: 6px; padding-top: 4px; }
   @media print { button { display: none; } }
 </style></head><body>
 <header>
@@ -86,11 +88,22 @@ export function printDossier(opts: {
 ${body || "<p>Aucun résultat à afficher.</p>"}
 <p class="legend">Chaque quiz est noté sur 100 : écoute 25 points, questions 30 points, lecture à voix haute (micro) 20 points, écrit 25 points (corrigé par un professeur). Seul le premier essai est enregistré ; les essais suivants sont de l'entraînement. « Provisoire » : l'écrit n'est pas encore corrigé.</p>
 <footer>
-  <div class="seals">${sealSvg("company", { size: 120, idPrefix: "p-company", worn: false })}${sealSvg("academia", { size: 120, idPrefix: "p-academia" })}</div>
-  <div class="sign">Cachet et signature de l'administration</div>
+  <div>${sealSvg("company", { size: 130, idPrefix: "p-company" })}</div>
+  <div class="sign">
+    ${cachetSvg("company", { size: 240, date: today, idPrefix: "p-cachet" }).replace("<svg ", '<svg class="cachet" ')}
+    <img class="signature" src="${window.location.origin}/seals/signature-jordi-mukosa.png" alt="">
+    <div class="name"><b>Jordi Mukosa</b><br>Directeur</div>
+  </div>
 </footer>
 </body></html>`);
   w.document.close();
   w.focus();
-  setTimeout(() => w.print(), 400);
+  // Print once the signature image has loaded.
+  const sig = w.document.querySelector("img.signature") as HTMLImageElement | null;
+  const go = () => setTimeout(() => w.print(), 300);
+  if (!sig || sig.complete) go();
+  else {
+    sig.onload = go;
+    sig.onerror = go;
+  }
 }
