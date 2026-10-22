@@ -33,7 +33,21 @@ export function extractSpeechText(line: string): string {
     const runs = line.match(/[\u3400-\u9fff]+/g);
     if (runs) return runs.join("，");
   }
+  // Chinese "phrase - français": the French translation is for reading, never for the voice.
+  if (CJK.test(head)) {
+    const dash = head.search(/\s*[-–—]\s+(?=\p{L})/u);
+    if (dash > 0) head = head.slice(0, dash).trim();
+  }
   return head;
+}
+
+/**
+ * Only the language being learned is voiced. Chinese lessons explain in French: those explanation lines (no
+ * Chinese character in what would be spoken) get no speaker button and no recording.
+ */
+export function isSpokenText(langSlug: string, spoken: string): boolean {
+  if (!spoken.trim()) return false;
+  return langSlug === "chinese" ? CJK.test(spoken) : true;
 }
 
 /** Conversation lines are voiced by two people. Speaker A shares the

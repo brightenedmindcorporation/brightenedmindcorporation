@@ -9,7 +9,7 @@
 import path from "path";
 import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
-import { clipId, dialogueClipText, extractSpeechText, lessonNarrations, verbPhrases } from "../../lib/academy/audioClips.ts";
+import { clipId, dialogueClipText, extractSpeechText, isSpokenText, lessonNarrations, verbPhrases } from "../../lib/academy/audioClips.ts";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const WORK = process.env.AUDIO_WORK_DIR || path.resolve(ROOT, "..", "bm-audio");
@@ -116,8 +116,13 @@ export async function collectTexts(lang) {
       const narration = lessonNarrations(lang, lesson);
       add(narration.lesson);
       add(narration.reading);
-      for (const section of lesson.sections) for (const line of section.body) add(extractSpeechText(line));
-      for (const line of lesson.reading) add(extractSpeechText(line));
+      // Only the language being learned is voiced (no French explanations in the Chinese lessons).
+      const addSpoken = (line) => {
+        const spoken = extractSpeechText(line);
+        if (isSpokenText(lang, spoken)) add(spoken);
+      };
+      for (const section of lesson.sections) for (const line of section.body) addSpoken(line);
+      for (const line of lesson.reading) addSpoken(line);
     }
   }
   // The verb reference page (verb + forms + example sentence).

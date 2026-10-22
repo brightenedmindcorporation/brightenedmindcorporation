@@ -3,7 +3,7 @@
 import type { Lesson } from "@/content/curriculum/types";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2 } from "lucide-react";
-import { extractSpeechText, lessonNarrations } from "@/lib/academy/audioClips";
+import { extractSpeechText, isSpokenText, lessonNarrations } from "@/lib/academy/audioClips";
 import NarrationPlayer from "@/components/academy/NarrationPlayer";
 import WritingLab from "@/components/academy/WritingLab";
 import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
@@ -67,7 +67,8 @@ function SpeakIconButton({ text, langSlug }: { text: string; langSlug: string })
 function SpeakableLine({ text, langSlug, className = "" }: { text: string; langSlug: string; className?: string }) {
   return (
     <p className={`flex items-start gap-2 ${className}`}>
-      <SpeakIconButton text={extractSpeechText(text)} langSlug={langSlug} />
+      {/* Only the language being learned is voiced: a French explanation gets no speaker. */}
+      {isSpokenText(langSlug, extractSpeechText(text)) ? <SpeakIconButton text={extractSpeechText(text)} langSlug={langSlug} /> : <span className="w-7 shrink-0" aria-hidden="true" />}
       <span translate="no" className="notranslate">{text}</span>
     </p>
   );

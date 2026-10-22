@@ -1,6 +1,6 @@
 "use client";
 
-import { clipUrl, extractSpeechText, lessonNarrations } from "./audioClips";
+import { clipUrl, extractSpeechText, isSpokenText, lessonNarrations } from "./audioClips";
 import type { Lesson } from "@/content/curriculum/types";
 
 // Plays the pre-recorded clips. Clips are kept in the browser's Cache
@@ -104,7 +104,7 @@ export function lessonPhrases(langSlug: string, lesson: Lesson): string[] {
   const set = new Set<string>();
   const add = (t?: string) => {
     const text = (t || "").trim();
-    if (text) set.add(text);
+    if (text && isSpokenText(langSlug, text)) set.add(text);
   };
   const narration = lessonNarrations(langSlug, lesson);
   add(narration.lesson);
