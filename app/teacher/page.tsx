@@ -171,7 +171,7 @@ export default function TeacherPage() {
   }
 
   return (
-    <main className="min-h-screen bg-page text-ink px-6 md:px-10 pt-28 pb-12">
+    <main className="min-h-screen bg-page text-ink px-4 sm:px-6 md:px-10 pt-24 md:pt-28 pb-12">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-5 mb-6">
           <div>
@@ -188,8 +188,8 @@ export default function TeacherPage() {
           </button>
         </div>
 
-        <div className="flex gap-1 border-b border-line mb-6">
-          {([
+        {(() => {
+          const tabItems = [
             { id: "news", label: "Actualités" },
             { id: "live", label: "Mes cours en direct" },
             { id: "students", label: "Mes étudiants" },
@@ -197,18 +197,40 @@ export default function TeacherPage() {
             { id: "placement", label: "Tests de niveau" },
             { id: "stats", label: "Statistiques" },
             { id: "messages", label: "Messages" },
-          ] as { id: Tab; label: string }[]).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px ${
-                tab === t.id ? "border-red-600 text-red-500" : "border-transparent text-ink-soft hover:text-ink"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+          ] as { id: Tab; label: string }[];
+          return (
+            <>
+              {/* A list on phones, a tab bar from tablet size up */}
+              <div className="md:hidden mb-6">
+                <label className="block text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Section</label>
+                <select
+                  value={tab}
+                  onChange={(e) => setTab(e.target.value as Tab)}
+                  className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-base font-bold text-ink focus:outline-none focus:border-red-600/60"
+                >
+                  {tabItems.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="hidden md:flex gap-1 border-b border-line mb-6 flex-wrap">
+                {tabItems.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px ${
+                      tab === t.id ? "border-red-600 text-red-500" : "border-transparent text-ink-soft hover:text-ink"
+                    }`}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          );
+        })()}
 
         {tab === "news" && <NewsTab />}
         {tab === "live" && <LiveTab teacher={teacher} />}
@@ -412,7 +434,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
                     </button>
                   </p>
                 </div>
-                <div className="flex items-center gap-4">
+                <div className="flex flex-wrap items-center gap-3 sm:gap-4">
                   <button onClick={() => setHosting(s)} className={primaryBtn}>
                     Rejoindre en tant qu'enseignant
                   </button>
@@ -456,7 +478,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
 
       {hosting && (
         <div className="bg-surface border border-line rounded-2xl p-6 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div>
               <p className="font-bold">
                 Salle en direct — {label(hosting.langCode)} — Niveau {hosting.level}
@@ -689,7 +711,7 @@ function MessageComposer({
   return (
     <div className="grid lg:grid-cols-2 gap-6">
       <div className="bg-surface border border-line rounded-2xl p-5 space-y-3">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="font-bold">Destinataires</p>
           <button
             onClick={() => setSelected(selected.size === unique.length ? new Set() : new Set(unique.map(keyOf)))}
@@ -786,7 +808,7 @@ function NewsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm text-ink-soft">Ce qui se passe autour de vos cours : nouveaux étudiants, certificats, messages, classes à venir et annonces de l'école.</p>
         <RefreshButton onClick={load} loading={loading} />
       </div>

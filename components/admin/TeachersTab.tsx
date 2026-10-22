@@ -85,7 +85,7 @@ function AssignmentPicker({ value, onChange }: { value: Assignment[]; onChange: 
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-xs text-ink-faint">
           {value.reduce((n, a) => n + a.levels.length, 0)} cours sélectionné(s)
         </p>
@@ -95,7 +95,7 @@ function AssignmentPicker({ value, onChange }: { value: Assignment[]; onChange: 
       </div>
       {CATEGORIES.map((cat) => (
         <div key={cat.id} className="space-y-2">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-xs font-bold text-ink uppercase tracking-wide">{cat.label}</p>
             <button type="button" onClick={() => toggleGroup(cat.items)} className={linkBtn}>
               {groupAll(cat.items) ? "Désélectionner la catégorie" : "Sélectionner toute la catégorie"}

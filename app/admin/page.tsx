@@ -1898,7 +1898,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
   }
 
   return (
-    <main className="px-6 md:px-10 pt-28 pb-10 min-h-screen bg-surface-sunken text-ink font-sans">
+    <main className="px-4 sm:px-6 md:px-10 pt-24 md:pt-28 pb-10 min-h-screen bg-surface-sunken text-ink font-sans">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between gap-3 mb-6 flex-wrap bg-surface border border-line rounded-2xl px-4 py-3">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
@@ -1919,9 +1919,9 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
           </div>
         </div>
 
-        {/* TABS */}
-        <div className="flex gap-2 mb-8 border-b border-line flex-wrap">
-          {([
+        {/* TABS: a list on phones (17 tabs would fill the screen), a tab bar from tablet size up */}
+        {(() => {
+          const tabItems = [
             { id: "students", label: "Étudiants", badge: stats.pending },
             { id: "live", label: "Cours en direct", badge: 0 },
             { id: "payments", label: "Paiements", badge: 0 },
@@ -1939,25 +1939,45 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "corrections", label: "Corrections", badge: 0 },
             { id: "placement", label: "Tests de niveau", badge: 0 },
             { id: "stats", label: "Statistiques", badge: 0 },
-          ] as { id: Tab; label: string; badge: number }[]).map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px inline-flex items-center gap-1.5 ${
-                tab === t.id
-                  ? "border-red-600 text-red-500"
-                  : "border-transparent text-ink-soft hover:text-ink"
-              }`}
-            >
-              {t.label}
-              {t.badge > 0 && (
-                <span className="text-[10px] font-black bg-red-600 text-white rounded-full min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center">
-                  {t.badge}
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
+          ] as { id: Tab; label: string; badge: number }[];
+          return (
+            <>
+              <div className="md:hidden mb-6">
+                <label className="block text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Section</label>
+                <select
+                  value={tab}
+                  onChange={(e) => setTab(e.target.value as Tab)}
+                  className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-base font-bold text-ink focus:outline-none focus:border-red-600/60"
+                >
+                  {tabItems.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.label}
+                      {t.badge > 0 ? ` (${t.badge})` : ""}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="hidden md:flex gap-2 mb-8 border-b border-line flex-wrap">
+                {tabItems.map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setTab(t.id)}
+                    className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px inline-flex items-center gap-1.5 ${
+                      tab === t.id ? "border-red-600 text-red-500" : "border-transparent text-ink-soft hover:text-ink"
+                    }`}
+                  >
+                    {t.label}
+                    {t.badge > 0 && (
+                      <span className="text-[10px] font-black bg-red-600 text-white rounded-full min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center">
+                        {t.badge}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            </>
+          );
+        })()}
 
         {/* ================= STUDENTS TAB ================= */}
         {tab === "students" && (
@@ -2420,7 +2440,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
             {hostingSession && (
               <div className="mt-8 bg-surface border border-line rounded-2xl p-6">
-                <div className="flex items-center justify-between mb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                   <div>
                     <p className="font-bold text-ink">
                       Salle en direct — {languageLabel(hostingSession.langCode)} — Niveau {hostingSession.level}
@@ -3166,7 +3186,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= CERTIFICATES TAB ================= */}
         {tab === "certificates" && (
           <div>
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
               <p className="text-xs text-ink-soft max-w-xl">
                 Certificats auto-générés en fin de niveau, et certificats émis manuellement ici (sans passer par le parcours d'apprentissage).
               </p>
@@ -3369,7 +3389,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                             className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
                           />
                         </div>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
                             <label className="block text-xs font-semibold text-ink-soft mb-1">Langue</label>
                             <select
@@ -3504,7 +3524,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "mail" && (
           <div>
             {mailNotice && (
-              <div className="p-3 mb-6 bg-surface border border-line rounded-xl text-sm text-ink flex items-center justify-between">
+              <div className="p-3 mb-6 bg-surface border border-line rounded-xl text-sm text-ink flex flex-wrap items-center justify-between gap-2">
                 {mailNotice}
                 <button onClick={() => setMailNotice(null)} className="text-ink-faint hover:text-ink ml-4"><X size={15} /></button>
               </div>
@@ -3548,7 +3568,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               </div>
             ) : (
               <div className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
-                <div className="flex items-center justify-between px-5 py-4 border-b border-line bg-surface-alt/50">
+                <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-4 border-b border-line bg-surface-alt/50">
                   <div>
                     <p className="font-black text-ink flex items-center gap-2"><Inbox size={16} /> brightenedmindcorporation@gmail.com</p>
                     <p className="text-xs text-ink-soft mt-0.5">
@@ -3863,9 +3883,9 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
       {/* ================= CERTIFICATE PREVIEW MODAL ================= */}
       {certPreviewUrl && (
-        <div className="fixed inset-0 z-[70] bg-black/80 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[70] bg-black/80 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-4 w-full max-w-4xl shadow-2xl">
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <p className="text-sm font-bold text-ink">Aperçu du certificat</p>
               <button onClick={closeCertificatePreview} className="text-ink-soft hover:text-ink"><X size={18} /></button>
             </div>
@@ -3876,7 +3896,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
       {/* ================= GENERATE CERTIFICATE MODAL ================= */}
       {certGenerateOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><Trophy size={18} /> Générer un certificat</h3>
             <p className="text-xs text-ink-soft mb-4">
@@ -3903,7 +3923,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-1 focus:outline-none focus:border-red-600/60"
             />
             <p className="text-xs text-ink-faint mb-4">Le même Student ID que celui remis à l'inscription (onglet Étudiants). Le numéro du certificat (Certificate Number) est généré automatiquement.</p>
-            <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Langue</label>
                 <select
@@ -4046,7 +4066,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       {addStudentOpen && <AddStudentModal onClose={() => setAddStudentOpen(false)} onDone={fetchStudents} />}
 
       {messageOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><Mail size={18} /> Message aux étudiants</h3>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">Destinataire(s)</label>
@@ -4115,9 +4135,9 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
       {/* ================= SENT MESSAGES MODAL ================= */}
       {sentMessagesOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
               <h3 className="text-lg font-bold text-ink flex items-center gap-2"><SquarePen size={18} /> Messages envoyés aux étudiants</h3>
               <button onClick={() => setSentMessagesOpen(false)} className="text-ink-faint hover:text-ink"><X size={18} /></button>
             </div>
@@ -4200,7 +4220,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
       {/* ================= COMPOSE MODAL ================= */}
       {composeOpen && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Nouveau message</h3>
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">De</label>
@@ -4298,7 +4318,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
       {/* ================= REPLY MODAL ================= */}
       {replyTarget && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-1">Répondre sur le site</h3>
             <p className="text-xs text-ink-soft mb-4">
@@ -4368,7 +4388,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
       {/* ================= EDIT ANNOUNCEMENT MODAL ================= */}
       {editingAnnouncement && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Modifier l'annonce</h3>
 
@@ -4448,7 +4468,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               Afficher dans la bande défilante de la page d'accueil
             </label>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nouvelle photo (optionnel)</label>
                 <input
