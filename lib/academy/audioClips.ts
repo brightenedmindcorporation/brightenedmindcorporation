@@ -16,6 +16,18 @@ export const AUDIO_VERSION = 2;
 
 const CJK = /[\u3400-\u9fff]/;
 
+/**
+ * A "/" is never pronounced: "Hello / Hi" is read "Hello, Hi", "Yes/No" is read "Yes, No", and the slashes around
+ * a phonetic spelling ("/eɪ/") are simply dropped. (Numbers such as 1/2 are left alone.)
+ */
+export function cleanSlashes(text: string): string {
+  return text
+    .replace(/\/([^\/\s]{1,8})\//gu, "$1")
+    .replace(/(?<=\p{L})\s*\/\s*(?=\p{L})/gu, ", ")
+    .replace(/\s+\/\s+/g, ", ")
+    .replace(/[ \t]{2,}/g, " ");
+}
+
 /** Lesson lines are written "phrase (phonetics) - translation"; only the
  * phrase before the first parenthesis is spoken.
  *
@@ -31,14 +43,14 @@ export function extractSpeechText(line: string): string {
   if (numbered && CJK.test(numbered[1])) head = numbered[1].trim();
   if (!CJK.test(head) && CJK.test(line)) {
     const runs = line.match(/[\u3400-\u9fff]+/g);
-    if (runs) return runs.join("，");
+    if (runs) return cleanSlashes(runs.join("，"));
   }
   // Chinese "phrase - français": the French translation is for reading, never for the voice.
   if (CJK.test(head)) {
     const dash = head.search(/\s*[-–—]\s+(?=\p{L})/u);
     if (dash > 0) head = head.slice(0, dash).trim();
   }
-  return head;
+  return cleanSlashes(head);
 }
 
 /**
@@ -112,7 +124,7 @@ export function lessonNarrations(langSlug: string, lesson: NarrationSource): { l
     .filter(Boolean)
     .join(PAUSE);
   const useCurated = langSlug === "chinese" || lesson.speakText.trim().length >= joinedBody.length * 0.6;
-  return { lesson: (useCurated ? lesson.speakText : joinedBody).trim(), reading };
+  return { lesson: cleanSlashes((useCurated ? lesson.speakText : joinedBody).trim()), reading: cleanSlashes(reading) };
 }
 
 // ---- Verb reference audio -------------------------------------------------

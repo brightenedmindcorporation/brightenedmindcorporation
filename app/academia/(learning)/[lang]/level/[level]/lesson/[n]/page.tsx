@@ -8,11 +8,14 @@ import { useParams, useRouter } from "next/navigation";
 import { PenLine } from "lucide-react";
 import { getLesson, getLevelCurriculum } from "@/content/curriculum";
 import LessonRenderer from "@/components/academy/LessonRenderer";
+import { frenchFor } from "@/content/translations";
+import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/academy/progress";
 import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 
 export default function LessonPage() {
+  const [showFr] = useFrenchVisible();
   const router = useRouter();
   const params = useParams<{ lang: string; level: string; n: string }>();
   const langSlug = params.lang;
@@ -113,6 +116,12 @@ export default function LessonPage() {
               Lesson {lesson.id}: {lesson.title}
             </h1>
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{lesson.subtitle}</p>
+            {showFr && frenchFor(langSlug, lesson.title) && (
+              <p lang="fr" className="text-red-200/70 mt-3 text-sm italic">
+                {frenchFor(langSlug, lesson.title)}
+                {frenchFor(langSlug, lesson.subtitle) ? ` — ${frenchFor(langSlug, lesson.subtitle)}` : ""}
+              </p>
+            )}
           </div>
 
           <LessonRenderer lesson={lesson} langSlug={langSlug} statsKey={curriculum ? `${curriculum.langCode}-${level}-${lessonId}` : undefined} />

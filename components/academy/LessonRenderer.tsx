@@ -9,6 +9,8 @@ import WritingLab from "@/components/academy/WritingLab";
 import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
 import { useYouTubeMeter } from "@/lib/youtubeMeter";
 import ListenButton from "@/components/academy/ListenButton";
+import { frenchFor, hasFrenchTranslations } from "@/content/translations";
+import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
@@ -64,13 +66,44 @@ function SpeakIconButton({ text, langSlug }: { text: string; langSlug: string })
   );
 }
 
+/** The French translation under an English line (the voice never reads it). */
+function Fr({ langSlug, text, className = "" }: { langSlug: string; text: string; className?: string }) {
+  const [visible] = useFrenchVisible();
+  const fr = frenchFor(langSlug, text);
+  if (!visible || !fr) return null;
+  return (
+    <span lang="fr" className={`block text-[13px] leading-snug italic text-ink-faint ${className}`}>
+      {fr}
+    </span>
+  );
+}
+
 function SpeakableLine({ text, langSlug, className = "" }: { text: string; langSlug: string; className?: string }) {
   return (
-    <p className={`flex items-start gap-2 ${className}`}>
+    <div className={`flex items-start gap-2 ${className}`}>
       {/* Only the language being learned is voiced: a French explanation gets no speaker. */}
       {isSpokenText(langSlug, extractSpeechText(text)) ? <SpeakIconButton text={extractSpeechText(text)} langSlug={langSlug} /> : <span className="w-7 shrink-0" aria-hidden="true" />}
-      <span translate="no" className="notranslate">{text}</span>
-    </p>
+      <div className="min-w-0">
+        <span translate="no" className="notranslate">{text}</span>
+        <Fr langSlug={langSlug} text={text} />
+      </div>
+    </div>
+  );
+}
+
+/** Show or hide the French translations under the English lines. */
+function FrenchToggle({ langSlug }: { langSlug: string }) {
+  const [visible, set] = useFrenchVisible();
+  if (!hasFrenchTranslations(langSlug)) return null;
+  return (
+    <button
+      type="button"
+      onClick={() => set(!visible)}
+      className="inline-flex items-center gap-2 text-xs font-bold text-ink-soft hover:text-ink border border-line rounded-xl px-3 py-1.5 bg-surface"
+      aria-pressed={visible}
+    >
+      🇫🇷 Traduction française : {visible ? "masquer" : "afficher"}
+    </button>
   );
 }
 
@@ -166,12 +199,16 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
   const narration = useMemo(() => lessonNarrations(langSlug, lesson), [langSlug, lesson]);
   return (
     <div className="space-y-8">
+      <FrenchToggle langSlug={langSlug} />
       <Card>
         <CardTitle icon={BookOpen}>Lesson</CardTitle>
         <div className="text-ink-soft mt-4 space-y-4">
           {lesson.sections.map((section, i) => (
             <div key={i}>
-              <p className="font-semibold text-ink mt-4 first:mt-0">{section.heading}</p>
+              <p className="font-semibold text-ink mt-4 first:mt-0">
+                {section.heading}
+                <Fr langSlug={langSlug} text={section.heading} className="font-normal" />
+              </p>
               <div className="space-y-1 mt-1">
                 {section.body.map((line, j) => (
                   <SpeakableLine key={j} text={line} langSlug={langSlug} />
@@ -195,7 +232,10 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
       <Card>
         <CardTitle icon={FileText}>Reading Text</CardTitle>
         <div className="text-ink-soft mt-4 space-y-3">
-          <p className="font-bold text-ink">{lesson.readingTitle}</p>
+          <p className="font-bold text-ink">
+            {lesson.readingTitle}
+            <Fr langSlug={langSlug} text={lesson.readingTitle} className="font-normal" />
+          </p>
           {lesson.reading.map((p, i) => (
             <SpeakableLine key={i} text={p} langSlug={langSlug} />
           ))}
@@ -214,7 +254,10 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
         <p className="text-ink-soft mt-4">Complete the sentences:</p>
         <ul className="list-disc ml-6 text-ink-soft mt-4 space-y-1">
           {lesson.exercises.map((ex, i) => (
-            <li key={i} translate="no" className="notranslate">{ex}</li>
+            <li key={i}>
+              <span translate="no" className="notranslate">{ex}</span>
+              <Fr langSlug={langSlug} text={ex} />
+            </li>
           ))}
         </ul>
       </Card>
@@ -223,7 +266,10 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
 
       <Card>
         <CardTitle icon={MessageSquare}>Speaking Topic</CardTitle>
-        <p className="text-ink-soft mt-4">{lesson.speakingTopic}</p>
+        <p className="text-ink-soft mt-4">
+          {lesson.speakingTopic}
+          <Fr langSlug={langSlug} text={lesson.speakingTopic} />
+        </p>
       </Card>
     </div>
   );
