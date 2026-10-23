@@ -4,10 +4,13 @@ import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { Download, CheckCircle2, Search } from "lucide-react";
+import { Download, CheckCircle2, Search, FileDown } from "lucide-react";
 import { getLevelCurriculum } from "@/content/curriculum";
 import SpeakIcon from "@/components/academy/SpeakIcon";
 import { extractSpeechText } from "@/lib/academy/audioClips";
+import { frenchFor } from "@/content/translations";
+import { printVocabulary } from "@/lib/academy/vocabularyPrint";
+import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import { downloadLessonAudio, isLessonCached } from "@/lib/academy/lessonAudioPlayer";
 import chineseChars from "@/content/vocabulary/chinese.json";
 import english from "@/content/vocabulary/english.json";
@@ -29,6 +32,7 @@ interface Word {
 interface Item {
   text: string;
   phonetic?: string;
+  translation?: string;
   lesson: number;
 }
 
@@ -45,6 +49,7 @@ export default function VocabularyPage() {
   const [query, setQuery] = useState("");
   const [offline, setOffline] = useState<"idle" | "loading" | "done">("idle");
   const [progress, setProgress] = useState(0);
+  const [showFr] = useFrenchVisible();
 
   useEffect(() => {
     try {
@@ -110,7 +115,7 @@ export default function VocabularyPage() {
           if (text.length < 2 || seen.has(text) || tokens.every((t) => t.length <= 1 || /^[-–—,.:]$/.test(t))) continue;
           if (/^\d+\s*[-–]/.test(text)) continue;
           seen.add(text);
-          out.push({ text, phonetic: dict[text], lesson: lesson.id });
+          out.push({ text, phonetic: dict[text], translation: frenchFor(langSlug, text), lesson: lesson.id });
         }
       }
     }
@@ -144,6 +149,31 @@ export default function VocabularyPage() {
 
   const q = query.trim().toLowerCase();
   const match = (...fields: (string | undefined)[]) => !q || fields.some((f) => f?.toLowerCase().includes(q));
+
+  /** Downloads the page as a printable sheet (the print dialog saves it as a PDF). */
+  const downloadPage = () => {
+    if (chinese) {
+      printVocabulary({
+        title: "Caractères chinois et vocabulaire",
+        levelTitle: curriculum.levelTitle,
+        langLabel: curriculum.langLabel,
+        wordsHeading: "Mot",
+        chars: chinese.chars,
+        rows: chinese.words.map((wd) => ({ text: wd.text, phonetic: wd.pinyin, translation: wd.meaning })),
+      });
+    } else {
+      printVocabulary({
+        title: "Vocabulaire et prononciation",
+        levelTitle: curriculum.levelTitle,
+        langLabel: curriculum.langLabel,
+        note:
+          langSlug === "french"
+            ? "Prononciation en alphabet phonétique international (API)."
+            : "Prononciation figurée, à lire avec les sons du français : les syllabes sont séparées par des tirets et la syllabe accentuée est en MAJUSCULES.",
+        rows: items.map((i) => ({ text: i.text, phonetic: i.phonetic, translation: i.translation })),
+      });
+    }
+  };
 
   const downloadAll = async () => {
     setOffline("loading");
@@ -180,6 +210,12 @@ export default function VocabularyPage() {
                 className="w-full bg-surface border border-line rounded-xl pl-10 pr-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
               />
             </div>
+            <button
+              onClick={downloadPage}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-ink border border-line hover:border-red-600/60 rounded-xl px-4 py-2 transition bg-surface"
+            >
+              <FileDown size={15} /> Télécharger la page (PDF)
+            </button>
             {offline === "done" ? (
               <span className="inline-flex items-center gap-2 text-sm font-semibold text-emerald-500">
                 <CheckCircle2 size={16} /> Audios disponibles hors ligne
@@ -242,7 +278,7 @@ export default function VocabularyPage() {
               </p>
               <div className="divide-y divide-line/60">
                 {items
-                  .filter((i) => match(i.text, i.phonetic))
+                  .filter((i) => match(i.text, i.phonetic, i.translation))
                   .map((i) => (
                     <div key={i.text} className="flex items-start gap-3 py-3">
                       <SpeakIcon text={i.text} langSlug={langSlug} label={`Écouter : ${i.text}`} className="mt-0.5" />
@@ -251,6 +287,11 @@ export default function VocabularyPage() {
                         {i.phonetic && (
                           <p className="text-sm text-red-500 mt-0.5" translate="no">
                             {i.phonetic}
+                          </p>
+                        )}
+                        {showFr && i.translation && (
+                          <p lang="fr" className="text-sm text-ink-soft italic mt-0.5">
+                            {i.translation}
                           </p>
                         )}
                       </div>

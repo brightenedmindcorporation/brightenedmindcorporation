@@ -1,15 +1,21 @@
-import level1 from "./english-fr-level1";
-import level2 from "./english-fr-level2";
-import level3 from "./english-fr-level3";
-import exercises from "./english-fr-exercises";
+import enLevel1 from "./english-fr-level1";
+import enLevel2 from "./english-fr-level2";
+import enLevel3 from "./english-fr-level3";
+import enExercises from "./english-fr-exercises";
+import esLevel1 from "./spanish-fr-level1";
+import esLevel2 from "./spanish-fr-level2";
+import esLevel3 from "./spanish-fr-level3";
 
-// French translations shown under the English lessons (the voice always reads the English).
-const ENGLISH_FR: Record<string, string> = { ...level1, ...level2, ...level3, ...exercises };
+// French translations shown under the lessons of a language (the voice always reads the language being learned).
+// Key: the exact line of the lesson. A language appears here once its lessons are translated.
+const DICTIONARIES: Record<string, Record<string, string>> = {
+  english: { ...enLevel1, ...enLevel2, ...enLevel3, ...enExercises },
+  spanish: { ...esLevel1, ...esLevel2, ...esLevel3 },
+};
 
-/** The French translation of an English lesson line, when there is one. Only the English course has them. */
+/** The French translation of a lesson line, when there is one. */
 export function frenchFor(langSlug: string, text: string): string | undefined {
-  if (langSlug !== "english") return undefined;
-  return ENGLISH_FR[text.trim()];
+  return DICTIONARIES[langSlug]?.[text.trim()];
 }
 
-export const hasFrenchTranslations = (langSlug: string) => langSlug === "english";
+export const hasFrenchTranslations = (langSlug: string) => langSlug in DICTIONARIES;
