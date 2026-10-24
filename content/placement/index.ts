@@ -7,8 +7,9 @@ import swahili from "./swahili";
 import chinese from "./chinese";
 import bureautique from "./bureautique";
 import logiciels from "./logiciels";
+import visuel from "./visuel";
 
-const registry: Record<string, PlacementContent> = { english, french, spanish, portuguese, swahili, chinese, bureautique, logiciels };
+const registry: Record<string, PlacementContent> = { english, french, spanish, portuguese, swahili, chinese, bureautique, logiciels, visuel };
 
 export function getPlacementContent(langSlug: string): PlacementContent | null {
   return registry[langSlug] ?? null;

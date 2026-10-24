@@ -104,6 +104,31 @@ export default function LogicielsPage() {
       </section>
 
       <div className="max-w-7xl mx-auto px-6 py-16 space-y-16">
+        <section>
+          <div className="text-center mb-10">
+            <h2 className="text-3xl font-bold text-ink mb-3">Un parcours en 3 niveaux</h2>
+            <p className="text-ink-soft text-sm max-w-2xl mx-auto">
+              36 leçons illustrées, des travaux pratiques, des tutoriels vidéo en français, un quiz par leçon noté sur 100 et un quiz final
+              pour chaque niveau. À la fin de chaque niveau, vous recevez votre certificat BM Academia.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              { n: 1, t: "Bases de la gestion", d: "Notions de comptabilité OHADA, cycle commercial et prise en main de Dolibarr : clients, produits, ventes, achats, stock.", l: "12 leçons · quiz final de 20 questions" },
+              { n: 2, t: "Comptabilité et ERP", d: "Sage (saisie, lettrage, rapprochement, balance, clôture, gestion commerciale) et premiers pas dans Odoo.", l: "12 leçons · quiz final de 20 questions" },
+              { n: 3, t: "ERP avancé, douane et audit", d: "Odoo avancé (comptabilité, CRM, RH, projets), sécurité, opérations douanières, guichet unique et audit.", l: "12 leçons · quiz final de 20 questions" },
+            ].map((lv) => (
+              <div key={lv.n} className="bg-surface p-7 rounded-3xl border border-line">
+                <span className="inline-flex w-10 h-10 rounded-full bg-red-600 text-white font-black items-center justify-center">{lv.n}</span>
+                <h3 className="text-xl font-bold text-ink mt-4">Niveau {lv.n} · {lv.t}</h3>
+                <p className="text-ink-soft text-sm mt-2 leading-relaxed">{lv.d}</p>
+                <p className="text-xs font-semibold text-red-500 mt-4">{lv.l}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+
         <section className="bg-surface/40 p-8 md:p-12 rounded-3xl border border-line">
           <div className="text-center mb-10">
             <h2 className="text-3xl font-bold text-ink mb-3">Choisissez un logiciel</h2>

@@ -1,70 +1,7 @@
 import type { ReactNode } from "react";
-import { BLUE, GREEN, INK, LINE, MINT, ORANGE, PAPER, PEACH, Pill, RED, ROSE, Rect, SKY, SOFT, SUNK, Txt, YELLOW, Line, Grid, Dot, Win, type Fig } from "../figureKit";
+import { BLUE, GREEN, INK, LINE, MINT, ORANGE, PAPER, PEACH, Pill, RED, ROSE, Rect, SKY, SOFT, SUNK, Txt, YELLOW, Line, Grid, Dot, Win, Box, Arrow, Flow, Note, Screen, Menu, Kanban, type Fig } from "../figureKit";
 
 // Diagrams of the Logiciels de gestion course, keyed "lg-<level>-<lesson>".
-
-const Box = ({ x, y, w, h, t, s, fill = SKY, stroke = BLUE, size = 13 }: { x: number; y: number; w: number; h: number; t: string; s?: string; fill?: string; stroke?: string; size?: number }) => (
-  <g>
-    <Rect x={x} y={y} w={w} h={h} fill={fill} stroke={stroke} sw={2} r={10} />
-    <Txt x={x + w / 2} y={y + (s ? h / 2 - 2 : h / 2 + 5)} anchor="middle" bold s={size}>{t}</Txt>
-    {s && <Txt x={x + w / 2} y={y + h / 2 + 15} anchor="middle" s={10.5} fill={SOFT}>{s}</Txt>}
-  </g>
-);
-const Arrow = ({ x1, y1, x2, y2 }: { x1: number; y1: number; x2: number; y2: number }) => <Line a={{ x: x1, y: y1 }} b={{ x: x2, y: y2 }} c={RED} sw={2.5} arrow />;
-
-/** A row of boxes joined by arrows. */
-const Flow = ({ y, items, h = 54, x0 = 20, w = 600, fill = SKY, stroke = BLUE }: { y: number; items: [string, string?][]; h?: number; x0?: number; w?: number; fill?: string; stroke?: string }) => {
-  const n = items.length;
-  const gap = 22;
-  const bw = (w - gap * (n - 1)) / n;
-  return (
-    <g>
-      {items.map(([t, s], i) => (
-        <g key={t}>
-          <Box x={x0 + i * (bw + gap)} y={y} w={bw} h={h} t={t} s={s} fill={fill} stroke={stroke} size={bw < 100 ? 11.5 : 13} />
-          {i < n - 1 && <Arrow x1={x0 + i * (bw + gap) + bw + 2} y1={y + h / 2} x2={x0 + (i + 1) * (bw + gap) - 2} y2={y + h / 2} />}
-        </g>
-      ))}
-    </g>
-  );
-};
-const Note = ({ x, y, children, anchor = "start" as "start" | "middle" | "end" }: { x: number; y: number; children: ReactNode; anchor?: "start" | "middle" | "end" }) => (
-  <Txt x={x} y={y} s={12} fill={SOFT} anchor={anchor}>{children}</Txt>
-);
-const Screen = ({ title, color = BLUE, children }: { title: string; color?: string; children?: ReactNode }) => (
-  <g>
-    <Win x={20} y={8} w={600} h={268} title={title} color={color} />
-    {children}
-  </g>
-);
-const Menu = ({ x, y, items, color = BLUE }: { x: number; y: number; items: string[]; color?: string }) => (
-  <g>
-    {items.map((t, i) => (
-      <Txt key={t} x={x + i * 78} y={y} s={11} fill={i === 1 ? color : SOFT} bold={i === 1}>{t}</Txt>
-    ))}
-  </g>
-);
-const Kanban = ({ cols, y = 40, h = 190 }: { cols: { t: string; cards: string[]; c: string }[]; y?: number; h?: number }) => {
-  const w = (600 - 15 * (cols.length - 1)) / cols.length;
-  return (
-    <g>
-      {cols.map((c, i) => (
-        <g key={c.t}>
-          <Rect x={20 + i * (w + 15)} y={y} w={w} h={h} fill={SUNK} stroke={LINE} r={8} />
-          <Rect x={20 + i * (w + 15)} y={y} w={w} h={26} fill={c.c} stroke={c.c} r={8} />
-          <Txt x={20 + i * (w + 15) + w / 2} y={y + 18} anchor="middle" bold s={12} fill="#fff">{c.t}</Txt>
-          {c.cards.map((t, j) => (
-            <g key={t}>
-              <Rect x={28 + i * (w + 15)} y={y + 36 + j * 50} w={w - 16} h={42} fill={PAPER} stroke={LINE} r={6} />
-              <Txt x={36 + i * (w + 15)} y={y + 54 + j * 50} s={11} bold>{t.split("|")[0]}</Txt>
-              <Txt x={36 + i * (w + 15)} y={y + 70 + j * 50} s={10} fill={SOFT}>{t.split("|")[1] ?? ""}</Txt>
-            </g>
-          ))}
-        </g>
-      ))}
-    </g>
-  );
-};
 
 export const LOGICIELS_FIGS: Record<string, Fig> = {
   // ───────────── Niveau 1 ─────────────
