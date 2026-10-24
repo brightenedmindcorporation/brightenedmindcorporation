@@ -3,6 +3,7 @@
 import { useActiveTime } from "@/lib/academy/useActiveTime";
 import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
+import BackToLevel from "@/components/academy/BackToLevel";
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { GraduationCap } from "lucide-react";
@@ -101,14 +102,7 @@ export default function FinalQuizPage() {
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10">
         <div className="max-w-4xl mx-auto space-y-8">
-          <div>
-            <Link
-              href={base}
-              className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
-            >
-              ← Back to Level
-            </Link>
-          </div>
+          <div className="sticky top-2 z-30"><BackToLevel href={base} langSlug={langSlug} /></div>
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <span className="text-xs font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
