@@ -46,7 +46,8 @@ const IDS: Record<string, string> = {
 
 export function withVideos(level: number, lessons: Lesson[]): Lesson[] {
   return lessons.map((l) => {
-    const id = IDS[`${level}-${l.id}`];
-    return id ? { ...l, videoUrl: `https://www.youtube.com/watch?v=${id}` } : l;
+    const key = `${level}-${l.id}`;
+    const id = IDS[key];
+    return { ...l, figure: key, ...(id ? { videoUrl: `https://www.youtube.com/watch?v=${id}` } : {}) };
   });
 }

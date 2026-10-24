@@ -5,6 +5,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2, Target } from "lucide-react";
 import { isOfficeProgram } from "@/content/curriculum";
 import { extractSpeechText, isSpokenText, lessonNarrations } from "@/lib/academy/audioClips";
+import OfficeFigure from "@/components/academy/OfficeFigure";
 import NarrationPlayer from "@/components/academy/NarrationPlayer";
 import WritingLab from "@/components/academy/WritingLab";
 import { downloadLessonAudio, isLessonCached, lessonPhrases } from "@/lib/academy/lessonAudioPlayer";
@@ -220,6 +221,7 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
               </div>
             ))}
           </div>
+          <OfficeFigure id={lesson.figure} />
         </Card>
 
         {lesson.videoUrl && <VideoCard lesson={lesson} statsKey={statsKey} />}

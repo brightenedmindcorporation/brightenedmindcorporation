@@ -13,6 +13,8 @@ export interface Lesson {
   videoTopic: string;
   /** Optional YouTube/Vimeo URL embedded in the lesson's Video card. Falls back to videoTopic text when absent. */
   videoUrl?: string;
+  /** Id of a hand-drawn diagram (office course), shown under the lesson text. */
+  figure?: string;
   readingTitle: string;
   reading: string[];
   readingSpeakText: string;
