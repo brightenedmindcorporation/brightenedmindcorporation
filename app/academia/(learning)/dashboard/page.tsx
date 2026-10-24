@@ -7,7 +7,7 @@ import { Lock, MessageSquarePlus, Paperclip, X, BookText, ChevronDown } from "lu
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AcademyHeader from "../components/AcademyHeader";
-import { getLevelCurriculum, availableLanguages, findProgramByCode, findProgramBySlug } from "@/content/curriculum";
+import { getLevelCurriculum, availableLanguages, findProgramByCode, findProgramBySlug, isOfficeProgram } from "@/content/curriculum";
 import { isOtherProgramCode as isOtherCode, getOtherProgramLabel } from "@/content/programs";
 
 // A program without lessons or quizzes (Visuel, Logiciels). Bureautique has its own course, like a language.
@@ -275,6 +275,13 @@ export default function Dashboard() {
   const isOtherProgram = isOtherProgramCode(activeEnrollment.langCode);
   const langSlug = resolveLangSlug(activeEnrollment.langCode);
   const langInfo = findProgramBySlug(langSlug) ?? availableLanguages[0];
+  // Bureautique, Logiciels and Visuel are taught in French with their own level descriptions; the languages keep the English interface.
+  const office = isOfficeProgram(langSlug);
+  const t = (french: string, english: string) => (office ? french : english);
+  const levelCard = (n: number, fallbackTitle: string, fallbackText: string) => {
+    const c = office ? getLevelCurriculum(langSlug, n) : null;
+    return { title: c ? c.levelTitle.replace(/^Niveau \d+\s*-\s*/, "") : fallbackTitle, text: c ? c.levelSubtitle : fallbackText };
+  };
   const programLabel = isOtherProgram ? getOtherProgramLabel(activeEnrollment.langCode) ?? activeEnrollment.langCode : langInfo.label;
 
   // Levels below the one the student registered at are not part of their enrolment.
@@ -292,7 +299,7 @@ export default function Dashboard() {
     if (levelNumber(activeEnrollment.level) === target - 1 && getLevelProgress(langSlug, target - 1).finalQuizPassed) {
       return (activeEnrollment as any).levelRequest?.level === target ? "Demande envoyée — en attente" : levelRequesting ? "Envoi…" : `Demander le niveau ${target}`;
     }
-    return (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> Locked</span>);
+    return (<span className="inline-flex items-center gap-1.5"><Lock size={13} /> {t("Verrouillé", "Locked")}</span>);
   };
 
   // Asks the administration for the next level (after the final quiz of the current one).
@@ -502,10 +509,10 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
-                  Welcome back, {fullName}
+                  {t("Bienvenue", "Welcome back")}, {fullName}
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
-                  Ready to continue your <span className="text-red-500 font-semibold">{langInfo.label}</span> lessons today?
+                  {office ? <>Prêt(e) à continuer votre formation <span className="text-red-500 font-semibold">{langInfo.label}</span> ?</> : <>Ready to continue your <span className="text-red-500 font-semibold">{langInfo.label}</span> lessons today?</>}
                 </p>
               </div>
             </div>
@@ -547,7 +554,7 @@ export default function Dashboard() {
                 onClick={handleContinue}
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3.5 rounded-xl transition transform active:scale-95 flex items-center justify-center gap-2"
               >
-                <span>▶ Continue Lesson {lastLesson}</span>
+                <span>▶ {t("Continuer la leçon", "Continue Lesson")} {lastLesson}</span>
               </button>
             </div>
           </div>
@@ -556,7 +563,7 @@ export default function Dashboard() {
           <div className="bg-surface-sunken/80 border border-line rounded-2xl p-5 mb-6 relative">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-bold text-ink-soft font-sans">
-                Course Progress (Level {levelNumber(activeEnrollment.level)})
+                {t("Progression", "Course Progress")} ({t("Niveau", "Level")} {levelNumber(activeEnrollment.level)})
               </span>
               <span className="text-sm font-extrabold text-red-500">
                 {progressPercentage}%
@@ -569,7 +576,7 @@ export default function Dashboard() {
               />
             </div>
             <p className="text-xs text-ink-soft mt-2 font-medium">
-              {completedQuizzes} / {totalQuizzes} quizzes completed
+              {completedQuizzes} / {totalQuizzes} {t("quiz réussis", "quizzes completed")}
             </p>
           </div>
 
@@ -577,7 +584,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
               <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
-                Email
+                {t("E-mail", "Email")}
               </span>
               <p className="text-sm font-semibold text-ink mt-1 truncate">
                 {student.email || "N/A"}
@@ -586,7 +593,7 @@ export default function Dashboard() {
 
             <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
               <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
-                Student ID
+                {t("ID étudiant", "Student ID")}
               </span>
               <p className="text-sm font-semibold text-ink mt-1">
                 {activeEnrollment.matricule || "N/A"}
@@ -595,19 +602,19 @@ export default function Dashboard() {
 
             <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
               <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
-                Current Level
+                {t("Niveau actuel", "Current Level")}
               </span>
               <p className="text-sm font-semibold text-red-500 mt-1">
-                Level {levelNumber(activeEnrollment.level)}
+                {t("Niveau", "Level")} {levelNumber(activeEnrollment.level)}
               </p>
             </div>
 
             <div className="p-4 bg-surface-sunken/60 rounded-xl border border-line">
               <span className="text-[10px] text-ink-faint uppercase font-bold tracking-wider">
-                Status
+                {t("Statut", "Status")}
               </span>
               <p className="text-sm font-semibold text-emerald-400 mt-1 capitalize">
-                {activeEnrollment.status || "Active"}
+                {activeEnrollment.status === "Approved" ? t("Approuvé", "Approved") : activeEnrollment.status || "Active"}
               </p>
             </div>
           </div>
@@ -639,29 +646,29 @@ export default function Dashboard() {
 
         {/* Sections des cours */}
         <div className={!isOtherProgram && placementPending(activeEnrollment as any) ? "opacity-50 pointer-events-none" : ""}>
-          <h2 className="text-xl font-black text-ink mb-4">Your {langInfo.label} Courses</h2>
+          <h2 className="text-xl font-black text-ink mb-4">{office ? `Votre formation ${langInfo.label}` : `Your ${langInfo.label} Courses`}</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
             <div className="bg-surface p-6 rounded-2xl border border-line shadow-xl flex flex-col justify-between hover:border-red-600/40 transition">
               <div>
                 <span className="text-xs font-bold text-red-400 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
-                  Beginner
+                  {t("Débutant", "Beginner")}
                 </span>
-                <h3 className="text-lg font-bold text-ink mt-3">Level 1</h3>
+                <h3 className="text-lg font-bold text-ink mt-3">{t("Niveau", "Level")} 1{office ? ` · ${levelCard(1, "", "").title}` : ""}</h3>
                 <p className="text-ink-soft text-xs mt-1 font-sans">
-                  Basics, everyday vocabulary, and simple conversation.
+                  {levelCard(1, "", "Basics, everyday vocabulary, and simple conversation.").text}
                 </p>
               </div>
               {firstLevel > 1 ? (
                 <button disabled className="mt-6 w-full py-2.5 rounded-xl text-sm font-bold bg-surface-alt text-ink-faint cursor-not-allowed border border-line">
-                  Not in your enrolment
+                  {t("Non inclus dans votre inscription", "Not in your enrolment")}
                 </button>
               ) : (
                 <button
                   onClick={() => router.push(`/academia/${langSlug}/level/1`)}
                   className="glow-accent mt-6 w-full bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold py-2.5 rounded-xl text-sm transition"
                 >
-                  Open Level 1
+                  {t("Ouvrir le niveau 1", "Open Level 1")}
                 </button>
               )}
             </div>
@@ -669,11 +676,11 @@ export default function Dashboard() {
             <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-800/40">
-                  Intermediate
+                  {t("Intermédiaire", "Intermediate")}
                 </span>
-                <h3 className="text-lg font-bold text-ink mt-3">Level 2</h3>
+                <h3 className="text-lg font-bold text-ink mt-3">{t("Niveau", "Level")} 2{office ? ` · ${levelCard(2, "", "").title}` : ""}</h3>
                 <p className="text-ink-soft text-xs mt-1">
-                  Grammar expansion, listening comprehension, and writing.
+                  {levelCard(2, "", "Grammar expansion, listening comprehension, and writing.").text}
                 </p>
               </div>
               <button
@@ -688,18 +695,18 @@ export default function Dashboard() {
                     : "bg-amber-600 hover:bg-amber-700 text-white"
                 }`}
               >
-                {firstLevel > 2 ? "Not in your enrolment" : levelButtonLabel(2, "Open Level 2")}
+                {firstLevel > 2 ? t("Non inclus dans votre inscription", "Not in your enrolment") : levelButtonLabel(2, t("Ouvrir le niveau 2", "Open Level 2"))}
               </button>
             </div>
 
             <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-purple-400 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800/40">
-                  Advanced / Pro
+                  {t("Avancé / Pro", "Advanced / Pro")}
                 </span>
-                <h3 className="text-lg font-bold text-ink mt-3">Level 3</h3>
+                <h3 className="text-lg font-bold text-ink mt-3">{t("Niveau", "Level")} 3{office ? ` · ${levelCard(3, "", "").title}` : ""}</h3>
                 <p className="text-ink-soft text-xs mt-1">
-                  Professional communication, emails, and job interviews.
+                  {levelCard(3, "", "Professional communication, emails, and job interviews.").text}
                 </p>
               </div>
               <button
@@ -714,7 +721,7 @@ export default function Dashboard() {
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >
-                {firstLevel > 3 ? "Not in your enrolment" : levelButtonLabel(3, "Open Level 3")}
+                {firstLevel > 3 ? t("Non inclus dans votre inscription", "Not in your enrolment") : levelButtonLabel(3, t("Ouvrir le niveau 3", "Open Level 3"))}
               </button>
             </div>
 
