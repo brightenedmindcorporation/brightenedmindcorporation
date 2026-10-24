@@ -53,7 +53,7 @@ export default function CorrectionsPage() {
   }, [router]);
 
   return (
-    <main className="min-h-screen bg-surface-sunken text-ink px-4 py-10">
+    <main className="min-h-screen bg-surface-sunken text-ink px-4 pb-10 pt-28">
       <div className="max-w-3xl mx-auto space-y-6">
         <div>
           <button onClick={goBack} className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface px-4 py-2 rounded-xl border border-line">

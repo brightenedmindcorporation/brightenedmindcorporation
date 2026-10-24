@@ -1,5 +1,6 @@
 "use client";
 
+import RenameIdsButton from "@/components/admin/RenameIdsButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import {
@@ -1985,6 +1986,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= STUDENTS TAB ================= */}
         {tab === "students" && (
           <div>
+            <div className="mb-4 flex justify-end"><RenameIdsButton /></div>
             {/* STATS */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
               <div className="p-4 rounded-2xl border border-line bg-surface">

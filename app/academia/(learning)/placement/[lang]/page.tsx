@@ -294,7 +294,7 @@ export default function PlacementPage() {
   };
 
   return (
-    <main className="min-h-screen bg-surface-sunken text-ink px-4 py-10">
+    <main className="min-h-screen bg-surface-sunken text-ink px-4 pb-10 pt-28">
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
           <span className="text-xs font-bold uppercase tracking-widest text-red-300">Test de niveau</span>
