@@ -4,7 +4,7 @@ import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { AuthError, bearer, canTeach, getCaller, isTeachersStudent } from "@/lib/teacherAuth";
 import { createNotification } from "@/lib/notifications";
 import { sendLevelInvitation } from "@/lib/academy/levelInvite";
-import { availableLanguages, getLevelCurriculum } from "@/content/curriculum";
+import { findProgramByCode, getLevelCurriculum } from "@/content/curriculum";
 
 export const dynamic = "force-dynamic";
 
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const lang = availableLanguages.find((l) => l.code === langCode);
+    const lang = findProgramByCode(langCode);
     const curriculum = lang ? getLevelCurriculum(lang.slug, level) : null;
     const lesson = curriculum?.lessons.find((l) => l.id === lessonId);
     if (!curriculum || (needsLesson && !lesson)) return NextResponse.json({ error: "Leçon introuvable." }, { status: 404 });

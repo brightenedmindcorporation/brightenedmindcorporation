@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Trophy, XCircle, CheckCircle2 } from "lucide-react";
-import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
+import { getLevelCurriculum, findProgramBySlug } from "@/content/curriculum";
 import { pullProgress } from "@/lib/academy/progressSync";
 import { summarizeLevel } from "@/lib/academy/levelSummary";
 import { getLevelProgress, getOrCreateCertificateId } from "@/lib/academy/progress";
@@ -20,7 +20,7 @@ export default function CertificatePage() {
   const level = Number(params.level);
 
   const curriculum = getLevelCurriculum(langSlug, level);
-  const langCode = availableLanguages.find((l) => l.slug === langSlug)?.code ?? "XX";
+  const langCode = findProgramBySlug(langSlug)?.code ?? "XX";
 
   const [studentName, setStudentName] = useState("");
   const [average, setAverage] = useState(0);

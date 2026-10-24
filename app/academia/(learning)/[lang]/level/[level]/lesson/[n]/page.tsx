@@ -9,6 +9,7 @@ import { PenLine } from "lucide-react";
 import { getLesson, getLevelCurriculum } from "@/content/curriculum";
 import LessonRenderer from "@/components/academy/LessonRenderer";
 import { frenchFor } from "@/content/translations";
+import { isOfficeProgram } from "@/content/curriculum";
 import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/academy/progress";
 import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
@@ -113,7 +114,7 @@ export default function LessonPage() {
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">
-              Lesson {lesson.id}: {lesson.title}
+              {isOfficeProgram(langSlug) ? "Leçon" : "Lesson"} {lesson.id}{isOfficeProgram(langSlug) ? " :" : ":"} {lesson.title}
             </h1>
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{lesson.subtitle}</p>
             {showFr && frenchFor(langSlug, lesson.title) && (

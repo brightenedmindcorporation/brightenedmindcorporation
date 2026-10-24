@@ -21,7 +21,7 @@ interface Teacher {
 // Languages have 3 levels; the other programs (Bureautique…) a single room.
 const PROGRAMS: { code: string; label: string; levels: number[] }[] = [
   ...availableLanguages.map((l) => ({ code: l.code, label: l.label, levels: [1, 2, 3] })),
-  ...otherPrograms.map((p) => ({ code: p.code, label: p.label, levels: [1] })),
+  ...otherPrograms.map((p) => ({ code: p.code, label: p.label, levels: p.code === "BUREAUTIQUE" ? [1, 2, 3] : [1] })),
 ];
 
 const labelOf = (code: string) => PROGRAMS.find((p) => p.code === code)?.label ?? code;

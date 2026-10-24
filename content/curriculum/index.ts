@@ -17,6 +17,9 @@ import { portugueseLevel3 } from "./portuguese/level3";
 import { chineseLevel1 } from "./chinese/level1";
 import { chineseLevel2 } from "./chinese/level2";
 import { chineseLevel3 } from "./chinese/level3";
+import { bureautiqueLevel1 } from "./bureautique/level1";
+import { bureautiqueLevel2 } from "./bureautique/level2";
+import { bureautiqueLevel3 } from "./bureautique/level3";
 
 // Add new entries here as more languages/levels are authored (Phase 4).
 // Each entry's key is `${langSlug}-${level}`.
@@ -39,6 +42,9 @@ const registry: Record<string, LevelCurriculum> = {
   "chinese-1": chineseLevel1,
   "chinese-2": chineseLevel2,
   "chinese-3": chineseLevel3,
+  "bureautique-1": bureautiqueLevel1,
+  "bureautique-2": bureautiqueLevel2,
+  "bureautique-3": bureautiqueLevel3,
 };
 
 export const availableLanguages = [
@@ -49,6 +55,19 @@ export const availableLanguages = [
   { slug: "portuguese", label: "Portugais", code: "PT" },
   { slug: "chinese", label: "Chinois", code: "ZH" },
 ];
+
+/**
+ * Bureautique (Windows, Word, Excel, PowerPoint) is taught with the same engine as the languages (levels, lessons,
+ * quizzes, marks out of 100, certificate) but is not a language: no audio, dictation or reading aloud.
+ */
+export const officeProgram = { slug: "bureautique", label: "Bureautique", code: "BUREAUTIQUE" };
+
+/** Everything that has lessons and quizzes: the languages and the office course. */
+export const curriculumPrograms = [...availableLanguages, officeProgram];
+
+export const isOfficeProgram = (slug?: string) => slug === officeProgram.slug;
+export const findProgramByCode = (code?: string) => curriculumPrograms.find((p) => p.code === code);
+export const findProgramBySlug = (slug?: string) => curriculumPrograms.find((p) => p.slug === slug);
 
 export function getLevelCurriculum(langSlug: string, level: number): LevelCurriculum | null {
   return registry[`${langSlug}-${level}`] ?? null;

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { X, CheckCircle2, XCircle, Circle, Award, Unlock, Lock, BadgeCheck, Printer } from "lucide-react";
-import { availableLanguages, getLevelCurriculum } from "@/content/curriculum";
+import { findProgramByCode, getLevelCurriculum } from "@/content/curriculum";
 import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
 import { printDossier } from "@/lib/academy/dossierPrint";
 import type { PartLine, QuizMark } from "@/lib/academy/quizScoring";
@@ -63,7 +63,7 @@ export default function StudentDossier({
   /** Only the administration may change scores or restart a level. */
   canEditScores?: boolean;
 }) {
-  const lang = availableLanguages.find((l) => l.code === student.langCode);
+  const lang = findProgramByCode(student.langCode);
   const [busy, setBusy] = useState<string | null>(null);
   const act = async (action: DossierAction, level: number, lessonId: number, _total: number, current?: number | null) => {
     if (!onAct) return;

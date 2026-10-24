@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy } from "lucide-react";
 import AcademyHeader from "../../../components/AcademyHeader";
-import { getLevelCurriculum } from "@/content/curriculum";
+import { getLevelCurriculum, isOfficeProgram } from "@/content/curriculum";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { pullProgress } from "@/lib/academy/progressSync";
@@ -142,6 +142,7 @@ export default function LevelOverviewPage() {
             )}
           </div>
 
+          {!isOfficeProgram(langSlug) && (
           <Link
             href={`${base}/vocabulary`}
             className="mt-6 flex items-center justify-between gap-4 bg-surface hover:bg-surface-alt rounded-2xl border border-line px-6 py-4 shadow-lg transition"
@@ -158,6 +159,7 @@ export default function LevelOverviewPage() {
             </span>
             <span className="text-red-500 font-bold shrink-0">Ouvrir →</span>
           </Link>
+          )}
 
           <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-8 mt-8">
             <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">

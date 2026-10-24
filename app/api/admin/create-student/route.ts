@@ -34,7 +34,8 @@ export async function POST(request: Request) {
     const gender = normalizeGender(body.gender);
     const studyDays = body.studyDays === 5 ? 5 : 3;
     const teacherUid = typeof body.teacherUid === "string" && body.teacherUid ? body.teacherUid : "";
-    const language = availableLanguages.some((l) => l.code === langCode);
+    // Languages and the Bureautique course have levels; the other programs do not.
+    const language = availableLanguages.some((l) => l.code === langCode) || langCode === "BUREAUTIQUE";
     const other = isOtherProgramCode(langCode);
 
     if (name.length < 2) return NextResponse.json({ error: "Le nom complet est obligatoire." }, { status: 400 });

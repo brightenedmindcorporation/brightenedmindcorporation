@@ -31,7 +31,10 @@ import {
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages } from "@/content/curriculum";
-import { getOtherProgramLabel, isOtherProgramCode, otherPrograms } from "@/content/programs";
+import { getOtherProgramLabel, isOtherProgramCode as isOtherCode, otherPrograms } from "@/content/programs";
+
+// A program without levels (Visuel, Logiciels). Bureautique has levels, lessons and quizzes like a language.
+const isOtherProgramCode = (code?: string) => isOtherCode(code) && code !== "BUREAUTIQUE";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";

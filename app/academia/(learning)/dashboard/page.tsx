@@ -7,8 +7,11 @@ import { Lock, MessageSquarePlus, Paperclip, X, BookText, ChevronDown } from "lu
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AcademyHeader from "../components/AcademyHeader";
-import { getLevelCurriculum, availableLanguages } from "@/content/curriculum";
-import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
+import { getLevelCurriculum, availableLanguages, findProgramByCode, findProgramBySlug } from "@/content/curriculum";
+import { isOtherProgramCode as isOtherCode, getOtherProgramLabel } from "@/content/programs";
+
+// A program without lessons or quizzes (Visuel, Logiciels). Bureautique has its own course, like a language.
+const isOtherProgramCode = (code?: string) => isOtherCode(code) && !findProgramByCode(code);
 import { getLevelProgress } from "@/lib/academy/progress";
 import { levelNumber, startLevel, placementPending } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
@@ -39,7 +42,7 @@ interface StudentData {
 // before langCode existed fall back to English, which was the only
 // language the platform had at the time.
 function resolveLangSlug(langCode?: string): string {
-  const match = availableLanguages.find((l) => l.code === langCode);
+  const match = findProgramByCode(langCode);
   return match?.slug ?? "english";
 }
 
@@ -271,7 +274,7 @@ export default function Dashboard() {
 
   const isOtherProgram = isOtherProgramCode(activeEnrollment.langCode);
   const langSlug = resolveLangSlug(activeEnrollment.langCode);
-  const langInfo = availableLanguages.find((l) => l.slug === langSlug) ?? availableLanguages[0];
+  const langInfo = findProgramBySlug(langSlug) ?? availableLanguages[0];
   const programLabel = isOtherProgram ? getOtherProgramLabel(activeEnrollment.langCode) ?? activeEnrollment.langCode : langInfo.label;
 
   // Levels below the one the student registered at are not part of their enrolment.
@@ -406,7 +409,7 @@ export default function Dashboard() {
         {approvedEnrollments.length > 1 && (
           <div className="flex flex-wrap gap-2 bg-surface/80 border border-line p-3 rounded-2xl backdrop-blur-md">
             {approvedEnrollments.map((en) => {
-              const label = availableLanguages.find((l) => l.code === en.langCode)?.label ?? getOtherProgramLabel(en.langCode) ?? en.langCode;
+              const label = findProgramByCode(en.langCode)?.label ?? getOtherProgramLabel(en.langCode) ?? en.langCode;
               const isActive = en.langCode === activeEnrollment.langCode;
               return (
                 <button

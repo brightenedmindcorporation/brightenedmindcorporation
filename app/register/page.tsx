@@ -43,6 +43,8 @@ function RegisterForm() {
 
   const router = useRouter();
   const isLanguageProgram = !isOtherProgramCode(programCode);
+  // Bureautique has levels and a study rhythm like a language, but no placement test and no online payment yet.
+  const hasLevels = isLanguageProgram || programCode === "BUREAUTIQUE";
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,9 +139,9 @@ function RegisterForm() {
             }
           })(),
           langCode: programCode,
-          level: isLanguageProgram ? level : "N/A",
+          level: hasLevels ? level : "N/A",
           placement: isLanguageProgram && levelMode === "test",
-          studyDays: isLanguageProgram ? studyDays : undefined,
+          studyDays: hasLevels ? studyDays : undefined,
         }),
       });
       const enrollResult = await enrollResponse.json();
@@ -342,7 +344,7 @@ function RegisterForm() {
             </select>
           </div>
 
-          {isLanguageProgram && (
+          {hasLevels && (
             <>
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-ink-soft">Votre niveau</label>
@@ -364,6 +366,7 @@ function RegisterForm() {
                     </select>
                   </span>
                 </label>
+                {isLanguageProgram && (
                 <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer ${levelMode === "test" ? "border-red-600 bg-red-600/5" : "border-line"}`}>
                   <input type="radio" name="levelMode" className="mt-1" checked={levelMode === "test"} onChange={() => setLevelMode("test")} />
                   <span className="text-sm">
@@ -373,6 +376,7 @@ function RegisterForm() {
                     </span>
                   </span>
                 </label>
+                )}
                 <p className="text-xs text-ink-faint">Vous accédez à votre niveau, pas aux niveaux inférieurs. Le niveau suivant s&apos;ouvre quand vous réussissez le test final.</p>
               </div>
 

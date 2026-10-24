@@ -2,7 +2,8 @@
 
 import type { Lesson } from "@/content/curriculum/types";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2 } from "lucide-react";
+import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2, Target } from "lucide-react";
+import { isOfficeProgram } from "@/content/curriculum";
 import { extractSpeechText, isSpokenText, lessonNarrations } from "@/lib/academy/audioClips";
 import NarrationPlayer from "@/components/academy/NarrationPlayer";
 import WritingLab from "@/components/academy/WritingLab";
@@ -197,6 +198,60 @@ function OfflineAudioButton({ lesson, langSlug }: { lesson: Lesson; langSlug: st
 
 export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson: Lesson; langSlug: string; statsKey?: string }) {
   const narration = useMemo(() => lessonNarrations(langSlug, lesson), [langSlug, lesson]);
+
+  // Office course (Windows, Word, Excel, PowerPoint): text, optional video and practical work, no audio.
+  if (isOfficeProgram(langSlug)) {
+    return (
+      <div className="space-y-8">
+        <Card>
+          <CardTitle icon={BookOpen}>Leçon</CardTitle>
+          <div className="text-ink-soft mt-4 space-y-6">
+            {lesson.sections.map((section, i) => (
+              <div key={i}>
+                <p className="font-bold text-ink">{section.heading}</p>
+                <ul className="mt-2 space-y-2">
+                  {section.body.map((line, j) => (
+                    <li key={j} className="flex items-start gap-3">
+                      <span className="mt-2 w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+                      <span>{line}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </Card>
+
+        {lesson.videoUrl && <VideoCard lesson={lesson} statsKey={statsKey} />}
+
+        <Card>
+          <CardTitle icon={FileText}>Cas pratique</CardTitle>
+          <div className="text-ink-soft mt-4 space-y-3">
+            <p className="font-bold text-ink">{lesson.readingTitle}</p>
+            {lesson.reading.map((p, i) => (
+              <p key={i}>{p}</p>
+            ))}
+          </div>
+        </Card>
+
+        <Card>
+          <CardTitle icon={Mic}>Travaux pratiques</CardTitle>
+          <p className="text-ink-soft mt-4">Faites ces exercices sur votre ordinateur :</p>
+          <ol className="list-decimal ml-6 text-ink-soft mt-4 space-y-2">
+            {lesson.exercises.map((ex, i) => (
+              <li key={i}>{ex}</li>
+            ))}
+          </ol>
+        </Card>
+
+        <Card>
+          <CardTitle icon={Target}>À la fin de cette leçon, vous saurez</CardTitle>
+          <p className="text-ink-soft mt-4">{lesson.speakingTopic}</p>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-8">
       <FrenchToggle langSlug={langSlug} />

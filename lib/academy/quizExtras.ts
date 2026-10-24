@@ -1,5 +1,6 @@
 import type { LevelCurriculum } from "@/content/curriculum/types";
 import { getDialogue } from "@/content/dialogues";
+import { isOfficeProgram } from "@/content/curriculum";
 import { isCjkText, lessonChars, wordsOf } from "./writingLab";
 import type { QuizWriting, QuizParts } from "@/components/academy/QuizEngine";
 import type { QuizReading } from "@/components/academy/QuizReadingStep";
@@ -18,6 +19,8 @@ const QUESTION_END = /[?？]$/;
  * lesson's topic (the last lesson, a real-life review, for the level's final quiz).
  */
 export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: number | "final"): QuizWriting | undefined {
+  // The office course has no dictation or free writing: its quizzes are questions only.
+  if (isOfficeProgram(langSlug)) return undefined;
   const lesson = key === "final" ? curriculum.lessons[curriculum.lessons.length - 1] : curriculum.lessons.find((l) => l.id === key);
   if (!lesson) return undefined;
   const dialogue = getDialogue(langSlug, curriculum.level, key);
@@ -57,6 +60,7 @@ export function quizWriting(langSlug: string, curriculum: LevelCurriculum, key: 
  * line of the lesson's reading without its French translation), short enough to read in a few seconds.
  */
 export function quizReading(langSlug: string, curriculum: LevelCurriculum, key: number | "final"): QuizReading | undefined {
+  if (isOfficeProgram(langSlug)) return undefined;
   const lesson = key === "final" ? curriculum.lessons[curriculum.lessons.length - 1] : curriculum.lessons.find((l) => l.id === key);
   if (!lesson) return undefined;
   const lines = getDialogue(langSlug, curriculum.level, key)?.lines ?? [];
