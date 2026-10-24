@@ -34,7 +34,7 @@ export default function CTA() {
             <br />
 
             <span className="text-gradient-red">
-              dâ€™exception ensemble.
+              d’exception ensemble.
             </span>
 
           </h2>
@@ -42,8 +42,8 @@ export default function CTA() {
           <p className="mt-10 max-w-3xl mx-auto text-ink-soft text-lg leading-9 font-sans">
 
             Brightened Mind Corporation accompagne les individus,
-            les entreprises et les communautÃ©s dans leur Ã©volution
-            grÃ¢ce Ã  des solutions innovantes, Ã©ducatives et stratÃ©giques.
+            les entreprises et les communautés dans leur évolution
+            grâce à des solutions innovantes, éducatives et stratégiques.
 
           </p>
 
