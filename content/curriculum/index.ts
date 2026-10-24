@@ -23,6 +23,9 @@ import { bureautiqueLevel3 } from "./bureautique/level3";
 import { logicielsLevel1 } from "./logiciels/level1";
 import { logicielsLevel2 } from "./logiciels/level2";
 import { logicielsLevel3 } from "./logiciels/level3";
+import { visuelLevel1 } from "./visuel/level1";
+import { visuelLevel2 } from "./visuel/level2";
+import { visuelLevel3 } from "./visuel/level3";
 
 // Add new entries here as more languages/levels are authored (Phase 4).
 // Each entry's key is `${langSlug}-${level}`.
@@ -51,6 +54,9 @@ const registry: Record<string, LevelCurriculum> = {
   "logiciels-1": logicielsLevel1,
   "logiciels-2": logicielsLevel2,
   "logiciels-3": logicielsLevel3,
+  "visuel-1": visuelLevel1,
+  "visuel-2": visuelLevel2,
+  "visuel-3": visuelLevel3,
 };
 
 export const availableLanguages = [
