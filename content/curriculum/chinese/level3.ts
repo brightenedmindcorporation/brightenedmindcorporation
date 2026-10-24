@@ -154,6 +154,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 据数据显示。因此，我们建议。`,
       videoTopic: "如何写一份清楚的商业报告。",
+      videoUrl: "https://www.youtube.com/watch?v=1PWrA8hR5bw",
       readingTitle: "费雷拟的销售报告 (Le rapport de ventes de Féréol)",
       reading: [
         "据数据显示，这个月的销售额增加了10%。(Selon les données, les ventes de ce mois ont augmenté de 10%.)",
@@ -230,6 +231,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 这个办法有效。我们需要调整计划。`,
       videoTopic: "观察团队如何讨论和解决问题。",
+      videoUrl: "https://www.youtube.com/watch?v=FWW_CpNHaAk",
       readingTitle: "工厂的机器出问题了。(Une machine de l'usine est tombée en panne.)",
       reading: [
         "经理说：«问题是机器停止了，这导致了生产延迟。» (Le manager a dit : « Le problème est que la machine s'est arrêtée, ce qui a causé un retard de production. »)",
@@ -281,6 +283,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 这个地方可以改进。感谢你的努力。`,
       videoTopic: "观察一位领导如何激励和分配任务。",
+      videoUrl: "https://www.youtube.com/watch?v=2EDoFpK0Idw",
       readingTitle: "陈经理领导一个大项目。(Mme Chen dirigeait un grand projet.)",
       reading: [
         "她对团队说：«大家做得很棒，我对团队充满信心。» (Elle a dit à l'équipe : « Vous faites tous du très bon travail, j'ai pleinement confiance en l'équipe. »)",

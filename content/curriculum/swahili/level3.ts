@@ -53,6 +53,7 @@ Ushauri na pendekezo. Inafaa na ungependa vinatumika kutoa ushauri. Inafaa ukagu
 
 Uwezekano. Huenda na yamkini vinaonyesha kitu kinawezekana lakini si uhakika.`,
       videoTopic: "Sikia tofauti kati ya wajibu, ushauri, na uwezekano mahali pa kazi.",
+      videoUrl: "https://www.youtube.com/watch?v=iLH1loVEIBU",
       readingTitle: "Maandalizi ya Ukaguzi",
       reading: [
         "Meneja wa fedha alisema, “Lazima tumalize nyaraka za ukaguzi ifikapo Jumatatu.”",
@@ -189,6 +190,7 @@ Wakati wa simu. Unaweza kurudia hilo, tafadhali? Samahani, mtandao hauko wazi sa
 
 Kumalizia simu. Asante kwa muda wako. Nitakutumia barua pepe kuthibitisha.`,
       videoTopic: "Sikiliza simu ya kitaalamu kuanzia mwanzo hadi mwisho.",
+      videoUrl: "https://www.youtube.com/watch?v=THbepS5Q7Ss",
       readingTitle: "Simu kwa Mteja",
       reading: [
         "“Habari, huyu ni Sara kutoka Shirika la Brightened Mind. Ninapiga simu kuhusu agizo lako la hivi karibuni.”",
@@ -215,6 +217,7 @@ Kubadilishana mawasiliano. Ilikuwa vizuri kuzungumza nawe. Naweza kupata kadi ya
 
 Mada salama dhidi ya za kuepuka. Salama ni kazi, mwelekeo wa sekta, na safari. Epuka mshahara na siasa.`,
       videoTopic: "Ona mazungumzo ya kawaida ya kitaalamu kwenye tukio la biashara.",
+      videoUrl: "https://www.youtube.com/watch?v=zTeT25PtnFk",
       readingTitle: "Kukutana na Mtu Mpya Mkutanoni",
       reading: [
         "Mkutanoni, Michael alijitambulisha kwa mgeni aliyesimama karibu na meza ya kahawa.",
@@ -241,6 +244,7 @@ Kupendekeza suluhisho. Chaguo moja lingekuwa... Tunaweza kujaribu... Vipi kama t
 
 Kufanya uamuzi. Twende na chaguo hili. Tumeamua kuendelea na...`,
       videoTopic: "Tazama timu ikitambua tatizo na kukubaliana kuhusu suluhisho pamoja.",
+      videoUrl: "https://www.youtube.com/watch?v=VVwvu8RF0ak",
       readingTitle: "Tatizo la Usafirishaji",
       reading: [
         "Timu ya usafirishaji ilisema, “Tumekumbana na tatizo na lori la usafirishaji. Tatizo kuu linaonekana kuwa hitilafu ya injini.”",
@@ -293,6 +297,7 @@ Kutoa maoni. Ninathamini sana juhudi ulizoweka kwenye hili. Eneo moja unaloweza 
 
 Kuongoza timu. Ningependa kukugawia kazi hii.`,
       videoTopic: "Ona meneja akitoa maoni wazi na ya heshima kwa mfanyakazi mwenzake.",
+      videoUrl: "https://www.youtube.com/watch?v=Il8XlDl77bw",
       readingTitle: "Kiongozi Mpya wa Timu",
       reading: [
         "Joseph alipokuwa kiongozi wa timu, alijifunza kugawa kazi badala ya kufanya kila kitu peke yake.",

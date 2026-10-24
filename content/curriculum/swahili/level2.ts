@@ -128,6 +128,7 @@ Kukubaliana na kutokubaliana kwa heshima. Nakubaliana nawe. Hilo ni jambo zuri, 
 
 Maneno ya kuunganisha. Kuongeza: na, pia. Kutofautisha: lakini, hata hivyo. Sababu na matokeo: kwa sababu, hivyo.`,
       videoTopic: "Ona jinsi maneno ya kuunganisha yanavyounganisha mawazo kwenye aya.",
+      videoUrl: "https://www.youtube.com/watch?v=kWsi305WfPU",
       readingTitle: "Kwa Nini Ninapenda Kusoma",
       reading: [
         "Ninapenda kusoma kwa sababu kunanisaidia kupumzika baada ya siku ndefu.",
@@ -317,6 +318,7 @@ Kukubaliana na kutokubaliana rasmi. Nakubaliana kabisa na hilo. Naelewa hoja yak
 
 Kuunga mkono hoja. Kwa mfano... Utafiti unaonyesha kuwa... Kwa kuhitimisha, naamini kuwa...`,
       videoTopic: "Tazama majadiliano mafupi na ya heshima yakitumia maneno ya maoni na hoja.",
+      videoUrl: "https://www.youtube.com/watch?v=NpPxCNsISfc",
       readingTitle: "Majadiliano Darasani",
       reading: [
         "Darasani, wanafunzi walijadili kama simu zinapaswa kuruhusiwa shuleni.",
