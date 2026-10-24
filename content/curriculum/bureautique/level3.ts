@@ -1,4 +1,5 @@
 import type { LevelCurriculum } from "../types";
+import { withVideos } from "./videos";
 import { lessonsA3, quizzesA3 } from "./level3-a";
 import { lessonsB3, quizzesB3, final3 } from "./level3-b";
 
@@ -10,7 +11,7 @@ export const bureautiqueLevel3: LevelCurriculum = {
   level: 3,
   levelTitle: "Niveau 3 - Bureautique professionnelle",
   levelSubtitle: "Sécurité, collaboration, rapports, tableaux de bord et présentations de niveau professionnel.",
-  lessons: [...lessonsA3, ...lessonsB3],
+  lessons: withVideos(3, [...lessonsA3, ...lessonsB3]),
   quizzes: [...quizzesA3, ...quizzesB3],
   finalQuiz: final3,
 };

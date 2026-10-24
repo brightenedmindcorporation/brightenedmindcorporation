@@ -1,5 +1,6 @@
 import "server-only";
 import { getAdminDb } from "@/lib/firebase-admin";
+import { shortCode } from "@/lib/academy/shortCode";
 
 /**
  * Server-only counterpart to lib/academy/matricule.ts's generateMatricule,
@@ -25,5 +26,5 @@ export async function generateMatriculeAdmin(langCode: string): Promise<string> 
     return seq;
   });
 
-  return `BMCA-${langCode}-${year}-${String(nextSeq).padStart(3, "0")}`;
+  return `BMCA-${shortCode(langCode)}-${year}-${String(nextSeq).padStart(3, "0")}`;
 }

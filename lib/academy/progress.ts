@@ -13,6 +13,7 @@
 // a dozen loose keys) rather than an anti-cheat fix.
 
 import type { QuizPartsRecord } from "@/lib/academy/quizScoring";
+import { shortCode } from "@/lib/academy/shortCode";
 
 export interface LevelProgress {
   /** Lessons the student has opened and studied (a lesson is studied before its quiz). */
@@ -258,7 +259,7 @@ export function getOrCreateCertificateId(
   if (progress.certificateId) return progress.certificateId;
 
   const year = new Date().getFullYear();
-  const id = `BMCA-${langCode}-L${level}-${year}-${Math.floor(Math.random() * 100000)}`;
+  const id = `BMCA-${shortCode(langCode)}-L${level}-${year}-${Math.floor(Math.random() * 100000)}`;
   progress.certificateId = id;
   saveProgress(langSlug, level, progress);
   return id;

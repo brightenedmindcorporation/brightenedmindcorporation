@@ -1,5 +1,6 @@
 import { doc, runTransaction } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { shortCode } from "@/lib/academy/shortCode";
 
 /**
  * Generates the next sequential matricule for a given language code,
@@ -22,5 +23,5 @@ export async function generateMatricule(langCode: string): Promise<string> {
     return seq;
   });
 
-  return `BMCA-${langCode}-${year}-${String(nextSeq).padStart(3, "0")}`;
+  return `BMCA-${shortCode(langCode)}-${year}-${String(nextSeq).padStart(3, "0")}`;
 }
