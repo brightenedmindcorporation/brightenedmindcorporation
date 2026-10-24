@@ -104,7 +104,7 @@ export default function CertificatePage() {
 
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
-      <main className="p-6 md:p-10">
+      <main className="p-6 md:p-10 pt-28 md:pt-28">
         <div className="max-w-3xl mx-auto space-y-8">
           <div>
             <Link

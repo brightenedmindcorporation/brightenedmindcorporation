@@ -103,7 +103,7 @@ export default function LevelOverviewPage() {
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <AcademyHeader />
 
-      <main className="p-6 md:p-10">
+      <main className="p-6 md:p-10 pt-28 md:pt-28">
         <div className="max-w-7xl mx-auto">
           <div className="mb-6">
             <Link

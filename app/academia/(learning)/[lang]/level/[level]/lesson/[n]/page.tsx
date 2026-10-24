@@ -102,9 +102,9 @@ export default function LessonPage() {
 
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
-      <main className="p-6 md:p-10">
+      <main className="p-6 md:p-10 pt-28 md:pt-28">
         <div className="max-w-5xl mx-auto space-y-8">
-          <div className="sticky top-2 z-30"><BackToLevel href={base} langSlug={langSlug} /></div>
+          <div className="sticky top-24 z-30"><BackToLevel href={base} langSlug={langSlug} /></div>
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">
