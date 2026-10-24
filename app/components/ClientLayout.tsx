@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import ThemeToggle from "@/components/ThemeToggle";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ScrollButtons from "@/components/ScrollButtons";
+import BackButton from "@/components/BackButton";
 import VisitTracker from "@/components/VisitTracker";
 import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
@@ -131,6 +132,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
       <div className="flex-grow">{children}</div>
       <ScrollButtons />
+      <BackButton />
       <VisitTracker />
 
       {!hideLayoutElements && (
