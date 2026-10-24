@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
-import { availableLanguages } from "@/content/curriculum";
+import { findProgramByCode, isOfficeProgram } from "@/content/curriculum";
 import { buildPlacementTest, gradePlacement, WRITING_MIN } from "@/lib/academy/placement";
 import { clipUrl, dialogueClipText } from "@/lib/academy/audioClips";
 import { diffAnswer } from "@/lib/academy/writingLab";
@@ -12,8 +12,8 @@ async function context(request: Request, langCode: string) {
   const idToken = request.headers.get("authorization")?.replace(/^Bearer /, "");
   if (!idToken) return { error: NextResponse.json({ error: "Connexion requise." }, { status: 401 }) };
   const decoded = await getAdminAuth().verifyIdToken(idToken);
-  const lang = availableLanguages.find((l) => l.code === langCode);
-  if (!lang) return { error: NextResponse.json({ error: "Langue inconnue." }, { status: 400 }) };
+  const lang = findProgramByCode(langCode);
+  if (!lang) return { error: NextResponse.json({ error: "Formation inconnue." }, { status: 400 }) };
   const db = getAdminDb();
   const enrollmentRef = db.collection("enrollments").doc(`${decoded.uid}_${langCode}`);
   const enrollment = await enrollmentRef.get();
@@ -36,14 +36,16 @@ export async function GET(request: Request) {
     }
     const test = buildPlacementTest(ctx.lang.slug, ctx.decoded.uid);
     if (!test) return NextResponse.json({ error: "Test indisponible pour cette langue." }, { status: 404 });
+    const office = isOfficeProgram(ctx.lang.slug);
     return NextResponse.json({
       status: "requested",
+      office,
       langSlug: ctx.lang.slug,
       questions: test.questions.map(({ answer, ...q }) => q),
       reading: { title: test.content.reading.title, paragraphs: test.content.reading.paragraphs },
-      readAloud: test.content.readAloud,
+      readAloud: office ? "" : test.content.readAloud,
       // The conversation is only given as audio: the text is not sent.
-      listening: test.content.listening.lines.map((text, i) => ({ url: clipUrl(ctx.lang.slug, dialogueClipText(i % 2 === 0 ? "A" : "B", text)) })),
+      listening: office ? [] : test.content.listening.lines.map((text, i) => ({ url: clipUrl(ctx.lang.slug, dialogueClipText(i % 2 === 0 ? "A" : "B", text)) })),
       writingMin: WRITING_MIN,
     });
   } catch (error: any) {
@@ -73,6 +75,7 @@ export async function POST(request: Request) {
     // Reading aloud: what the browser's speech recognition heard, compared with the passage; and the recording, for the reviewer to listen to.
     const spoken = body.readAloud && typeof body.readAloud === "object" ? body.readAloud : {};
     const transcript = typeof spoken.transcript === "string" ? spoken.transcript.slice(0, 1500) : "";
+    const office = isOfficeProgram(ctx.lang.slug);
     const cjk = ctx.lang.slug === "chinese";
     const readAloud = {
       transcript,
@@ -107,7 +110,7 @@ export async function POST(request: Request) {
         correct: q.answer,
         ok: answers[q.id] === q.answer,
       })),
-      readAloud: { ...readAloud, expected: test.content.readAloud },
+      readAloud: office ? null : { ...readAloud, expected: test.content.readAloud },
       writing,
     });
     await ctx.enrollmentRef.update({ placement: { ...ctx.placement, status: "submitted", submittedAt: now, suggestedLevel: grade.suggestedLevel } });

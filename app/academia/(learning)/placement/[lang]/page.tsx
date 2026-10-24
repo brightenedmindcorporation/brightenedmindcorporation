@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import { onAuthStateChanged, type User } from "firebase/auth";
 import { Headphones, Mic, Square, Play, BookOpenText, PenLine, ListChecks } from "lucide-react";
 import { auth } from "@/lib/firebase";
-import { availableLanguages, getLevelCurriculum } from "@/content/curriculum";
+import { findProgramBySlug, getLevelCurriculum } from "@/content/curriculum";
 import { CharPalette, ImeTextarea } from "@/components/academy/ImeField";
 import { lessonChars, textLength } from "@/lib/academy/writingLab";
 import { SPEECH_LANG } from "@/lib/academy/deviceSpeech";
@@ -21,6 +21,7 @@ interface Question {
   options: string[];
 }
 interface State {
+  office?: boolean;
   status: "requested" | "submitted" | "decided";
   questions?: Question[];
   reading?: { title: string; paragraphs: string[] };
@@ -85,7 +86,7 @@ function Questions({ list, offset = 0, answers, onPick }: { list: Question[]; of
 export default function PlacementPage() {
   const params = useParams<{ lang: string }>();
   const router = useRouter();
-  const lang = availableLanguages.find((l) => l.slug === params.lang);
+  const lang = findProgramBySlug(params.lang);
   const cjk = params.lang === "chinese";
 
   const [state, setState] = useState<State | null>(null);
@@ -251,20 +252,21 @@ export default function PlacementPage() {
     setRecording(false);
   };
 
-  if (!lang) return <main className="min-h-screen flex items-center justify-center text-ink-soft">Langue inconnue.</main>;
+  if (!lang) return <main className="min-h-screen flex items-center justify-center text-ink-soft">Formation inconnue.</main>;
 
   const all = state?.questions ?? [];
   const levelQs = all.filter((q) => q.section === "level");
   const readingQs = all.filter((q) => q.section === "reading");
   const listeningQs = all.filter((q) => q.section === "listening");
+  const office = Boolean(state?.office);
   const writingMin = cjk ? state?.writingMin?.chars ?? 18 : state?.writingMin?.words ?? 15;
   const answered = all.filter((q) => answers[q.id]).length;
   const writingLength = textLength(writing, cjk);
-  const readDone = Boolean(spoken.audioUrl) || spoken.skipped;
+  const readDone = office || Boolean(spoken.audioUrl) || spoken.skipped;
   const missing = [
     answered < all.length ? "les questions" : null,
     !readDone ? "la lecture à voix haute" : null,
-    writingLength < writingMin ? "le texte" : null,
+    !office && writingLength < writingMin ? "le texte" : null,
   ].filter(Boolean);
   const ready = all.length > 0 && missing.length === 0;
   const pick = (id: string, option: string) => {
@@ -300,7 +302,9 @@ export default function PlacementPage() {
           <span className="text-xs font-bold uppercase tracking-widest text-red-300">Test de niveau</span>
           <h1 className="text-3xl md:text-4xl font-black mt-2">{lang.label}</h1>
           <p className="text-red-200/80 mt-2 text-sm">
-            Cinq parties pour trouver le niveau qui vous convient : questions, lecture, écoute, lecture à voix haute et écriture. Ce n&apos;est pas un examen : répondez de votre mieux, sans aide. Votre niveau vous sera attribué par l&apos;administration après correction.
+            {office
+              ? "Deux parties pour trouver le niveau qui vous convient : des questions sur l'ordinateur, Word, Excel et PowerPoint, puis une lecture. Ce n'est pas un examen : répondez de votre mieux, sans aide. Votre niveau vous sera attribué par l'administration après correction."
+              : "Cinq parties pour trouver le niveau qui vous convient : questions, lecture, écoute, lecture à voix haute et écriture. Ce n'est pas un examen : répondez de votre mieux, sans aide. Votre niveau vous sera attribué par l'administration après correction."}
           </p>
         </div>
 
@@ -331,7 +335,7 @@ export default function PlacementPage() {
 
         {state?.status === "requested" && (
           <>
-            <Part n={1} icon={ListChecks} title="Vocabulaire et grammaire" hint="Certaines questions sont faciles, d'autres plus difficiles : c'est normal.">
+            <Part n={1} icon={ListChecks} title={office ? "Connaissances" : "Vocabulaire et grammaire"} hint="Certaines questions sont faciles, d'autres plus difficiles : c'est normal.">
               <Questions list={levelQs} answers={answers} onPick={pick} />
             </Part>
 
@@ -345,6 +349,8 @@ export default function PlacementPage() {
               <Questions list={readingQs} offset={levelQs.length} answers={answers} onPick={pick} />
             </Part>
 
+            {!office && (
+              <>
             <Part n={3} icon={Headphones} title="Écoute" hint="Deux personnes parlent. Vous pouvez écouter deux fois, puis répondez aux questions.">
               <div className="rounded-2xl border border-line bg-surface-alt p-5 flex flex-wrap items-center gap-4">
                 <button
@@ -411,6 +417,9 @@ export default function PlacementPage() {
                 {writingLength}/{writingMin} {cjk ? "caractères" : "mots"}
               </p>
             </Part>
+
+              </>
+            )}
 
             <button
               onClick={submit}

@@ -6,7 +6,7 @@ import { createNotification } from "@/lib/notifications";
 import { mailFrom } from "@/lib/mailFrom";
 import { sendWithText } from "@/lib/mailText";
 import { greeting } from "@/lib/salutation";
-import { availableLanguages } from "@/content/curriculum";
+import { findProgramByCode } from "@/content/curriculum";
 import { levelLabel } from "@/lib/academy/levelAccess";
 
 export const dynamic = "force-dynamic";
@@ -63,7 +63,7 @@ export async function POST(request: Request) {
     });
     await testRef.update({ status: "decided", decidedLevel: level, comment, decidedAt: now, decidedBy: caller.email });
 
-    const lang = availableLanguages.find((l) => l.code === test.langCode);
+    const lang = findProgramByCode(test.langCode);
     try {
       await createNotification({
         audience: test.uid,

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
-import { availableLanguages } from "@/content/curriculum";
+import { curriculumPrograms } from "@/content/curriculum";
 
 interface Test {
   id: string;
@@ -114,7 +114,7 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
 
       {shown.map((t) => {
         const isOpen = open === t.id;
-        const lang = availableLanguages.find((l) => l.code === t.langCode)?.label ?? t.langCode;
+        const lang = curriculumPrograms.find((l) => l.code === t.langCode)?.label ?? t.langCode;
         const chosen = level[t.id] ?? t.suggestedLevel;
         return (
           <div key={t.id} className="rounded-2xl border border-line bg-surface">
@@ -151,6 +151,7 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
 
             {isOpen && (
               <div className="border-t border-line p-4 space-y-5">
+                {t.readAloud && (
                 <div className="space-y-2">
                   <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">Lecture à voix haute</p>
                   {t.readAloud?.skipped && !t.readAloud.audioUrl ? (
@@ -168,11 +169,14 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
                     </>
                   )}
                 </div>
+                )}
 
+                {t.readAloud && (
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Texte de présentation</p>
                   <p translate="no" className="notranslate whitespace-pre-wrap rounded-xl bg-surface-alt border border-line p-3 text-ink">{t.writing || "—"}</p>
                 </div>
+                )}
 
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Réponses aux questions</p>

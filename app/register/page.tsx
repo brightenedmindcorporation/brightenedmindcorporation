@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { availableLanguages } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode } from "@/content/curriculum";
 import { otherPrograms, isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import PasswordInput from "@/components/academy/PasswordInput";
 
@@ -43,7 +43,7 @@ function RegisterForm() {
 
   const router = useRouter();
   const isLanguageProgram = !isOtherProgramCode(programCode);
-  // Bureautique has levels and a study rhythm like a language, but no placement test and no online payment yet.
+  // Bureautique has levels, a study rhythm and a placement test like a language, but no online payment yet.
   const hasLevels = isLanguageProgram || programCode === "BUREAUTIQUE";
 
   const handleRegister = async (e: React.FormEvent) => {
@@ -140,7 +140,7 @@ function RegisterForm() {
           })(),
           langCode: programCode,
           level: hasLevels ? level : "N/A",
-          placement: isLanguageProgram && levelMode === "test",
+          placement: hasLevels && levelMode === "test",
           studyDays: hasLevels ? studyDays : undefined,
         }),
       });
@@ -184,16 +184,16 @@ function RegisterForm() {
             </p>
           )}
           <p className="text-ink-soft text-sm mb-6">
-            {isLanguageProgram && levelMode === "test"
+            {hasLevels && levelMode === "test"
               ? "Passez maintenant votre test de niveau : il est corrigé par l'administration, qui vous attribue ensuite votre niveau. Vous pouvez aussi le passer plus tard depuis votre espace."
               : isLanguageProgram
               ? "Vous pouvez régler votre formation en ligne dès maintenant. Dans tous les cas, votre compte est activé (et votre Student ID envoyé) après validation par l'administration."
               : "Votre demande a été transmise à l'administration. Vous recevrez un email de confirmation une fois votre inscription approuvée."}
           </p>
           <div className="flex flex-col gap-3">
-            {isLanguageProgram && levelMode === "test" && (
+            {hasLevels && levelMode === "test" && (
               <button
-                onClick={() => router.push(`/academia/placement/${availableLanguages.find((l) => l.code === programCode)?.slug ?? ""}`)}
+                onClick={() => router.push(`/academia/placement/${findProgramByCode(programCode)?.slug ?? ""}`)}
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-5 py-2.5 rounded-lg font-semibold transition"
               >
                 Passer mon test de niveau maintenant
@@ -366,7 +366,7 @@ function RegisterForm() {
                     </select>
                   </span>
                 </label>
-                {isLanguageProgram && (
+                {hasLevels && (
                 <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer ${levelMode === "test" ? "border-red-600 bg-red-600/5" : "border-line"}`}>
                   <input type="radio" name="levelMode" className="mt-1" checked={levelMode === "test"} onChange={() => setLevelMode("test")} />
                   <span className="text-sm">
