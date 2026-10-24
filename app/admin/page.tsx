@@ -31,11 +31,11 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { availableLanguages } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode } from "@/content/curriculum";
 import { getOtherProgramLabel, isOtherProgramCode as isOtherCode, otherPrograms } from "@/content/programs";
 
-// A program without levels (Visuel, Logiciels). Bureautique has levels, lessons and quizzes like a language.
-const isOtherProgramCode = (code?: string) => isOtherCode(code) && code !== "BUREAUTIQUE";
+// A program without levels. Bureautique, Logiciels and Visuel have levels, lessons and quizzes like a language.
+const isOtherProgramCode = (code?: string) => isOtherCode(code) && !findProgramByCode(code);
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import PasswordInput from "@/components/academy/PasswordInput";

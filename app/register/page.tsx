@@ -44,7 +44,7 @@ function RegisterForm() {
   const router = useRouter();
   const isLanguageProgram = !isOtherProgramCode(programCode);
   // Bureautique has levels, a study rhythm and a placement test like a language, but no online payment yet.
-  const hasLevels = isLanguageProgram || programCode === "BUREAUTIQUE";
+  const hasLevels = Boolean(findProgramByCode(programCode));
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();

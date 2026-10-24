@@ -20,6 +20,9 @@ import { chineseLevel3 } from "./chinese/level3";
 import { bureautiqueLevel1 } from "./bureautique/level1";
 import { bureautiqueLevel2 } from "./bureautique/level2";
 import { bureautiqueLevel3 } from "./bureautique/level3";
+import { logicielsLevel1 } from "./logiciels/level1";
+import { logicielsLevel2 } from "./logiciels/level2";
+import { logicielsLevel3 } from "./logiciels/level3";
 
 // Add new entries here as more languages/levels are authored (Phase 4).
 // Each entry's key is `${langSlug}-${level}`.
@@ -45,6 +48,9 @@ const registry: Record<string, LevelCurriculum> = {
   "bureautique-1": bureautiqueLevel1,
   "bureautique-2": bureautiqueLevel2,
   "bureautique-3": bureautiqueLevel3,
+  "logiciels-1": logicielsLevel1,
+  "logiciels-2": logicielsLevel2,
+  "logiciels-3": logicielsLevel3,
 };
 
 export const availableLanguages = [
@@ -61,11 +67,18 @@ export const availableLanguages = [
  * quizzes, marks out of 100, certificate) but is not a language: no audio, dictation or reading aloud.
  */
 export const officeProgram = { slug: "bureautique", label: "Bureautique", code: "BUREAUTIQUE" };
+/** The management software course (Dolibarr, Sage, Odoo, customs and audit tools). */
+export const logicielsProgram = { slug: "logiciels", label: "Logiciels de gestion", code: "LOGICIELS" };
+/** The visual and audiovisual course (Photoshop, Illustrator, video editing, live production). */
+export const visuelProgram = { slug: "visuel", label: "Visuel & Audiovisuel", code: "VISUEL" };
+
+/** Courses taught as text lessons with practical work (no audio, dictation or reading aloud). */
+export const officePrograms = [officeProgram, logicielsProgram, visuelProgram];
 
 /** Everything that has lessons and quizzes: the languages and the office course. */
-export const curriculumPrograms = [...availableLanguages, officeProgram];
+export const curriculumPrograms = [...availableLanguages, ...officePrograms];
 
-export const isOfficeProgram = (slug?: string) => slug === officeProgram.slug;
+export const isOfficeProgram = (slug?: string) => officePrograms.some((p) => p.slug === slug);
 export const findProgramByCode = (code?: string) => curriculumPrograms.find((p) => p.code === code);
 export const findProgramBySlug = (slug?: string) => curriculumPrograms.find((p) => p.slug === slug);
 

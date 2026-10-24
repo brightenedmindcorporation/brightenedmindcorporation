@@ -9,7 +9,7 @@ import { createNotification } from "@/lib/notifications";
 import { mailFrom } from "@/lib/mailFrom";
 import { sendWithText } from "@/lib/mailText";
 import { greeting, normalizeGender } from "@/lib/salutation";
-import { availableLanguages } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode } from "@/content/curriculum";
 import { isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     const studyDays = body.studyDays === 5 ? 5 : 3;
     const teacherUid = typeof body.teacherUid === "string" && body.teacherUid ? body.teacherUid : "";
     // Languages and the Bureautique course have levels; the other programs do not.
-    const language = availableLanguages.some((l) => l.code === langCode) || langCode === "BUREAUTIQUE";
+    const language = Boolean(findProgramByCode(langCode));
     const other = isOtherProgramCode(langCode);
 
     if (name.length < 2) return NextResponse.json({ error: "Le nom complet est obligatoire." }, { status: 400 });
