@@ -556,7 +556,7 @@ export default function Dashboard() {
           <div className="bg-surface-sunken/80 border border-line rounded-2xl p-5 mb-6 relative">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-bold text-ink-soft font-sans">
-                Course Progress ({activeEnrollment.level || "Level 1"})
+                Course Progress (Level {levelNumber(activeEnrollment.level)})
               </span>
               <span className="text-sm font-extrabold text-red-500">
                 {progressPercentage}%
@@ -598,7 +598,7 @@ export default function Dashboard() {
                 Current Level
               </span>
               <p className="text-sm font-semibold text-red-500 mt-1">
-                {activeEnrollment.level || "Level 1"}
+                Level {levelNumber(activeEnrollment.level)}
               </p>
             </div>
 
