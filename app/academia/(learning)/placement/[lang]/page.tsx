@@ -12,6 +12,7 @@ import { lessonChars, textLength } from "@/lib/academy/writingLab";
 import { SPEECH_LANG } from "@/lib/academy/deviceSpeech";
 import { claimPlayback, releasePlayback } from "@/lib/academy/lessonAudioPlayer";
 import { sfx } from "@/lib/academy/sfx";
+import Zh, { withoutHint } from "@/components/academy/Zh";
 
 interface Question {
   id: string;
@@ -54,14 +55,14 @@ function Part({ n, icon: Icon, title, hint, children }: { n: number; icon: React
   );
 }
 
-function Questions({ list, offset = 0, answers, onPick }: { list: Question[]; offset?: number; answers: Record<string, string>; onPick: (id: string, option: string) => void }) {
+function Questions({ list, offset = 0, answers, onPick, zh = false }: { list: Question[]; offset?: number; zh?: boolean; answers: Record<string, string>; onPick: (id: string, option: string) => void }) {
   return (
     <>
       {list.map((q, index) => (
         <div key={q.id} className="border-b border-line/80 pb-6 last:border-b-0 last:pb-0">
           <h3 className="font-bold text-lg mb-3 flex gap-3">
             <span className="text-red-500">{offset + index + 1}.</span>
-            <span translate="no" className="notranslate">{q.question}</span>
+            <span translate="no" className={`notranslate ${zh ? "leading-[2.2]" : ""}`}><Zh text={q.question} on={zh} /></span>
           </h3>
           <div className="space-y-2.5">
             {q.options.map((option) => (
@@ -73,7 +74,7 @@ function Questions({ list, offset = 0, answers, onPick }: { list: Question[]; of
                   answers[q.id] === option ? "bg-red-600 border-red-500 text-white font-semibold" : "bg-surface-sunken/60 border-line text-ink-soft hover:border-red-600/50"
                 }`}
               >
-                <span translate="no" className="notranslate">{option}</span>
+                <span translate="no" className={`notranslate ${zh ? "leading-[2.2]" : ""}`}><Zh text={zh ? withoutHint(option) : option} on={zh} /></span>
               </button>
             ))}
           </div>
@@ -336,7 +337,7 @@ export default function PlacementPage() {
         {state?.status === "requested" && (
           <>
             <Part n={1} icon={ListChecks} title={office ? "Connaissances" : "Vocabulaire et grammaire"} hint="Certaines questions sont faciles, d'autres plus difficiles : c'est normal.">
-              <Questions list={levelQs} answers={answers} onPick={pick} />
+              <Questions list={levelQs} answers={answers} onPick={pick} zh={cjk} />
             </Part>
 
             <Part n={2} icon={BookOpenText} title="Lecture" hint="Lisez le texte, puis répondez aux questions.">
@@ -346,7 +347,7 @@ export default function PlacementPage() {
                   <p key={i} className="notranslate leading-relaxed">{p}</p>
                 ))}
               </div>
-              <Questions list={readingQs} offset={levelQs.length} answers={answers} onPick={pick} />
+              <Questions list={readingQs} offset={levelQs.length} answers={answers} onPick={pick} zh={cjk} />
             </Part>
 
             {!office && (
@@ -364,11 +365,11 @@ export default function PlacementPage() {
                 </button>
                 <span className="text-xs text-ink-soft">{plays}/2 écoutes</span>
               </div>
-              <Questions list={listeningQs} offset={levelQs.length + readingQs.length} answers={answers} onPick={pick} />
+              <Questions list={listeningQs} offset={levelQs.length + readingQs.length} answers={answers} onPick={pick} zh={cjk} />
             </Part>
 
             <Part n={4} icon={Mic} title="Lecture à voix haute" hint="Lisez ce texte à voix haute dans le micro. Un professeur écoutera votre prononciation.">
-              <p translate="no" className="notranslate rounded-2xl border border-line bg-surface-alt p-5 text-lg leading-relaxed">{state.readAloud}</p>
+              <p translate="no" className="notranslate rounded-2xl border border-line bg-surface-alt p-5 text-lg leading-relaxed"><Zh text={state.readAloud ?? ""} on={cjk} /></p>
               <div className="flex flex-wrap items-center gap-3">
                 <button
                   type="button"

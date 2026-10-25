@@ -6,6 +6,7 @@ import { sfx } from "@/lib/academy/sfx";
 import { SPEECH_LANG } from "@/lib/academy/deviceSpeech";
 import { diffAnswer } from "@/lib/academy/writingLab";
 import { DiffView } from "@/components/academy/WritingLab";
+import Zh from "@/components/academy/Zh";
 
 /** The reading-aloud part of a quiz: the passage to read, in the language of the quiz. */
 export interface QuizReading {
@@ -105,7 +106,9 @@ export default function QuizReadingStep({
   return (
     <div className="space-y-4">
       <p translate="no" className="notranslate rounded-2xl border border-line bg-surface-alt p-5 text-lg leading-relaxed text-ink">
-        {reading.text}
+        <span className={reading.cjk ? "leading-[2.4]" : undefined}>
+          <Zh text={reading.text} on={reading.cjk} />
+        </span>
       </p>
 
       {!submitted && (

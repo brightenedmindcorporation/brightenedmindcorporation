@@ -7,6 +7,7 @@ import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
 import { computeQuizMark, type QuizPartsRecord } from "@/lib/academy/quizScoring";
+import Zh, { withoutHint } from "@/components/academy/Zh";
 import QuizReadingStep, { emptyReadingState, readingDone, type QuizReading } from "@/components/academy/QuizReadingStep";
 import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writingSummary, type QuizWriting, type WritingItem } from "@/components/academy/QuizWritingStep";
 
@@ -58,11 +59,14 @@ function Questions({
   answers,
   submitted,
   onSelect,
+  zh = false,
 }: {
   questions: QuizQuestion[];
   answers: string[];
   submitted: boolean;
   onSelect: (index: number, option: string) => void;
+  /** Chinese: pinyin above the characters. */
+  zh?: boolean;
 }) {
   return (
     <>
@@ -70,7 +74,9 @@ function Questions({
         <div key={index} className="border-b border-line/80 pb-6 last:border-b-0 last:pb-0">
           <h3 className="font-bold text-lg text-ink mb-4 flex items-start gap-3">
             <span className="text-red-500 font-extrabold">{index + 1}.</span>
-            <span>{q.question}</span>
+            <span className={zh ? "leading-[2.2]" : undefined}>
+              <Zh text={q.question} on={zh} />
+            </span>
           </h3>
 
           <div className="space-y-3">
@@ -99,7 +105,9 @@ function Questions({
                   onClick={() => onSelect(index, option)}
                   className={`w-full text-left px-5 py-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${buttonStyle}`}
                 >
-                  <span>{option}</span>
+                  <span className={zh ? "leading-[2.2]" : undefined}>
+                    <Zh text={zh ? withoutHint(option) : option} on={zh} />
+                  </span>
                   {submitted && isCorrect && <CheckCircle2 size={16} className="inline text-emerald-400 ml-2" />}
                   {submitted && isSelected && !isCorrect && <XCircle size={16} className="inline text-red-400 ml-2" />}
                 </button>
@@ -205,6 +213,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
             answers={dialogueAnswers}
             submitted={submitted}
             onSelect={select(dialogueAnswers, setDialogueAnswers)}
+            zh={langSlug === "chinese"}
           />
         </div>
       )}
@@ -213,7 +222,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
         {(useDialogue || useWriting || useReading) && (
           <StepTitle n={++step} icon={ListChecks} title="Questions du quiz" hint="Répondez à toutes les questions." />
         )}
-        <Questions questions={quiz.questions} answers={answers} submitted={submitted} onSelect={select(answers, setAnswers)} />
+        <Questions questions={quiz.questions} answers={answers} submitted={submitted} onSelect={select(answers, setAnswers)} zh={langSlug === "chinese"} />
       </div>
 
       {useReading && (
