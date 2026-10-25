@@ -171,8 +171,8 @@ export const chineseLevel1: LevelCurriculum = {
       title: "日常生活 (Routines Quotidiennes)",
       subtitle: "Apprenez à parler de vos activités et habitudes quotidiennes.",
       sections: [
-        { heading: "常见活动 (Activités courantes)", body: ["起床 (qǐ cháng) - Se réveiller", "刷牙 (shuā yá) - Se brosser les dents", "洗澡 (xǐ zǎo) - Prendre une douche", "吃早餐 (chī zǎocān) - Prendre le petit-déjeuner", "去学校 (qù xuéxiào) - Aller à l'école", "学习 (xuéxí) - Étudier", "做作业 (zuò zuòyè) - Faire ses devoirs", "睡觉 (shuì jiào) - Dormir"] },
-        { heading: "常用句子 (Phrases utiles)", body: ["我六点起床。(wǒ liù diǎn qǐ cháng.) - Je me réveille à 6 heures.", "我七点去学校。(wǒ qī diǎn qù xuéxiào.) - Je vais à l'école à 7 heures."] },
+        { heading: "常见活动 (Activités courantes)", body: ["起床 (qǐ chuáng) - Se lever (get up)", "刷牙 (shuā yá) - Se brosser les dents", "洗澡 (xǐ zǎo) - Prendre une douche", "吃早餐 (chī zǎocān) - Prendre le petit-déjeuner", "去学校 (qù xuéxiào) - Aller à l'école", "学习 (xuéxí) - Étudier", "做作业 (zuò zuòyè) - Faire ses devoirs", "睡觉 (shuì jiào) - Dormir"] },
+        { heading: "常用句子 (Phrases utiles)", body: ["我六点起床。(wǒ liù diǎn qǐ chuáng.) - Je me lève à 6 heures.", "我七点去学校。(wǒ qī diǎn qù xuéxiào.) - Je vais à l'école à 7 heures."] },
       ],
       speakText: `起床、刷牙、洗澡、吃早餐、去学校、学习、做作业、睡觉。
 
@@ -180,7 +180,7 @@ export const chineseLevel1: LevelCurriculum = {
       videoTopic: "Apprendre le vocabulaire des routines quotidiennes en chinois.",
       videoUrl: "https://www.youtube.com/watch?v=zlQK5ahofpc",
       readingTitle: "我叫丹尼尔。(Je m'appelle Daniel.)",
-      reading: ["我每天六点起床。(Je me réveille à 6 heures chaque jour.)", "我刷牙，然后洗澡。(Je me brosse les dents, puis je me douche.)", "我七点去学校。(Je vais à l'école à 7 heures.)"],
+      reading: ["我每天六点起床。(Je me lève à 6 heures chaque jour.)", "我刷牙，然后洗澡。(Je me brosse les dents, puis je me douche.)", "我七点去学校。(Je vais à l'école à 7 heures.)"],
       readingSpeakText: `我叫丹尼尔。我每天六点起床。我刷牙，然后洗澡。`,
       exercises: ["描述你的早上作息。(Décrivez votre routine matinale.)", "说你几点起床。(Dites à quelle heure vous vous levez.)"],
       speakingTopic: "Parlez de votre routine quotidienne du matin au soir en chinois.",
@@ -420,7 +420,7 @@ export const chineseLevel1: LevelCurriculum = {
       subtitle: "日常生活",
       passingScore: 7,
       questions: [
-        { question: "人们通常早上先做什么？(Que fait-on en premier le matin ?)", options: ["起床 (qǐ cháng)", "睡觉", "踢足球"], answer: "起床 (qǐ cháng)" },
+        { question: "人们通常早上先做什么？(Que fait-on en premier le matin ?)", options: ["起床 (qǐ chuáng)", "睡觉", "踢足球"], answer: "起床 (qǐ chuáng)" },
         { question: "哪个活动在浴室做？(Quelle activité se fait dans la salle de bain ?)", options: ["刷牙 (shuā yá)", "学习数学", "看电视"], answer: "刷牙 (shuā yá)" },
         { question: "学生通常什么时候做作业？(Quand les élèves font-ils leurs devoirs ?)", options: ["晚上 (wǎnshàng)", "半夜", "早餐前"], answer: "晚上 (wǎnshàng)" },
         { question: "课文中的男孩叫什么？(Comment s'appelle le garçon du texte ?)", options: ["彼得", "丹尼尔 (Dāní'ěr)", "凯文"], answer: "丹尼尔 (Dāní'ěr)" },

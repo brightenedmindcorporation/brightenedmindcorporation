@@ -121,7 +121,7 @@ const data: Record<string, RawDialogue> = {
       "我做作业，吃晚饭，九点睡觉。",
     ],
     q: [
-      ["B几点起床？(À quelle heure se réveille la personne B ?)", "六点", "七点", "八点"],
+      ["B几点起床？(À quelle heure se lève la personne B ?)", "六点", "七点", "八点"],
       ["几点开始上课？(À quelle heure commence le cours ?)", "八点", "七点", "九点"],
       ["B睡觉前做什么？(Que fait la personne B avant de dormir ?)", "做作业和吃晚饭", "看电视", "踢足球"],
     ],
