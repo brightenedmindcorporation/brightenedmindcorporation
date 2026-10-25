@@ -68,7 +68,7 @@ export async function POST(request: Request) {
           type: "domestica-request",
           title: kind === "employer" ? "Domestica : nouvelle demande de personnel" : "Domestica : nouvelle candidature",
           message: `${name} — ${job}${city ? ` (${city})` : ""}`,
-          link: "/admin",
+          link: "/admin?tab=domestica",
         });
       } catch (e) {
         console.error("Domestica notification failed (non-fatal):", e);
