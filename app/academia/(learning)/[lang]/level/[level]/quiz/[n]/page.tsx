@@ -3,7 +3,7 @@
 import { useActiveTime } from "@/lib/academy/useActiveTime";
 import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
-import BackToLevel from "@/components/academy/BackToLevel";
+import BackToLesson from "@/components/academy/BackToLesson";
 import { useParams, useRouter } from "next/navigation";
 import { getQuiz, getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
@@ -100,7 +100,7 @@ export default function QuizPage() {
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
       <main className="p-6 md:p-10 pt-28 md:pt-28">
         <div className="max-w-4xl mx-auto space-y-8">
-          <div className="sticky top-24 z-30"><BackToLevel href={base} langSlug={langSlug} /></div>
+          <div className="sticky top-24 z-30"><BackToLesson href={`${base}/lesson/${lessonId}`} langSlug={langSlug} /></div>
 
           <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
             <span className="text-xs font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
@@ -114,6 +114,7 @@ export default function QuizPage() {
             quiz={quiz}
             alreadyScore={alreadyScore}
             langSlug={langSlug}
+            persistKey={`bm_quizdraft_${langSlug}_L${level}_${lessonId}`}
             dialogue={getDialogue(langSlug, level, lessonId) ?? undefined}
             writing={quizWriting(langSlug, curriculum, lessonId)}
             reading={quizReading(langSlug, curriculum, lessonId)}

@@ -119,6 +119,7 @@ export default function FinalQuizPage() {
             badge="Final Quiz"
             alreadyScore={alreadyScore}
             langSlug={langSlug}
+            persistKey={`bm_quizdraft_${langSlug}_L${level}_final`}
             dialogue={getDialogue(langSlug, level, "final") ?? undefined}
             writing={quizWriting(langSlug, curriculum, "final")}
             reading={quizReading(langSlug, curriculum, "final")}

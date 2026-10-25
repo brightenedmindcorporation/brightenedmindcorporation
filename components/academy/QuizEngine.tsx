@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { sfx } from "@/lib/academy/sfx";
 import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine, Mic } from "lucide-react";
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
@@ -38,6 +38,8 @@ interface QuizEngineProps {
   writing?: QuizWriting;
   /** Reading aloud with the microphone. */
   reading?: QuizReading;
+  /** Where the unfinished answers are kept, so they survive a visit to the lesson. */
+  persistKey?: string;
 }
 
 function StepTitle({ n, icon: Icon, title, hint }: { n: number; icon: React.ComponentType<{ size?: number }>; title: string; hint: string }) {
@@ -120,7 +122,7 @@ function Questions({
   );
 }
 
-export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing, reading }: QuizEngineProps) {
+export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing, reading, persistKey }: QuizEngineProps) {
   const alreadyDone = alreadyScore !== null;
   // A quiz already taken only shows its main questions (the extra steps
   // were not part of it, or are not stored); a practice retake shows all.
@@ -137,6 +139,34 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const [submitted, setSubmitted] = useState(alreadyDone);
   const [score, setScore] = useState(alreadyScore ?? 0);
   const [dialogueScore, setDialogueScore] = useState(0);
+
+  // Unfinished answers are kept on this device: the student can go back to the lesson to check something and find them as they were.
+  const [restored, setRestored] = useState(false);
+  useEffect(() => {
+    if (persistKey && !alreadyDone) {
+      try {
+        const d = JSON.parse(window.localStorage.getItem(persistKey) || "null");
+        if (d) {
+          if (Array.isArray(d.answers) && d.answers.length === quiz.questions.length) setAnswers(d.answers);
+          if (Array.isArray(d.dialogueAnswers) && d.dialogueAnswers.length === (dialogue?.questions.length ?? 0)) setDialogueAnswers(d.dialogueAnswers);
+          if (d.writing) setWritingState(d.writing);
+          if (d.reading) setReadingState(d.reading);
+        }
+      } catch {
+        // an unreadable draft is simply ignored
+      }
+    }
+    setRestored(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (!persistKey || !restored || submitted) return;
+    try {
+      window.localStorage.setItem(persistKey, JSON.stringify({ answers, dialogueAnswers, writing: writingState, reading: readingState }));
+    } catch {
+      // storage full or blocked: the quiz still works
+    }
+  }, [persistKey, restored, submitted, answers, dialogueAnswers, writingState, readingState]);
 
   const dialogueTotal = useDialogue?.questions.length ?? 0;
   const dialoguePassNeeded = Math.ceil(dialogueTotal * 0.6);
@@ -161,6 +191,11 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     setScore(finalScore);
     setDialogueScore(dScore);
     setSubmitted(true);
+    if (persistKey) {
+      try {
+        window.localStorage.removeItem(persistKey);
+      } catch {}
+    }
     // Passed or failed (same rule as the result shown below).
     if (finalScore >= quiz.passingScore && (!useDialogue || dScore >= dialoguePassNeeded)) sfx.success();
     else sfx.fail();

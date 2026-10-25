@@ -12,9 +12,10 @@ const HAN = /([㐀-鿿]+)/;
 
 /** Text where each Chinese character carries its pinyin above it (read in context); other text is left as is. */
 export default function Zh({ text, on = true }: { text: string; on?: boolean }) {
-  const [pinyin, setPinyin] = useState<PinyinFn | null>(loaded);
+  // the function is wrapped: React would call a bare function given to useState / setState
+  const [pinyin, setPinyin] = useState<{ fn: PinyinFn } | null>(loaded ? { fn: loaded } : null);
   useEffect(() => {
-    if (on && !loaded) load().then(setPinyin).catch(() => {});
+    if (on && !loaded) load().then((fn) => setPinyin({ fn })).catch(() => {});
   }, [on]);
 
   if (!on || !pinyin) return <>{text}</>;
@@ -23,7 +24,7 @@ export default function Zh({ text, on = true }: { text: string; on?: boolean }) 
       {text.split(HAN).map((part, i) => {
         if (!HAN.test(part)) return part;
         const chars = Array.from(part);
-        const syllables = pinyin(part, { type: "array", toneType: "symbol" });
+        const syllables = pinyin.fn(part, { type: "array", toneType: "symbol" });
         if (syllables.length !== chars.length) return part;
         return chars.map((c, k) => (
           <ruby key={`${i}-${k}`} className="[ruby-position:over]">
