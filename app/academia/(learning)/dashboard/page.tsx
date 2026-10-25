@@ -7,7 +7,7 @@ import { Lock, MessageSquarePlus, Paperclip, X, BookText, ChevronDown } from "lu
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AcademyHeader from "../components/AcademyHeader";
-import { getLevelCurriculum, availableLanguages, findProgramByCode, findProgramBySlug, isOfficeProgram } from "@/content/curriculum";
+import { getLevelCurriculum, availableLanguages, findProgramByCode, findProgramBySlug, isOfficeProgram, isLevelAvailable } from "@/content/curriculum";
 import { isOtherProgramCode as isOtherCode, getOtherProgramLabel } from "@/content/programs";
 
 // A program without lessons or quizzes (Visuel, Logiciels). Bureautique has its own course, like a language.
@@ -673,6 +673,7 @@ export default function Dashboard() {
               )}
             </div>
 
+            {isLevelAvailable(langSlug, 2) && (
             <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-amber-400 bg-amber-950/80 px-3 py-1 rounded-full border border-amber-800/40">
@@ -698,7 +699,9 @@ export default function Dashboard() {
                 {firstLevel > 2 ? t("Non inclus dans votre inscription", "Not in your enrolment") : levelButtonLabel(2, t("Ouvrir le niveau 2", "Open Level 2"))}
               </button>
             </div>
+            )}
 
+            {isLevelAvailable(langSlug, 3) && (
             <div className="bg-surface/60 p-6 rounded-2xl border border-line/80 shadow-xl flex flex-col justify-between opacity-80">
               <div>
                 <span className="text-xs font-bold text-purple-400 bg-purple-950/80 px-3 py-1 rounded-full border border-purple-800/40">
@@ -724,6 +727,7 @@ export default function Dashboard() {
                 {firstLevel > 3 ? t("Non inclus dans votre inscription", "Not in your enrolment") : levelButtonLabel(3, t("Ouvrir le niveau 3", "Open Level 3"))}
               </button>
             </div>
+            )}
 
           </div>
         </div>

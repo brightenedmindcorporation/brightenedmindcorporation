@@ -16,6 +16,7 @@ export const otherPrograms: OtherProgram[] = [
   { code: "BUREAUTIQUE", slug: "bureautique", label: "Bureautique" },
   { code: "VISUEL", slug: "visuel", label: "Visuel & Audiovisuel" },
   { code: "LOGICIELS", slug: "logiciels", label: "Logiciels de Gestion" },
+  { code: "DOMESTICA", slug: "domestica", label: "Formation BM Domestica (personnel domestique)" },
 ];
 
 export function isOtherProgramCode(code?: string): boolean {

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { auth } from "@/lib/firebase";
-import { availableLanguages, findProgramByCode } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode, programLevels } from "@/content/curriculum";
 import { otherPrograms } from "@/content/programs";
 
 interface Assignment {
@@ -21,7 +21,7 @@ interface Teacher {
 // Languages have 3 levels; the other programs (Bureautique…) a single room.
 const PROGRAMS: { code: string; label: string; levels: number[] }[] = [
   ...availableLanguages.map((l) => ({ code: l.code, label: l.label, levels: [1, 2, 3] })),
-  ...otherPrograms.map((p) => ({ code: p.code, label: p.label, levels: findProgramByCode(p.code) ? [1, 2, 3] : [1] })),
+  ...otherPrograms.map((p) => ({ code: p.code, label: p.label, levels: findProgramByCode(p.code) ? programLevels(findProgramByCode(p.code)!.slug) : [1] })),
 ];
 
 const labelOf = (code: string) => PROGRAMS.find((p) => p.code === code)?.label ?? code;

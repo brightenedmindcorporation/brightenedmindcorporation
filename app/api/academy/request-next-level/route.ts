@@ -4,6 +4,7 @@ import { createNotification } from "@/lib/notifications";
 import { logActivitySafe } from "@/lib/activityLog";
 import { findEnrollment } from "@/lib/academy/levelInvite";
 import { levelNumber } from "@/lib/academy/levelAccess";
+import { findProgramByCode, programLevels } from "@/content/curriculum";
 
 /**
  * The student asks for the next level after passing the final quiz of their
@@ -23,7 +24,9 @@ export async function POST(request: Request) {
     }
 
     const current = levelNumber(found.data.level);
-    if (current >= 3) return NextResponse.json({ error: "Vous êtes déjà au dernier niveau." }, { status: 400 });
+    const program = findProgramByCode(String(langCode));
+    const last = program ? programLevels(program.slug).length || 3 : 3;
+    if (current >= last) return NextResponse.json({ error: "Vous êtes déjà au dernier niveau." }, { status: 400 });
     const next = current + 1;
 
     const progress = await getAdminDb().collection("progress").doc(`${decoded.uid}_${langCode}_${current}`).get();

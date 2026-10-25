@@ -157,6 +157,26 @@ export default function DomesticaPage() {
         </div>
       </div>
 
+      {/* FORMATION */}
+      <div className="max-w-7xl mx-auto px-6 py-20">
+        <div className="rounded-3xl border border-line bg-surface/60 p-8 md:p-12 text-center">
+          <span className="inline-block rounded-full border border-red-700/40 bg-red-500/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-red-400">BM Academia</span>
+          <h2 className="mt-4 text-3xl md:text-4xl font-bold text-ink">La formation du personnel domestique</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-ink-soft">
+            12 leçons illustrées avec quiz et certificat : le métier et le savoir-être, l'hygiène, l'entretien de la maison, le linge, la cuisine, la garde d'enfants, les premiers secours,
+            la sécurité du foyer, la communication, vos droits et votre carrière. Pour les candidats comme pour le personnel déjà en poste.
+          </p>
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+            <a href="/register?program=DOMESTICA" className="glow-accent rounded-xl bg-gradient-to-br from-red-600 to-red-900 px-8 py-3.5 text-lg font-bold text-white transition hover:from-red-500 hover:to-red-800">
+              S'inscrire à la formation
+            </a>
+            <a href="/login?program=DOMESTICA" className="rounded-xl border border-line bg-surface px-8 py-3.5 text-lg font-bold text-ink transition hover:bg-surface-alt">
+              Se connecter
+            </a>
+          </div>
+        </div>
+      </div>
+
       {/* COMMENT ÇA MARCHE */}
       <div className="max-w-7xl mx-auto px-6 py-20">
         <div className="text-center mb-14">

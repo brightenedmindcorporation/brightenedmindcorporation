@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { auth } from "@/lib/firebase";
-import { availableLanguages } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode, programLevels } from "@/content/curriculum";
 import { otherPrograms } from "@/content/programs";
 
 interface TeacherOption {
@@ -178,7 +178,7 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
                 <div>
                   <label className="block text-xs font-semibold text-ink-soft mb-1.5">Niveau de départ</label>
                   <select value={level} onChange={(e) => setLevel(Number(e.target.value))} className={field}>
-                    {[1, 2, 3].map((n) => (
+                    {(findProgramByCode(langCode) ? programLevels(findProgramByCode(langCode)!.slug) : [1, 2, 3]).map((n) => (
                       <option key={n} value={n}>
                         Niveau {n}
                       </option>

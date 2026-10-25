@@ -26,6 +26,7 @@ import { logicielsLevel3 } from "./logiciels/level3";
 import { visuelLevel1 } from "./visuel/level1";
 import { visuelLevel2 } from "./visuel/level2";
 import { visuelLevel3 } from "./visuel/level3";
+import { domesticaLevel1 } from "./domestica/level1";
 
 // Add new entries here as more languages/levels are authored (Phase 4).
 // Each entry's key is `${langSlug}-${level}`.
@@ -57,6 +58,7 @@ const registry: Record<string, LevelCurriculum> = {
   "visuel-1": visuelLevel1,
   "visuel-2": visuelLevel2,
   "visuel-3": visuelLevel3,
+  "domestica-1": domesticaLevel1,
 };
 
 export const availableLanguages = [
@@ -79,10 +81,16 @@ export const logicielsProgram = { slug: "logiciels", label: "Logiciels de gestio
 export const visuelProgram = { slug: "visuel", label: "Visuel & Audiovisuel", code: "VISUEL" };
 
 /** Courses taught as text lessons with practical work (no audio, dictation or reading aloud). */
-export const officePrograms = [officeProgram, logicielsProgram, visuelProgram];
+/** The short training for domestic staff (BM Domestica): one level. */
+export const domesticaProgram = { slug: "domestica", label: "Formation BM Domestica", code: "DOMESTICA" };
+
+export const officePrograms = [officeProgram, logicielsProgram, visuelProgram, domesticaProgram];
 
 /** Everything that has lessons and quizzes: the languages and the office course. */
 export const curriculumPrograms = [...availableLanguages, ...officePrograms];
+
+/** The levels a program offers (a language or course with fewer than 3 levels stops earlier). */
+export const programLevels = (slug?: string): number[] => [1, 2, 3].filter((n) => `${slug}-${n}` in registry);
 
 export const isOfficeProgram = (slug?: string) => officePrograms.some((p) => p.slug === slug);
 export const findProgramByCode = (code?: string) => curriculumPrograms.find((p) => p.code === code);

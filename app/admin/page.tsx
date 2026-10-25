@@ -31,7 +31,7 @@ import {
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
-import { availableLanguages, findProgramByCode } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode, programLevels } from "@/content/curriculum";
 import { getOtherProgramLabel, isOtherProgramCode as isOtherCode, otherPrograms } from "@/content/programs";
 
 // A program without levels. Bureautique, Logiciels and Visuel have levels, lessons and quizzes like a language.
@@ -2166,7 +2166,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       {s.levelRequest && (
                         <p className="text-amber-500 text-xs font-semibold">⏳ L'étudiant demande le niveau {s.levelRequest.level} (quiz final du niveau précédent réussi).</p>
                       )}
-                      {levelNumber(s.level) < 3 && (
+                      {levelNumber(s.level) < (findProgramByCode(s.langCode) ? programLevels(findProgramByCode(s.langCode)!.slug).length || 3 : 3) && (
                         <button
                           onClick={() => unlockLevel(s)}
                           className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition ${s.levelRequest ? "bg-green-600 text-white border-green-600 hover:bg-green-700" : "border-line text-ink-soft hover:text-ink hover:border-red-600/50"}`}

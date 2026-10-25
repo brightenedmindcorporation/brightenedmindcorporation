@@ -8,6 +8,7 @@ import { sendWithText } from "@/lib/mailText";
 import { greeting } from "@/lib/salutation";
 import { levelLabel, levelNumber } from "@/lib/academy/levelAccess";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
+import { findProgramByCode, programLevels } from "@/content/curriculum";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bmcorporation-cd.com";
 
@@ -36,7 +37,9 @@ export async function POST(request: Request) {
     }
 
     const current = levelNumber(data.level);
-    if (current >= 3) return NextResponse.json({ error: "Cet étudiant est déjà au dernier niveau." }, { status: 400 });
+    const program = findProgramByCode(String(data.langCode));
+    const last = program ? programLevels(program.slug).length || 3 : 3;
+    if (current >= last) return NextResponse.json({ error: "Cet étudiant est déjà au dernier niveau." }, { status: 400 });
     const next = current + 1;
 
     await ref.set(

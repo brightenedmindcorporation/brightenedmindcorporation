@@ -5,7 +5,7 @@ import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "fire
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { availableLanguages, findProgramByCode } from "@/content/curriculum";
+import { availableLanguages, findProgramByCode, programLevels } from "@/content/curriculum";
 import { otherPrograms, isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import PasswordInput from "@/components/academy/PasswordInput";
 
@@ -45,6 +45,8 @@ function RegisterForm() {
   const isLanguageProgram = !isOtherProgramCode(programCode);
   // Bureautique has levels, a study rhythm and a placement test like a language, but no online payment yet.
   const hasLevels = Boolean(findProgramByCode(programCode));
+  // A course with one level only (BM Domestica training): no level to choose and no placement test.
+  const singleLevel = hasLevels && programLevels(findProgramByCode(programCode)!.slug).length === 1;
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -346,6 +348,7 @@ function RegisterForm() {
 
           {hasLevels && (
             <>
+              {singleLevel ? null : (
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-ink-soft">Votre niveau</label>
                 <label className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer ${levelMode === "known" ? "border-red-600 bg-red-600/5" : "border-line"}`}>
@@ -379,6 +382,7 @@ function RegisterForm() {
                 )}
                 <p className="text-xs text-ink-faint">Vous accédez à votre niveau, pas aux niveaux inférieurs. Le niveau suivant s&apos;ouvre quand vous réussissez le test final.</p>
               </div>
+              )}
 
               <div>
                 <label className="block text-sm font-medium text-ink-soft mb-1">Rythme d'étude</label>

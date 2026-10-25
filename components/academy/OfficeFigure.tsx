@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { INK, SOFT, LINE, PAPER, SUNK, RED, BLUE, GREEN, ORANGE, SKY, MINT, PEACH, ROSE, YELLOW, Rect, Txt, Line, Dot, Key, Win, Grid, Pill, Page, Ribbon, type Fig } from "./figureKit";
 import { LOGICIELS_FIGS } from "./figures/logiciels";
 import { VISUEL_FIGS } from "./figures/visuel";
+import { DOMESTICA_FIGS } from "./figures/domestica";
 
 // Hand-drawn diagrams for the courses. Bureautique: "<level>-<lesson>"; Logiciels: "lg-<level>-<lesson>"; Visuel: "va-<level>-<lesson>".
 
@@ -972,7 +973,7 @@ const OFFICE_FIGS: Record<string, Fig> = {
   },
 };
 
-const FIGS: Record<string, Fig> = { ...OFFICE_FIGS, ...LOGICIELS_FIGS, ...VISUEL_FIGS };
+const FIGS: Record<string, Fig> = { ...OFFICE_FIGS, ...LOGICIELS_FIGS, ...VISUEL_FIGS, ...DOMESTICA_FIGS };
 
 export function hasOfficeFigure(id?: string): boolean {
   return !!id && id in FIGS;
