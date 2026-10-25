@@ -26,7 +26,8 @@ interface Item {
   status: string;
   createdAt: string;
   notes?: Note[];
-  documents?: { name: string; url: string; size: number }[];
+  documents?: { name: string; url: string; size: number; category?: string }[];
+  cv?: Record<string, any>;
   placedWith?: string;
   placedWithName?: string;
   placedAt?: string;
@@ -256,6 +257,43 @@ export default function DomesticaTab() {
                       </>
                     )}
                   </div>
+                  {i.cv && (
+                    <div className="rounded-xl border border-line bg-surface-alt p-3 text-ink-soft">
+                      <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft">Identité complète (CV)</p>
+                      <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
+                        <p><b className="text-ink">Nom :</b> {[i.cv.lastName, i.cv.middleName, i.cv.firstName].filter(Boolean).join(" ")}</p>
+                        <p><b className="text-ink">Sexe :</b> {i.cv.gender || "—"}</p>
+                        <p><b className="text-ink">Né(e) :</b> {[i.cv.birthDate, i.cv.birthPlace].filter(Boolean).join(" à ") || "—"}</p>
+                        <p><b className="text-ink">Nationalité :</b> {i.cv.nationality || "—"} {i.cv.origin ? `(${i.cv.origin})` : ""}</p>
+                        <p><b className="text-ink">État civil :</b> {[i.cv.civilStatus, i.cv.children && `${i.cv.children} enfant(s)`].filter(Boolean).join(", ") || "—"}</p>
+                        <p><b className="text-ink">Parents :</b> {[i.cv.father, i.cv.mother].filter(Boolean).join(" et ") || "—"}</p>
+                        <p className="sm:col-span-2"><b className="text-ink">Adresse :</b> {[i.cv.street, i.cv.quarter, i.cv.commune, i.cv.city, i.cv.country].filter(Boolean).join(", ") || "—"}</p>
+                      </div>
+                      {Array.isArray(i.cv.studies) && i.cv.studies.length > 0 && (
+                        <div className="mt-2">
+                          <b className="text-ink">Études :</b>
+                          <ul className="ml-4 list-disc">
+                            {i.cv.studies.map((s: any, k: number) => (
+                              <li key={k}>{[s.level, s.school, s.option && `option ${s.option}`, s.year, s.diploma && `→ ${s.diploma}`].filter(Boolean).join(" · ")}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {Array.isArray(i.cv.experiences) && i.cv.experiences.length > 0 && (
+                        <div className="mt-2">
+                          <b className="text-ink">Expérience :</b>
+                          <ul className="ml-4 list-disc">
+                            {i.cv.experiences.map((x: any, k: number) => (
+                              <li key={k}>{[x.job, x.employer, x.period].filter(Boolean).join(" · ")}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {Array.isArray(i.cv.references) && i.cv.references.length > 0 && (
+                        <p className="mt-2"><b className="text-ink">Références :</b> {i.cv.references.map((r: any) => [r.name, r.relation, r.phone].filter(Boolean).join(" — ")).join(" | ")}</p>
+                      )}
+                    </div>
+                  )}
                   {i.message && <p className="whitespace-pre-wrap rounded-xl border border-line bg-surface-alt p-3 text-ink-soft">{i.message}</p>}
                   {(i.documents ?? []).length > 0 && (
                     <div>
@@ -263,7 +301,7 @@ export default function DomesticaTab() {
                       <div className="flex flex-wrap gap-2">
                         {(i.documents ?? []).map((d) => (
                           <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-line bg-surface-alt px-3 py-2 text-xs font-bold text-ink hover:border-red-600/60">
-                            📎 {d.name}
+                            📎 {d.category ? `${d.category} : ` : ""}{d.name}
                           </a>
                         ))}
                       </div>

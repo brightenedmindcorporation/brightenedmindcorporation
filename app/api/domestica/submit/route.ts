@@ -7,7 +7,7 @@ import { mailFrom } from "@/lib/mailFrom";
 import { sendWithText } from "@/lib/mailText";
 import { isCloudinaryConfigured, uploadBufferToCloudinary } from "@/lib/cloudinary";
 
-const MAX_FILES = 4;
+const MAX_FILES = 15;
 const MAX_FILE_BYTES = 5 * 1024 * 1024;
 const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 
@@ -53,7 +53,22 @@ export async function POST(request: Request) {
     }
 
     // Documents: only for candidates, limited in number, size and type.
-    const documents: { name: string; url: string; size: number }[] = [];
+    const documents: { name: string; url: string; size: number; category?: string }[] = [];
+    // The CV builder sends the category of each file (identity card, service certificate…) in the same order as the files.
+    let docMeta: string[] = [];
+    try {
+      const parsed = JSON.parse(String(body.docMeta || "[]"));
+      if (Array.isArray(parsed)) docMeta = parsed.map((c) => clean(c, 80));
+    } catch {
+      docMeta = [];
+    }
+    // The CV data itself (identity, address, studies…), kept as a plain object for the administration.
+    let cv: Record<string, unknown> | null = null;
+    try {
+      if (body.cv && String(body.cv).length < 30000) cv = JSON.parse(String(body.cv));
+    } catch {
+      cv = null;
+    }
     if (kind === "candidate" && files.length) {
       if (files.length > MAX_FILES) return NextResponse.json({ error: `Vous pouvez joindre ${MAX_FILES} documents au maximum.` }, { status: 400 });
       for (const f of files) {
@@ -61,9 +76,9 @@ export async function POST(request: Request) {
         if (!ALLOWED_TYPES.includes(f.type)) return NextResponse.json({ error: `« ${f.name} » : formats acceptés : PDF, Word, JPG, PNG.` }, { status: 400 });
       }
       if (!isCloudinaryConfigured()) return NextResponse.json({ error: "L'envoi de documents n'est pas disponible pour le moment. Envoyez votre candidature sans fichier ou écrivez-nous sur WhatsApp." }, { status: 503 });
-      for (const f of files) {
+      for (const [i, f] of files.entries()) {
         const url = await uploadBufferToCloudinary(Buffer.from(await f.arrayBuffer()), f.name, "domestica-candidates", "raw");
-        documents.push({ name: f.name, url, size: f.size });
+        documents.push({ name: f.name, url, size: f.size, ...(docMeta[i] ? { category: docMeta[i] } : {}) });
       }
     }
 
@@ -84,6 +99,7 @@ export async function POST(request: Request) {
       languages: clean(body.languages, 120),
       availability: clean(body.availability, 80),
       documents,
+      ...(cv ? { cv } : {}),
       status: "new",
       createdAt: new Date().toISOString(),
     };
@@ -120,7 +136,7 @@ export async function POST(request: Request) {
             ? { Horaires: record.schedule || "-", "Début souhaité": record.startDate || "-", Budget: record.budget || "-" }
             : { Expérience: record.experience || "-", Langues: record.languages || "-", Disponibilité: record.availability || "-" }),
           Détails: message || "-",
-          ...(documents.length ? { Documents: documents.map((d) => `${d.name} : ${d.url}`).join(" | ") } : {}),
+          ...(documents.length ? { Documents: documents.map((d) => `${d.category ? d.category + " — " : ""}${d.name} : ${d.url}`).join(" | ") } : {}),
         })
           .map(([k, v]) => `<p><b>${esc(k)} :</b> ${esc(String(v)).replace(/\n/g, "<br/>")}</p>`)
           .join("");
