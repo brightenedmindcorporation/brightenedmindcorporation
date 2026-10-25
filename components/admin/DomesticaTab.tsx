@@ -26,6 +26,7 @@ interface Item {
   status: string;
   createdAt: string;
   notes?: Note[];
+  documents?: { name: string; url: string; size: number }[];
   placedWith?: string;
   placedWithName?: string;
   placedAt?: string;
@@ -256,6 +257,18 @@ export default function DomesticaTab() {
                     )}
                   </div>
                   {i.message && <p className="whitespace-pre-wrap rounded-xl border border-line bg-surface-alt p-3 text-ink-soft">{i.message}</p>}
+                  {(i.documents ?? []).length > 0 && (
+                    <div>
+                      <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft">Documents joints</p>
+                      <div className="flex flex-wrap gap-2">
+                        {(i.documents ?? []).map((d) => (
+                          <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-line bg-surface-alt px-3 py-2 text-xs font-bold text-ink hover:border-red-600/60">
+                            📎 {d.name}
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <div className="flex flex-wrap items-center gap-3">
                     <label className="text-xs font-bold uppercase tracking-wide text-ink-soft">Statut</label>

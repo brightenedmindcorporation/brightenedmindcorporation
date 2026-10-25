@@ -5,6 +5,11 @@ import { createNotification } from "@/lib/notifications";
 import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { mailFrom } from "@/lib/mailFrom";
 import { sendWithText } from "@/lib/mailText";
+import { isCloudinaryConfigured, uploadBufferToCloudinary } from "@/lib/cloudinary";
+
+const MAX_FILES = 4;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_TYPES = ["application/pdf", "image/jpeg", "image/png", "application/msword", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 const clean = (v: unknown, max = 600) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -16,7 +21,17 @@ const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
  */
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => ({}));
+    // Candidates may attach documents (CV, certificates, references): the form is then sent as multipart.
+    let body: any = {};
+    let files: File[] = [];
+    if ((request.headers.get("content-type") || "").includes("multipart/form-data")) {
+      const form = await request.formData();
+      for (const [k, v] of form.entries()) if (typeof v === "string") body[k] = v;
+      body.consent = body.consent === "true";
+      files = form.getAll("documents").filter((f): f is File => f instanceof File && f.size > 0);
+    } else {
+      body = await request.json().catch(() => ({}));
+    }
     if (clean(body.website)) return NextResponse.json({ status: "success" }); // honeypot: bots fill hidden fields
 
     const kind = body.kind === "candidate" ? "candidate" : body.kind === "employer" ? "employer" : "";
@@ -37,6 +52,21 @@ export async function POST(request: Request) {
       if (fake) return fake;
     }
 
+    // Documents: only for candidates, limited in number, size and type.
+    const documents: { name: string; url: string; size: number }[] = [];
+    if (kind === "candidate" && files.length) {
+      if (files.length > MAX_FILES) return NextResponse.json({ error: `Vous pouvez joindre ${MAX_FILES} documents au maximum.` }, { status: 400 });
+      for (const f of files) {
+        if (f.size > MAX_FILE_BYTES) return NextResponse.json({ error: `« ${f.name} » dépasse 5 Mo.` }, { status: 400 });
+        if (!ALLOWED_TYPES.includes(f.type)) return NextResponse.json({ error: `« ${f.name} » : formats acceptés : PDF, Word, JPG, PNG.` }, { status: 400 });
+      }
+      if (!isCloudinaryConfigured()) return NextResponse.json({ error: "L'envoi de documents n'est pas disponible pour le moment. Envoyez votre candidature sans fichier ou écrivez-nous sur WhatsApp." }, { status: 503 });
+      for (const f of files) {
+        const url = await uploadBufferToCloudinary(Buffer.from(await f.arrayBuffer()), f.name, "domestica-candidates", "raw");
+        documents.push({ name: f.name, url, size: f.size });
+      }
+    }
+
     const record = {
       kind,
       name,
@@ -53,6 +83,7 @@ export async function POST(request: Request) {
       experience: clean(body.experience, 60),
       languages: clean(body.languages, 120),
       availability: clean(body.availability, 80),
+      documents,
       status: "new",
       createdAt: new Date().toISOString(),
     };
@@ -89,6 +120,7 @@ export async function POST(request: Request) {
             ? { Horaires: record.schedule || "-", "Début souhaité": record.startDate || "-", Budget: record.budget || "-" }
             : { Expérience: record.experience || "-", Langues: record.languages || "-", Disponibilité: record.availability || "-" }),
           Détails: message || "-",
+          ...(documents.length ? { Documents: documents.map((d) => `${d.name} : ${d.url}`).join(" | ") } : {}),
         })
           .map(([k, v]) => `<p><b>${esc(k)} :</b> ${esc(String(v)).replace(/\n/g, "<br/>")}</p>`)
           .join("");

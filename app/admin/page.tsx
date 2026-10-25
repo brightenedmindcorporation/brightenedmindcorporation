@@ -1903,7 +1903,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
   }
 
   return (
-    <main className="px-4 sm:px-6 md:px-10 pt-24 md:pt-28 pb-10 min-h-screen bg-surface-sunken text-ink font-sans">
+    <main className="px-4 sm:px-6 md:px-10 pt-36 md:pt-36 pb-10 min-h-screen bg-surface-sunken text-ink font-sans overflow-x-hidden [overflow-wrap:anywhere]">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between gap-3 mb-6 flex-wrap bg-surface border border-line rounded-2xl px-4 py-3">
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink">Admin Panel</h1>

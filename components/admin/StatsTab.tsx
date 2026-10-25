@@ -216,7 +216,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
           {announcements.length === 0 && silent.length === 0 ? (
             empty
           ) : (
-            <table className="w-full">
+            <table className="block w-full overflow-x-auto">
               <thead className="border-b border-line">
                 <tr>
                   <th className={th}>Annonce</th>
@@ -277,7 +277,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
         {videos.length === 0 ? (
           empty
         ) : (
-          <table className="w-full">
+          <table className="block w-full overflow-x-auto">
             <thead className="border-b border-line">
               <tr>
                 <th className={th}>Vidéo</th>
@@ -330,7 +330,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
         {lessons.length === 0 ? (
           empty
         ) : (
-          <table className="w-full">
+          <table className="block w-full overflow-x-auto">
             <thead className="border-b border-line">
               <tr>
                 <th className={th}>Leçon</th>
@@ -378,7 +378,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
             {(data.campaigns ?? []).length === 0 ? (
               empty
             ) : (
-              <table className="w-full">
+              <table className="block w-full overflow-x-auto">
                 <thead className="border-b border-line">
                   <tr>
                     <th className={th}>Source</th>

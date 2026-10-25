@@ -11,6 +11,7 @@ export default function DomesticaForms({ initial = "employer" }: { initial?: "em
   const [kind, setKind] = useState<"employer" | "candidate">(initial);
   const [values, setValues] = useState<Record<string, string>>({ job: JOBS[0] });
   const [consent, setConsent] = useState(false);
+  const [docs, setDocs] = useState<File[]>([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -33,11 +34,10 @@ export default function DomesticaForms({ initial = "employer" }: { initial?: "em
     setSending(true);
     setError(null);
     try {
-      const response = await fetch("/api/domestica/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...values, kind, consent }),
-      });
+      const form = new FormData();
+      for (const [k, v] of Object.entries({ ...values, kind, consent: String(consent) })) form.append(k, v);
+      if (kind === "candidate") docs.forEach((f) => form.append("documents", f));
+      const response = await fetch("/api/domestica/submit", { method: "POST", body: form });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");
       setDone(true);
@@ -115,6 +115,33 @@ export default function DomesticaForms({ initial = "employer" }: { initial?: "em
         value={values.message ?? ""}
         onChange={set("message")}
       />
+
+      {kind === "candidate" && (
+        <div className="rounded-xl border border-dashed border-line bg-surface-sunken p-4">
+          <p className="text-sm font-bold text-ink">Vos documents (facultatif)</p>
+          <p className="mt-1 text-xs text-ink-soft">CV, attestations, lettres de recommandation : PDF, Word, JPG ou PNG, 4 fichiers de 5 Mo maximum.</p>
+          <input
+            type="file"
+            multiple
+            accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+            onChange={(e) => {
+              const picked = Array.from(e.target.files ?? []).slice(0, 4);
+              setDocs(picked);
+            }}
+            className="mt-3 block w-full text-sm text-ink-soft file:mr-3 file:rounded-lg file:border-0 file:bg-red-600 file:px-4 file:py-2 file:text-sm file:font-bold file:text-white"
+          />
+          {docs.length > 0 && (
+            <ul className="mt-2 space-y-1 text-xs text-ink-soft">
+              {docs.map((f) => (
+                <li key={f.name}>
+                  📎 {f.name} ({Math.max(1, Math.round(f.size / 1024))} Ko)
+                </li>
+              ))}
+            </ul>
+          )}
+          <p className="mt-3 text-xs text-ink-faint">Pas de CV ? <a href="/domestica/cv" className="font-bold text-red-500 underline">Créez-en un gratuitement</a> et joignez-le ici.</p>
+        </div>
+      )}
 
       {kind === "candidate" && (
         <label className="flex items-start gap-3 text-xs text-ink-soft">

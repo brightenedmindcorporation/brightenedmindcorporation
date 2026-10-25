@@ -171,7 +171,7 @@ export default function TeacherPage() {
   }
 
   return (
-    <main className="min-h-screen bg-page text-ink px-4 sm:px-6 md:px-10 pt-24 md:pt-28 pb-12">
+    <main className="min-h-screen bg-page text-ink px-4 sm:px-6 md:px-10 pt-36 md:pt-36 pb-12 overflow-x-hidden [overflow-wrap:anywhere]">
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-5 mb-6">
           <div>
