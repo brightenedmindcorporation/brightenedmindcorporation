@@ -264,3 +264,13 @@ export function getOrCreateCertificateId(
   saveProgress(langSlug, level, progress);
   return id;
 }
+
+/**
+ * How many lessons the student has got through. A lesson the administration opened is a decision about
+ * the student's pace: everything before it counts as behind them, whether or not each quiz was taken on the site.
+ */
+export function lessonsBehind(progress: LevelProgress): number[] {
+  const reached = Math.max(0, ...(progress.unlockedLessons ?? []));
+  const before = Array.from({ length: Math.max(0, reached - 1) }, (_, i) => i + 1);
+  return Array.from(new Set([...progress.completedQuizzes, ...before])).sort((a, b) => a - b);
+}

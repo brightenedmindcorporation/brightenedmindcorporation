@@ -10,7 +10,7 @@ import { getLevelCurriculum, isOfficeProgram } from "@/content/curriculum";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { pullProgress } from "@/lib/academy/progressSync";
-import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, type LevelProgress } from "@/lib/academy/progress";
+import { getLevelProgress, isLessonUnlocked, getLessonUnlockDate, lessonsBehind, type LevelProgress } from "@/lib/academy/progress";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 
 export default function LevelOverviewPage() {
@@ -95,7 +95,7 @@ export default function LevelOverviewPage() {
     );
   }
 
-  const completedQuizzes = progress.completedQuizzes;
+  const completedQuizzes = lessonsBehind(progress);
   const progressPct = Math.round((completedQuizzes.length / curriculum.lessons.length) * 100);
   const base = `/academia/${langSlug}/level/${level}`;
 
