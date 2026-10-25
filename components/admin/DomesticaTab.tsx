@@ -32,6 +32,7 @@ interface Item {
   placedWithName?: string;
   placedAt?: string;
   followUps?: Record<string, { done: boolean; at: string; note?: string }>;
+  feedbacks?: Record<string, { at: string; overall: number; punctuality: number; quality: number; behaviour: number; recommend: string; needsReplacement: boolean; comment: string }>;
 }
 
 const CANDIDATE_STATUS: Record<string, string> = {
@@ -54,7 +55,11 @@ const READY_ORDER = ["available", "training", "verified", "contacted", "new"];
 
 const date = (iso: string) => new Date(iso).toLocaleDateString("fr-FR", { dateStyle: "medium" });
 const addDays = (iso: string, days: number) => new Date(new Date(iso).getTime() + days * 86400000);
-const whatsapp = (phone: string) => `https://wa.me/${phone.replace(/[^\d]/g, "")}`;
+const whatsapp = (phone: string, text?: string) => `https://wa.me/${phone.replace(/[^\d]/g, "")}${text ? `?text=${encodeURIComponent(text)}` : ""}`;
+/** Public satisfaction questionnaire for a placement ("1" = 1 month, "3" = 3 months). */
+const surveyLink = (id: string, key: "d30" | "d90") => `${window.location.origin}/domestica/avis?id=${id}&m=${key === "d30" ? 1 : 3}`;
+const surveyText = (item: { id: string; name: string }, key: "d30" | "d90") =>
+  `Bonjour ${item.name.split(/\s+/)[0]}, BM Domestica prend de vos nouvelles : comment se passe la collaboration depuis ${key === "d30" ? "1 mois" : "3 mois"} ? Votre avis (2 minutes) : ${surveyLink(item.id, key)}`;
 
 type View = "employer" | "candidate" | "placed" | "followups";
 
@@ -178,9 +183,15 @@ export default function DomesticaTab() {
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <a href={whatsapp(item.phone)} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
-                    WhatsApp
+                  <a href={whatsapp(item.phone, surveyText(item, key))} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
+                    Envoyer le questionnaire (WhatsApp)
                   </a>
+                  <button
+                    onClick={() => navigator.clipboard?.writeText(surveyLink(item.id, key)).then(() => window.alert("Lien copié."))}
+                    className="rounded-xl border border-line bg-surface px-3 py-2 text-xs font-bold text-ink"
+                  >
+                    Copier le lien
+                  </button>
                   <button
                     disabled={busy === item.id}
                     onClick={() => {
@@ -378,6 +389,7 @@ export default function DomesticaTab() {
                           <li key={k}>
                             Suivi à {l} ({date(addDays(i.startDate || i.placedAt || i.createdAt, d).toISOString())}) :{" "}
                             {i.followUps?.[k]?.done ? <b className="text-emerald-500">fait{i.followUps[k].note ? ` — ${i.followUps[k].note}` : ""}</b> : <span className="text-ink-faint">à faire</span>}
+                            {i.feedbacks?.[k]?.needsReplacement && <b className="ml-2 text-red-500">remplacement demandé</b>}
                           </li>
                         ))}
                       </ul>
