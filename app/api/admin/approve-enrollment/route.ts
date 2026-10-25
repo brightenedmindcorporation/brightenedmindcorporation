@@ -55,9 +55,9 @@ export async function POST(request: Request) {
     try {
       // Reinstating keeps the Student ID the student already has.
       const existing = (snap.data()?.matricule as string) || "";
-      const reinstated = snap.data()?.previousStatus === "Rejected" && Boolean(existing);
+      const reinstated = ["Rejected", "Suspended", "Expired"].includes(snap.data()?.previousStatus) && Boolean(existing);
       const matricule = existing || (await generateMatriculeAdmin(langCode));
-      await enrollmentRef.update({ status: "Approved", matricule, approvedAt: new Date().toISOString(), previousStatus: FieldValue.delete() });
+      await enrollmentRef.update({ status: "Approved", matricule, approvedAt: new Date().toISOString(), previousStatus: FieldValue.delete(), statusReason: FieldValue.delete(), history: FieldValue.arrayUnion({ at: new Date().toISOString(), by: decoded.email, action: reinstated ? "reactivated" : "approved" }) });
       try {
         const uid = (snap.data()?.uid as string) || enrollmentId.split("_")[0];
         await createNotification({

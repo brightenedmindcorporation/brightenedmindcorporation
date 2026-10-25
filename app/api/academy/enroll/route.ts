@@ -4,6 +4,11 @@ import { rejectIfFakeEmail } from "@/lib/emailValidation";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 import { normalizeGender } from "@/lib/salutation";
+import { getProgramSettings } from "@/lib/academy/programSettings";
+import { generateMatriculeAdmin } from "@/lib/academy/matricule-admin";
+
+/** A student may wait for at most this many approvals at the same time. */
+const MAX_PENDING = 2;
 
 /**
  * Self-service enrollment request, used both for a student's very first
@@ -50,6 +55,10 @@ export async function POST(request: Request) {
 
 
     const adminDb = getAdminDb();
+    const settings = await getProgramSettings();
+    if (settings.closed.includes(langCode)) {
+      return NextResponse.json({ error: "Les inscriptions à cette formation sont fermées pour le moment." }, { status: 403 });
+    }
     const studentRef = adminDb.collection("students").doc(uid);
     const enrollmentRef = adminDb.collection("enrollments").doc(`${uid}_${langCode}`);
 
@@ -58,9 +67,14 @@ export async function POST(request: Request) {
 
       if (enrollmentSnap.exists) {
         const existingStatus = enrollmentSnap.data()!.status;
-        if (existingStatus === "Pending" || existingStatus === "Approved") {
+        if (existingStatus === "Pending" || existingStatus === "Approved" || existingStatus === "Suspended" || existingStatus === "Expired") {
           return { ok: false as const, status: existingStatus };
         }
+      }
+      // A student who already has an account asks for another program from the dashboard: limited number of waiting requests.
+      if (studentSnap.exists) {
+        const waiting = await adminDb.collection("enrollments").where("uid", "==", uid).where("status", "==", "Pending").get();
+        if (waiting.size >= MAX_PENDING) return { ok: false as const, status: "Limit" };
       }
 
       if (!studentSnap.exists) {
@@ -84,17 +98,39 @@ export async function POST(request: Request) {
         ...(source ? { source } : {}),
         status: "Pending",
         matricule: "",
+        ...(studentSnap.exists ? { addedFromAccount: true } : {}),
+        history: [{ at: new Date().toISOString(), by: "student", action: "requested" }],
         createdAt: new Date().toISOString(),
       });
 
-      return { ok: true as const };
+      return { ok: true as const, added: studentSnap.exists };
     });
 
     if (!result.ok) {
-      return NextResponse.json(
-        { error: "Vous avez déjà une inscription pour cette langue.", status: result.status },
-        { status: 409 }
-      );
+      const message =
+        result.status === "Limit"
+          ? `Vous avez déjà ${MAX_PENDING} demandes en attente d'approbation. Patientez avant d'en faire une autre.`
+          : result.status === "Suspended" || result.status === "Expired"
+            ? "Votre accès à cette formation est suspendu ou terminé : contactez l'administration."
+            : "Vous avez déjà une inscription pour cette langue.";
+      return NextResponse.json({ error: message, status: result.status }, { status: 409 });
+    }
+
+    // Programs the administration approves at once (free ones, for example).
+    let autoApproved = false;
+    if (settings.autoApprove.includes(langCode) && wantsPlacement !== true) {
+      try {
+        const matricule = await generateMatriculeAdmin(langCode);
+        await enrollmentRef.update({
+          status: "Approved",
+          matricule,
+          approvedAt: new Date().toISOString(),
+          history: FieldValue.arrayUnion({ at: new Date().toISOString(), by: "automatique", action: "approved" }),
+        });
+        autoApproved = true;
+      } catch (e) {
+        console.error("Automatic approval failed (the request stays pending):", e);
+      }
     }
 
     // Credit the sign-up to the campaign link the student came from (see /admin → Statistiques).
@@ -112,15 +148,15 @@ export async function POST(request: Request) {
       await createNotification({
         audience: "admin",
         type: "enrollment",
-        title: "Nouvelle inscription",
-        message: `${name} s'est inscrit(e) — ${langCode}`,
+        title: result.added ? "Demande d'une formation supplémentaire" : "Nouvelle inscription",
+        message: `${name} ${result.added ? "demande l'accès à" : "s'est inscrit(e) —"} ${langCode}${autoApproved ? " (approuvée automatiquement)" : ""}`,
         link: "/admin?tab=students",
       });
     } catch (notifError) {
       console.error("Error creating enrollment notification (non-fatal):", notifError);
     }
 
-    return NextResponse.json({ status: "success" });
+    return NextResponse.json({ status: "success", approved: autoApproved });
   } catch (error: any) {
     console.error("Error creating enrollment:", error);
     return NextResponse.json({ error: error.message || "Erreur serveur." }, { status: 500 });

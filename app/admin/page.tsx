@@ -1,5 +1,6 @@
 "use client";
 
+import ProgramSwitches from "@/components/admin/ProgramSwitches";
 import RenameIdsButton from "@/components/admin/RenameIdsButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -1631,6 +1632,45 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
     }
   };
 
+  /** Access control of one enrollment: suspend, give back, or set an end date. */
+  const accessAction = async (student: any, action: "suspend" | "reactivate" | "setExpiry") => {
+    if (processingIds.has(student.id)) return;
+    const body: Record<string, unknown> = { enrollmentId: student.id, action };
+    if (action === "suspend") {
+      const reason = window.prompt(`Suspendre l'accès de ${student.name} à ${languageLabel(student.langCode)} ? Motif (visible par l'élève) :`, "");
+      if (reason === null) return;
+      body.reason = reason;
+    } else if (action === "setExpiry") {
+      const date = window.prompt("Date de fin d'accès (AAAA-MM-JJ), vide pour la retirer :", student.accessUntil || "");
+      if (date === null) return;
+      body.accessUntil = date.trim();
+    } else if (student.accessUntil && student.accessUntil < new Date().toISOString().slice(0, 10)) {
+      const date = window.prompt("La date de fin d'accès est dépassée. Nouvelle date (AAAA-MM-JJ), vide pour la retirer :", "");
+      if (date === null) return;
+      body.accessUntil = date.trim();
+    }
+    setProcessingIds((prev) => new Set(prev).add(student.id));
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/enrollment-access", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify(body),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur inconnue");
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setProcessingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(student.id);
+        return next;
+      });
+    }
+  };
+
   const rejectStudent = async (student: any) => {
     if (processingIds.has(student.id)) return;
 
@@ -1641,6 +1681,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       if (!confirmed) return;
     }
 
+    // A refused request carries a reason the student can read (optional).
+    let reason = "";
+    if (student.kind === "enrollment" && student.status === "Pending") {
+      const asked = window.prompt("Motif du refus (visible par l'élève, facultatif) :", "");
+      if (asked === null) return;
+      reason = asked;
+    }
+
     setProcessingIds((prev) => new Set(prev).add(student.id));
 
     try {
@@ -1649,7 +1697,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       const response = await fetch(isEnrollment ? "/api/admin/reject-enrollment" : "/api/admin/reject-student", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(isEnrollment ? { idToken, enrollmentId: student.id } : { idToken, studentId: student.id }),
+        body: JSON.stringify(isEnrollment ? { idToken, enrollmentId: student.id, reason } : { idToken, studentId: student.id }),
       });
       const result = await response.json();
 
@@ -1811,7 +1859,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       byLang[code] = (byLang[code] || 0) + 1;
       if (s.status === "Pending") pending++;
       else if (s.status === "Approved") approved++;
-      else if (s.status === "Rejected") rejected++;
+      else if (s.status === "Rejected" || s.status === "Suspended" || s.status === "Expired") rejected++;
     }
     return { total: students.length, byLang, pending, approved, rejected };
   }, [students]);
@@ -1988,6 +2036,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= STUDENTS TAB ================= */}
         {tab === "students" && (
           <div>
+            <ProgramSwitches />
             <div className="mb-4 flex justify-end"><RenameIdsButton /></div>
             {/* STATS */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -2123,6 +2172,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 <option value="Pending">Pending</option>
                 <option value="Approved">Approved</option>
                 <option value="Rejected">Rejected</option>
+                <option value="Suspended">Suspendu</option>
+                <option value="Expired">Accès terminé</option>
               </select>
             </div>
 
@@ -2139,8 +2190,28 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <p className="text-ink"><b className="text-ink">Niveau :</b> {s.level}</p>
                   <p className="text-ink">
                     <b className="text-ink">Statut :</b>{" "}
-                    {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : "En attente"}
+                    {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : s.status === "Suspended" ? "Suspendu" : s.status === "Expired" ? "Accès terminé" : "En attente"}
+                    {s.addedFromAccount && <span className="ml-2 rounded-full border border-red-600/40 bg-red-500/10 px-2 py-0.5 text-[11px] font-bold text-red-500">Formation supplémentaire</span>}
+                    {s.statusReason && s.status !== "Approved" && <span className="ml-2 text-xs text-ink-soft">— {s.statusReason}</span>}
                   </p>
+                  {s.kind === "enrollment" && (s.accessUntil || (s.history?.length ?? 0) > 0) && (
+                    <div className="mt-1 text-xs text-ink-soft">
+                      {s.accessUntil && <p>Accès jusqu'au <b className="text-ink">{s.accessUntil}</b></p>}
+                      {(s.history?.length ?? 0) > 0 && (
+                        <details className="mt-1">
+                          <summary className="cursor-pointer font-semibold">Historique ({s.history.length})</summary>
+                          <ul className="mt-1 space-y-0.5">
+                            {[...s.history].reverse().map((h: any, i: number) => (
+                              <li key={i}>
+                                {new Date(h.at).toLocaleDateString("fr-FR", { dateStyle: "medium" })} · {h.by} · {({ requested: "demande", approved: "approuvée", rejected: "refusée", suspended: "suspendue", reactivated: "rétablie", expired: "accès terminé", expiry: "date de fin" } as Record<string, string>)[h.action] ?? h.action}
+                                {h.reason ? ` : ${h.reason}` : ""}
+                              </li>
+                            ))}
+                          </ul>
+                        </details>
+                      )}
+                    </div>
+                  )}
                   <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
                   <p className="text-ink">
                     <b className="text-ink">Dernière connexion :</b>{" "}
@@ -2241,13 +2312,38 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <div className="flex flex-wrap gap-3 mt-4">
                     <button
                       onClick={() => approveStudent(s)}
-                      disabled={processingIds.has(s.id) || s.status === "Approved"}
+                      disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Suspended" || s.status === "Expired"}
                       className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
                     >
                       {processingIds.has(s.id) ? "Traitement..." : s.status === "Rejected" ? "Réintégrer (approuver)" : "Approuver"}
                     </button>
 
-                    {s.status === "Approved" ? (
+                    {s.kind === "enrollment" && (s.status === "Suspended" || s.status === "Expired") ? (
+                      <button
+                        onClick={() => accessAction(s, "reactivate")}
+                        disabled={processingIds.has(s.id)}
+                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40"
+                      >
+                        Réactiver l'accès
+                      </button>
+                    ) : s.kind === "enrollment" && s.status === "Approved" ? (
+                      <>
+                        <button
+                          onClick={() => accessAction(s, "suspend")}
+                          disabled={processingIds.has(s.id)}
+                          className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Suspendre l'accès
+                        </button>
+                        <button
+                          onClick={() => accessAction(s, "setExpiry")}
+                          disabled={processingIds.has(s.id)}
+                          className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition disabled:opacity-40"
+                        >
+                          Date de fin d'accès
+                        </button>
+                      </>
+                    ) : s.status === "Approved" ? (
                       <button
                         onClick={() => rejectStudent(s)}
                         disabled={processingIds.has(s.id)}

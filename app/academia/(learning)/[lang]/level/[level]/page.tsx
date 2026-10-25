@@ -1,5 +1,6 @@
 "use client";
 
+import { useAccessGuard } from "@/lib/academy/useAccessGuard";
 import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -25,6 +26,7 @@ export default function LevelOverviewPage() {
   const [studyDays, setStudyDays] = useState<number | undefined>(undefined);
 
   const curriculum = getLevelCurriculum(langSlug, level);
+  useAccessGuard(curriculum?.langCode, router);
 
   useEffect(() => {
     try {

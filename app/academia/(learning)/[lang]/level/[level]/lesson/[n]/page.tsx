@@ -1,5 +1,6 @@
 "use client";
 
+import { useAccessGuard } from "@/lib/academy/useAccessGuard";
 import { useActiveTime } from "@/lib/academy/useActiveTime";
 import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
@@ -30,6 +31,7 @@ export default function LessonPage() {
 
   const lesson = getLesson(langSlug, level, lessonId);
   const curriculum = getLevelCurriculum(langSlug, level);
+  useAccessGuard(curriculum?.langCode, router);
 
   // Active time on this page, shown to the administration.
   useActiveTime(unlocked && curriculum ? `${curriculum?.langCode}-${level}-lesson-${lessonId}` : null);

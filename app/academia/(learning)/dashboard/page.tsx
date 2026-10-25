@@ -16,6 +16,7 @@ import { getLevelProgress } from "@/lib/academy/progress";
 import { levelNumber, startLevel, placementPending } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
+import AddProgramPanel from "@/components/academy/AddProgramPanel";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { logActivity } from "@/lib/academy/activity";
 import { getVerbReference } from "@/content/verbs";
@@ -411,6 +412,24 @@ export default function Dashboard() {
             )}
           </div>
         )}
+
+        {/* Demandes de formation en cours + ajout d'une formation avec le même compte */}
+        {(student?.enrollments ?? []).some((e) => e.status && e.status !== "Approved") && (
+          <div className="flex flex-wrap gap-2">
+            {(student?.enrollments ?? [])
+              .filter((e) => e.status && e.status !== "Approved")
+              .map((e) => {
+                const label = findProgramByCode(e.langCode)?.label ?? getOtherProgramLabel(e.langCode) ?? e.langCode;
+                const text = e.status === "Pending" ? "en attente d'approbation" : e.status === "Rejected" ? "demande non approuvée" : e.status === "Suspended" ? "accès suspendu" : e.status === "Expired" ? "accès terminé" : e.status;
+                return (
+                  <span key={e.langCode} className={`rounded-full border px-3 py-1.5 text-xs font-bold ${e.status === "Pending" ? "border-amber-600/40 bg-amber-500/10 text-amber-500" : "border-red-600/40 bg-red-500/10 text-red-500"}`}>
+                    {label} : {text}
+                  </span>
+                );
+              })}
+          </div>
+        )}
+        <AddProgramPanel name={student?.name || ""} onChanged={(updated) => setStudent(updated)} />
 
         {/* Sélecteur de langue (si inscrit à plusieurs langues) */}
         {approvedEnrollments.length > 1 && (

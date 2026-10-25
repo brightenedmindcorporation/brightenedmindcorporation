@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
+import { FieldValue } from "firebase-admin/firestore";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -13,7 +14,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { idToken, enrollmentId } = await request.json();
+    const { idToken, enrollmentId, reason: rawReason } = await request.json();
+    const reason = typeof rawReason === "string" ? rawReason.trim().slice(0, 300) : "";
     if (!idToken || !enrollmentId) {
       return NextResponse.json({ error: "idToken et enrollmentId sont requis." }, { status: 400 });
     }
@@ -25,7 +27,11 @@ export async function POST(request: Request) {
 
     const adminDb = getAdminDb();
     const snap = await adminDb.collection("enrollments").doc(enrollmentId).get();
-    await adminDb.collection("enrollments").doc(enrollmentId).update({ status: "Rejected" });
+    await adminDb.collection("enrollments").doc(enrollmentId).update({
+      status: "Rejected",
+      statusReason: reason,
+      history: FieldValue.arrayUnion({ at: new Date().toISOString(), by: decoded.email, action: "rejected", ...(reason ? { reason } : {}) }),
+    });
 
     try {
       const uid = (snap.data()?.uid as string) || enrollmentId.split("_")[0];
@@ -33,7 +39,7 @@ export async function POST(request: Request) {
         audience: uid,
         type: "enrollment-rejected",
         title: "Inscription non approuvée",
-        message: "Votre demande d'inscription n'a pas été approuvée. Contactez l'administration pour plus de détails.",
+        message: `Votre demande d'inscription n'a pas été approuvée${reason ? ` : ${reason}` : ""}. Contactez l'administration pour plus de détails.`,
         link: "/academia/dashboard",
       });
     } catch (notifError) {

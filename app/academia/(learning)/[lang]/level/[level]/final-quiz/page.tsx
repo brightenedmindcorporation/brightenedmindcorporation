@@ -1,5 +1,6 @@
 "use client";
 
+import { useAccessGuard } from "@/lib/academy/useAccessGuard";
 import { useActiveTime } from "@/lib/academy/useActiveTime";
 import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
@@ -22,6 +23,7 @@ export default function FinalQuizPage() {
   const level = Number(params.level);
 
   const curriculum = getLevelCurriculum(langSlug, level);
+  useAccessGuard(curriculum?.langCode, router);
   const base = `/academia/${langSlug}/level/${level}`;
 
   const [checked, setChecked] = useState(false);

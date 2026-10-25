@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
 
 /**
@@ -34,12 +35,20 @@ export async function GET(request: Request) {
     }
 
     const student = studentSnap.data()!;
-    let enrollments: any[] = enrollmentsSnap.docs.map((d) => {
+    // An access whose end date has passed stops here: the status is changed once, for the student and the administration.
+    const today = new Date().toISOString().slice(0, 10);
+    let enrollments: any[] = await Promise.all(enrollmentsSnap.docs.map(async (d) => {
       const data = d.data();
+      if (data.status === "Approved" && typeof data.accessUntil === "string" && data.accessUntil < today) {
+        data.status = "Expired";
+        await d.ref
+          .update({ status: "Expired", suspendedAt: new Date().toISOString(), history: FieldValue.arrayUnion({ at: new Date().toISOString(), by: "automatique", action: "expired" }) })
+          .catch((e) => console.error("Expiry update failed (non-fatal):", e));
+      }
       // A level saved as a bare number (1-3) is read as "Level N", like everywhere else.
       const level = typeof data.level === "number" ? `Level ${data.level}` : data.level;
       return { id: d.id, ...data, level };
-    });
+    }));
 
     // Legacy accounts created before multi-enrollment support carry their
     // single langCode/level/status/matricule directly on students/{uid}.

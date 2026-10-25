@@ -69,7 +69,9 @@ function LoginForm() {
 
       if (approved.length === 0) {
         setLoginError(
-          enrollments.length > 0
+          enrollments.some((en: any) => en.status === "Suspended" || en.status === "Expired")
+            ? "Votre accès a été suspendu ou est terminé. Contactez l'administration pour le rétablir."
+            : enrollments.length > 0
             ? "Aucune de vos inscriptions n'a encore été approuvée par l'administration."
             : "Aucune inscription trouvée pour ce compte. Inscrivez-vous d'abord."
         );
