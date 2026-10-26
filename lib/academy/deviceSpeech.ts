@@ -25,6 +25,8 @@ if (typeof window !== "undefined" && "speechSynthesis" in window) {
 // Prefers a voice the device has installed locally (works without a network
 // request) over a cloud-streamed one, when the browser exposes that choice.
 function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
+  // The list can still be empty when the page has just loaded: ask the browser again.
+  if (!cachedVoices.length && typeof window !== "undefined" && "speechSynthesis" in window) cachedVoices = window.speechSynthesis.getVoices();
   const base = langTag.split("-")[0];
   const matches = cachedVoices.filter((v) => v.lang === langTag || v.lang.startsWith(base));
   return matches.find((v) => v.localService) ?? matches[0];

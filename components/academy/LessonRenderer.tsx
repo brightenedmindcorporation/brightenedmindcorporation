@@ -80,6 +80,12 @@ function Fr({ langSlug, text, className = "" }: { langSlug: string; text: string
   );
 }
 
+/** How the English names of the letters are written for the voice (a lone capital letter is easily read as a French or Spanish letter). */
+const ENGLISH_LETTER_NAMES: Record<string, string> = {
+  A: "ay", B: "bee", C: "see", D: "dee", E: "ee", F: "eff", G: "jee", H: "aitch", I: "eye", J: "jay", K: "kay", L: "el", M: "em",
+  N: "en", O: "oh", P: "pee", Q: "queue", R: "are", S: "ess", T: "tee", U: "you", V: "vee", W: "double you", X: "ex", Y: "why", Z: "zee",
+};
+
 /** An alphabet row ("A B C D …"): every letter gets its own speaker so the student can hear each one. */
 const LETTER_ROW = /^(?:\p{Lu}\s){3,}\p{Lu}$/u;
 
@@ -89,7 +95,7 @@ function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
       {text.split(/\s+/).map((letter, i) => (
         <span key={i} className="notranslate inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-alt py-1 pl-1 pr-3">
           <ListenButton
-            play={(id) => speak(letter, langSlug, id)}
+            play={(id) => (langSlug === "english" ? speakWithDeviceVoice(ENGLISH_LETTER_NAMES[letter] ?? letter, "english", { id }) : speak(letter, langSlug, id))}
             title={`Écouter la lettre ${letter}`}
             size={13}
             className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface hover:bg-red-600 hover:text-white text-ink-soft transition"
