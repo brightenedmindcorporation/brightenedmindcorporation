@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail } from "firebase/auth";
+import { Suspense, useEffect, useState } from "react";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
 import { logActivity } from "@/lib/academy/activity";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -37,6 +37,44 @@ function LoginForm() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next") || "/academia/dashboard";
   const requiredProgram = searchParams.get("program");
+
+  // A student already signed in on this browser goes straight in: no password asked again.
+  const [resuming, setResuming] = useState(true);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      unsubscribe();
+      if (!user) {
+        setResuming(false);
+        return;
+      }
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch("/api/academy/my-enrollments", { headers: { Authorization: `Bearer ${idToken}` }, cache: "no-store" });
+        if (!response.ok) throw new Error("not a student");
+        const { student: data, enrollments } = await response.json();
+        const approved = (enrollments || []).filter((en: any) => en.status === "Approved");
+        let stored: any = null;
+        try {
+          stored = JSON.parse(localStorage.getItem("loggedStudent") || "null");
+        } catch {
+          stored = null;
+        }
+        const wanted = requiredProgram || (stored?.uid === user.uid ? stored.activeLangCode : null);
+        const active = approved.find((en: any) => en.langCode === wanted) ?? (requiredProgram ? null : approved[0]);
+        if (!active) {
+          setResuming(false);
+          return;
+        }
+        localStorage.setItem("loggedStudent", JSON.stringify({ uid: user.uid, name: data.name, email: data.email, enrollments, activeLangCode: active.langCode }));
+        await fetch("/api/auth/session", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ idToken }) }).catch(() => {});
+        router.replace(nextPath);
+      } catch {
+        setResuming(false);
+      }
+    });
+    return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,6 +204,14 @@ function LoginForm() {
       setResetLoading(false);
     }
   };
+
+  if (resuming) {
+    return (
+      <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
+        <p className="text-ink-soft">Ouverture de votre espace…</p>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">

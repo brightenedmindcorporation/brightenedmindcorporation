@@ -147,6 +147,7 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
   const [answers, setAnswers] = useState<string[]>(() => items.map(() => ""));
   const [focused, setFocused] = useState(0);
   const [state, setState] = useState<("idle" | "ok" | "accent" | "wrong")[]>(() => items.map(() => "idle"));
+  const [reveal, setReveal] = useState(false);
 
   const check = () => {
     const next = items.map((it, i) => {
@@ -196,6 +197,11 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
             </p>
           )}
           {state[i] === "wrong" && <p className="text-sm font-semibold text-red-500">Pas tout à fait. Relisez la phrase et réessayez.</p>}
+          {reveal && (
+            <p className="text-sm font-semibold text-sky-500">
+              Réponse : <span translate="no" className="notranslate text-ink">{it.answer}</span>
+            </p>
+          )}
         </div>
       ))}
       <div className="flex flex-wrap gap-2">
@@ -211,6 +217,9 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
             <RotateCcw size={14} /> Réessayer
           </button>
         )}
+        <button onClick={() => setReveal((v) => !v)} className={ghostBtn} title="Affiche le mot attendu sous chaque phrase">
+          {reveal ? "Masquer les réponses" : "Voir les réponses"}
+        </button>
       </div>
       {state.every((s) => s === "ok") && (
         <p className="text-sm font-semibold text-emerald-500">Toutes les phrases sont complètes. Bravo !</p>
@@ -223,6 +232,7 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
 function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onSolved: () => void }) {
   const [built, setBuilt] = useState<number[]>([]);
   const [result, setResult] = useState<"idle" | "ok" | "wrong">("idle");
+  const [reveal, setReveal] = useState(false);
   const byId = useMemo(() => new Map(item.tiles.map((t) => [t.id, t.text])), [item]);
   const remaining = item.tiles.filter((t) => !built.includes(t.id));
 
@@ -284,6 +294,14 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
         >
           <RotateCcw size={14} /> Recommencer
         </button>
+        <button onClick={() => setReveal((v) => !v)} className={ghostBtn}>
+          {reveal ? "Masquer la réponse" : "Voir la réponse"}
+        </button>
+        {reveal && (
+          <span className="text-sm font-semibold text-sky-500">
+            Réponse : <span translate="no" className="notranslate text-ink">{item.full}</span>
+          </span>
+        )}
         {result === "ok" && (
           <span className="text-sm font-semibold text-emerald-500">
             Correct ! <span translate="no" className="notranslate text-ink">{item.full}</span>
