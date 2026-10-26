@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
+import HeroSlideshow from "@/components/communication/HeroSlideshow";
+import Portfolio from "@/components/communication/Portfolio";
 
 // Icônes SVG intégrées
 const IconCamera = () => (
@@ -41,6 +43,13 @@ const IconDollar = () => (
   </svg>
 );
 
+const steps = [
+  { n: "01", t: "Le brief", d: "Vous nous décrivez votre projet, la date et le lieu : par le formulaire ou sur WhatsApp." },
+  { n: "02", t: "Le devis", d: "Nous vous répondons avec une proposition claire, écrite avant tout engagement." },
+  { n: "03", t: "La production", d: "Prise de vue, tournage ou création : l'équipe BM se déplace et réalise." },
+  { n: "04", t: "La livraison", d: "Retouche soignée et livraison des fichiers aux formats convenus." },
+];
+
 const bmServicesData = [
   {
     title: "Communication Visuelle",
@@ -48,16 +57,19 @@ const bmServicesData = [
       {
         icon: IconCamera,
         title: "Photographie Professionnelle",
+        quote: "Photographie",
         description: "Photo Studio, Portrait, Mariage, Dot, Anniversaire, Événements Cultuels, Conférences, etc.",
       },
       {
         icon: IconVideo,
         title: "Vidéographie & Production",
+        quote: "Vidéographie",
         description: "Tournage de Clips Vidéo, Spots Publicitaires, Vidéos de Motivation, Documentaires, Production Live.",
       },
       {
         icon: IconPenTool,
         title: "Design & Supports",
+        quote: "Design & Supports",
         description: "Création de Logos, Flyers, Affiches, Cartes de Visite, Dépliants, Profils d'Entreprise.",
       },
     ],
@@ -68,16 +80,19 @@ const bmServicesData = [
       {
         icon: IconSmartphone,
         title: "Marketing Digital & Réseaux Sociaux",
+        quote: "Marketing Digital",
         description: "Création et gestion complète de comptes et pages professionnels (Community Management).",
       },
       {
         icon: IconMonitor,
         title: "Web & Développement",
+        quote: "Site Web / Application",
         description: "Design de sites web, Création et hébergement de sites web et applications mobiles.",
       },
       {
         icon: IconDollar,
         title: "Monétisation & Publicité",
+        quote: "Marketing Digital",
         description: "Boostage et création de campagnes publicitaires ciblées, Monétisation des comptes sociaux.",
       },
     ],
@@ -86,29 +101,29 @@ const bmServicesData = [
 
 export default function CommunicationPage() {
   return (
-    <main className="min-h-screen bg-page text-ink font-sans antialiased pt-28">
+    <main className="min-h-screen bg-page text-ink font-sans antialiased">
       {/* HERO SECTION */}
-      <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
-        <div className="relative z-10 max-w-4xl">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/5 text-red-400 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-red-700/40">
-            BM CORPORATION
-          </span>
-          <h1 className="text-4xl min-[400px]:text-5xl md:text-6xl font-extrabold tracking-tight text-ink mb-6">
-            L'Agence de <span className="text-gradient-red">Communication</span> Intégrale
-          </h1>
-          <p className="text-xl text-ink-soft mb-10 leading-relaxed max-w-2xl mx-auto">
-            Propulsez votre marque avec l'expertise de BM Communication. Du visuel à fort impact au marketing digital stratégique.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
-              Demander un Devis Gratuit
-            </Link>
-            <a href="#visuelle" className="bg-surface text-ink font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-surface-alt transition border border-line">
-              Découvrir nos services
-            </a>
-          </div>
+      <HeroSlideshow>
+        <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 text-red-300 font-semibold text-xs tracking-[0.2em] uppercase mb-4 border border-red-400/40 backdrop-blur">
+          BM COMMUNICATION
+        </span>
+        <h1 className="text-4xl min-[400px]:text-5xl md:text-6xl font-extrabold tracking-tight mb-6 drop-shadow-lg">
+          Nous racontons vos moments, <span className="text-[#ff8a95]">nous faisons rayonner votre marque</span>
+        </h1>
+        <p className="text-xl text-white/85 mb-10 leading-relaxed max-w-2xl mx-auto">
+          Photographie, vidéo, design et marketing digital : l'agence de communication qui donne de l'impact à vos événements et à votre image.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link href="/devis" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-8 py-3.5 rounded-xl text-lg transition-all">
+            Demander un Devis Gratuit
+          </Link>
+          <a href="#portfolio" className="bg-white/10 backdrop-blur text-white font-bold px-8 py-3.5 rounded-xl text-lg hover:bg-white/20 transition border border-white/40">
+            Voir le portfolio
+          </a>
         </div>
-      </section>
+      </HeroSlideshow>
+
+      <Portfolio />
 
       {/* GRILLES DE SERVICES */}
       <div className="max-w-7xl mx-auto px-6 py-20 space-y-24">
@@ -140,6 +155,9 @@ export default function CommunicationPage() {
                     <p className="text-ink-soft leading-relaxed">
                       {service.description}
                     </p>
+                    <Link href={`/devis?service=${encodeURIComponent(service.quote)}`} className="mt-6 inline-block text-sm font-bold text-red-500 hover:text-red-400">
+                      Demander un devis pour ce service →
+                    </Link>
                   </div>
                 );
               })}
@@ -147,6 +165,25 @@ export default function CommunicationPage() {
           </section>
         ))}
       </div>
+
+      {/* COMMENT NOUS TRAVAILLONS */}
+      <section className="bg-surface-sunken border-t border-line py-20 px-6">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-ink mb-3">Comment nous travaillons</h2>
+            <p className="text-ink-soft text-sm max-w-xl mx-auto">Un parcours simple, de votre première demande à la livraison.</p>
+          </div>
+          <ol className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {steps.map((s) => (
+              <li key={s.n} className="rounded-3xl border border-line bg-surface p-6">
+                <span className="text-4xl font-black text-red-600/30 leading-none">{s.n}</span>
+                <p className="mt-3 text-lg font-bold text-ink">{s.t}</p>
+                <p className="mt-1 text-sm text-ink-soft leading-relaxed">{s.d}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
 
       {/* CALL TO ACTION */}
       <section className="bg-surface-sunken py-24 px-6 border-t border-line text-center">
@@ -160,6 +197,11 @@ export default function CommunicationPage() {
           <Link href="/devis" className="glow-accent inline-block bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-10 py-4 rounded-full text-xl transition hover:scale-105">
             Demander un Devis Gratuit
           </Link>
+          <p className="mt-6">
+            <a href="https://wa.me/243988830799?text=Bonjour%20BM%20Communication%2C%20je%20souhaite%20en%20savoir%20plus." target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-emerald-500 hover:text-emerald-400">
+              Ou écrivez-nous sur WhatsApp
+            </a>
+          </p>
         </div>
       </section>
     </main>

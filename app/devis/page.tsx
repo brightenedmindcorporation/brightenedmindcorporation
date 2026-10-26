@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Paperclip, X } from 'lucide-react';
 import { availableLanguages } from '@/content/curriculum';
@@ -59,6 +59,12 @@ export default function DevisPage() {
   const [email, setEmail] = useState("");
   const [service, setService] = useState("Photographie");
   const [message, setMessage] = useState("");
+
+  // A link from a service page (/devis?service=Photographie) preselects that service.
+  useEffect(() => {
+    const wanted = new URLSearchParams(window.location.search).get("service");
+    if (wanted && ["Photographie", "Vidéographie", "Design & Supports", "Marketing Digital", "Site Web / Application"].includes(wanted)) setService(wanted);
+  }, []);
   const [attachment, setAttachment] = useState<File | null>(null);
 
   // Renseigne ici le vrai numéro WhatsApp de ton entreprise (au format international sans le +)
