@@ -4115,12 +4115,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               levels={levels}
               onClose={() => setDossierOf(null)}
               canEditScores
-              onAct={async (action, level, lessonId, score) => {
+              onAct={async (action, level, lessonId, score, parts) => {
                 const idToken = await auth.currentUser?.getIdToken();
                 const response = await fetch("/api/admin/student-progress", {
                   method: "POST",
                   headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
-                  body: JSON.stringify({ uid: dossierOf.uid, langCode: dossierOf.langCode, level, lessonId, action, score }),
+                  body: JSON.stringify({ uid: dossierOf.uid, langCode: dossierOf.langCode, level, lessonId, action, score, parts }),
                 });
                 const result = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(result.error || "Erreur serveur");

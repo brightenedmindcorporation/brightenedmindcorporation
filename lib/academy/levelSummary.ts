@@ -16,6 +16,8 @@ export interface ProgressDoc {
   practiceBest?: Record<string, number>;
   quizParts?: Record<string, QuizPartsRecord>;
   adminPercent?: Record<string, number>;
+  /** Points set part by part by the administration (key: lesson id, or "final"). */
+  adminParts?: Record<string, Partial<Record<"listen" | "quiz" | "read" | "write", number>>>;
   writingMarks?: Record<string, number>;
   adminFinal?: boolean;
 }
@@ -57,6 +59,7 @@ export function summarizeLevel(curriculum: LevelCurriculum, progress: ProgressDo
       rawTotal: total,
       writeMark: progress.writingMarks?.[key],
       adminPercent: progress.adminPercent?.[key],
+      adminParts: progress.adminParts?.[key],
     });
 
   const rows: QuizRow[] = curriculum.lessons.map((lesson) => {

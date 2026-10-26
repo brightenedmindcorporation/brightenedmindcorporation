@@ -59,12 +59,59 @@ export default function StudentDossier({
   levels: Record<string, ProgressDoc | undefined>;
   onClose: () => void;
   /** Administration / teacher: step in on a lesson (open it, take it back, change a score, restart the level). */
-  onAct?: (action: DossierAction, level: number, lessonId: number, score?: number) => Promise<void>;
+  onAct?: (action: DossierAction, level: number, lessonId: number, score?: number, parts?: Record<string, number>) => Promise<void>;
   /** Only the administration may change scores or restart a level. */
   canEditScores?: boolean;
 }) {
   const lang = findProgramByCode(student.langCode);
   const [busy, setBusy] = useState<string | null>(null);
+  /** The detailed mark editor (one field per part of the quiz). */
+  const [editing, setEditing] = useState<{ level: number; lessonId: number; label: string; mark: QuizMark } | null>(null);
+  const [fields, setFields] = useState<Record<string, string>>({});
+  const [total, setTotal] = useState("");
+
+  const openEdit = (level: number, lessonId: number, label: string, mark: QuizMark) => {
+    const next: Record<string, string> = {};
+    for (const l of mark.lines) next[l.key] = String(l.got ?? 0);
+    setFields(next);
+    setTotal(mark.percent !== null ? String(mark.percent) : "0");
+    setEditing({ level, lessonId, label, mark });
+  };
+  const saveEdit = async () => {
+    if (!editing || !onAct) return;
+    const { level, lessonId, mark } = editing;
+    const action: DossierAction = lessonId === 0 ? "setFinalScore" : "setScore";
+    let parts: Record<string, number> | undefined;
+    let score: number | undefined;
+    if (mark.lines.length > 0) {
+      parts = {};
+      for (const l of mark.lines) {
+        const v = Number(String(fields[l.key] ?? "0").replace(",", "."));
+        if (!Number.isFinite(v) || v < 0 || v > l.max) {
+          alert(`« ${l.label} » : entrez une valeur entre 0 et ${l.max}.`);
+          return;
+        }
+        parts[l.key] = v;
+      }
+    } else {
+      score = Number(total.replace(",", "."));
+      if (!Number.isFinite(score) || score < 0 || score > 100) {
+        alert("Entrez une note entre 0 et 100.");
+        return;
+      }
+    }
+    setBusy(`${level}-${lessonId}`);
+    try {
+      await onAct(action, level, lessonId, score, parts);
+      setEditing(null);
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    } finally {
+      setBusy(null);
+    }
+  };
+  const editedTotal = editing && editing.mark.lines.length > 0 ? Math.round(editing.mark.lines.reduce((sum, l) => sum + (Number(String(fields[l.key] ?? "0").replace(",", ".")) || 0), 0)) : null;
+
   const act = async (action: DossierAction, level: number, lessonId: number, _total: number, current?: number | null) => {
     if (!onAct) return;
     let score: number | undefined;
@@ -234,7 +281,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                                     )
                                   )}
                                   {canEditScores && (
-                                    <button disabled={busy !== null} onClick={() => act("setScore", level, r.lessonId, r.total, r.mark.percent)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                    <button disabled={busy !== null} onClick={() => openEdit(level, r.lessonId, `leçon ${r.lessonId} : ${r.title}`, r.mark)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
                                       <BadgeCheck size={11} /> Modifier la note
                                     </button>
                                   )}
@@ -260,7 +307,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                           {onAct && (
                             <td className="p-3">
                               {canEditScores && (
-                                <button disabled={busy !== null} onClick={() => act("setFinalScore", level, 0, s.final.total, s.final.mark.percent)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
+                                <button disabled={busy !== null} onClick={() => openEdit(level, 0, "quiz final du niveau", s.final.mark)} className="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-lg border border-line text-ink hover:border-emerald-600/60 hover:text-emerald-500 disabled:opacity-50">
                                   <BadgeCheck size={11} /> Modifier la note
                                 </button>
                               )}
@@ -283,6 +330,51 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
           )}
         </div>
       </div>
+      {editing && (
+        <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/60 p-4" onClick={() => setEditing(null)}>
+          <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-6 shadow-2xl" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Modifier la note en détail">
+            <h3 className="text-lg font-black text-ink">Modifier la note en détail</h3>
+            <p className="mt-1 text-xs text-ink-soft">{editing.label}. Chaque partie se note sur son maximum ; la somme donne la note sur 100. L&apos;étudiant en est informé.</p>
+            <div className="mt-4 space-y-3">
+              {editing.mark.lines.length > 0 ? (
+                editing.mark.lines.map((l) => (
+                  <label key={l.key} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="font-semibold text-ink">{l.label}</span>
+                    <span className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        inputMode="decimal"
+                        min={0}
+                        max={l.max}
+                        step={0.5}
+                        value={fields[l.key] ?? ""}
+                        onChange={(e) => setFields((f) => ({ ...f, [l.key]: e.target.value }))}
+                        className="w-24 rounded-lg border border-line bg-surface-alt px-3 py-2 text-right text-ink"
+                      />
+                      <span className="w-12 text-ink-faint">/ {l.max}</span>
+                    </span>
+                  </label>
+                ))
+              ) : (
+                <label className="flex items-center justify-between gap-3 text-sm">
+                  <span className="font-semibold text-ink">Note totale</span>
+                  <span className="flex items-center gap-2">
+                    <input type="number" inputMode="decimal" min={0} max={100} step={1} value={total} onChange={(e) => setTotal(e.target.value)} className="w-24 rounded-lg border border-line bg-surface-alt px-3 py-2 text-right text-ink" />
+                    <span className="w-12 text-ink-faint">/ 100</span>
+                  </span>
+                </label>
+              )}
+            </div>
+            <p className="mt-4 text-right text-sm text-ink-soft">
+              Note finale : <b className="text-lg text-ink">{editedTotal ?? (Number(total) || 0)}</b> / 100
+            </p>
+            <div className="mt-5 flex justify-end gap-2">
+              <button onClick={() => setEditing(null)} className="rounded-xl border border-line px-4 py-2 text-sm font-bold text-ink-soft">Annuler</button>
+              <button onClick={saveEdit} disabled={busy !== null} className="rounded-xl bg-red-600 px-5 py-2 text-sm font-bold text-white disabled:opacity-50">Enregistrer</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

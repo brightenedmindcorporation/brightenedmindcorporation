@@ -62,6 +62,19 @@ export async function POST(request: Request) {
     let message = "";
     let title = "";
 
+    // Points set part by part (écoute, questions, lecture, écrit): their sum is the mark out of 100.
+    const PART_KEYS = ["listen", "quiz", "read", "write"] as const;
+    let adminParts: Record<string, number> | null = null;
+    if (body.parts && typeof body.parts === "object") {
+      adminParts = {};
+      for (const k of PART_KEYS) {
+        const v = Number(body.parts[k]);
+        if (body.parts[k] !== undefined && body.parts[k] !== null && body.parts[k] !== "" && Number.isFinite(v)) adminParts[k] = Math.max(0, Math.min(100, Math.round(v * 10) / 10));
+      }
+      if (Object.keys(adminParts).length === 0) adminParts = null;
+    }
+    const partsTotal = adminParts ? Math.round(Object.values(adminParts).reduce((a, b) => a + b, 0)) : null;
+
     if (action === "unlock") {
       await ref.set({ ...base, unlockedLessons: FieldValue.arrayUnion(lessonId) }, { merge: true });
       title = "Leçon ouverte";
@@ -71,7 +84,7 @@ export async function POST(request: Request) {
     } else if (action === "setScore") {
       const quiz = curriculum.quizzes.find((q) => q.lessonId === lessonId);
       const total = quiz?.questions.length ?? 0;
-      const raw = Number(body.score);
+      const raw = partsTotal ?? Number(body.score);
       if (!quiz || !Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
       // The administration marks out of 100 (écoute + questions + écrit); the questions' score follows it.
       const percent = Math.max(0, Math.min(100, Math.round(raw)));
@@ -83,6 +96,7 @@ export async function POST(request: Request) {
           ...base,
           quizScores: { [lessonId]: score },
           adminPercent: { [lessonId]: percent },
+          adminParts: { [lessonId]: adminParts ?? FieldValue.delete() },
           adminScored: FieldValue.arrayUnion(lessonId),
           studiedLessons: FieldValue.arrayUnion(lessonId),
           completedQuizzes: passed ? FieldValue.arrayUnion(lessonId) : FieldValue.arrayRemove(lessonId),
@@ -94,12 +108,12 @@ export async function POST(request: Request) {
       message = `Votre note du quiz de la leçon ${lessonId} a été fixée à ${percent}/100 par ${who}${passed ? " : la leçon suivante est disponible." : "."}`;
     } else if (action === "setFinalScore") {
       const total = curriculum.finalQuiz.questions.length;
-      const raw = Number(body.score);
+      const raw = partsTotal ?? Number(body.score);
       if (!Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
       const percent = Math.max(0, Math.min(100, Math.round(raw)));
       const score = Math.round((percent / 100) * total);
       const passed = percent >= (curriculum.finalQuiz.passingScore / total) * 100;
-      await ref.set({ ...base, finalQuizScore: score, finalQuizPassed: passed, adminFinal: true, adminPercent: { final: percent } }, { merge: true });
+      await ref.set({ ...base, finalQuizScore: score, finalQuizPassed: passed, adminFinal: true, adminPercent: { final: percent }, adminParts: { final: adminParts ?? FieldValue.delete() } }, { merge: true });
       title = "Note mise à jour";
       message = `Votre note du quiz final du niveau ${level} a été fixée à ${percent}/100 par ${who}${passed ? " : votre certificat est disponible." : "."}`;
       if (passed) await sendLevelInvitation(uid, langCode, level).catch((e) => console.error("Level invitation failed (non-fatal):", e));

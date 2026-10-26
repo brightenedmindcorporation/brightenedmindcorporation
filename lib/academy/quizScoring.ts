@@ -53,8 +53,10 @@ export function computeQuizMark(opts: {
   writeMark?: number | null;
   /** The administration's own mark out of 100. */
   adminPercent?: number | null;
+  /** Points set part by part by the administration (each out of the part's maximum shown in the lines). */
+  adminParts?: Partial<Record<"listen" | "quiz" | "read" | "write", number>> | null;
 }): QuizMark {
-  const { parts, rawScore, rawTotal, writeMark, adminPercent } = opts;
+  const { parts, rawScore, rawTotal, writeMark, adminPercent, adminParts } = opts;
   if (rawScore === null && typeof adminPercent !== "number") return { percent: null, provisional: false, legacy: false, byAdmin: false, lines: [] };
 
   const hasMark = typeof writeMark === "number";
@@ -65,7 +67,8 @@ export function computeQuizMark(opts: {
   const read = parts?.read;
   const write = parts ? Boolean(parts.write) : hasMark;
 
-  const present = [listen ? "listen" : null, "quiz", read ? "read" : null, write ? "write" : null].filter(Boolean) as ("listen" | "quiz" | "read" | "write")[];
+  const has = (k: "listen" | "quiz" | "read" | "write") => adminParts != null && typeof adminParts[k] === "number";
+  const present = [listen || has("listen") ? "listen" : null, "quiz", read || has("read") ? "read" : null, write || has("write") ? "write" : null].filter(Boolean) as ("listen" | "quiz" | "read" | "write")[];
   const totalWeight = present.reduce((sum, k) => sum + PART_WEIGHTS[k], 0);
   const scale = 100 / totalWeight;
   const ratio = (pair: [number, number]) => (pair[1] > 0 ? pair[0] / pair[1] : 0);
@@ -76,7 +79,23 @@ export function computeQuizMark(opts: {
   if (read) lines.push({ key: "read", label: "Lecture", max: round1(PART_WEIGHTS.read * scale), got: round1(ratio(read) * PART_WEIGHTS.read * scale), detail: `${read[0]}/${read[1]}` });
   if (write) lines.push({ key: "write", label: "Écrit", max: round1(PART_WEIGHTS.write * scale), got: hasMark ? round1((writeMark! / 10) * PART_WEIGHTS.write * scale) : null, detail: hasMark ? `${writeMark}/10` : "à corriger" });
 
-  const provisional = write && !hasMark;
+  // Part by part, as set by the administration: its points replace the computed ones.
+  const fixed = (k: PartLine["key"], label: string, weight: number) => {
+    if (!has(k)) return;
+    const max = round1(weight * scale);
+    const got = Math.max(0, Math.min(max, round1(adminParts![k] as number)));
+    const existing = lines.find((l) => l.key === k);
+    if (existing) {
+      existing.got = got;
+      existing.detail = "fixé";
+    } else lines.push({ key: k, label, max, got, detail: "fixé" });
+  };
+  fixed("listen", "Écoute", PART_WEIGHTS.listen);
+  fixed("quiz", "Questions", PART_WEIGHTS.quiz);
+  fixed("read", "Lecture", PART_WEIGHTS.read);
+  fixed("write", "Écrit", PART_WEIGHTS.write);
+
+  const provisional = write && !hasMark && !has("write");
   const marked = lines.filter((l) => l.got !== null);
   const earned = marked.reduce((sum, l) => sum + (l.got as number), 0);
   const possible = marked.reduce((sum, l) => sum + l.max, 0);
