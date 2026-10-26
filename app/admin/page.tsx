@@ -1,6 +1,7 @@
 "use client";
 
 import ProgramSwitches from "@/components/admin/ProgramSwitches";
+import ProgressAudit from "@/components/admin/ProgressAudit";
 import RenameIdsButton from "@/components/admin/RenameIdsButton";
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
@@ -2037,6 +2038,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "students" && (
           <div>
             <ProgramSwitches />
+            <ProgressAudit />
             <div className="mb-4 flex justify-end"><RenameIdsButton /></div>
             {/* STATS */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
