@@ -80,7 +80,29 @@ function Fr({ langSlug, text, className = "" }: { langSlug: string; text: string
   );
 }
 
+/** An alphabet row ("A B C D …"): every letter gets its own speaker so the student can hear each one. */
+const LETTER_ROW = /^(?:\p{Lu}\s){3,}\p{Lu}$/u;
+
+function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
+  return (
+    <div className="flex flex-wrap gap-2 py-1" translate="no">
+      {text.split(/\s+/).map((letter, i) => (
+        <span key={i} className="notranslate inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-alt py-1 pl-1 pr-3">
+          <ListenButton
+            play={(id) => speak(letter, langSlug, id)}
+            title={`Écouter la lettre ${letter}`}
+            size={13}
+            className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface hover:bg-red-600 hover:text-white text-ink-soft transition"
+          />
+          <span className="text-lg font-semibold text-ink">{letter}</span>
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function SpeakableLine({ text, langSlug, className = "" }: { text: string; langSlug: string; className?: string }) {
+  if (LETTER_ROW.test(text.trim())) return <LetterRow text={text.trim()} langSlug={langSlug} />;
   return (
     <div className={`flex items-start gap-2 ${className}`}>
       {/* Only the language being learned is voiced: a French explanation gets no speaker. */}
