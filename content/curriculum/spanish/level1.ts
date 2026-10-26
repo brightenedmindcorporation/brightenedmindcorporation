@@ -26,7 +26,7 @@ Saludos comunes: Hola. Buenos días. Buenas tardes. Buenas noches. ¿Cómo está
 
 Presentarse: Me llamo... Tengo... años. Vivo en... Soy estudiante. Mucho gusto.`,
       videoTopic: "Cómo presentarte en español.",
-      videoUrl: "https://www.youtube.com/watch?v=HypxjkmUY6s",
+      videoUrl: "https://www.youtube.com/watch?v=SF55CmLuWJM",
       readingTitle: "¡Hola!",
       reading: [
         "Me llamo Sofia. Tengo 12 años. Vivo en Kolwezi. Soy estudiante.",
@@ -56,7 +56,7 @@ Las vocales son: A, E, I, O, U.
 
 Ejemplo: me llamo David. D, A, V, I, D.`,
       videoTopic: "Recitar el alfabeto español de la A a la Z.",
-      videoUrl: "https://www.youtube.com/watch?v=1wJIkTuckEI",
+      videoUrl: "https://www.youtube.com/watch?v=Cq9lal9HB_c",
       readingTitle: "Hola, me llamo Ana.",
       reading: ["Estoy aprendiendo español en la escuela.", "Hoy estoy aprendiendo el alfabeto.", "Practico todos los días y me gusta aprender palabras nuevas.", "Puedo deletrear mi nombre: A - N - A."],
       readingSpeakText: `Hola, me llamo Ana. Estoy aprendiendo español en la escuela. Hoy estoy aprendiendo el alfabeto.`,
@@ -78,7 +78,7 @@ Información personal: ¿Cómo te llamas? ¿Cuántos años tienes? ¿Dónde vive
 
 Ejemplo de respuestas: me llamo David. Tengo quince años. Vivo en Kinshasa.`,
       videoTopic: "Aprender los números y presentarse.",
-      videoUrl: "https://www.youtube.com/watch?v=dLiWa3QEuAQ",
+      videoUrl: "https://www.youtube.com/watch?v=EdIulWGzQMg",
       readingTitle: "Hola, me llamo Sara.",
       reading: ["Tengo 14 años.", "Vivo en Kinshasa.", "Mi número de teléfono es 987654321."],
       readingSpeakText: `Hola, me llamo Sara. Tengo catorce años. Vivo en Kinshasa. Mi número de teléfono es nueve ocho siete seis cinco cuatro tres dos uno.`,
@@ -100,7 +100,7 @@ Frases útiles: este es mi padre. Mi madre es muy amable. Tengo un hermano y dos
 
 Ejemplo: vivo con mi familia. Mi padre trabaja en una oficina.`,
       videoTopic: "Aprender el vocabulario de la familia.",
-      videoUrl: "https://www.youtube.com/watch?v=zqzxzKBPPJ4",
+      videoUrl: "https://www.youtube.com/watch?v=RJkPSW5colA",
       readingTitle: "Me llamo Juan.",
       reading: ["Vivo con mis padres y mi hermana.", "Mi padre es médico.", "Mi madre es muy cariñosa.", "Me encanta pasar tiempo con mi familia."],
       readingSpeakText: `Me llamo Juan. Vivo con mis padres y mi hermana. Mi padre es médico. Mi madre es muy cariñosa.`,
@@ -142,7 +142,7 @@ Describir objetos: la mochila es roja. El teléfono es negro.
 
 Describir personas: ella es alta. Él es bajo. Ella está feliz.`,
       videoTopic: "Aprender los colores y practicar descripciones.",
-      videoUrl: "https://www.youtube.com/watch?v=OUeqNtnVkIA",
+      videoUrl: "https://www.youtube.com/watch?v=ACdOYyvqss8",
       readingTitle: "Me llamo Lisa.",
       reading: ["Tengo una mochila escolar azul.", "Mi cuaderno es verde y mi teléfono es negro.", "Estoy feliz y soy amable.", "Mi hermano pequeño es bajo pero muy fuerte."],
       readingSpeakText: `Me llamo Lisa. Tengo una mochila escolar azul. Mi cuaderno es verde y mi teléfono es negro.`,
@@ -188,7 +188,7 @@ Frases útiles: hoy es lunes. Mi cumpleaños es en julio.`,
 
 Frases útiles: me despierto a las seis. Voy a la escuela a las siete.`,
       videoTopic: "Aprender el vocabulario de las rutinas diarias.",
-      videoUrl: "https://www.youtube.com/watch?v=fIvq1HrkrnM",
+      videoUrl: "https://www.youtube.com/watch?v=BUv-dqHlXQ8",
       readingTitle: "Me llamo Daniel.",
       reading: [
         "Cada día me despierto a las 6 de la mañana.",
@@ -216,7 +216,7 @@ Bebidas comunes: agua, leche, jugo, té, café.
 
 Frases útiles: bebo agua todos los días. Mi comida favorita es el arroz.`,
       videoTopic: "Aprender el vocabulario de comidas y bebidas.",
-      videoUrl: "https://www.youtube.com/watch?v=CREFPST6Wqg",
+      videoUrl: "https://www.youtube.com/watch?v=Vw8LFfXzrec",
       readingTitle: "Me llamo Emma.",
       reading: ["Cada mañana como pan y huevos en el desayuno.", "En la escuela, bebo agua y a veces jugo de frutas.", "Mi comida favorita es el arroz con pollo.", "Por la noche, mi familia come pescado y verduras juntos."],
       readingSpeakText: `Me llamo Emma. Cada mañana como pan y huevos en el desayuno.`,
@@ -261,7 +261,7 @@ Preguntar por direcciones: ¿dónde está el hospital? ¿cómo llego al banco?`,
 
 Frases útiles: mi pasatiempo favorito es leer. Me gusta jugar al fútbol.`,
       videoTopic: "Aprender el vocabulario de pasatiempos y tiempo libre.",
-      videoUrl: "https://www.youtube.com/watch?v=cUI25Sjmdfk",
+      videoUrl: "https://www.youtube.com/watch?v=F-EQkAfRG7M",
       readingTitle: "El sábado por la tarde, Jaime visitó a su primo Daniel.",
       reading: [
         "Cuando llegó, Daniel estaba sentado afuera leyendo un libro sobre animales.",

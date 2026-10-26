@@ -140,7 +140,7 @@ Demander la parole. Puis-je dire quelque chose ? Si je peux ajouter... Désolé 
 
 Rédiger un compte-rendu de réunion. Le compte-rendu enregistre ce qui a été discuté et décidé.`,
       videoTopic: "Voir comment se déroule une réunion formelle du début à la fin.",
-      videoUrl: "https://www.youtube.com/watch?v=b93rWTrmse4",
+      videoUrl: "https://www.youtube.com/watch?v=tzT8-1f0VVc",
       readingTitle: "La Réunion du Lundi",
       reading: [
         "À 9 heures, le chef d'équipe a dit, « Pouvons-nous commencer ? » et tout le monde a été d'accord.",
@@ -273,7 +273,7 @@ Phrases utiles. Pourriez-vous m'aider à comprendre comment cela se fait habitue
 
 Conseils pour une communication claire. Parlez clairement et évitez les expressions idiomatiques compliquées.`,
       videoTopic: "Voir comment une équipe internationale communique clairement entre les cultures.",
-      videoUrl: "https://www.youtube.com/watch?v=U60-5cDKnmg",
+      videoUrl: "https://www.youtube.com/watch?v=Qwh685vS2oE",
       readingTitle: "Travailler avec une Équipe Internationale",
       reading: [
         "Quand l'entreprise Brightened Mind a commencé à travailler avec des partenaires à l'étranger, l'équipe a remarqué des différences culturelles.",

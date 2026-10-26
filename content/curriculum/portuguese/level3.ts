@@ -26,7 +26,7 @@ Segundo condicional, para algo improvável ou hipotético. Se eu tivesse mais te
 
 Usos empresariais. Condicionais são comuns em negociações e planejamento.`,
       videoTopic: "Comparar o primeiro e o segundo condicional em uma negociação empresarial.",
-      videoUrl: "https://www.youtube.com/watch?v=lMJ8vgmShc0",
+      videoUrl: "https://www.youtube.com/watch?v=DxO7DEbkIHM",
       readingTitle: "Uma Negociação na Empresa Brightened Mind",
       reading: [
         "Durante a reunião, o fornecedor disse, “Se você pedir mais unidades, vamos oferecer um desconto.”",
@@ -83,7 +83,7 @@ Responder e chegar a um meio-termo. Isso parece razoável, mas você também pod
 
 Fechar um acordo. Acho que temos um acordo. Vamos colocar isso por escrito.`,
       videoTopic: "Ver uma negociação completa do início até o fechamento do acordo.",
-      videoUrl: "https://www.youtube.com/watch?v=YaJWvc1KmRc",
+      videoUrl: "https://www.youtube.com/watch?v=OLaiteAdCj8",
       readingTitle: "Fechando o Acordo",
       reading: [
         "Duas empresas negociaram por quase duas horas sobre o preço do novo equipamento.",
@@ -110,7 +110,7 @@ Organizar seus pontos. Primeiro, vou explicar... Depois, vou passar para... Por 
 
 Encerrar uma apresentação. Resumindo, os pontos principais são... Obrigado pela atenção de vocês. Alguma pergunta?`,
       videoTopic: "Ver uma apresentação profissional curta e bem estruturada.",
-      videoUrl: "https://www.youtube.com/watch?v=jjfMilsjbjo",
+      videoUrl: "https://www.youtube.com/watch?v=TwGYB-FsL3U",
       readingTitle: "A Primeira Apresentação de Linda",
       reading: [
         "Linda estava nervosa antes de sua primeira apresentação para a equipe de direção.",
@@ -190,7 +190,7 @@ Durante a ligação. Você poderia repetir isso, por favor? Desculpe, a ligaçã
 
 Encerrar uma ligação. Obrigado pelo seu tempo. Vou te enviar um e-mail para confirmar.`,
       videoTopic: "Ouvir uma ligação profissional do início ao fim.",
-      videoUrl: "https://www.youtube.com/watch?v=2Y1TNGgy5jA",
+      videoUrl: "https://www.youtube.com/watch?v=l8IYHU4HFnE",
       readingTitle: "Uma Ligação para um Cliente",
       reading: [
         "“Alô, aqui é a Sara da empresa Brightened Mind. Estou ligando sobre o seu pedido recente.”",
@@ -244,7 +244,7 @@ Sugerir soluções. Uma opção seria... Poderíamos tentar... E se nós...?
 
 Tomar uma decisão. Vamos com essa opção. Decidimos seguir em frente com...`,
       videoTopic: "Ver uma equipe identificar um problema e concordar com uma solução juntos.",
-      videoUrl: "https://www.youtube.com/watch?v=9D4ZltpqwEs",
+      videoUrl: "https://www.youtube.com/watch?v=O-dhwro70zE",
       readingTitle: "Um Problema de Entrega",
       reading: [
         "A equipe de logística disse, “Tivemos um problema com o caminhão de entrega. O principal problema parece ser uma falha mecânica.”",
@@ -271,7 +271,7 @@ Frases úteis. Você poderia me ajudar a entender como isso é feito normalmente
 
 Dicas para uma comunicação clara. Fale com clareza e evite expressões complicadas.`,
       videoTopic: "Ver como uma equipe internacional se comunica com clareza entre culturas.",
-      videoUrl: "https://www.youtube.com/watch?v=D2l5wedNLsw",
+      videoUrl: "https://www.youtube.com/watch?v=XXIulVSfQsE",
       readingTitle: "Trabalhando com uma Equipe Internacional",
       reading: [
         "Quando a empresa Brightened Mind começou a trabalhar com parceiros no exterior, a equipe notou algumas diferenças culturais.",
@@ -349,7 +349,7 @@ Exemplo de conversa real.
 Bom dia. Obrigado por participar desta ligação.
 Bom dia, fico feliz em estar aqui. Estou ligando sobre a proposta que você enviou.`,
       videoTopic: "Revisar todos os temas do Nível 3 através de uma conversa de negócios completa.",
-      videoUrl: "https://www.youtube.com/watch?v=hNC9ydxjSlU",
+      videoUrl: "https://www.youtube.com/watch?v=mC_w15mKDE8",
       readingTitle: "Completando o Programa",
       reading: [
         "Depois de terminar os Níveis 1, 2 e 3, Chantal agora pode liderar reuniões, escrever relatórios profissionais e negociar com clientes internacionais com confiança.",

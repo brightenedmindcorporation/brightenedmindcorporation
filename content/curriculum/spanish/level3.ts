@@ -190,7 +190,7 @@ Durante la llamada. ¿Podría repetir eso, por favor? Lo siento, la línea no se
 
 Terminar una llamada. Gracias por su tiempo. Le enviaré un correo para confirmar.`,
       videoTopic: "Escuchar una llamada profesional de principio a fin.",
-      videoUrl: "https://www.youtube.com/watch?v=6eJx4FPQSOQ",
+      videoUrl: "https://www.youtube.com/watch?v=C33qoX1u4EA",
       readingTitle: "Una Llamada a un Cliente",
       reading: [
         "“Hola, le habla Sara de la empresa Brightened Mind. Le llamo por su pedido reciente.”",
@@ -244,7 +244,7 @@ Sugerir soluciones. Una opción sería... Podríamos intentar... ¿Qué tal si..
 
 Tomar una decisión. Vayamos con esta opción. Hemos decidido seguir adelante con...`,
       videoTopic: "Ver a un equipo identificar un problema y acordar una solución juntos.",
-      videoUrl: "https://www.youtube.com/watch?v=mQjGXGLVU_A",
+      videoUrl: "https://www.youtube.com/watch?v=yafHNmVp-Og",
       readingTitle: "Un Problema de Entrega",
       reading: [
         "El equipo de logística dijo, “Hemos tenido un problema con el camión de reparto. El problema principal parece ser un fallo mecánico.”",

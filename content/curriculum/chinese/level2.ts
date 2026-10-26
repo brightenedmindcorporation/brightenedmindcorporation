@@ -27,7 +27,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 我觉得。我想。我需要。`,
       videoTopic: "中文句子结构和常见错误讲解。",
-      videoUrl: "https://www.youtube.com/watch?v=ZzTkNUmynFQ",
+      videoUrl: "https://www.youtube.com/watch?v=Slcag8GIMhM",
       readingTitle: "我叫格雷斯。(Je m'appelle Grace.)",
       reading: [
         "现在我在学中级汉语。(Maintenant j'apprends le chinois de niveau intermédiaire.)",
@@ -53,7 +53,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 将要和会表示将来。我将要去巴黎。明天会下雨。`,
       videoTopic: "比较«了»、«过»和«会»的用法。",
-      videoUrl: "https://www.youtube.com/watch?v=USn244EQX5Y",
+      videoUrl: "https://www.youtube.com/watch?v=lJsxzeIcYAQ",
       readingTitle: "去年，托马斯第一次去了卢本达里。(L'an dernier, Thomas est allé à Lubumbashi pour la première fois.)",
       reading: [
         "在等巴士时，他遇到了一个老朋友。(En attendant le bus, il a rencontré un vieil ami.)",
@@ -79,7 +79,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 礼貌地赞成和反对。我同意你。这是个好观点，但我觉得。`,
       videoTopic: "在对话中练习追问问题。",
-      videoUrl: "https://www.youtube.com/watch?v=ldXXxwNDdGE",
+      videoUrl: "https://www.youtube.com/watch?v=H7oZTMGH0X4",
       readingTitle: "上个星期五，保罗认识了一位新同事克拉。(Vendredi dernier, Paul a rencontré une nouvelle collègue, Clara.)",
       reading: [
         "他问：«你从哪里来？»她说她来自高马。(Il a demandé : « D'où viens-tu ? » Elle a dit qu'elle venait de Goma.)",
@@ -103,7 +103,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 连接词。增加：和、也。对比：但是、虽然。因果：因为、所以。`,
       videoTopic: "观察连接词如何在段落中连接观点。",
-      videoUrl: "https://www.youtube.com/watch?v=S9LfaBLtNoo",
+      videoUrl: "https://www.youtube.com/watch?v=NrLhdYJO1Y4",
       readingTitle: "我为什么喜欢阅读 (Pourquoi j'aime lire)",
       reading: [
         "我喜欢阅读，因为它帮我在漫长的一天后放松。(J'aime lire car cela m'aide à me détendre après une longue journée.)",
@@ -130,7 +130,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 听歌和播客。重复听同一段对话。`,
       videoTopic: "听力策略和常见口语表达。",
-      videoUrl: "https://www.youtube.com/watch?v=SZ1ee8LZTyQ",
+      videoUrl: "https://www.youtube.com/watch?v=WASYoPoZU_0",
       readingTitle: "我叫费利克斯。(Je m'appelle Félix.)",
       reading: [
         "刚开始学汉语时，我很难理解快速的对话。(Au début, j'avais du mal à comprendre les dialogues rapides.)",
@@ -153,7 +153,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 开头介绍主题。中间给出详节。结尾总结。`,
       videoTopic: "在真实文本中练习浏览和扫读。",
-      videoUrl: "https://www.youtube.com/watch?v=DpdyApZFMxM",
+      videoUrl: "https://www.youtube.com/watch?v=Of41QzrUvCI",
       readingTitle: "一封来自学校的通知 (Une annonce de l'école)",
       reading: [
         "亲爱的家长，学校将在下个星期五舞办一场文化活动。(Chers parents, l'école organisera un événement culturel vendredi prochain.)",
@@ -176,7 +176,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 我觉得。在我看来。我对此有保留意见。`,
       videoTopic: "实际情境中表达情感和意见。",
-      videoUrl: "https://www.youtube.com/watch?v=zFlKLeYRIig",
+      videoUrl: "https://www.youtube.com/watch?v=-UJZSUjJuCo",
       readingTitle: "考试前，苏纳感到非常焦虑。(Avant l'examen, Sonia était très anxieuse.)",
       reading: [
         "但当她看到成绩时，她感到非常兴奋和自豪。(Mais en voyant son résultat, elle a ressenti excitation et fierté.)",
@@ -201,7 +201,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 多听多说，节奏会变得自然。`,
       videoTopic: "练习困难音和轻声。",
-      videoUrl: "https://www.youtube.com/watch?v=AAnEKm45R9M",
+      videoUrl: "https://www.youtube.com/watch?v=hWN-JVxNYZE",
       readingTitle: "我叫费恩—我在学发音。(Je m'appelle Faith et j'apprends la prononciation.)",
       reading: [
         "我尝试区分zh和z的发音。(J'essaie de distinguer les sons zh et z.)",
@@ -224,7 +224,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 这个多少钱？可以便宜一些吗？我只是看看。`,
       videoTopic: "在餐厅和商店里的对话示例。",
-      videoUrl: "https://www.youtube.com/watch?v=QrAhf7noJUQ",
+      videoUrl: "https://www.youtube.com/watch?v=Vp1gs9bNR0Y",
       readingTitle: "昨天，姆姆和哥哥去餐厅吃饭。(Hier, Marie et son frère sont allés manger au restaurant.)",
       reading: [
         "服务员给他们菜单，姆姆说：«我要一个鱼。» (Le serveur leur a donné la carte, Marie a dit : « Je veux un poisson. »)",
@@ -246,7 +246,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 尊敬的。谢谢您的回复。期待您的回应。`,
       videoTopic: "简单商业会议和邮件语言。",
-      videoUrl: "https://www.youtube.com/watch?v=eusx3I2T4PI",
+      videoUrl: "https://www.youtube.com/watch?v=sex51Ozy0Es",
       readingTitle: "李先生于上周和客户开了会。(M. Li a eu une réunion avec un client la semaine dernière.)",
       reading: [
         "会后，他写了一封邮件感谢客户。(Après la réunion, il a écrit un email pour remercier le client.)",
@@ -269,7 +269,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 我理解你的观点，但是。这个说法没有考虑到。`,
       videoTopic: "观察一场关于教育的简单辩论。",
-      videoUrl: "https://www.youtube.com/watch?v=5R_J_xFxt34",
+      videoUrl: "https://www.youtube.com/watch?v=V5hL-RYQYMg",
       readingTitle: "在班上，学生们辩论孩子是否应该有手机。(En classe, les élèves débattaient si les enfants devraient avoir un téléphone.)",
       reading: [
         "林说：«我认为孩子需要手机，因为安全很重要。» (Lin a dit : « Je crois que les enfants ont besoin d'un téléphone, car la sécurité est importante. »)",
@@ -308,7 +308,7 @@ export const chineseLevel2: LevelCurriculum = {
 
 你对线上学习有什么看法？我觉得它很方便，但我更喜欢现场学习。`,
       videoTopic: "复习第二级的语法和对话技巧。",
-      videoUrl: "https://www.youtube.com/watch?v=PULnJUnQbac",
+      videoUrl: "https://www.youtube.com/watch?v=08wCm-hzVZc",
       readingTitle: "上个月，苏竒参加了一个关于教育的辩论比赛。(Le mois dernier, Suzanne a participé à un concours de débat sur l'éducation.)",
       reading: [
         "她准备了很多观点和例子。(Elle a préparé beaucoup d'arguments et d'exemples.)",

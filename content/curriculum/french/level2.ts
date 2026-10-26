@@ -60,7 +60,7 @@ L'imparfait est utilisé pour une action en cours dans le passé. À vingt heure
 
 Le futur proche et le futur simple. Je vais visiter Paris l'année prochaine. Je pense qu'il pleuvra demain.`,
       videoTopic: "Comparer le passé composé, l'imparfait et les deux formes de futur.",
-      videoUrl: "https://www.youtube.com/watch?v=toxtIsVP9GM",
+      videoUrl: "https://www.youtube.com/watch?v=4IexZtlIqF0",
       readingTitle: "L'année dernière, Thomas a voyagé à Lubumbashi pour la première fois.",
       reading: [
         "Pendant qu'il attendait le bus, il a rencontré un vieil ami de l'école.",
@@ -199,7 +199,7 @@ Familles de mots. Réussir, réussite, réussi.
 
 Les expressions figées sont des mots qui vont ensemble. Prendre une décision. Prendre une photo.`,
       videoTopic: "Enrichir son vocabulaire grâce aux synonymes, antonymes et expressions figées.",
-      videoUrl: "https://www.youtube.com/watch?v=RGKqstvTHX8",
+      videoUrl: "https://www.youtube.com/watch?v=uYRiOJ9PCPs",
       readingTitle: "Enrichir son Vocabulaire",
       reading: [
         "Apprendre des mots nouveaux chaque jour est l'une des meilleures façons d'améliorer rapidement son français.",
@@ -226,7 +226,7 @@ Les liaisons. En français, on relie souvent la consonne finale d'un mot à la v
 
 Sons souvent confondus. Rue versus roue. Pain versus bain.`,
       videoTopic: "Entendre la différence entre l'intonation montante et descendante.",
-      videoUrl: "https://www.youtube.com/watch?v=PNdrwBGlYho",
+      videoUrl: "https://www.youtube.com/watch?v=YTBeLibLQjs",
       readingTitle: "Pourquoi la Prononciation est Importante",
       reading: [
         "Une bonne grammaire est importante, mais une prononciation claire aide les gens à vous comprendre immédiatement.",
@@ -281,7 +281,7 @@ Phrases utiles pour les réunions. Commençons. Pourriez-vous clarifier ce point
 
 Vocabulaire professionnel. Délai signifie la date à laquelle quelque chose doit être terminé.`,
       videoTopic: "Voir comment un e-mail professionnel et une réunion sont structurés.",
-      videoUrl: "https://www.youtube.com/watch?v=zP3GV5wckWQ",
+      videoUrl: "https://www.youtube.com/watch?v=YDJ7BmqtA3w",
       readingTitle: "La Première Semaine de David dans un Nouveau Travail",
       reading: [
         "Pendant sa première réunion, David a entendu sa responsable dire, « Commençons. »",

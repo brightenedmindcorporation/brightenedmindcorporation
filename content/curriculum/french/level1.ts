@@ -68,7 +68,7 @@ On utilise les lettres pour épeler les noms et les mots.
 
 Exemple : mon nom est David. D, A, V, I, D.`,
       videoTopic: "Réciter l'alphabet français de A à Z.",
-      videoUrl: "https://www.youtube.com/watch?v=mOaJwzvWTp4",
+      videoUrl: "https://www.youtube.com/watch?v=no0WNgeYdqI",
       readingTitle: "Bonjour, je m'appelle Anna.",
       reading: [
         "J'apprends le français à l'école.",
@@ -131,7 +131,7 @@ Phrases utiles : c'est mon père. Ma mère est très gentille. J'ai un frère et
 
 Exemple : j'habite avec ma famille. Mon père travaille dans un bureau. Ma mère est enseignante.`,
       videoTopic: "Apprendre le vocabulaire de la famille.",
-      videoUrl: "https://www.youtube.com/watch?v=8rOj0ccPhiY",
+      videoUrl: "https://www.youtube.com/watch?v=Ci-AVeJaNHE",
       readingTitle: "Je m'appelle Jean.",
       reading: ["J'habite avec mes parents et ma sœur.", "Mon père est médecin.", "Ma mère est très attentionnée.", "J'aime passer du temps avec ma famille."],
       readingSpeakText: `Je m'appelle Jean. J'habite avec mes parents et ma sœur. Mon père est médecin. Ma mère est très attentionnée. J'aime passer du temps avec ma famille.`,
@@ -153,7 +153,7 @@ Phrases utiles : c'est mon livre. J'écris avec un stylo. La chaise est bleue.
 
 Décrire les objets : le livre est petit. L'ordinateur est neuf. Le sac est lourd.`,
       videoTopic: "Apprendre les objets courants et leur prononciation.",
-      videoUrl: "https://www.youtube.com/watch?v=LHILn-NQMwY",
+      videoUrl: "https://www.youtube.com/watch?v=EoOEXiQXmuQ",
       readingTitle: "Je m'appelle Pierre.",
       reading: ["Chaque jour, je vais à l'école avec mon sac et mon cahier.", "J'utilise un stylo pour écrire dans mon livre.", "Mon téléphone est dans mon sac.", "Je m'assois sur une chaise et j'étudie chaque matin."],
       readingSpeakText: `Je m'appelle Pierre. Chaque jour, je vais à l'école avec mon sac et mon cahier. J'utilise un stylo pour écrire dans mon livre. Mon téléphone est dans mon sac.`,
@@ -197,7 +197,7 @@ Les mois de l'année : janvier, février, mars, avril, mai, juin, juillet, août
 
 Phrases utiles : aujourd'hui, c'est lundi. Mon anniversaire est en juillet.`,
       videoTopic: "Apprendre les jours, les mois et comment dire les dates.",
-      videoUrl: "https://www.youtube.com/watch?v=q-wjUX3GSnk",
+      videoUrl: "https://www.youtube.com/watch?v=9uBq2hh5_qQ",
       readingTitle: "Je m'appelle Kevin.",
       reading: [
         "Aujourd'hui, c'est vendredi 12 juin. Je me réveille tôt chaque matin.",
@@ -301,7 +301,7 @@ Phrases utiles : mon loisir préféré est la lecture. J'aime jouer au football.
 
 Qu'est-ce que tu aimes faire ? Mon loisir m'aide à me relaxer.`,
       videoTopic: "Apprendre le vocabulaire des loisirs et du temps libre.",
-      videoUrl: "https://www.youtube.com/watch?v=-0YM3EFcl2A",
+      videoUrl: "https://www.youtube.com/watch?v=KZoHrqDtgQ8",
       readingTitle: "Samedi après-midi, James a rendu visite à son cousin Daniel.",
       reading: [
         "Quand il est arrivé, Daniel était assis dehors et lisait un livre sur les animaux.",

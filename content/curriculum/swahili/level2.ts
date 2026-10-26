@@ -40,7 +40,7 @@ Ngeli za nomino. Nomino za Kiswahili zina ngeli tofauti. M wa: mtu, watu. Ki vi:
 
 Makosa ya kawaida. Si sahihi: Mtoto wanasoma. Sahihi: Mtoto anasoma.`,
       videoTopic: "Pitia muundo wa sentensi na ngeli za nomino kwa mifano.",
-      videoUrl: "https://www.youtube.com/watch?v=Vqoi8fZExkE",
+      videoUrl: "https://www.youtube.com/watch?v=9HhmyO5XXMA",
       readingTitle: "Jina langu ni Grace.",
       reading: [
         "Ninasoma Kiswahili cha kati sasa.",
@@ -103,7 +103,7 @@ Kuendeleza mazungumzo. Onyesha hamu: kweli? Inavutia! Niambie zaidi.
 
 Kukubaliana na kutokubaliana kwa heshima. Nakubaliana nawe. Hilo ni jambo zuri, lakini nadhani...`,
       videoTopic: "Jizoeze maswali ya ziada katika mazungumzo halisi.",
-      videoUrl: "https://www.youtube.com/watch?v=F059_aQXmYc",
+      videoUrl: "https://www.youtube.com/watch?v=vVdqEV-mLkE",
       readingTitle: "Ijumaa iliyopita, Paulo alikutana na mfanyakazi mwenzake mpya aitwaye Clara kazini.",
       reading: [
         "Alimuuliza, “Unatoka wapi?” naye akasema alitoka Goma.",
@@ -210,7 +210,7 @@ Vinyume, maneno yenye maana kinyume. Moto na baridi. Rahisi na gumu. Mapema na k
 
 Familia za maneno. Fanikiwa, mafanikio, -enye mafanikio.`,
       videoTopic: "Jenga msamiati kupitia visawe, vinyume, na jozi za maneno.",
-      videoUrl: "https://www.youtube.com/watch?v=tuD6GNOmshQ",
+      videoUrl: "https://www.youtube.com/watch?v=Q0Yo_1o_anE",
       readingTitle: "Kujenga Msamiati Mkubwa",
       reading: [
         "Kujifunza maneno mapya kila siku ni mojawapo ya njia bora za kuboresha Kiswahili chako haraka.",

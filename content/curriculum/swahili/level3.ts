@@ -297,7 +297,7 @@ Kutoa maoni. Ninathamini sana juhudi ulizoweka kwenye hili. Eneo moja unaloweza 
 
 Kuongoza timu. Ningependa kukugawia kazi hii.`,
       videoTopic: "Ona meneja akitoa maoni wazi na ya heshima kwa mfanyakazi mwenzake.",
-      videoUrl: "https://www.youtube.com/watch?v=Il8XlDl77bw",
+      videoUrl: "https://www.youtube.com/watch?v=DkTskOY4uaY",
       readingTitle: "Kiongozi Mpya wa Timu",
       reading: [
         "Joseph alipokuwa kiongozi wa timu, alijifunza kugawa kazi badala ya kufanya kila kitu peke yake.",

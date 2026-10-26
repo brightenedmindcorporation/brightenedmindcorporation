@@ -30,7 +30,7 @@ Concordância verbal. Um sujeito singular leva um verbo singular: ela trabalha e
 
 Erros comuns. Errado: as crianças brinca lá fora. Certo: as crianças brincam lá fora.`,
       videoTopic: "Revisar a estrutura da frase e a concordância verbal com exemplos.",
-      videoUrl: "https://www.youtube.com/watch?v=6XIvDQtrb8I",
+      videoUrl: "https://www.youtube.com/watch?v=GM1HykSFzRg",
       readingTitle: "Meu nome é Grace.",
       reading: [
         "Agora estou estudando português de nível intermediário.",
@@ -57,7 +57,7 @@ O pretérito imperfeito é usado para uma ação em andamento no passado. Às vi
 
 Futuro com ir e o futuro simples. Vou visitar Paris ano que vem. Acho que vai chover amanhã.`,
       videoTopic: "Comparar o pretérito perfeito, o imperfeito e as duas formas de futuro.",
-      videoUrl: "https://www.youtube.com/watch?v=oidJ0TOL6oM",
+      videoUrl: "https://www.youtube.com/watch?v=zhrz9AItbf0",
       readingTitle: "No ano passado, Tomás viajou para Lubumbashi pela primeira vez.",
       reading: [
         "Enquanto esperava o ônibus, encontrou um velho amigo da escola.",
@@ -109,7 +109,7 @@ Concordar e discordar educadamente. Eu concordo com você. É um bom ponto, mas 
 
 Palavras conectivas. Adição: e, também. Contraste: mas, porém. Causa e efeito: porque, portanto.`,
       videoTopic: "Ver como as palavras conectivas unem ideias em um parágrafo.",
-      videoUrl: "https://www.youtube.com/watch?v=MXcovtPUyNE",
+      videoUrl: "https://www.youtube.com/watch?v=llJOpuPsdRk",
       readingTitle: "Por que Gosto de Ler",
       reading: [
         "Eu gosto de ler porque me ajuda a relaxar depois de um dia longo.",
@@ -194,7 +194,7 @@ Famílias de palavras. Ter sucesso, sucesso, bem-sucedido.
 
 Colocações são palavras que andam juntas. Tomar uma decisão. Tirar uma foto. Fazer a lição de casa.`,
       videoTopic: "Construir vocabulário através de sinônimos, antônimos e pares de palavras comuns.",
-      videoUrl: "https://www.youtube.com/watch?v=g28ERJqv138",
+      videoUrl: "https://www.youtube.com/watch?v=nbTroKewNXQ",
       readingTitle: "Construindo um Vocabulário Mais Amplo",
       reading: [
         "Aprender palavras novas todos os dias é uma das melhores formas de melhorar seu português rapidamente.",
@@ -221,7 +221,7 @@ Entonação. Perguntas de sim ou não geralmente sobem no final: você vem?
 
 Sons que se confundem com frequência. Caro versus carro.`,
       videoTopic: "Ouvir a diferença entre a entonação ascendente e descendente.",
-      videoUrl: "https://www.youtube.com/watch?v=SQH-Xv9i7aw",
+      videoUrl: "https://www.youtube.com/watch?v=fYAeBGc5RVM",
       readingTitle: "Por que a Pronúncia Importa",
       reading: [
         "A boa gramática é importante, mas uma pronúncia clara ajuda as pessoas a te entenderem imediatamente.",
@@ -303,7 +303,7 @@ Concordar e discordar formalmente. Eu concordo completamente com esse ponto. Ent
 
 Apoiar um argumento. Por exemplo... Pesquisas mostram que... Em conclusão, acredito que...`,
       videoTopic: "Ver um debate curto e respeitoso usando frases de opinião e argumento.",
-      videoUrl: "https://www.youtube.com/watch?v=PUh76LFZXdg",
+      videoUrl: "https://www.youtube.com/watch?v=zd2pwQIbd4o",
       readingTitle: "Um Debate em Sala de Aula",
       reading: [
         "Na aula, os estudantes debateram se os celulares deveriam ser permitidos na escola.",

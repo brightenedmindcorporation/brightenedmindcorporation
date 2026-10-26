@@ -26,7 +26,7 @@ Cumprimentos comuns: Olá. Oi. Bom dia. Boa tarde. Boa noite. Como vai? Bem, obr
 
 Apresentar-se: Meu nome é... Tenho... anos. Moro em... Sou estudante. Muito prazer.`,
       videoTopic: "Como se apresentar em português.",
-      videoUrl: "https://www.youtube.com/watch?v=6naONfjkOCg",
+      videoUrl: "https://www.youtube.com/watch?v=HPViWsefXrs",
       readingTitle: "Olá!",
       reading: [
         "Meu nome é Sofia. Tenho 12 anos. Moro em Kolwezi. Sou estudante.",
@@ -56,7 +56,7 @@ As vogais são: A, E, I, O, U.
 
 Exemplo: meu nome é David. D, A, V, I, D.`,
       videoTopic: "Recitar o alfabeto português de A a Z.",
-      videoUrl: "https://www.youtube.com/watch?v=jv1sguzvzj4",
+      videoUrl: "https://www.youtube.com/watch?v=if1I1TDXdg8",
       readingTitle: "Olá, meu nome é Ana.",
       reading: ["Estou aprendendo português na escola.", "Hoje estou aprendendo o alfabeto.", "Pratico todos os dias e gosto de aprender palavras novas.", "Sei soletrar meu nome: A - N - A."],
       readingSpeakText: `Olá, meu nome é Ana. Estou aprendendo português na escola. Hoje estou aprendendo o alfabeto.`,
@@ -98,7 +98,7 @@ Exemplo de respostas: meu nome é David. Tenho quinze anos. Moro em Kinshasa.`,
 
 Frases úteis: este é o meu pai. Minha mãe é muito gentil. Tenho um irmão e duas irmãs.`,
       videoTopic: "Aprender o vocabulário da família.",
-      videoUrl: "https://www.youtube.com/watch?v=2I9PMKHPtbk",
+      videoUrl: "https://www.youtube.com/watch?v=nY6Pt2AO5aA",
       readingTitle: "Meu nome é João.",
       reading: ["Moro com meus pais e minha irmã.", "Meu pai é médico.", "Minha mãe é muito carinhosa.", "Eu adoro passar tempo com minha família."],
       readingSpeakText: `Meu nome é João. Moro com meus pais e minha irmã. Meu pai é médico. Minha mãe é muito carinhosa.`,
@@ -118,7 +118,7 @@ Frases úteis: este é o meu pai. Minha mãe é muito gentil. Tenho um irmão e 
 
 Frases úteis: este é o meu livro. Eu escrevo com uma caneta. A cadeira é azul.`,
       videoTopic: "Aprender objetos comuns e sua pronúncia.",
-      videoUrl: "https://www.youtube.com/watch?v=2zo5rbQhGDg",
+      videoUrl: "https://www.youtube.com/watch?v=If3kVMXaca4",
       readingTitle: "Meu nome é Pedro.",
       reading: ["Todos os dias vou à escola com minha mochila e meu caderno.", "Uso uma caneta para escrever no meu livro.", "Meu telefone está na minha mochila.", "Sento em uma cadeira e estudo toda manhã."],
       readingSpeakText: `Meu nome é Pedro. Todos os dias vou à escola com minha mochila e meu caderno.`,
@@ -140,7 +140,7 @@ Descrever objetos: a mochila é vermelha. O telefone é preto.
 
 Descrever pessoas: ela é alta. Ele é baixo. Ela está feliz.`,
       videoTopic: "Aprender as cores e praticar descrições.",
-      videoUrl: "https://www.youtube.com/watch?v=tkuNDi7fX0Q",
+      videoUrl: "https://www.youtube.com/watch?v=fnbMXLwmuNU",
       readingTitle: "Meu nome é Lisa.",
       reading: ["Tenho uma mochila escolar azul.", "Meu caderno é verde e meu telefone é preto.", "Estou feliz e sou gentil.", "Meu irmão pequeno é baixo mas muito forte."],
       readingSpeakText: `Meu nome é Lisa. Tenho uma mochila escolar azul. Meu caderno é verde e meu telefone é preto.`,
@@ -162,7 +162,7 @@ Meses do ano: janeiro, fevereiro, março, abril, maio, junho, julho, agosto, set
 
 Frases úteis: hoje é segunda-feira. Meu aniversário é em julho.`,
       videoTopic: "Aprender os dias, os meses e como dizer as datas.",
-      videoUrl: "https://www.youtube.com/watch?v=_YVTxDkklGw",
+      videoUrl: "https://www.youtube.com/watch?v=qpdmyp_yrjA",
       readingTitle: "Meu nome é Kevin.",
       reading: [
         "Hoje é sexta-feira, 12 de junho. Acordo cedo todas as manhãs.",
@@ -214,7 +214,7 @@ Bebidas comuns: água, leite, suco, chá, café.
 
 Frases úteis: bebo água todos os dias. Minha comida favorita é o arroz.`,
       videoTopic: "Aprender o vocabulário de comidas e bebidas.",
-      videoUrl: "https://www.youtube.com/watch?v=keeZo5HfXwc",
+      videoUrl: "https://www.youtube.com/watch?v=IL66LnlEFrk",
       readingTitle: "Meu nome é Emma.",
       reading: ["Toda manhã como pão e ovos no café da manhã.", "Na escola, bebo água e às vezes suco de frutas.", "Minha comida favorita é arroz com frango.", "À noite, minha família come peixe e legumes juntos."],
       readingSpeakText: `Meu nome é Emma. Toda manhã como pão e ovos no café da manhã.`,
@@ -234,7 +234,7 @@ Frases úteis: bebo água todos os dias. Minha comida favorita é o arroz.`,
 
 Perguntar o caminho: onde fica o hospital? Como eu chego ao banco?`,
       videoTopic: "Aprender o vocabulário de lugares e direções.",
-      videoUrl: "https://www.youtube.com/watch?v=pnKi8yITHM8",
+      videoUrl: "https://www.youtube.com/watch?v=_WmxiEIZICY",
       readingTitle: "Na quarta-feira passada, Michael foi ao centro com o pai dele.",
       reading: [
         "Primeiro, pararam no banco porque o pai dele precisava sacar dinheiro.",
