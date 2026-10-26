@@ -54,7 +54,7 @@ Business uses.
 
 Conditionals are common in negotiations and planning. If you reduce the price, we will sign the contract.`,
       videoTopic: "Compare first and second conditional sentences in a business negotiation.",
-      videoUrl: "https://www.youtube.com/watch?v=7Iu0z-LC-Es",
+      videoUrl: "https://www.youtube.com/watch?v=vXp0ETWXbWo",
       readingTitle: "A Negotiation at Brightened Mind Corporation",
       reading: [
         "During the meeting, the supplier said, “If you order more units, we will offer a discount.”",
@@ -121,7 +121,7 @@ Possibility.
 
 Might, could, and may show something is possible but not certain. The deadline might change next week.`,
       videoTopic: "Hear the difference between obligation, advice, and possibility in a workplace context.",
-      videoUrl: "https://www.youtube.com/watch?v=v8ub9s7hxaQ",
+      videoUrl: "https://www.youtube.com/watch?v=IuTwOF_R59A",
       readingTitle: "Preparing for the Audit",
       reading: [
         "The finance manager said, “We must finish the audit documents by Monday.”",
@@ -199,7 +199,7 @@ Closing a deal.
 
 I think we have an agreement. Let's put this in writing.`,
       videoTopic: "Watch a full negotiation from opening to closing the deal.",
-      videoUrl: "https://www.youtube.com/watch?v=lPinxUDxhVs",
+      videoUrl: "https://www.youtube.com/watch?v=2qdTjJJMXWo",
       readingTitle: "Closing the Deal",
       reading: [
         "The two companies negotiated for almost two hours about the price of the new equipment.",
@@ -338,7 +338,7 @@ Writing meeting minutes.
 
 Minutes record what was discussed and decided in a meeting. Attendees means who was present. Agenda means the list of topics discussed. Action items are tasks assigned, with who is responsible and the deadline.`,
       videoTopic: "See how a formal meeting is run from start to finish.",
-      videoUrl: "https://www.youtube.com/watch?v=QOUOsneeB-w",
+      videoUrl: "https://www.youtube.com/watch?v=eh4M5Rviw04",
       readingTitle: "The Monday Meeting",
       reading: [
         "At 9 a.m., the team leader said, “Shall we begin?” and everyone agreed.",
@@ -395,7 +395,7 @@ Useful phrases.
 
 The purpose of this report is to... The data shows that... Based on these findings, we recommend... In conclusion...`,
       videoTopic: "See how a business report is organized from introduction to recommendations.",
-      videoUrl: "https://www.youtube.com/watch?v=zf7HyxcpfLw",
+      videoUrl: "https://www.youtube.com/watch?v=5yAL98Hci6I",
       readingTitle: "A Report on Customer Satisfaction",
       reading: [
         "The purpose of this report is to evaluate customer satisfaction over the last quarter.",
@@ -466,7 +466,7 @@ Ending a call.
 
 Thank you for your time. I'll send you an email to confirm. Talk to you soon. Goodbye.`,
       videoTopic: "Listen to a professional phone call from start to finish.",
-      videoUrl: "https://www.youtube.com/watch?v=8az2C76BQ5Q",
+      videoUrl: "https://www.youtube.com/watch?v=hdLylW2vyII",
       readingTitle: "A Client Phone Call",
       reading: [
         "“Hello, this is Sarah from Brightened Mind Corporation. I'm calling about your recent order.”",
@@ -532,7 +532,7 @@ Safe topics versus topics to avoid.
 
 Safe topics include work, industry trends, the event itself, and travel. Topics to avoid include salary, politics, personal problems, and religion.`,
       videoTopic: "See a natural networking conversation at a business event.",
-      videoUrl: "https://www.youtube.com/watch?v=jZ8PIImWs5Q",
+      videoUrl: "https://www.youtube.com/watch?v=NzGsqtAYH-o",
       readingTitle: "Meeting Someone New at a Conference",
       reading: [
         "At the conference, Michael introduced himself to a stranger standing near the coffee table.",
@@ -599,7 +599,7 @@ Making a decision.
 
 Let's go with this option. I think that's our best course of action. We've decided to move forward with...`,
       videoTopic: "Watch a team identify a problem and agree on a solution together.",
-      videoUrl: "https://www.youtube.com/watch?v=Ny3b8BAie3Y",
+      videoUrl: "https://www.youtube.com/watch?v=1D03qwlz3jA",
       readingTitle: "A Delivery Problem",
       reading: [
         "The logistics team said, “We've run into an issue with the delivery truck. The main problem seems to be a mechanical failure.”",
@@ -665,7 +665,7 @@ Tips for clear communication.
 
 Speak clearly and avoid complicated idioms. Check understanding with simple follow up questions. Be patient and respectful of different communication styles.`,
       videoTopic: "See how an international team communicates clearly across cultures.",
-      videoUrl: "https://www.youtube.com/watch?v=AuROwC6p2ws",
+      videoUrl: "https://www.youtube.com/watch?v=Tzx8ZJrFltU",
       readingTitle: "Working With an International Team",
       reading: [
         "When Brightened Mind Corporation started working with partners abroad, the team noticed some cultural differences.",
@@ -733,7 +733,7 @@ Leading a team.
 
 I'd like to delegate this task to you. Great job motivating the team this week. We all need to be accountable for our deadlines.`,
       videoTopic: "See a manager give clear, respectful feedback to a team member.",
-      videoUrl: "https://www.youtube.com/watch?v=0tSXSrtSl-k",
+      videoUrl: "https://www.youtube.com/watch?v=g8y2hAZmfa8",
       readingTitle: "A New Team Leader",
       reading: [
         "When Joseph became team leader, he learned to delegate tasks instead of doing everything himself.",
@@ -801,7 +801,7 @@ Overall, it looks strong. If you could extend the delivery deadline by one week,
 That sounds reasonable. Let me check with my team and get back to you today.
 Perfect, thank you for your time. I look forward to working together.`,
       videoTopic: "Review all Level 3 topics through one complete business conversation.",
-      videoUrl: "https://www.youtube.com/watch?v=q9UjYpHp2Vk",
+      videoUrl: "https://www.youtube.com/watch?v=9WAEYRGGbOI",
       readingTitle: "Completing the Program",
       reading: [
         "After finishing Levels 1, 2, and 3, Chantal can now confidently lead meetings, write professional reports, and negotiate with international clients.",

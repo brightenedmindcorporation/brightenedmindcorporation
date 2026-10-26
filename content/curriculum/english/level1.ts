@@ -56,7 +56,7 @@ I live in.
 I am a student.
 Nice to meet you.`,
       videoTopic: "How to Introduce Yourself in English",
-      videoUrl: "https://www.youtube.com/watch?v=I_tRSrPru94",
+      videoUrl: "https://www.youtube.com/watch?v=78GhhuwR7M4",
       readingTitle: "Hello!",
       reading: [
         "My name is Sarah. I am 12 years old. I live in Kolwezi. I am a student.",
@@ -131,7 +131,7 @@ My name is David.
 
 D A V I D.`,
       videoTopic: "Learn and repeat the English alphabet from A to Z.",
-      videoUrl: "https://www.youtube.com/watch?v=um3YrKRfsr0",
+      videoUrl: "https://www.youtube.com/watch?v=E0kGRzPROUA",
       readingTitle: "Hello! My name is Anna.",
       reading: [
         "I am learning English at school.",
@@ -231,7 +231,7 @@ My phone number is one two three four five six seven eight nine.
 
 My email is david@gmail.com`,
       videoTopic: "Learn numbers and practice introducing yourself.",
-      videoUrl: "https://www.youtube.com/watch?v=CpW0O7uRLdg",
+      videoUrl: "https://www.youtube.com/watch?v=YuXFxvTbviI",
       readingTitle: "Hello! My name is Sarah.",
       reading: [
         "I am 14 years old.",
@@ -331,7 +331,7 @@ I have one brother and one sister.
 
 We are happy together.`,
       videoTopic: "Learn family vocabulary and relationship words.",
-      videoUrl: "https://www.youtube.com/watch?v=v9EU41cuhHY",
+      videoUrl: "https://www.youtube.com/watch?v=R9IlLtNFvSo",
       readingTitle: "My name is John.",
       reading: [
         "I live with my parents and my sister.",
@@ -425,7 +425,7 @@ Remember.
 
 Everyday objects are things we use at home, at school, or at work every day.`,
       videoTopic: "Learn common objects and their pronunciation.",
-      videoUrl: "https://www.youtube.com/watch?v=5oEhOwtp_nU",
+      videoUrl: "https://www.youtube.com/watch?v=mZPLWweN0VE",
       readingTitle: "My name is Peter.",
       reading: [
         "Every day I go to school with my bag and my notebook.",
@@ -520,7 +520,7 @@ Clean.
 
 We use colors and adjectives to describe what we see around us.`,
       videoTopic: "Learn colors and practice descriptions.",
-      videoUrl: "https://www.youtube.com/watch?v=9OzIMC6XCiE",
+      videoUrl: "https://www.youtube.com/watch?v=H4KCplaWzeE",
       readingTitle: "My name is Lisa.",
       reading: [
         "I have a blue school bag.",
@@ -600,7 +600,7 @@ Today is June fifteenth.
 
 I go to church on Sunday.`,
       videoTopic: "Learn days of the week, months, and how to say dates.",
-      videoUrl: "https://www.youtube.com/watch?v=To6NiejpCzk",
+      videoUrl: "https://www.youtube.com/watch?v=b4VA2Uhn9nk",
       readingTitle: "My name is Kevin.",
       reading: [
         "Today is Friday, June 12th. I wake up early every morning.",
@@ -692,7 +692,7 @@ Talking about routine.
 
 Daily routine means the activities we do every day, usually in the same order.`,
       videoTopic: "Learn vocabulary about everyday routines.",
-      videoUrl: "https://www.youtube.com/watch?v=bq6GBbh3uhU",
+      videoUrl: "https://www.youtube.com/watch?v=Q_NZy52eSxE",
       readingTitle: "My name is Daniel.",
       reading: [
         "Every day I wake up at 6 o’clock in the morning.",
@@ -754,7 +754,7 @@ We eat chicken for dinner.
 
 Food gives us energy and drinks help our body stay healthy.`,
       videoTopic: "Learn common food and drink vocabulary.",
-      videoUrl: "https://www.youtube.com/watch?v=T5c-n80NDSQ",
+      videoUrl: "https://www.youtube.com/watch?v=6INSITGOhAg",
       readingTitle: "My name is Emma.",
       reading: [
         "Every morning I eat bread and eggs for breakfast.",
@@ -824,7 +824,7 @@ How do I get to the bank?
 The market is near the church.
 The library is next to the school.`,
       videoTopic: "Learn vocabulary about places in town and directions.",
-      videoUrl: "https://www.youtube.com/watch?v=SHXPpsIJTb0",
+      videoUrl: "https://www.youtube.com/watch?v=iyjns35isLY",
       readingTitle: "Last Wednesday, Michael went to the town center with his father.",
       reading: [
         "First, they stopped at the bank because his father needed to withdraw money.",
@@ -885,7 +885,7 @@ I enjoy spending time with friends.
 My hobby helps me relax.
 I practice my hobby after school.`,
       videoTopic: "Learn vocabulary about hobbies and free time activities.",
-      videoUrl: "https://www.youtube.com/watch?v=hoyhPZDp3dE",
+      videoUrl: "https://www.youtube.com/watch?v=9gjuqCWJwGo",
       readingTitle: "On Saturday afternoon, James visited his cousin Daniel.",
       reading: [
         "When he arrived, Daniel was sitting outside and reading a book about animals.",
@@ -961,7 +961,7 @@ I like reading books and listening to music.
 Nice. What is your favorite food?
 I love rice and chicken.`,
       videoTopic: "Review beginner English conversation and vocabulary.",
-      videoUrl: "https://www.youtube.com/watch?v=wUF33157hYI",
+      videoUrl: "https://www.youtube.com/watch?v=mWluTdSLU0g",
       readingTitle: "Last Sunday, Kevin traveled with his family to visit his uncle in town.",
       reading: [
         "Before leaving home, he ate bread and drank tea for breakfast.",

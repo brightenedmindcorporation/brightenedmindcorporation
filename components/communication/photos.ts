@@ -21,15 +21,17 @@ const thumb = (id: string) => `/communication/bm-${id}-t.webp`;
 export const photoSrc = full;
 export const photoThumb = thumb;
 
-// The photos of the BM Communication portfolio. The academic ceremony photos wait for the people's consent.
+// The photos of the BM Communication portfolio.
 export const PHOTOS: Photo[] = [
   { id: "03", category: "mariage", alt: "Portrait en robe rouge dans un escalier lumineux", w: 733, h: 1080 },
   { id: "01", category: "mariage", alt: "Séance de couple : costume sombre et robe rouge", w: 847, h: 1080 },
   { id: "16", category: "evenement", alt: "Match de boxe en plein air au coucher du soleil", w: 1080, h: 724 },
+  { id: "20", category: "evenement", alt: "Discours au pupitre lors d'une cérémonie académique", w: 720, h: 1080 },
   { id: "11", category: "portrait", alt: "Mannequin en robe bleu nuit sur fond turquoise", w: 728, h: 1080 },
   { id: "06", category: "mariage", alt: "Couple en tendre étreinte pendant une séance photo", w: 1080, h: 725 },
   { id: "02", category: "portrait", alt: "Portrait d'homme en chemise camouflage sur fond bleu nuit", w: 716, h: 1080 },
   { id: "25", category: "evenement", alt: "Cortège en pagnes wax lors d'une cérémonie", w: 1080, h: 735 },
+  { id: "19", category: "evenement", alt: "Remise de diplômes : professeur en toge applaudissant", w: 717, h: 1080 },
   { id: "10", category: "mariage", alt: "Mariée en robe blanche perlée devant une grande baie vitrée", w: 720, h: 1080 },
   { id: "17", category: "evenement", alt: "Combat de boxe sous un ciel orangé", w: 1080, h: 727 },
   { id: "09", category: "portrait", alt: "Portrait de jeune femme sur fond bleu", w: 717, h: 1080 },
@@ -46,6 +48,8 @@ export const PHOTOS: Photo[] = [
   { id: "15", category: "evenement", alt: "Silhouettes autour d'un ring de boxe au soleil couchant", w: 1080, h: 721 },
   { id: "23", category: "portrait", alt: "Portrait en extérieur avec bouquet de fleurs et diplôme", w: 1080, h: 1034 },
   { id: "22", category: "evenement", alt: "Boxeurs sur le ring devant le public", w: 1080, h: 716 },
+  { id: "21", category: "evenement", alt: "Allocution sous un parasol lors d'une cérémonie académique", w: 1080, h: 720 },
+  { id: "24", category: "evenement", alt: "Cérémonie académique en plein air : l'orateur au pupitre", w: 720, h: 1080 },
 ];
 
 export const HERO_SLIDES = [
