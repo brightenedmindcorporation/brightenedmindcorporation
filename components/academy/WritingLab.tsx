@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { userScope } from "@/lib/academy/userScope";
 import { PenLine, Volume2, CheckCircle2, RotateCcw, Copy, Eye } from "lucide-react";
 import type { Lesson } from "@/content/curriculum/types";
 import { speakPhrase, speakWithDeviceVoice } from "@/lib/academy/deviceSpeech";
@@ -296,7 +297,7 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
 
 export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
   const task = useMemo(() => buildWritingTask(langSlug, lesson), [langSlug, lesson]);
-  const storageKey = `bm-writing:${langSlug}:${lesson.id}:${lesson.title}`;
+  const storageKey = `bm-writing:${userScope()}:${langSlug}:${lesson.id}:${lesson.title}`;
   const [saved, setSaved] = useState<Saved>(EMPTY);
   const [loaded, setLoaded] = useState(false);
   const [showModel, setShowModel] = useState(false);

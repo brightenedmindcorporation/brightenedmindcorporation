@@ -14,6 +14,7 @@
 
 import type { QuizPartsRecord } from "@/lib/academy/quizScoring";
 import { shortCode } from "@/lib/academy/shortCode";
+import { userScope } from "@/lib/academy/userScope";
 
 export interface LevelProgress {
   /** Lessons the student has opened and studied (a lesson is studied before its quiz). */
@@ -46,7 +47,8 @@ export interface LevelProgress {
 }
 
 function storageKey(langSlug: string, level: number) {
-  return `bm_academy_progress_${langSlug}_L${level}`;
+  // Per student: the old shared key is left alone (it may hold another student's results); the server copy comes back on the next sync.
+  return `bm_academy_progress_${userScope()}_${langSlug}_L${level}`;
 }
 
 function emptyProgress(): LevelProgress {

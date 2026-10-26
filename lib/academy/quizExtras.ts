@@ -1,4 +1,5 @@
 import type { LevelCurriculum } from "@/content/curriculum/types";
+import { userScope } from "@/lib/academy/userScope";
 import { getDialogue } from "@/content/dialogues";
 import { isOfficeProgram } from "@/content/curriculum";
 import { isCjkText, lessonChars, wordsOf } from "./writingLab";
@@ -86,7 +87,7 @@ export function quizReading(langSlug: string, curriculum: LevelCurriculum, key: 
 /** Keeps the student's written answer and conversation result on this device. */
 export function saveQuizParts(langSlug: string, level: number, key: number | "final", parts: QuizParts) {
   try {
-    localStorage.setItem(`bm-quizparts:${langSlug}:${level}:${key}`, JSON.stringify({ ...parts, at: new Date().toISOString() }));
+    localStorage.setItem(`bm-quizparts:${userScope()}:${langSlug}:${level}:${key}`, JSON.stringify({ ...parts, at: new Date().toISOString() }));
   } catch {
     // storage unavailable: the quiz result itself is still recorded
   }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { userScope } from "@/lib/academy/userScope";
 import { sfx } from "@/lib/academy/sfx";
 import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine, Mic } from "lucide-react";
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
@@ -122,7 +123,9 @@ function Questions({
   );
 }
 
-export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing, reading, persistKey }: QuizEngineProps) {
+export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialogue, langSlug = "english", writing, reading, persistKey: sharedKey }: QuizEngineProps) {
+  // drafts belong to the signed-in student, not to the browser
+  const persistKey = sharedKey ? `${sharedKey}_${typeof window === "undefined" ? "" : userScope()}` : undefined;
   const alreadyDone = alreadyScore !== null;
   // A quiz already taken only shows its main questions (the extra steps
   // were not part of it, or are not stored); a practice retake shows all.
