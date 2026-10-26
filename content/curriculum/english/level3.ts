@@ -54,7 +54,7 @@ Business uses.
 
 Conditionals are common in negotiations and planning. If you reduce the price, we will sign the contract.`,
       videoTopic: "Compare first and second conditional sentences in a business negotiation.",
-      videoUrl: "https://www.youtube.com/watch?v=vXp0ETWXbWo",
+      videoUrl: "https://www.youtube.com/watch?v=9a-GrWskPdM",
       readingTitle: "A Negotiation at Brightened Mind Corporation",
       reading: [
         "During the meeting, the supplier said, “If you order more units, we will offer a discount.”",
@@ -121,7 +121,7 @@ Possibility.
 
 Might, could, and may show something is possible but not certain. The deadline might change next week.`,
       videoTopic: "Hear the difference between obligation, advice, and possibility in a workplace context.",
-      videoUrl: "https://www.youtube.com/watch?v=IuTwOF_R59A",
+      videoUrl: "https://www.youtube.com/watch?v=jFqHk2WCzsM",
       readingTitle: "Preparing for the Audit",
       reading: [
         "The finance manager said, “We must finish the audit documents by Monday.”",
@@ -266,7 +266,7 @@ Closing a presentation.
 
 To summarize, the key points are... Thank you for your attention. Are there any questions?`,
       videoTopic: "Watch a short, well-structured professional presentation.",
-      videoUrl: "https://www.youtube.com/watch?v=bgFNTuRYtKE",
+      videoUrl: "https://www.youtube.com/watch?v=OgEJ5krABiw",
       readingTitle: "Linda's First Presentation",
       reading: [
         "Linda was nervous before her first presentation to the management team.",
@@ -338,7 +338,7 @@ Writing meeting minutes.
 
 Minutes record what was discussed and decided in a meeting. Attendees means who was present. Agenda means the list of topics discussed. Action items are tasks assigned, with who is responsible and the deadline.`,
       videoTopic: "See how a formal meeting is run from start to finish.",
-      videoUrl: "https://www.youtube.com/watch?v=eh4M5Rviw04",
+      videoUrl: "https://www.youtube.com/watch?v=tmh-kaHwRdw",
       readingTitle: "The Monday Meeting",
       reading: [
         "At 9 a.m., the team leader said, “Shall we begin?” and everyone agreed.",
@@ -395,7 +395,7 @@ Useful phrases.
 
 The purpose of this report is to... The data shows that... Based on these findings, we recommend... In conclusion...`,
       videoTopic: "See how a business report is organized from introduction to recommendations.",
-      videoUrl: "https://www.youtube.com/watch?v=5yAL98Hci6I",
+      videoUrl: "https://www.youtube.com/watch?v=SLFxiiSjDc8",
       readingTitle: "A Report on Customer Satisfaction",
       reading: [
         "The purpose of this report is to evaluate customer satisfaction over the last quarter.",
@@ -466,7 +466,7 @@ Ending a call.
 
 Thank you for your time. I'll send you an email to confirm. Talk to you soon. Goodbye.`,
       videoTopic: "Listen to a professional phone call from start to finish.",
-      videoUrl: "https://www.youtube.com/watch?v=hdLylW2vyII",
+      videoUrl: "https://www.youtube.com/watch?v=a8IaXNJ5tbQ",
       readingTitle: "A Client Phone Call",
       reading: [
         "“Hello, this is Sarah from Brightened Mind Corporation. I'm calling about your recent order.”",
@@ -532,7 +532,7 @@ Safe topics versus topics to avoid.
 
 Safe topics include work, industry trends, the event itself, and travel. Topics to avoid include salary, politics, personal problems, and religion.`,
       videoTopic: "See a natural networking conversation at a business event.",
-      videoUrl: "https://www.youtube.com/watch?v=NzGsqtAYH-o",
+      videoUrl: "https://www.youtube.com/watch?v=2jGfSjaiqhc",
       readingTitle: "Meeting Someone New at a Conference",
       reading: [
         "At the conference, Michael introduced himself to a stranger standing near the coffee table.",
@@ -665,7 +665,7 @@ Tips for clear communication.
 
 Speak clearly and avoid complicated idioms. Check understanding with simple follow up questions. Be patient and respectful of different communication styles.`,
       videoTopic: "See how an international team communicates clearly across cultures.",
-      videoUrl: "https://www.youtube.com/watch?v=Tzx8ZJrFltU",
+      videoUrl: "https://www.youtube.com/watch?v=CWHRa1XtQ4A",
       readingTitle: "Working With an International Team",
       reading: [
         "When Brightened Mind Corporation started working with partners abroad, the team noticed some cultural differences.",
@@ -801,7 +801,7 @@ Overall, it looks strong. If you could extend the delivery deadline by one week,
 That sounds reasonable. Let me check with my team and get back to you today.
 Perfect, thank you for your time. I look forward to working together.`,
       videoTopic: "Review all Level 3 topics through one complete business conversation.",
-      videoUrl: "https://www.youtube.com/watch?v=9WAEYRGGbOI",
+      videoUrl: "https://www.youtube.com/watch?v=VIsItk3RHEc",
       readingTitle: "Completing the Program",
       reading: [
         "After finishing Levels 1, 2, and 3, Chantal can now confidently lead meetings, write professional reports, and negotiate with international clients.",
