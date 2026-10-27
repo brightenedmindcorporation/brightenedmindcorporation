@@ -186,7 +186,7 @@ Frases úteis: hoje é segunda-feira. Meu aniversário é em julho.`,
 
 Frases úteis: acordo às seis horas. Vou à escola às sete horas.`,
       videoTopic: "Aprender o vocabulário das rotinas diárias.",
-      videoUrl: "https://www.youtube.com/watch?v=FMm7foSrFEM",
+      videoUrl: "https://www.youtube.com/watch?v=3ayysoyBgQ0",
       readingTitle: "Meu nome é Daniel.",
       reading: [
         "Todos os dias acordo às 6 horas da manhã.",
