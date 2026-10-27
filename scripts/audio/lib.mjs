@@ -9,7 +9,7 @@
 import path from "path";
 import fs from "fs";
 import { fileURLToPath, pathToFileURL } from "url";
-import { clipId, dialogueClipText, extractSpeechText, isSpokenText, lessonNarrations, verbPhrases } from "../../lib/academy/audioClips.ts";
+import { clipId, dialogueClipText, spokenForm, extractSpeechText, isSpokenText, lessonNarrations, verbPhrases } from "../../lib/academy/audioClips.ts";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const WORK = process.env.AUDIO_WORK_DIR || path.resolve(ROOT, "..", "bm-audio");
@@ -135,7 +135,7 @@ export async function collectTexts(lang) {
     const charsFile = path.join(ROOT, "content", "vocabulary", "chinese.json");
     if (fs.existsSync(charsFile)) for (const ch of Object.keys(JSON.parse(fs.readFileSync(charsFile, "utf8")))) add(ch);
   }
-  return Array.from(texts, ([id, text]) => ({ id, text, voice: voiceOverride.get(id) ?? voiceFor(lang, text) }));
+  return Array.from(texts, ([id, text]) => ({ id, text: spokenForm(lang, text) ?? text, voice: voiceOverride.get(id) ?? voiceFor(lang, text) }));
 }
 
 export function textsFile(lang) {
