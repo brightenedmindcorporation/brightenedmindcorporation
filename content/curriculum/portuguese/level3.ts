@@ -53,7 +53,6 @@ Conselho e sugestão. Deveria se usa para dar conselhos. Você deveria checar os
 
 Possibilidade. Poderia e é possível que mostram que algo é possível mas não certo.`,
       videoTopic: "Ouvir a diferença entre obrigação, conselho e possibilidade no trabalho.",
-      videoUrl: "https://www.youtube.com/watch?v=pVv3L0vLRYo",
       readingTitle: "Preparativos para a Auditoria",
       reading: [
         "A gerente financeira disse, “Devemos terminar os documentos da auditoria até segunda-feira.”",
@@ -138,7 +137,6 @@ Pedir a palavra. Posso dizer algo? Se eu puder acrescentar... Desculpe interromp
 
 Escrever atas de reunião. As atas registram o que foi discutido e decidido.`,
       videoTopic: "Ver como uma reunião formal se desenvolve do início ao fim.",
-      videoUrl: "https://www.youtube.com/watch?v=Z30r06x0ieQ",
       readingTitle: "A Reunião de Segunda-Feira",
       reading: [
         "Às 9 horas, o líder da equipe disse, “Podemos começar?” e todos concordaram.",
@@ -162,7 +160,6 @@ Escrever atas de reunião. As atas registram o que foi discutido e decidido.`,
 
 Frases úteis. O propósito deste relatório é... Os dados mostram que... Com base nesses resultados, recomendamos...`,
       videoTopic: "Ver como um relatório empresarial se organiza da introdução às recomendações.",
-      videoUrl: "https://www.youtube.com/watch?v=-quTpulii5U",
       readingTitle: "Um Relatório sobre a Satisfação do Cliente",
       reading: [
         "O propósito deste relatório é avaliar a satisfação do cliente durante o último trimestre.",
@@ -217,7 +214,6 @@ Trocar informações de contato. Foi ótimo falar com você. Posso pegar seu car
 
 Temas seguros versus temas a evitar. Seguros: trabalho, tendências do setor. Evitar: salário, política.`,
       videoTopic: "Ver uma conversa informal natural em um evento de negócios.",
-      videoUrl: "https://www.youtube.com/watch?v=8fZI_dyC9F8",
       readingTitle: "Conhecendo Alguém Novo em uma Conferência",
       reading: [
         "Na conferência, Miguel se apresentou a um estranho que estava perto da mesa de café.",
@@ -298,7 +294,6 @@ Dar feedback. Eu realmente aprecio o esforço que você colocou nisso.
 
 Liderar uma equipe. Gostaria de delegar essa tarefa a você.`,
       videoTopic: "Ver um gerente dando feedback claro e respeitoso a um membro da equipe.",
-      videoUrl: "https://www.youtube.com/watch?v=RTiZj49XN-c",
       readingTitle: "Um Novo Líder de Equipe",
       reading: [
         "Quando José se tornou líder de equipe, aprendeu a delegar tarefas em vez de fazer tudo sozinho.",

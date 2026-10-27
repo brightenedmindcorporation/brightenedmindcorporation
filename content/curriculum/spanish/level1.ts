@@ -120,7 +120,6 @@ Ejemplo: vivo con mi familia. Mi padre trabaja en una oficina.`,
 
 Frases útiles: este es mi libro. Escribo con un bolígrafo. La silla es azul.`,
       videoTopic: "Aprender objetos comunes y su pronunciación.",
-      videoUrl: "https://www.youtube.com/watch?v=rqX2AN-sVSA",
       readingTitle: "Me llamo Pedro.",
       reading: ["Cada día voy a la escuela con mi mochila y mi cuaderno.", "Uso un bolígrafo para escribir en mi libro.", "Mi teléfono está en mi mochila.", "Me siento en una silla y estudio cada mañana."],
       readingSpeakText: `Me llamo Pedro. Cada día voy a la escuela con mi mochila y mi cuaderno.`,
@@ -164,7 +163,6 @@ Meses del año: enero, febrero, marzo, abril, mayo, junio, julio, agosto, septie
 
 Frases útiles: hoy es lunes. Mi cumpleaños es en julio.`,
       videoTopic: "Aprender los días, los meses y cómo decir las fechas.",
-      videoUrl: "https://www.youtube.com/watch?v=U76dqwEjsP0",
       readingTitle: "Me llamo Kevin.",
       reading: [
         "Hoy es viernes 12 de junio. Me levanto temprano cada mañana.",
@@ -236,7 +234,6 @@ Frases útiles: bebo agua todos los días. Mi comida favorita es el arroz.`,
 
 Preguntar por direcciones: ¿dónde está el hospital? ¿cómo llego al banco?`,
       videoTopic: "Aprender el vocabulario de lugares y direcciones.",
-      videoUrl: "https://www.youtube.com/watch?v=hz3q4WCxccA",
       readingTitle: "El miércoles pasado, Miguel fue al centro con su padre.",
       reading: [
         "Primero, se detuvieron en el banco porque su padre necesitaba retirar dinero.",
@@ -315,7 +312,6 @@ Ejemplo de conversación real.
 Hola, me llamo David. ¿Cómo te llamas?
 Hola David, me llamo Sara. Mucho gusto.`,
       videoTopic: "Repasar la conversación básica y el vocabulario del Nivel 1.",
-      videoUrl: "https://www.youtube.com/watch?v=z4xGBWwhjiA",
       readingTitle: "El domingo pasado, Kevin viajó con su familia para visitar a su tío en la ciudad.",
       reading: [
         "Antes de salir, comió pan y bebió té en el desayuno.",

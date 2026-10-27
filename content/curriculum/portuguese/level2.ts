@@ -84,7 +84,6 @@ Manter uma conversa. Mostre interesse: sério? Conte mais.
 
 Concordar e discordar educadamente. Eu concordo com você. É um bom ponto, mas eu acho que...`,
       videoTopic: "Praticar perguntas de acompanhamento em uma conversa real.",
-      videoUrl: "https://www.youtube.com/watch?v=QviLRRwIfb8",
       readingTitle: "Na sexta-feira passada, Paulo conheceu uma nova colega de trabalho chamada Clara.",
       reading: [
         "Ele perguntou, “De onde você é?” e ela disse que era de Goma.",
@@ -137,7 +136,6 @@ Está certo pedir para alguém repetir: você pode repetir, por favor?
 
 Seguir direções. Vire à esquerda. Vire à direita. Siga em frente.`,
       videoTopic: "Praticar seguir direções faladas pela cidade.",
-      videoUrl: "https://www.youtube.com/watch?v=eX_TTO0KMsk",
       readingTitle: "Marie perguntou a um estranho o caminho para os correios.",
       reading: [
         "O homem disse, “Siga em frente, depois vire à esquerda no mercado.”",
@@ -163,7 +161,6 @@ Busca de informações significa procurar rapidamente uma informação específi
 
 Usar pistas do contexto. Você não precisa entender cada palavra para entender um texto.`,
       videoTopic: "Praticar a leitura rápida de um artigo curto para encontrar a ideia principal.",
-      videoUrl: "https://www.youtube.com/watch?v=gncbFC8Lqpc",
       readingTitle: "O Mercado de Kolwezi",
       reading: [
         "Todo sábado, centenas de pessoas se reúnem no mercado central de Kolwezi.",
@@ -248,7 +245,6 @@ No aeroporto. Onde fica o balcão de check-in? Eu gostaria de um assento na jane
 
 Em uma entrevista de emprego. Fale sobre você. Quais são seus pontos fortes?`,
       videoTopic: "Praticar diálogos reais em um restaurante, aeroporto e entrevista de emprego.",
-      videoUrl: "https://www.youtube.com/watch?v=RaaLjEIFWAU",
       readingTitle: "A Entrevista de Emprego de Ana",
       reading: [
         "Ana chegou cedo para a entrevista de emprego e cumprimentou o gerente educadamente.",
@@ -276,7 +272,6 @@ Frases úteis para reuniões. Vamos começar. Você poderia esclarecer esse pont
 
 Vocabulário profissional. Prazo significa a data em que algo deve ser concluído.`,
       videoTopic: "Ver como se estrutura um e-mail profissional e uma conversa de reunião.",
-      videoUrl: "https://www.youtube.com/watch?v=fGWspM9MA4A",
       readingTitle: "A Primeira Semana de David em um Novo Emprego",
       reading: [
         "Durante sua primeira reunião, David ouviu sua gerente dizer, “Vamos começar.”",
@@ -355,7 +350,6 @@ Exemplo de conversa da vida real.
 Oi, soube que você começou um novo emprego. Como está sendo?
 Está indo bem, obrigada! Eu estava nervosa no início, mas meus colegas são muito simpáticos.`,
       videoTopic: "Revisar todos os temas do Nível 2 através de uma conversa estendida.",
-      videoUrl: "https://www.youtube.com/watch?v=u15mgPYMKhU",
       readingTitle: "Um Ano de Progresso",
       reading: [
         "Há um ano, Patrick mal conseguia se apresentar em português.",

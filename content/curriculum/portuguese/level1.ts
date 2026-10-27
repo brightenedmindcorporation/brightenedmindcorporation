@@ -78,7 +78,6 @@ Informações pessoais: Qual é o seu nome? Quantos anos você tem? Onde você m
 
 Exemplo de respostas: meu nome é David. Tenho quinze anos. Moro em Kinshasa.`,
       videoTopic: "Aprender os números e se apresentar.",
-      videoUrl: "https://www.youtube.com/watch?v=Lq5FJG8e2fU",
       readingTitle: "Olá, meu nome é Sara.",
       reading: ["Tenho 14 anos.", "Moro em Kinshasa.", "Meu número de telefone é 987654321."],
       readingSpeakText: `Olá, meu nome é Sara. Tenho catorze anos. Moro em Kinshasa. Meu número de telefone é nove oito sete seis cinco quatro três dois um.`,
@@ -259,7 +258,6 @@ Perguntar o caminho: onde fica o hospital? Como eu chego ao banco?`,
 
 Frases úteis: meu passatempo favorito é ler. Eu gosto de jogar futebol.`,
       videoTopic: "Aprender o vocabulário de lazer e tempo livre.",
-      videoUrl: "https://www.youtube.com/watch?v=rZlSS6GhAKo",
       readingTitle: "No sábado à tarde, Tiago visitou seu primo Daniel.",
       reading: [
         "Quando chegou, Daniel estava sentado lá fora lendo um livro sobre animais.",
@@ -313,7 +311,6 @@ Exemplo de conversa real.
 Olá, meu nome é David. Qual é o seu nome?
 Oi David, meu nome é Sara. Muito prazer.`,
       videoTopic: "Revisar a conversa básica e o vocabulário do Nível 1.",
-      videoUrl: "https://www.youtube.com/watch?v=JoaGC5BIh9s",
       readingTitle: "No domingo passado, Kevin viajou com a família para visitar o tio na cidade.",
       reading: [
         "Antes de sair, comeu pão e bebeu chá no café da manhã.",

@@ -84,7 +84,6 @@ Mantener una conversación. Muestra interés: ¿en serio? Cuéntame más.
 
 Estar de acuerdo y en desacuerdo cortésmente. Estoy de acuerdo contigo. Es un buen punto, pero creo que...`,
       videoTopic: "Practicar preguntas de seguimiento en una conversación real.",
-      videoUrl: "https://www.youtube.com/watch?v=tBZ_sq3CJSM",
       readingTitle: "El viernes pasado, Pablo conoció a una nueva compañera de trabajo llamada Clara.",
       reading: [
         "Le preguntó, “¿De dónde eres?” y ella dijo que era de Goma.",
@@ -355,7 +354,6 @@ Ejemplo de conversación de la vida real.
 Hola, me enteré de que empezaste un nuevo trabajo. ¿Cómo va?
 Va bien, ¡gracias! Estaba nerviosa al principio, pero mis colegas son muy amables.`,
       videoTopic: "Repasar todos los temas del Nivel 2 a través de una conversación extendida.",
-      videoUrl: "https://www.youtube.com/watch?v=SEefRHuXr0c",
       readingTitle: "Un Año de Progreso",
       reading: [
         "Hace un año, Patrick apenas podía presentarse en español.",
