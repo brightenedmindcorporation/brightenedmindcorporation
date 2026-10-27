@@ -37,7 +37,7 @@
     "eslint-config-next": "16.2.9",
     "franc-min": "^6.2.0",
     "gh-pages": "^6.3.0",
-    "msedge-tts": "^2.1.0",
+    "msedge-tts": "^2.1.1",
     "pinyin-pro": "^3.29.5",
     "tailwindcss": "^4",
     "typescript": "^5"
