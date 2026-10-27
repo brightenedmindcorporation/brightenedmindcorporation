@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePinyin } from "@/lib/academy/pinyinPref";
 
 type PinyinFn = (text: string, options: { type: "array"; toneType: "symbol" }) => string[];
 
@@ -11,7 +12,9 @@ const load = () => (loader ||= import("pinyin-pro").then((m) => (loaded = m.piny
 const HAN = /([㐀-鿿]+)/;
 
 /** Text where each Chinese character carries its pinyin above it (read in context); other text is left as is. */
-export default function Zh({ text, on = true }: { text: string; on?: boolean }) {
+export default function Zh({ text, on: wanted = true }: { text: string; on?: boolean }) {
+  const pref = usePinyin();
+  const on = wanted && pref;
   // the function is wrapped: React would call a bare function given to useState / setState
   const [pinyin, setPinyin] = useState<{ fn: PinyinFn } | null>(loaded ? { fn: loaded } : null);
   useEffect(() => {

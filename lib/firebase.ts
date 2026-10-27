@@ -16,4 +16,13 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 // The sign-in is kept on this device (also after the browser is closed) until the student signs out.
-if (typeof window !== "undefined") setPersistence(auth, browserLocalPersistence).catch(() => {});
+// Stay signed in across browser restarts, unless the student unchecked "Se souvenir de moi" for this session.
+if (typeof window !== "undefined") {
+  let sessionOnly = false;
+  try {
+    sessionOnly = sessionStorage.getItem("bm-session-only") === "1";
+  } catch {
+    // storage blocked: keep the default
+  }
+  if (!sessionOnly) setPersistence(auth, browserLocalPersistence).catch(() => {});
+}

@@ -79,7 +79,12 @@ export async function getClipBlob(url: string): Promise<Blob | null> {
 /** Plays the short clip for `text`; returns false (so the caller can fall
  * back to speech synthesis) when no clip could be played. */
 export async function playClip(langSlug: string, text: string, id?: string): Promise<boolean> {
-  const blob = await getClipBlob(clipUrl(langSlug, text));
+  return playClipUrl(clipUrl(langSlug, text), id);
+}
+
+/** Plays the clip at `url`; false when it can't be had or played. */
+export async function playClipUrl(url: string, id?: string): Promise<boolean> {
+  const blob = await getClipBlob(url);
   if (!blob) return false;
   const objectUrl = URL.createObjectURL(blob);
   const audio = new Audio(objectUrl);

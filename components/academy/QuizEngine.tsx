@@ -9,6 +9,7 @@ import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
 import { computeQuizMark, type QuizPartsRecord } from "@/lib/academy/quizScoring";
 import Zh, { withoutHint } from "@/components/academy/Zh";
+import PinyinToggle from "@/components/academy/PinyinToggle";
 import QuizReadingStep, { emptyReadingState, readingDone, type QuizReading } from "@/components/academy/QuizReadingStep";
 import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writingSummary, type QuizWriting, type WritingItem } from "@/components/academy/QuizWritingStep";
 
@@ -242,6 +243,11 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
 
   return (
     <div className="space-y-6">
+      {langSlug === "chinese" && (
+        <div className="flex justify-end">
+          <PinyinToggle />
+        </div>
+      )}
       {useDialogue && (
         <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-6">
           <StepTitle n={++step} icon={Headphones} title="Conversation à écouter" hint="Écoutez la conversation, puis répondez. Le texte n'est pas affiché pendant l'écoute." />

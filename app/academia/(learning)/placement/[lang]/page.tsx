@@ -13,6 +13,7 @@ import { SPEECH_LANG } from "@/lib/academy/deviceSpeech";
 import { claimPlayback, releasePlayback } from "@/lib/academy/lessonAudioPlayer";
 import { sfx } from "@/lib/academy/sfx";
 import Zh, { withoutHint } from "@/components/academy/Zh";
+import PinyinToggle from "@/components/academy/PinyinToggle";
 
 interface Question {
   id: string;
@@ -336,6 +337,7 @@ export default function PlacementPage() {
 
         {state?.status === "requested" && (
           <>
+            {cjk && <div className="flex justify-end"><PinyinToggle /></div>}
             <Part n={1} icon={ListChecks} title={office ? "Connaissances" : "Vocabulaire et grammaire"} hint="Certaines questions sont faciles, d'autres plus difficiles : c'est normal.">
               <Questions list={levelQs} answers={answers} onPick={pick} zh={cjk} />
             </Part>

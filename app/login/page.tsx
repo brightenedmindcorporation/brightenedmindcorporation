@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState } from "react";
-import { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged } from "firebase/auth";
+import { signInWithEmailAndPassword, sendPasswordResetEmail, onAuthStateChanged, setPersistence, browserLocalPersistence, browserSessionPersistence } from "firebase/auth";
 import { logActivity } from "@/lib/academy/activity";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +26,8 @@ function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  // Stay signed in on this browser (the default); unchecked on a shared computer, the session ends with the browser.
+  const [remember, setRemember] = useState(true);
   const [loginError, setLoginError] = useState<string | null>(null);
 
   const [showResetModal, setShowResetModal] = useState(false);
@@ -83,6 +85,13 @@ function LoginForm() {
     try {
       setLoading(true);
 
+      try {
+        if (remember) sessionStorage.removeItem("bm-session-only");
+        else sessionStorage.setItem("bm-session-only", "1");
+      } catch {
+        // storage blocked: the choice still applies to this sign-in
+      }
+      await setPersistence(auth, remember ? browserLocalPersistence : browserSessionPersistence);
       const userCred = await signInWithEmailAndPassword(auth, email.trim(), password);
       const user = userCred.user;
 
@@ -253,7 +262,11 @@ function LoginForm() {
             />
           </div>
 
-          <div className="text-right">
+          <div className="flex items-center justify-between gap-3">
+            <label className="flex cursor-pointer items-center gap-2 text-sm text-ink-soft">
+              <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} className="h-4 w-4 accent-red-600" />
+              Se souvenir de moi
+            </label>
             <button
               type="button"
               onClick={() => {

@@ -13,6 +13,7 @@ import { useYouTubeMeter } from "@/lib/youtubeMeter";
 import ListenButton from "@/components/academy/ListenButton";
 import { frenchFor, hasFrenchTranslations } from "@/content/translations";
 import { useFrenchVisible } from "@/lib/academy/frenchHelp";
+import { playClipUrl } from "@/lib/academy/lessonAudioPlayer";
 import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
@@ -95,7 +96,12 @@ function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
       {text.split(/\s+/).map((letter, i) => (
         <span key={i} className="notranslate inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-alt py-1 pl-1 pr-3">
           <ListenButton
-            play={(id) => (langSlug === "english" ? speakWithDeviceVoice(ENGLISH_LETTER_NAMES[letter] ?? letter, "english", { id }) : speak(letter, langSlug, id))}
+            play={async (id) => {
+              if (langSlug !== "english") return speak(letter, langSlug, id);
+              // A recorded clip of the letter's name; the device voice only when it can't be played.
+              if (await playClipUrl(`/audio/letters/en/${letter.toLowerCase()}.mp3`, id)) return;
+              await speakWithDeviceVoice(ENGLISH_LETTER_NAMES[letter] ?? letter, "english", { id });
+            }}
             title={`Écouter la lettre ${letter}`}
             size={13}
             className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface hover:bg-red-600 hover:text-white text-ink-soft transition"
