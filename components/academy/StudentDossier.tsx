@@ -24,8 +24,14 @@ function PartCells({ mark, taken, review }: { mark: QuizMark; taken: boolean; re
     if (!l) return <span className="text-ink-faint">—</span>;
     return (
       <>
-        <span className="font-mono">{l.detail}</span>
-        {l.got !== null && <span className="block text-[11px] text-ink-faint">{l.got}/{l.max}</span>}
+        {l.detail === "fixé" && l.got !== null ? (
+          <span className="font-mono">{l.got}/{l.max}</span>
+        ) : (
+          <>
+            <span className="font-mono">{l.detail}</span>
+            {l.got !== null && <span className="block text-[11px] text-ink-faint">{l.got}/{l.max}</span>}
+          </>
+        )}
       </>
     );
   };
