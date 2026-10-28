@@ -10,6 +10,7 @@ import ScrollButtons from "@/components/ScrollButtons";
 import BackButton from "@/components/BackButton";
 import VisitTracker from "@/components/VisitTracker";
 import PwaRegister from "@/components/PwaRegister";
+import InstallButton from "@/components/InstallButton";
 import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
 
@@ -80,6 +81,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               <LanguageSwitcher className="hidden sm:block" />
               <ThemeToggle className="hidden sm:inline-flex" />
 
+              <InstallButton className="hidden lg:inline-flex border border-line hover:border-red-600/60 text-ink text-sm font-bold px-4 py-2.5 rounded-xl transition" />
               <Link
                 href="/devis"
                 className="hidden sm:inline-block border border-line hover:border-red-600/60 text-ink text-sm font-bold px-4 py-2.5 rounded-xl transition"
@@ -122,6 +124,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               >
                 Devis
               </Link>
+              <InstallButton label="Télécharger l'application" className="border border-line hover:border-red-600/60 text-ink font-bold px-5 py-2.5 rounded-xl transition" />
               <div className="pt-2 border-t border-line flex items-center gap-3">
                 <ThemeToggle />
                 <LanguageSwitcher />
