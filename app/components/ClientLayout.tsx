@@ -19,6 +19,7 @@ const NAV_LINKS = [
   { href: "/academia", label: "Academia" },
   { href: "/communication", label: "Communication" },
   { href: "/domestica", label: "Domestica" },
+  { href: "/suivi", label: "Suivi colis" },
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
