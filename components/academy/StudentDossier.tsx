@@ -260,7 +260,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                               {r.score === null ? (
                                 <span className="text-xs text-ink-faint">Pas passé</span>
                               ) : r.passed ? (
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi{(progress.adminScored ?? []).includes(r.lessonId) ? " (note fixée par l'admin)" : ""}</span>
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-500"><CheckCircle2 size={13} /> Réussi{r.mark.byAdmin ? " (note fixée par l'admin)" : ""}</span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-500"><XCircle size={13} /> Pas encore réussi</span>
                               )}
