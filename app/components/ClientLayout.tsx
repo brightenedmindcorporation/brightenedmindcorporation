@@ -124,7 +124,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
               >
                 Devis
               </Link>
-              <InstallButton label="Télécharger l'application" className="border border-line hover:border-red-600/60 text-ink font-bold px-5 py-2.5 rounded-xl transition" />
+              <InstallButton label="Télécharger l'application" className="flex border border-line hover:border-red-600/60 text-ink font-bold px-5 py-2.5 rounded-xl transition" />
               <div className="pt-2 border-t border-line flex items-center gap-3">
                 <ThemeToggle />
                 <LanguageSwitcher />

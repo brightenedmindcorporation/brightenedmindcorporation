@@ -46,7 +46,7 @@ export default function InstallButton({ className = "", label = "Télécharger l
 
   return (
     <>
-      <button onClick={click} className={`inline-flex items-center justify-center gap-2 ${className}`}>
+      <button onClick={click} className={`items-center justify-center gap-2 ${className}`}>
         <Download size={16} />
         {label}
       </button>
