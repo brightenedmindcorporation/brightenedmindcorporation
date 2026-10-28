@@ -119,7 +119,7 @@ export default function NotificationBell({ scope }: { scope: "admin" | "student"
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-[min(20rem,calc(100vw-2rem))] max-h-96 overflow-y-auto bg-surface border border-line rounded-2xl shadow-2xl z-50">
+        <div className="fixed inset-x-4 top-16 sm:absolute sm:inset-x-auto sm:right-0 sm:top-auto mt-2 sm:w-80 max-h-[70vh] sm:max-h-96 overflow-y-auto bg-surface border border-line rounded-2xl shadow-2xl z-50">
           <div className="flex items-center justify-between px-4 py-3 border-b border-line sticky top-0 bg-surface">
             <p className="text-sm font-bold text-ink">Notifications</p>
             {unreadCount > 0 && (

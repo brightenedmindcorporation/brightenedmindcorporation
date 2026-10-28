@@ -12,7 +12,8 @@ import { isOtherProgramCode as isOtherCode, getOtherProgramLabel } from "@/conte
 
 // A program without lessons or quizzes (Visuel, Logiciels). Bureautique has its own course, like a language.
 const isOtherProgramCode = (code?: string) => isOtherCode(code) && !findProgramByCode(code);
-import { getLevelProgress } from "@/lib/academy/progress";
+import { getLevelProgress, lessonsBehind } from "@/lib/academy/progress";
+import { pullProgress } from "@/lib/academy/progressSync";
 import { levelNumber, startLevel, placementPending } from "@/lib/academy/levelAccess";
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
@@ -130,7 +131,6 @@ export default function Dashboard() {
     const studentLevelNum = levelNumber(activeEnrollment.level);
     // Progress of the level the student is working on (not always level 1).
     const level1 = getLevelCurriculum(langSlug, studentLevelNum);
-    const progress = getLevelProgress(langSlug, studentLevelNum);
     const curriculumForLiveCheck = getLevelCurriculum(langSlug, studentLevelNum);
     let interval: ReturnType<typeof setInterval> | undefined;
     if (curriculumForLiveCheck) {
@@ -144,22 +144,25 @@ export default function Dashboard() {
     }
     const totalLessons = level1?.lessons.length ?? 12;
 
-    let completedCount = 0;
-    let currentLesson = 1;
-
-    for (let i = 1; i <= totalLessons; i++) {
-      if (progress.completedQuizzes.includes(i)) {
-        completedCount++;
-        currentLesson = Math.min(i + 1, totalLessons);
-      } else {
-        break;
-      }
-    }
-
-    setLastLesson(currentLesson);
-    setProgressStats({ completed: completedCount, total: totalLessons });
+    // Same count as the level page (lessons behind the furthest unlocked one count too), and refreshed from the server.
+    let cancelled = false;
+    const compute = () => {
+      const p = getLevelProgress(langSlug, studentLevelNum);
+      const done = new Set(lessonsBehind(p));
+      let currentLesson = 1;
+      while (currentLesson < totalLessons && done.has(currentLesson)) currentLesson++;
+      setLastLesson(currentLesson);
+      setProgressStats({ completed: Math.min(done.size, totalLessons), total: totalLessons });
+    };
+    compute();
+    pullProgress(langSlug, curriculumForLiveCheck?.langCode, studentLevelNum)
+      .then(() => {
+        if (!cancelled) compute();
+      })
+      .catch(() => {});
 
     return () => {
+      cancelled = true;
       if (interval) clearInterval(interval);
     };
   }, [activeEnrollment?.langCode, activeEnrollment?.level]);
