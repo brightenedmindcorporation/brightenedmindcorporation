@@ -93,7 +93,7 @@ function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
             play={async (id) => {
               if (langSlug !== "english") return speak(letter, langSlug, id);
               // A recorded clip of the letter's name; the device voice only when it can't be played.
-              if (await playClipUrl(`/audio/letters/en/${letter.toLowerCase()}.mp3`, id)) return;
+              if (await playClipUrl(`/audio/letters/en/${letter.toLowerCase()}.mp3?v=2`, id)) return;
               // No recording: the device voice, but only an English one (a French default voice would spell the letters in French).
               if (hasVoiceFor("english")) await speakWithDeviceVoice(`${letter}.`, "english", { id });
             }}
