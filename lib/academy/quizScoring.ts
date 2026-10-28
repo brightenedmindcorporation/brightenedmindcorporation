@@ -7,10 +7,10 @@
  * Only the first attempt is recorded; later attempts are practice.
  */
 /**
- * The quiz is failed when the general mark (every part together) is 4/10, i.e. 40/100, or lower.
+ * The quiz is failed when the general mark (every part together) is 6/10, i.e. 60/100, or lower.
  * There is no pass mark per part: only this overall mark counts.
  */
-export const FAIL_AT_OR_BELOW = 40;
+export const FAIL_AT_OR_BELOW = 60;
 export const passesQuiz = (percent: number | null): boolean => percent !== null && percent > FAIL_AT_OR_BELOW;
 
 export const PART_WEIGHTS = { listen: 25, quiz: 30, read: 20, write: 25 } as const;

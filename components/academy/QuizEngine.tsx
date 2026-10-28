@@ -19,7 +19,7 @@ export interface QuizParts {
   dialogueTotal: number;
   /** Heard-conversation questions answered well enough (at least 60 %): shown for information only. */
   dialoguePassed: boolean;
-  /** The quiz is passed: its general mark (every part together) is above 4/10. */
+  /** The quiz is passed: its general mark (every part together) is above 6/10. */
   passed: boolean;
   writing: string;
   /** The texts written, structured for the teacher who corrects them. */
@@ -338,7 +338,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                   ) : (
                     <span className="text-red-400 inline-flex items-center gap-1.5">
                       <XCircle size={16} />{" "}
-                      {`Failed. Votre note générale (${mark.percent ?? 0}/100) doit dépasser 4/10 (${FAIL_AT_OR_BELOW}/100) pour réussir.`}
+                      {`Failed. Votre note générale (${mark.percent ?? 0}/100) doit dépasser ${FAIL_AT_OR_BELOW / 10}/10 (${FAIL_AT_OR_BELOW}/100) pour réussir.`}
                     </span>
                   )}
                 </p>
