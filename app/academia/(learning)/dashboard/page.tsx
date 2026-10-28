@@ -17,6 +17,7 @@ import { levelNumber, startLevel, placementPending } from "@/lib/academy/levelAc
 import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/academy/liveSessions";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import AddProgramPanel from "@/components/academy/AddProgramPanel";
+import InstallApp from "@/components/academy/InstallApp";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { logActivity } from "@/lib/academy/activity";
 import { getVerbReference } from "@/content/verbs";
@@ -429,6 +430,7 @@ export default function Dashboard() {
               })}
           </div>
         )}
+        <InstallApp />
         <AddProgramPanel name={student?.name || ""} onChanged={(updated) => setStudent(updated)} />
 
         {/* Sélecteur de langue (si inscrit à plusieurs langues) */}

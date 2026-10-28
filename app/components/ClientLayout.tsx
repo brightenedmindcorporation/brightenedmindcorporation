@@ -9,6 +9,7 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ScrollButtons from "@/components/ScrollButtons";
 import BackButton from "@/components/BackButton";
 import VisitTracker from "@/components/VisitTracker";
+import PwaRegister from "@/components/PwaRegister";
 import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
 
@@ -134,6 +135,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
       <ScrollButtons />
       <BackButton />
       <VisitTracker />
+      <PwaRegister />
 
       {!hideLayoutElements && (
         <footer className="bg-surface-sunken border-t border-line py-12 px-6 text-ink-soft text-sm font-sans">

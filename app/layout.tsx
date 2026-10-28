@@ -45,6 +45,7 @@ export const metadata: Metadata = {
     follow: true,
   },
 
+  appleWebApp: { capable: true, title: "BM Academia", statusBarStyle: "default" },
   openGraph: {
     title: "Brightened Mind Corporation",
     description:
@@ -57,6 +58,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  themeColor: "#7a1f2b",
 };
 
 // Runs before paint (blocking, in <head>) so the page never flashes the
