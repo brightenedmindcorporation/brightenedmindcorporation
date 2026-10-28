@@ -81,12 +81,6 @@ function Fr({ langSlug, text, className = "" }: { langSlug: string; text: string
   );
 }
 
-/** How the English names of the letters are written for the voice (a lone capital letter is easily read as a French or Spanish letter). */
-const ENGLISH_LETTER_NAMES: Record<string, string> = {
-  A: "ay", B: "bee", C: "see", D: "dee", E: "ee", F: "eff", G: "jee", H: "aitch", I: "eye", J: "jay", K: "kay", L: "el", M: "em",
-  N: "en", O: "oh", P: "pee", Q: "queue", R: "are", S: "ess", T: "tee", U: "you", V: "vee", W: "double you", X: "ex", Y: "why", Z: "zee",
-};
-
 /** An alphabet row ("A B C D …"): every letter gets its own speaker so the student can hear each one. */
 const LETTER_ROW = /^(?:\p{Lu}\s){3,}\p{Lu}$/u;
 
@@ -101,7 +95,7 @@ function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
               // A recorded clip of the letter's name; the device voice only when it can't be played.
               if (await playClipUrl(`/audio/letters/en/${letter.toLowerCase()}.mp3`, id)) return;
               // No recording: the device voice, but only an English one (a French default voice would spell the letters in French).
-              if (hasVoiceFor("english")) await speakWithDeviceVoice(ENGLISH_LETTER_NAMES[letter] ?? letter, "english", { id });
+              if (hasVoiceFor("english")) await speakWithDeviceVoice(`${letter}.`, "english", { id });
             }}
             title={`Écouter la lettre ${letter}`}
             size={13}

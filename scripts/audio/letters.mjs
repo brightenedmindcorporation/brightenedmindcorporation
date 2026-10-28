@@ -6,10 +6,9 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 
-const NAMES = {
-  A: "ay", B: "bee", C: "see", D: "dee", E: "ee", F: "eff", G: "jee", H: "aitch", I: "eye", J: "jay", K: "kay", L: "ell", M: "em",
-  N: "en", O: "oh", P: "pee", Q: "cue", R: "are", S: "ess", T: "tee", U: "you", V: "vee", W: "double you", X: "ex", Y: "why", Z: "zee",
-};
+// The plain capital letter, which the voice reads as the English letter name. Respellings ("ay", "ee", "eff") are
+// misread ("eye", "ee ee", "ee ef ef"), so they are not used.
+const NAMES = Object.fromEntries("ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((c) => [c, `${c}.`]));
 const out = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "public", "audio", "letters", "en");
 fs.mkdirSync(out, { recursive: true });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

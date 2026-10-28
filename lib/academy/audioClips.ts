@@ -85,19 +85,15 @@ function cyrb53(str: string, seed: number): number {
   return 4294967296 * (2097151 & h2) + (h1 >>> 0);
 }
 
-const ENGLISH_LETTER_NAMES: Record<string, string> = {
-  A: "ay", B: "bee", C: "see", D: "dee", E: "ee", F: "eff", G: "jee", H: "aitch", I: "eye", J: "jay", K: "kay", L: "ell", M: "em",
-  N: "en", O: "oh", P: "pee", Q: "cue", R: "are", S: "ess", T: "tee", U: "you", V: "vee", W: "double you", X: "ex", Y: "why", Z: "zee",
-};
-
 /**
  * What the voice must say for English text made of letters ("A", "D - A - V - I - D", "A = /eɪ/", a row "A B C D"):
- * the names of the letters, because a voice reads a lone "A" like the article and cannot read phonetic symbols.
+ * the plain capital letters, separated by commas, which the voice reads as the English letter names. (Respellings such as
+ * "ay" or "ee" are misread: "eye", "ee ee"; and the phonetic symbols cannot be read at all.)
  * null when the text has nothing to spell (its clip is unchanged).
  */
 export function spokenForm(langSlug: string, text: string): string | null {
   if (langSlug !== "english") return null;
-  const name = (c: string) => ENGLISH_LETTER_NAMES[c] ?? c;
+  const name = (c: string) => `${c}.`;
   const out = text
     .split("\n")
     .map((line) => {
@@ -106,7 +102,7 @@ export function spokenForm(langSlug: string, text: string): string | null {
       const eq = t.match(/^(\p{Lu})\s*=\s*/u);
       if (eq) return name(eq[1]);
       return line.replace(/(?<![\p{L}\p{N}'])\p{Lu}(?:(?:\s*[-–,]\s*|\s+)\p{Lu}(?![\p{L}\p{N}']))+/gu, (run) =>
-        run.match(/\p{Lu}/gu)!.map(name).join(", ")
+        run.match(/\p{Lu}/gu)!.join(", ")
       );
     })
     .join("\n");
@@ -114,7 +110,7 @@ export function spokenForm(langSlug: string, text: string): string | null {
 }
 
 export function clipId(langSlug: string, text: string): string {
-  const key = `${langSlug}|${text.trim()}${spokenForm(langSlug, text) !== null ? "|spelled" : ""}`;
+  const key = `${langSlug}|${text.trim()}${spokenForm(langSlug, text) !== null ? "|spelled2" : ""}`;
   const a = cyrb53(key, 0).toString(16).padStart(14, "0");
   const b = cyrb53(key, 1).toString(16).padStart(14, "0");
   return (a + b).slice(0, 22);
