@@ -6,6 +6,13 @@
  * Until the teacher has corrected the written part, the mark is provisional (computed on the other parts).
  * Only the first attempt is recorded; later attempts are practice.
  */
+/**
+ * The quiz is failed when the general mark (every part together) is 4/10, i.e. 40/100, or lower.
+ * There is no pass mark per part: only this overall mark counts.
+ */
+export const FAIL_AT_OR_BELOW = 40;
+export const passesQuiz = (percent: number | null): boolean => percent !== null && percent > FAIL_AT_OR_BELOW;
+
 export const PART_WEIGHTS = { listen: 25, quiz: 30, read: 20, write: 25 } as const;
 
 /** What the student did on the first attempt (saved with the progress). */

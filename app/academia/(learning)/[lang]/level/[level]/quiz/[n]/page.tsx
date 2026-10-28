@@ -124,13 +124,13 @@ export default function QuizPage() {
               // Only the first attempt is the result (and what the certificate shows); later ones are practice.
               const first = getLevelProgress(langSlug, level).quizScores[lessonId] === undefined;
               if (first) {
-                const passed = score >= quiz.passingScore && (parts?.dialoguePassed ?? true);
+                const passed = parts?.passed ?? score >= quiz.passingScore;
                 if (parts) saveQuizParts(langSlug, level, lessonId, parts);
                 // The written texts go to the teachers for correction; the other questions are graded here.
                 if (parts?.writingItems?.length && curriculum.langCode) submitWritingForReview({ langCode: curriculum.langCode, level, key: lessonId, items: parts.writingItems });
                 logActivity("quiz", `Quiz ${lessonId} : ${score}/${quiz.questions.length} — ${passed ? "réussi" : "échoué"} (${curriculum.langLabel}, niveau ${level})`, { langCode: curriculum.langCode, level, lessonId, score, total: quiz.questions.length, passed });
               }
-              const updated = recordQuizResult(langSlug, level, lessonId, score, quiz.passingScore, parts?.dialoguePassed ?? true, parts?.record);
+              const updated = recordQuizResult(langSlug, level, lessonId, score, parts ? 0 : quiz.passingScore, parts?.passed ?? true, parts?.record);
               if (curriculum.langCode) syncProgress(curriculum.langCode, level, updated);
             }}
           />

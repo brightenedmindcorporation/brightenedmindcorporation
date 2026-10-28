@@ -5,6 +5,7 @@ import { AuthError, bearer, canTeach, getCaller, isTeachersStudent } from "@/lib
 import { createNotification } from "@/lib/notifications";
 import { sendLevelInvitation } from "@/lib/academy/levelInvite";
 import { findProgramByCode, getLevelCurriculum } from "@/content/curriculum";
+import { passesQuiz } from "@/lib/academy/quizScoring";
 
 export const dynamic = "force-dynamic";
 
@@ -89,7 +90,7 @@ export async function POST(request: Request) {
       // The administration marks out of 100 (écoute + questions + écrit); the questions' score follows it.
       const percent = Math.max(0, Math.min(100, Math.round(raw)));
       const score = Math.round((percent / 100) * total);
-      const passed = percent >= (quiz.passingScore / total) * 100;
+      const passed = passesQuiz(percent);
       const existing = (await ref.get()).data() || {};
       await ref.set(
         {
@@ -112,7 +113,7 @@ export async function POST(request: Request) {
       if (!Number.isFinite(raw)) return NextResponse.json({ error: "Note invalide." }, { status: 400 });
       const percent = Math.max(0, Math.min(100, Math.round(raw)));
       const score = Math.round((percent / 100) * total);
-      const passed = percent >= (curriculum.finalQuiz.passingScore / total) * 100;
+      const passed = passesQuiz(percent);
       await ref.set({ ...base, finalQuizScore: score, finalQuizPassed: passed, adminFinal: true, adminPercent: { final: percent }, adminParts: { final: adminParts ?? FieldValue.delete() } }, { merge: true });
       title = "Note mise à jour";
       message = `Votre note du quiz final du niveau ${level} a été fixée à ${percent}/100 par ${who}${passed ? " : votre certificat est disponible." : "."}`;

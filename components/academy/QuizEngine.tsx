@@ -7,7 +7,7 @@ import { CheckCircle2, XCircle, RefreshCw, Headphones, ListChecks, PenLine, Mic 
 import type { Quiz, FinalQuiz, QuizQuestion } from "@/content/curriculum/types";
 import type { Dialogue } from "@/content/dialogues/types";
 import DialoguePlayer from "@/components/academy/DialoguePlayer";
-import { computeQuizMark, type QuizPartsRecord } from "@/lib/academy/quizScoring";
+import { computeQuizMark, FAIL_AT_OR_BELOW, passesQuiz, type QuizPartsRecord } from "@/lib/academy/quizScoring";
 import Zh, { withoutHint } from "@/components/academy/Zh";
 import PinyinToggle from "@/components/academy/PinyinToggle";
 import QuizReadingStep, { emptyReadingState, readingDone, type QuizReading } from "@/components/academy/QuizReadingStep";
@@ -17,8 +17,10 @@ import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writi
 export interface QuizParts {
   dialogueScore: number;
   dialogueTotal: number;
-  /** Heard-conversation questions answered well enough (at least 60 %). */
+  /** Heard-conversation questions answered well enough (at least 60 %): shown for information only. */
   dialoguePassed: boolean;
+  /** The quiz is passed: its general mark (every part together) is above 4/10. */
+  passed: boolean;
   writing: string;
   /** The texts written, structured for the teacher who corrects them. */
   writingItems?: WritingItem[];
@@ -200,21 +202,24 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
         window.localStorage.removeItem(persistKey);
       } catch {}
     }
-    // Passed or failed (same rule as the result shown below).
-    if (finalScore >= quiz.passingScore && (!useDialogue || dScore >= dialoguePassNeeded)) sfx.success();
+    const record = {
+      quiz: [finalScore, quiz.questions.length] as [number, number],
+      ...(useDialogue ? { listen: [dScore, dialogueTotal] as [number, number] } : {}),
+      ...(useReading ? { read: [readingState.percent ?? 0, 100] as [number, number] } : {}),
+      ...(useWriting ? { write: true } : {}),
+    };
+    // Passed or failed on the general mark (same rule as the result shown below); the written part, not corrected yet, is left out.
+    const passedNow = passesQuiz(computeQuizMark({ parts: record, rawScore: finalScore, rawTotal: quiz.questions.length }).percent);
+    if (passedNow) sfx.success();
     else sfx.fail();
     onSubmit(finalScore, {
       dialogueScore: dScore,
       dialogueTotal,
       dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded,
+      passed: passedNow,
       writing: useWriting ? writingSummary(useWriting, writingState) : "",
       writingItems: useWriting ? writingItems(useWriting, writingState) : undefined,
-      record: {
-        quiz: [finalScore, quiz.questions.length],
-        ...(useDialogue ? { listen: [dScore, dialogueTotal] as [number, number] } : {}),
-        ...(useReading ? { read: [readingState.percent ?? 0, 100] as [number, number] } : {}),
-        ...(useWriting ? { write: true } : {}),
-      },
+      record,
     });
   };
 
@@ -230,8 +235,8 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     rawTotal: quiz.questions.length,
   });
   const dialoguePassed = !useDialogue || dialogueScore >= dialoguePassNeeded;
-  const mainPassed = score >= quiz.passingScore;
-  const passed = mainPassed && dialoguePassed;
+  const passed = passesQuiz(mark.percent);
+  const mainPassed = passed;
 
   let step = 0;
   const missing = [
@@ -316,7 +321,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                     <span className={dialoguePassed ? "text-emerald-400" : "text-red-500"}>
                       {dialogueScore} / {dialogueTotal}
                     </span>{" "}
-                    (minimum {dialoguePassNeeded})
+                    (compte dans la note générale)
                   </p>
                 )}
                 {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée : un professeur la corrigera (25 points).</p>}
@@ -333,9 +338,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                   ) : (
                     <span className="text-red-400 inline-flex items-center gap-1.5">
                       <XCircle size={16} />{" "}
-                      {!mainPassed
-                        ? `Failed. You need at least ${quiz.passingScore}/${quiz.questions.length} to pass.`
-                        : `Failed. Il faut au moins ${dialoguePassNeeded}/${dialogueTotal} à la conversation.`}
+                      {`Failed. Votre note générale (${mark.percent ?? 0}/100) doit dépasser 4/10 (${FAIL_AT_OR_BELOW}/100) pour réussir.`}
                     </span>
                   )}
                 </p>
