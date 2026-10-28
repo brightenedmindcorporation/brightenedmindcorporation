@@ -2,7 +2,7 @@
 
 import { setPinyin, usePinyin } from "@/lib/academy/pinyinPref";
 
-/** Shows or hides the pinyin above the characters, in quizzes and the placement test. */
+/** Shows or hides the pinyin above the characters, in lessons, quizzes and the placement test. */
 export default function PinyinToggle() {
   const on = usePinyin();
   return (

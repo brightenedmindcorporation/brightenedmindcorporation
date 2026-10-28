@@ -13,6 +13,8 @@ import { useYouTubeMeter } from "@/lib/youtubeMeter";
 import ListenButton from "@/components/academy/ListenButton";
 import { frenchFor, hasFrenchTranslations } from "@/content/translations";
 import { useFrenchVisible } from "@/lib/academy/frenchHelp";
+import Zh from "@/components/academy/Zh";
+import PinyinToggle from "@/components/academy/PinyinToggle";
 import { playClipUrl } from "@/lib/academy/lessonAudioPlayer";
 import { hasVoiceFor, speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
@@ -115,7 +117,7 @@ function SpeakableLine({ text, langSlug, className = "" }: { text: string; langS
       {/* Only the language being learned is voiced: a French explanation gets no speaker. */}
       {isSpokenText(langSlug, extractSpeechText(text)) ? <SpeakIconButton text={extractSpeechText(text)} langSlug={langSlug} /> : <span className="w-7 shrink-0" aria-hidden="true" />}
       <div className="min-w-0">
-        <span translate="no" className="notranslate">{text}</span>
+        <span translate="no" className={`notranslate ${langSlug === "chinese" ? "leading-[2.4]" : ""}`}><Zh text={text} on={langSlug === "chinese"} /></span>
         <Fr langSlug={langSlug} text={text} />
       </div>
     </div>
@@ -285,14 +287,17 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
 
   return (
     <div className="space-y-8">
-      <FrenchToggle langSlug={langSlug} />
+      <div className="flex flex-wrap items-center gap-3">
+        <FrenchToggle langSlug={langSlug} />
+        {langSlug === "chinese" && <PinyinToggle />}
+      </div>
       <Card>
         <CardTitle icon={BookOpen}>Lesson</CardTitle>
         <div className="text-ink-soft mt-4 space-y-4">
           {lesson.sections.map((section, i) => (
             <div key={i}>
               <p className="font-semibold text-ink mt-4 first:mt-0">
-                {section.heading}
+                <Zh text={section.heading} on={langSlug === "chinese"} />
                 <Fr langSlug={langSlug} text={section.heading} className="font-normal" />
               </p>
               <div className="space-y-1 mt-1">
@@ -319,7 +324,7 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
         <CardTitle icon={FileText}>Reading Text</CardTitle>
         <div className="text-ink-soft mt-4 space-y-3">
           <p className="font-bold text-ink">
-            {lesson.readingTitle}
+            <Zh text={lesson.readingTitle} on={langSlug === "chinese"} />
             <Fr langSlug={langSlug} text={lesson.readingTitle} className="font-normal" />
           </p>
           {lesson.reading.map((p, i) => (
@@ -341,7 +346,7 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
         <ul className="list-disc ml-6 text-ink-soft mt-4 space-y-1">
           {lesson.exercises.map((ex, i) => (
             <li key={i}>
-              <span translate="no" className="notranslate">{ex}</span>
+              <span translate="no" className={`notranslate ${langSlug === "chinese" ? "leading-[2.4]" : ""}`}><Zh text={ex} on={langSlug === "chinese"} /></span>
               <Fr langSlug={langSlug} text={ex} />
             </li>
           ))}
@@ -353,7 +358,7 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
       <Card>
         <CardTitle icon={MessageSquare}>Speaking Topic</CardTitle>
         <p className="text-ink-soft mt-4">
-          {lesson.speakingTopic}
+          <Zh text={lesson.speakingTopic} on={langSlug === "chinese"} />
           <Fr langSlug={langSlug} text={lesson.speakingTopic} />
         </p>
       </Card>
