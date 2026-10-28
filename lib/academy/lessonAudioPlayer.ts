@@ -82,18 +82,38 @@ export async function playClip(langSlug: string, text: string, id?: string): Pro
   return playClipUrl(clipUrl(langSlug, text), id);
 }
 
-/** Plays the clip at `url`; false when it can't be had or played. */
+/** A tenth of a second of silence, played at the tap itself: phones only let a page start sound inside the tap,
+ * and the real clip arrives a moment later (after a download), so the player is "unlocked" first. */
+function silentWavUrl(): string {
+  const rate = 8000;
+  const samples = 800;
+  const buffer = new ArrayBuffer(44 + samples);
+  const v = new DataView(buffer);
+  const text = (o: number, t: string) => [...t].forEach((c, i) => v.setUint8(o + i, c.charCodeAt(0)));
+  text(0, "RIFF"); v.setUint32(4, 36 + samples, true); text(8, "WAVE"); text(12, "fmt ");
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true);
+  v.setUint32(28, rate, true); v.setUint16(32, 1, true); v.setUint16(34, 8, true); text(36, "data"); v.setUint32(40, samples, true);
+  for (let i = 0; i < samples; i++) v.setUint8(44 + i, 128);
+  return URL.createObjectURL(new Blob([buffer], { type: "audio/wav" }));
+}
+
+/** Plays the clip at `url`; false when it can't be had or played. Call it straight from the tap. */
 export async function playClipUrl(url: string, id?: string): Promise<boolean> {
+  const silent = silentWavUrl();
+  const audio = new Audio(silent);
+  const unlocked = audio.play().catch(() => {});
   const blob = await getClipBlob(url);
+  await unlocked;
+  URL.revokeObjectURL(silent);
   if (!blob) return false;
   const objectUrl = URL.createObjectURL(blob);
-  const audio = new Audio(objectUrl);
   const stop = () => {
     audio.pause();
     URL.revokeObjectURL(objectUrl);
     releasePlayback(stop);
   };
   claimPlayback(stop, id);
+  audio.src = objectUrl;
   audio.onended = stop;
   try {
     await audio.play();

@@ -32,6 +32,12 @@ function pickVoice(langTag: string): SpeechSynthesisVoice | undefined {
   return matches.find((v) => v.localService) ?? matches[0];
 }
 
+/** True when the device has a voice for the language (otherwise it would read the text with its default voice, often French). */
+export function hasVoiceFor(langSlug: string): boolean {
+  if (typeof window === "undefined" || !("speechSynthesis" in window)) return false;
+  return Boolean(pickVoice(SPEECH_LANG[langSlug] ?? "en-US"));
+}
+
 /** The device's own voice — only the fallback when no recording is available. */
 export function speakWithDeviceVoice(text: string, langSlug: string, opts: { pitch?: number; id?: string } = {}): Promise<void> {
   if (!("speechSynthesis" in window)) return Promise.resolve();

@@ -14,7 +14,7 @@ import ListenButton from "@/components/academy/ListenButton";
 import { frenchFor, hasFrenchTranslations } from "@/content/translations";
 import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import { playClipUrl } from "@/lib/academy/lessonAudioPlayer";
-import { speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
+import { hasVoiceFor, speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
 // Distraction-free params: rel=0 limits end-of-video suggestions to the
 // same channel (YouTube no longer allows disabling them entirely),
@@ -100,7 +100,8 @@ function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
               if (langSlug !== "english") return speak(letter, langSlug, id);
               // A recorded clip of the letter's name; the device voice only when it can't be played.
               if (await playClipUrl(`/audio/letters/en/${letter.toLowerCase()}.mp3`, id)) return;
-              await speakWithDeviceVoice(ENGLISH_LETTER_NAMES[letter] ?? letter, "english", { id });
+              // No recording: the device voice, but only an English one (a French default voice would spell the letters in French).
+              if (hasVoiceFor("english")) await speakWithDeviceVoice(ENGLISH_LETTER_NAMES[letter] ?? letter, "english", { id });
             }}
             title={`Écouter la lettre ${letter}`}
             size={13}
