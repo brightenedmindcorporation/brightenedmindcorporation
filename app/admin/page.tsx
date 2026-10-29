@@ -53,6 +53,7 @@ import PlacementTab from "@/components/admin/PlacementTab";
 import CorrectionsTab from "@/components/admin/CorrectionsTab";
 import DomesticaTab from "@/components/admin/DomesticaTab";
 import ShipmentsTab from "@/components/admin/ShipmentsTab";
+import TrucksTab from "@/components/admin/TrucksTab";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
@@ -74,7 +75,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections" | "domestica" | "shipments";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections" | "domestica" | "shipments" | "trucks";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1410,7 +1411,7 @@ export default function AdminPage() {
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
     const requestedTab = params.get("tab");
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "shipments"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "shipments", "trucks"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1996,6 +1997,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "placement", label: "Tests de niveau", badge: 0 },
             { id: "domestica", label: "Domestica", badge: 0 },
             { id: "shipments", label: "Suivi colis", badge: 0 },
+            { id: "trucks", label: "Camions (carte)", badge: 0 },
             { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[];
           return (
@@ -2639,6 +2641,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "corrections" && <CorrectionsTab />}
         {tab === "domestica" && <DomesticaTab />}
         {tab === "shipments" && <ShipmentsTab />}
+        {tab === "trucks" && <TrucksTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

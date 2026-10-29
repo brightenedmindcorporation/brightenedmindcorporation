@@ -51,6 +51,7 @@ export async function POST(request: Request) {
       destination: text(b.destination, 120),
       weightKg: Number.isFinite(weight) && weight > 0 ? weight : null,
       eta: text(b.eta, 20),
+      truckId: text(b.truckId, 80),
       status: "registered",
       history: [first],
       createdAt: now,
@@ -71,15 +72,22 @@ export async function PATCH(request: Request) {
     const b = await request.json().catch(() => ({}));
     const id = text(b.id, 80);
     const status = text(b.status, 30);
-    if (!id || !SHIPMENT_STATUSES.some((s) => s.id === status)) return NextResponse.json({ error: "Colis ou état invalide." }, { status: 400 });
+    const truckOnly = !status && typeof b.truckId === "string";
+    if (!id || (!truckOnly && !SHIPMENT_STATUSES.some((s) => s.id === status))) return NextResponse.json({ error: "Colis ou état invalide." }, { status: 400 });
     const ref = getAdminDb().collection("shipments").doc(id);
     const snap = await ref.get();
     if (!snap.exists) return NextResponse.json({ error: "Colis introuvable." }, { status: 404 });
+    // Assigning a truck is not a step of the journey: no new history entry.
+    if (truckOnly) {
+      await ref.set({ truckId: text(b.truckId, 80) }, { merge: true });
+      return NextResponse.json({ ok: true });
+    }
     const now = new Date().toISOString();
     const event: ShipmentEvent = clean({ status, note: text(b.note, 300) || undefined, location: text(b.location, 120) || undefined, at: now });
     const history = [...(snap.data()!.history || []), event];
     const update: Record<string, unknown> = { status, history, updatedAt: now };
     if (typeof b.eta === "string") update.eta = text(b.eta, 20);
+    if (typeof b.truckId === "string") update.truckId = text(b.truckId, 80);
     await ref.set(update, { merge: true });
     return NextResponse.json({ item: { id, ...snap.data(), ...update } });
   } catch (error) {

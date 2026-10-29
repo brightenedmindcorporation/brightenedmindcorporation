@@ -1,3 +1,5 @@
+import type { PublicTruck } from "@/lib/trucks";
+
 /** The steps of a parcel / equipment shipment, in the order they usually happen. */
 export const SHIPMENT_STATUSES = [
   { id: "registered", label: "Colis enregistré" },
@@ -36,6 +38,8 @@ export interface Shipment {
   destination: string;
   weightKg?: number | null;
   eta?: string;
+  /** The truck carrying it (its position is shown to the client while it is on the road). */
+  truckId?: string;
   status: string;
   history: ShipmentEvent[];
   createdAt: string;
@@ -53,6 +57,7 @@ export interface PublicShipment {
   status: string;
   history: ShipmentEvent[];
   updatedAt: string;
+  truck?: PublicTruck;
 }
 
 // Letters and digits that cannot be confused (no 0/O, 1/I/L): a code can be read out over the phone.

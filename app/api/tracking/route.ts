@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { normalizeCode, type PublicShipment } from "@/lib/tracking";
+import { isLive, type PublicTruck } from "@/lib/trucks";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +29,15 @@ export async function GET(request: Request) {
     const snap = await getAdminDb().collection("shipments").where("code", "==", code).limit(1).get();
     if (snap.empty) return NextResponse.json({ error: "Aucun colis ne correspond à ce code." }, { status: 404 });
     const s = snap.docs[0].data();
+    // The truck is shown only while the parcel is on the road, never the driver, plate or secret.
+    let truck: PublicTruck | undefined;
+    if (s.truckId && !["delivered", "registered"].includes(s.status)) {
+      const t = await getAdminDb().collection("trucks").doc(String(s.truckId)).get();
+      const d = t.data();
+      if (d && d.active !== false && typeof d.lat === "number" && typeof d.lng === "number" && d.updatedAt) {
+        truck = { name: d.name, lat: d.lat, lng: d.lng, updatedAt: d.updatedAt, sharing: isLive(d) };
+      }
+    }
     const shipment: PublicShipment = {
       code: s.code,
       category: s.category,
@@ -38,6 +48,7 @@ export async function GET(request: Request) {
       status: s.status,
       history: s.history || [],
       updatedAt: s.updatedAt,
+      truck,
     };
     return NextResponse.json({ shipment });
   } catch (error) {

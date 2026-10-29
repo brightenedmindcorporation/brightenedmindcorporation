@@ -2,10 +2,14 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
 import { CheckCircle2, Circle, Package, Search, AlertTriangle } from "lucide-react";
+import { agoLabel } from "@/lib/trucks";
 import { SHIPMENT_STATUSES, statusLabel, type PublicShipment } from "@/lib/tracking";
 
 const date = (iso: string) => new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+const TruckMap = dynamic(() => import("@/components/TruckMap"), { ssr: false });
 
 export default function SuiviPage() {
   return (
@@ -44,6 +48,22 @@ function Tracker() {
     if (initial) search(initial);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // While the parcel is in a truck, the map follows it: the page quietly asks again every 10 seconds.
+  const code2 = shipment?.code;
+  const onRoad = !!shipment?.truck;
+  useEffect(() => {
+    if (!code2 || !onRoad) return;
+    const id = setInterval(async () => {
+      try {
+        const r = await fetch(`/api/tracking?code=${encodeURIComponent(code2)}`, { cache: "no-store" });
+        if (r.ok) setShipment((await r.json()).shipment);
+      } catch {
+        // keep the last known position
+      }
+    }, 10_000);
+    return () => clearInterval(id);
+  }, [code2, onRoad]);
 
   // The steps still to come, shown greyed after the ones done (the problem step only when it happened).
   const happened = new Set((shipment?.history ?? []).map((h) => h.status));
@@ -107,6 +127,18 @@ function Tracker() {
               <p className="text-lg font-black">{statusLabel(shipment.status)}</p>
               {shipment.eta && <p className="mt-1 text-sm opacity-90">Arrivée prévue : {new Date(shipment.eta).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}</p>}
             </div>
+
+            {shipment.truck && (
+              <div className="mt-6">
+                <p className="mb-2 text-sm font-bold text-ink">
+                  Votre colis est dans {shipment.truck.name} ·{" "}
+                  <span className={shipment.truck.sharing ? "text-emerald-500" : "text-ink-soft"}>
+                    {shipment.truck.sharing ? "position en direct" : `dernière position ${agoLabel(shipment.truck.updatedAt)}`}
+                  </span>
+                </p>
+                <TruckMap height={300} points={[{ id: "t", lat: shipment.truck.lat, lng: shipment.truck.lng, label: shipment.truck.name, detail: agoLabel(shipment.truck.updatedAt), live: shipment.truck.sharing }]} />
+              </div>
+            )}
 
             <ol className="mt-6 space-y-0">
               {flow.map((step, i) => {

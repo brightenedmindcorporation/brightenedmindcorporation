@@ -2,16 +2,18 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { auth } from "@/lib/firebase";
+import type { Truck } from "@/lib/trucks";
 import { SHIPMENT_CATEGORIES, SHIPMENT_STATUSES, statusLabel, type Shipment } from "@/lib/tracking";
 
 const date = (iso: string) => new Date(iso).toLocaleString("fr-FR", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const waNumber = (phone: string) => phone.replace(/[^\d]/g, "");
 
-const EMPTY = { clientName: "", clientPhone: "", clientEmail: "", category: SHIPMENT_CATEGORIES[0] as string, description: "", origin: "", destination: "", weightKg: "", eta: "" };
+const EMPTY = { clientName: "", clientPhone: "", clientEmail: "", category: SHIPMENT_CATEGORIES[0] as string, description: "", origin: "", destination: "", weightKg: "", eta: "", truckId: "" };
 
 /** Registers parcels / equipment shipments and moves them through their steps; clients follow them at /suivi with the code. */
 export default function ShipmentsTab() {
   const [items, setItems] = useState<Shipment[]>([]);
+  const [trucks, setTrucks] = useState<Truck[]>([]);
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [creating, setCreating] = useState(false);
@@ -40,6 +42,15 @@ export default function ShipmentsTab() {
     }
   };
   useEffect(() => {
+    (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const r = await fetch("/api/admin/trucks", { headers: { Authorization: `Bearer ${token}` }, cache: "no-store" });
+        if (r.ok) setTrucks((await r.json()).items);
+      } catch {
+        // without trucks the parcels still work
+      }
+    })();
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -129,6 +140,14 @@ export default function ShipmentsTab() {
             Arrivée prévue
             <input className={field} type="date" value={form.eta} onChange={(e) => setForm({ ...form, eta: e.target.value })} />
           </label>
+          <select className={`${field} sm:col-span-2`} value={form.truckId} onChange={(e) => setForm({ ...form, truckId: e.target.value })}>
+            <option value="">Camion : aucun pour l'instant</option>
+            {trucks.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name} {t.plate}
+              </option>
+            ))}
+          </select>
           <button onClick={create} disabled={busy === "new"} className="rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white disabled:opacity-50 sm:col-span-2">
             {busy === "new" ? "Enregistrement…" : "Enregistrer et générer le code"}
           </button>
@@ -167,6 +186,19 @@ export default function ShipmentsTab() {
               </select>
               <input className={`${field} max-w-[11rem]`} placeholder="Lieu (facultatif)" value={v.location} onChange={(e) => setStep((m) => ({ ...m, [s.id]: { ...v, location: e.target.value } }))} />
               <input className={`${field} max-w-xs flex-1`} placeholder="Note pour le client (facultatif)" value={v.note} onChange={(e) => setStep((m) => ({ ...m, [s.id]: { ...v, note: e.target.value } }))} />
+              <select
+                className={`${field} max-w-[12rem]`}
+                value={s.truckId ?? ""}
+                onChange={(e) => call("PATCH", { id: s.id, truckId: e.target.value }).then(load).catch((er: any) => alert(`Erreur : ${er.message}`))}
+                title="Camion qui transporte ce colis"
+              >
+                <option value="">Sans camion</option>
+                {trucks.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    🚚 {t.name}
+                  </option>
+                ))}
+              </select>
               <button onClick={() => update(s)} disabled={busy === s.id} className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50">
                 Mettre à jour
               </button>
