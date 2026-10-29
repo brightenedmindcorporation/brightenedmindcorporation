@@ -13,13 +13,14 @@ import PwaRegister from "@/components/PwaRegister";
 import InstallButton from "@/components/InstallButton";
 import BmLogo from "@/components/BmLogo";
 import { availableLanguages } from "@/content/curriculum";
+import { TRACKING_ENABLED } from "@/lib/features";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/academia", label: "Academia" },
   { href: "/communication", label: "Communication" },
   { href: "/domestica", label: "Domestica" },
-  { href: "/suivi", label: "Suivi colis" },
+  ...(TRACKING_ENABLED ? [{ href: "/suivi", label: "Suivi colis" }] : []),
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { TRACKING_ENABLED } from "@/lib/features";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +12,7 @@ const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : n
 /** Called by the driver's phone with the secret of its link: { token, lat, lng, speed?, heading?, accuracy? } or { token, stop: true }. */
 export async function POST(request: Request) {
   try {
+    if (!TRACKING_ENABLED) return NextResponse.json({ error: "Service indisponible." }, { status: 404 });
     if (!isAdminConfigured()) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
     const b = await request.json().catch(() => ({}));
     const token = String(b.token ?? "").trim();

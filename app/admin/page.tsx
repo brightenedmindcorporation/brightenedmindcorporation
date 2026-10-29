@@ -54,6 +54,7 @@ import CorrectionsTab from "@/components/admin/CorrectionsTab";
 import DomesticaTab from "@/components/admin/DomesticaTab";
 import ShipmentsTab from "@/components/admin/ShipmentsTab";
 import TrucksTab from "@/components/admin/TrucksTab";
+import { TRACKING_ENABLED } from "@/lib/features";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
@@ -1996,8 +1997,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "corrections", label: "Corrections", badge: 0 },
             { id: "placement", label: "Tests de niveau", badge: 0 },
             { id: "domestica", label: "Domestica", badge: 0 },
-            { id: "shipments", label: "Suivi colis", badge: 0 },
-            { id: "trucks", label: "Camions (carte)", badge: 0 },
+            ...(TRACKING_ENABLED ? [{ id: "shipments" as const, label: "Suivi colis", badge: 0 }, { id: "trucks" as const, label: "Camions (carte)", badge: 0 }] : []),
             { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[];
           return (
@@ -2640,8 +2640,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "placement" && <PlacementTab />}
         {tab === "corrections" && <CorrectionsTab />}
         {tab === "domestica" && <DomesticaTab />}
-        {tab === "shipments" && <ShipmentsTab />}
-        {tab === "trucks" && <TrucksTab />}
+        {TRACKING_ENABLED && tab === "shipments" && <ShipmentsTab />}
+        {TRACKING_ENABLED && tab === "trucks" && <TrucksTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { TRACKING_ENABLED } from "@/lib/features";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { normalizeCode, type PublicShipment } from "@/lib/tracking";
 import { isLive, type PublicTruck } from "@/lib/trucks";
@@ -21,6 +22,7 @@ function limited(ip: string): boolean {
 /** Public: the progress of one shipment, found with its code. Never returns the client's name, phone or e-mail. */
 export async function GET(request: Request) {
   try {
+    if (!TRACKING_ENABLED) return NextResponse.json({ error: "Service indisponible." }, { status: 404 });
     if (!isAdminConfigured()) return NextResponse.json({ error: "Service indisponible." }, { status: 503 });
     const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
     if (limited(ip)) return NextResponse.json({ error: "Trop de recherches. Réessayez dans une minute." }, { status: 429 });

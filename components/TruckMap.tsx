@@ -28,12 +28,13 @@ const icon = (L: typeof import("leaflet"), live: boolean) =>
   });
 
 /** An OpenStreetMap showing trucks; the markers move when the points change. */
-export default function TruckMap({ points, height = 420, onSelect }: { points: MapPoint[]; height?: number; onSelect?: (id: string) => void }) {
+export default function TruckMap({ points, height = 420, onSelect, follow = false }: { points: MapPoint[]; height?: number; onSelect?: (id: string) => void; follow?: boolean }) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<LeafletMap | null>(null);
   const markers = useRef(new globalThis.Map<string, Marker>());
   const lib = useRef<typeof import("leaflet") | null>(null);
   const fitted = useRef(false);
+  const lastFollow = useRef("");
   const latest = useRef(points);
   latest.current = points;
   const select = useRef(onSelect);
@@ -62,6 +63,16 @@ export default function TruckMap({ points, height = 420, onSelect }: { points: M
       if (!seen.has(id)) {
         mk.remove();
         markers.current.delete(id);
+      }
+    }
+    // A client following one truck: the map stays on it when it moves.
+    if (follow && latest.current.length === 1) {
+      const p = latest.current[0];
+      const key = `${p.lat},${p.lng}`;
+      if (key !== lastFollow.current) {
+        lastFollow.current = key;
+        m.setView([p.lat, p.lng], Math.max(m.getZoom(), 12), { animate: true });
+        fitted.current = true;
       }
     }
     // Frame the trucks once; after that the viewer keeps whatever view they chose.
