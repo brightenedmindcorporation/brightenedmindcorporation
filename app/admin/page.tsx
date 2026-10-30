@@ -83,7 +83,19 @@ export default function AdminPage() {
   const [authorized, setAuthorized] = useState(false);
   const [checking, setChecking] = useState(true);
   const [processingIds, setProcessingIds] = useState<Set<string>>(new Set());
-  const [tab, setTab] = useState<Tab>("students");
+  const [tab, setTabState] = useState<Tab>("students");
+  // The open tab is kept in the address and on this device, so refreshing the page stays on it.
+  const setTab = (t: Tab) => {
+    setTabState(t);
+    try {
+      localStorage.setItem("bm-admin-tab", t);
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", t);
+      window.history.replaceState({}, "", url.toString());
+    } catch {
+      // storage or history blocked: the tab simply is not remembered
+    }
+  };
 
   // --- Inline admin login (no detour through /login) ---
   const [loginEmail, setLoginEmail] = useState("");
@@ -1411,7 +1423,13 @@ export default function AdminPage() {
     // Deep-links from notifications (?tab=…) — e.g. a new candidature's
     // notification should open straight on the Candidatures tab, not
     // always land on the default Students tab.
-    const requestedTab = params.get("tab");
+    let savedTab: string | null = null;
+    try {
+      savedTab = localStorage.getItem("bm-admin-tab");
+    } catch {
+      // storage blocked
+    }
+    const requestedTab = params.get("tab") || savedTab;
     const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "shipments", "trucks"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
