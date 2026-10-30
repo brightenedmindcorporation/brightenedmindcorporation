@@ -13,12 +13,14 @@ import { printVocabulary } from "@/lib/academy/vocabularyPrint";
 import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import { downloadLessonAudio, isLessonCached } from "@/lib/academy/lessonAudioPlayer";
 import chineseChars from "@/content/vocabulary/chinese.json";
+import chineseMeanings from "@/content/vocabulary/chinese-meanings.json";
 import english from "@/content/vocabulary/english.json";
 import french from "@/content/vocabulary/french.json";
 import spanish from "@/content/vocabulary/spanish.json";
 import portuguese from "@/content/vocabulary/portuguese.json";
 import swahili from "@/content/vocabulary/swahili.json";
 
+const MEANINGS = chineseMeanings as Record<string, string>;
 const PHONETICS: Record<string, Record<string, string>> = { english, french, spanish, portuguese, swahili };
 const CJK = /[一-鿿]/;
 const TRIPLE = /^(.+?)\s*\(([^)]+)\)\s*[-–—]\s*(.+)$/;
@@ -159,6 +161,7 @@ export default function VocabularyPage() {
         langLabel: curriculum.langLabel,
         wordsHeading: "Mot",
         chars: chinese.chars,
+        charNotes: Object.fromEntries(chinese.chars.map((ch) => [ch, { pinyin: (chineseChars as Record<string, string>)[ch], meaning: MEANINGS[ch] }])),
         rows: chinese.words.map((wd) => ({ text: wd.text, phonetic: wd.pinyin, translation: wd.meaning })),
       });
     } else {
@@ -236,10 +239,10 @@ export default function VocabularyPage() {
             <>
               <section className="bg-surface rounded-3xl p-6 border border-line shadow-xl">
                 <h2 className="text-xl font-bold text-red-500 mb-1">Les {chinese.chars.length} caractères de ce niveau</h2>
-                <p className="text-xs text-ink-faint mb-5">Cliquez sur le haut-parleur pour écouter. Les caractères sont classés dans l'ordre où ils apparaissent dans les leçons.</p>
+                <p className="text-xs text-ink-faint mb-5">Cliquez sur le haut-parleur pour écouter ; le sens en français est sous le pinyin. Les caractères sont classés dans l'ordre où ils apparaissent dans les leçons.</p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3" translate="no">
                   {chinese.chars
-                    .filter((ch) => match(ch, (chineseChars as Record<string, string>)[ch]))
+                    .filter((ch) => match(ch, (chineseChars as Record<string, string>)[ch], MEANINGS[ch]))
                     .map((ch) => (
                       <div key={ch} className="relative rounded-2xl border border-line bg-surface-alt p-3 text-center">
                         <div className="absolute top-2 right-2">
@@ -247,6 +250,7 @@ export default function VocabularyPage() {
                         </div>
                         <p className="text-4xl font-bold text-ink mt-2">{ch}</p>
                         <p className="text-sm text-red-500 font-semibold mt-1">{(chineseChars as Record<string, string>)[ch]}</p>
+                        {MEANINGS[ch] && <p className="text-xs text-ink-soft mt-1 leading-snug">{MEANINGS[ch]}</p>}
                       </div>
                     ))}
                 </div>

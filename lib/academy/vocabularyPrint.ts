@@ -19,6 +19,8 @@ export function printVocabulary(opts: {
   rows: VocabularyRow[];
   /** Chinese only: the characters of the level. */
   chars?: string[];
+  /** Chinese only: pinyin and meaning printed under each character. */
+  charNotes?: Record<string, { pinyin?: string; meaning?: string }>;
   wordsHeading?: string;
 }) {
   const w = window.open("", "_blank", "width=900,height=1100");
@@ -36,7 +38,7 @@ export function printVocabulary(opts: {
         `<tr><td translate="no">${esc(r.text)}</td>${hasPhonetic ? `<td translate="no">${esc(r.phonetic || "")}</td>` : ""}${hasTranslation ? `<td>${esc(r.translation || "")}</td>` : ""}</tr>`
     )
     .join("");
-  const chars = opts.chars?.length ? `<div class="chars">${opts.chars.map((c) => `<span>${esc(c)}</span>`).join("")}</div>` : "";
+  const chars = opts.chars?.length ? `<div class="chars">${opts.chars.map((c) => { const n = opts.charNotes?.[c]; return `<span>${esc(c)}${n ? `<small>${esc(n.pinyin || "")}</small><em>${esc(n.meaning || "")}</em>` : ""}</span>`; }).join("")}</div>` : "";
   w.document.write(`<!doctype html><html lang="fr"><head><meta charset="utf-8"><title>${esc(opts.title)} — ${esc(opts.levelTitle)}</title>
 <style>
   @page { size: A4; margin: 14mm; }
@@ -51,7 +53,9 @@ export function printVocabulary(opts: {
   tr { break-inside: avoid; }
   tbody tr:nth-child(even) td { background: #fbf8f8; }
   .chars { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 14px; font-size: 26px; font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif; }
-  .chars span { border: 1px solid #ccc; border-radius: 6px; padding: 2px 8px; }
+  .chars span { border: 1px solid #ccc; border-radius: 6px; padding: 2px 8px; text-align: center; break-inside: avoid; }
+  .chars span small { display: block; font-size: 11px; color: #b3121b; font-family: Arial, Helvetica, sans-serif; font-weight: bold; }
+  .chars span em { display: block; max-width: 110px; font-size: 9px; color: #444; font-style: normal; font-family: Arial, Helvetica, sans-serif; }
   .note { font-family: Arial, Helvetica, sans-serif; font-size: 10px; color: #555; margin: 0 0 10px; }
   @media print { button { display: none; } }
 </style></head><body>
