@@ -1557,6 +1557,27 @@ export default function AdminPage() {
     }
   };
 
+  // Puts the student at a given level, up or down; the student is notified and keeps the same Student ID.
+  const changeLevel = async (student: any, level: number) => {
+    const current = levelNumber(student.level);
+    if (level === current) return;
+    const direction = level > current ? "monte" : "redescend";
+    if (!confirm(`Placer ${student.name} au niveau ${level} (il/elle ${direction} depuis le niveau ${current}) ?\n\nSes leçons déjà faites restent enregistrées, son Student ID ne change pas, et il/elle en sera informé(e).${level > current ? "\n\nVérifiez d'abord que ses frais sont réglés si ce niveau est payant." : ""}`)) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/update-enrollment", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ id: student.id, kind: student.kind, level }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   // Sets the civility (Monsieur / Madame) used to address the student in e-mails.
   const changeGender = async (student: any, gender: "M" | "F") => {
     try {
@@ -2252,6 +2273,23 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           Débloquer le niveau {levelNumber(s.level) + 1}
                         </button>
                       )}
+                    </div>
+                  )}
+                  {!isOtherProgramCode(s.langCode) && s.status === "Approved" && (
+                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
+                      <b className="text-ink">Niveau actuel :</b>
+                      <select
+                        value={levelNumber(s.level)}
+                        onChange={(e) => changeLevel(s, Number(e.target.value))}
+                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      >
+                        {Array.from({ length: findProgramByCode(s.langCode) ? programLevels(findProgramByCode(s.langCode)!.slug).length || 3 : 3 }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>
+                            Niveau {n}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="text-xs text-ink-faint">(modifiable vers le haut ou vers le bas)</span>
                     </div>
                   )}
                   {!isOtherProgramCode(s.langCode) && (

@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { FieldValue } from "firebase-admin/firestore";
 import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
 import { createNotification } from "@/lib/notifications";
 import { AuthError, bearer, getCaller } from "@/lib/teacherAuth";
 import { normalizeGender } from "@/lib/salutation";
+import { levelLabel, levelNumber } from "@/lib/academy/levelAccess";
+import { findProgramByCode, programLevels } from "@/content/curriculum";
 
 /**
  * Admin changes a student's study plan (3 or 5 days per week). The plan sets
@@ -17,10 +20,11 @@ export async function PATCH(request: Request) {
     }
     await getCaller(bearer(request), ["admin"]);
 
-    const { id, kind, studyDays, gender: rawGender, startLevel: rawStart } = await request.json();
+    const { id, kind, studyDays, gender: rawGender, startLevel: rawStart, level: rawLevel } = await request.json();
     const start = Number(rawStart);
+    const newLevel = Number(rawLevel);
     const gender = normalizeGender(rawGender);
-    if (!id || (!gender && !(start >= 1 && start <= 3) && studyDays !== 3 && studyDays !== 5)) {
+    if (!id || (!gender && !(newLevel >= 1 && newLevel <= 3) && !(start >= 1 && start <= 3) && studyDays !== 3 && studyDays !== 5)) {
       return NextResponse.json({ error: "id et studyDays (3 ou 5) ou gender (M ou F) requis." }, { status: 400 });
     }
 
@@ -28,6 +32,39 @@ export async function PATCH(request: Request) {
     const ref = db.collection(kind === "legacyStudent" ? "students" : "enrollments").doc(String(id));
     const snap = await ref.get();
     if (!snap.exists) return NextResponse.json({ error: "Inscription introuvable." }, { status: 404 });
+
+    // The administration sets the student's current level directly, up or down (the lessons already done stay recorded).
+    if (newLevel >= 1 && newLevel <= 3) {
+      const data = snap.data()!;
+      const program = findProgramByCode(String(data.langCode));
+      const last = program ? programLevels(program.slug).length || 3 : 3;
+      if (newLevel > last) return NextResponse.json({ error: `Ce programme n'a que ${last} niveau(x).` }, { status: 400 });
+      const before = levelNumber(data.level);
+      const update: Record<string, unknown> = {
+        level: levelLabel(newLevel),
+        levelUnlockedAt: { ...(data.levelUnlockedAt || {}), ...(data.levelUnlockedAt?.[`L${newLevel}`] ? {} : { [`L${newLevel}`]: new Date().toISOString() }) },
+        levelChangedAt: new Date().toISOString(),
+        levelRequest: FieldValue.delete(),
+      };
+      // The access window starts at the start level: it can never be above the current level.
+      if (Number(data.startLevel) > newLevel) update.startLevel = newLevel;
+      await ref.set(update, { merge: true });
+      if (before !== newLevel) {
+        try {
+          const uid = (data.uid as string) || String(id).split("_")[0];
+          await createNotification({
+            audience: uid,
+            type: "level-changed",
+            title: `Votre niveau est maintenant le niveau ${newLevel}`,
+            message: `L'administration a placé votre formation au niveau ${newLevel}. Votre Student ID reste le même.`,
+            link: "/academia/dashboard",
+          });
+        } catch (notifError) {
+          console.error("Level-change notification failed (non-fatal):", notifError);
+        }
+      }
+      return NextResponse.json({ status: "success", level: newLevel });
+    }
 
     // The level the student started at: they have no access to the levels below it.
     if (start >= 1 && start <= 3) {
