@@ -1563,12 +1563,15 @@ export default function AdminPage() {
     if (level === current) return;
     const direction = level > current ? "monte" : "redescend";
     if (!confirm(`Placer ${student.name} au niveau ${level} (il/elle ${direction} depuis le niveau ${current}) ?\n\nSes leçons déjà faites restent enregistrées, son Student ID ne change pas, et il/elle en sera informé(e).${level > current ? "\n\nVérifiez d'abord que ses frais sont réglés si ce niveau est payant." : ""}`)) return;
+    // Levels above the new one are always closed. For the levels below, the administration chooses.
+    const start = Number(student.startLevel) >= 1 && Number(student.startLevel) <= 3 ? Number(student.startLevel) : 1;
+    const closeOthers = level > start && confirm(`Fermer aussi les niveaux précédents ?\n\nOK : ${student.name} n'aura accès qu'au niveau ${level}.\nAnnuler : les niveaux ${start} à ${level - 1} restent ouverts.`);
     try {
       const idToken = await auth.currentUser?.getIdToken();
       const response = await fetch("/api/admin/update-enrollment", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ id: student.id, kind: student.kind, level }),
+        body: JSON.stringify({ id: student.id, kind: student.kind, level, closeOthers }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || "Erreur serveur");

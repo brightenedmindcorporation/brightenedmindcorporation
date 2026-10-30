@@ -20,7 +20,7 @@ export async function PATCH(request: Request) {
     }
     await getCaller(bearer(request), ["admin"]);
 
-    const { id, kind, studyDays, gender: rawGender, startLevel: rawStart, level: rawLevel } = await request.json();
+    const { id, kind, studyDays, gender: rawGender, startLevel: rawStart, level: rawLevel, closeOthers } = await request.json();
     const start = Number(rawStart);
     const newLevel = Number(rawLevel);
     const gender = normalizeGender(rawGender);
@@ -47,7 +47,8 @@ export async function PATCH(request: Request) {
         levelRequest: FieldValue.delete(),
       };
       // The access window starts at the start level: it can never be above the current level.
-      if (Number(data.startLevel) > newLevel) update.startLevel = newLevel;
+      // "Close the other levels": the levels below are closed too, so only this level stays open.
+      if (Number(data.startLevel) > newLevel || closeOthers === true) update.startLevel = newLevel;
       await ref.set(update, { merge: true });
       if (before !== newLevel) {
         try {
