@@ -183,6 +183,9 @@ async function sendWeeklyReport(): Promise<boolean> {
   return !error;
 }
 
+/** The Monday e-mail report is switched off; set to true to send it again. */
+export const WEEKLY_REPORT_ENABLED = false;
+
 export interface DailyResult {
   ran: boolean;
   reason?: string;
@@ -220,7 +223,7 @@ export async function runDailyJob(force = false): Promise<DailyResult> {
     const localDate = new Date(Date.now() + 2 * 3600_000);
     const isMonday = localDate.getUTCDay() === 1;
     const last = (await ref.get()).data()?.lastWeeklyReport as string | undefined;
-    if ((isMonday && last !== today) || (force && !last)) {
+    if (WEEKLY_REPORT_ENABLED && ((isMonday && last !== today) || (force && !last))) {
       result.weeklyReport = await sendWeeklyReport();
       if (result.weeklyReport) await ref.set({ lastWeeklyReport: today }, { merge: true });
     }

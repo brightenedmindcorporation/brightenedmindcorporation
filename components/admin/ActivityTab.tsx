@@ -241,7 +241,7 @@ export default function ActivityTab() {
         <p className="font-bold text-ink">Suivi automatique</p>
         <p className="text-xs text-ink-soft max-w-2xl">
           Chaque jour, le site envoie un rappel (e-mail + notification) aux étudiants inactifs, selon les nombres de jours que vous tapez
-          ci-dessous, et vous envoie chaque lundi un rapport de la semaine. Il s'exécute tout seul à la première visite du jour, après 8 h.
+          ci-dessous. Le rapport hebdomadaire par e-mail est désactivé. Il s'exécute tout seul à la première visite du jour, après 8 h.
           Pour relancer un seul étudiant tout de suite, utilisez le bouton « Relancer » de sa ligne.
         </p>
         {job && (
