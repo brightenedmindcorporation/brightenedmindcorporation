@@ -31,9 +31,9 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
     try {
       stored = localStorage.getItem("theme");
     } catch {}
-    // Pas de préférence enregistrée = premier passage sur le site : on
-    // démarre en clair par défaut, plutôt que de deviner via l'OS.
-    const initial: Theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "light";
+    // Pas de préférence enregistrée = premier passage sur le site : le site
+    // suit le réglage de l'appareil (clair, sombre ou automatique).
+    const initial: Theme = stored === "light" || stored === "dark" || stored === "system" ? stored : "system";
     setTheme(initial);
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -42,10 +42,21 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
       try {
         current = localStorage.getItem("theme");
       } catch {}
-      if (current === "system") applyTheme("system");
+      // Sans choix enregistré, on suit l'appareil en direct (bascule automatique jour/nuit comprise).
+      if (current === null || current === "system") applyTheme("system");
     };
     mq.addEventListener("change", handleChange);
-    return () => mq.removeEventListener("change", handleChange);
+    // A phone set to "automatic" can switch at sunset while the browser sleeps: check again when the page comes back.
+    const handleVisible = () => {
+      if (document.visibilityState === "visible") handleChange();
+    };
+    document.addEventListener("visibilitychange", handleVisible);
+    window.addEventListener("focus", handleChange);
+    return () => {
+      mq.removeEventListener("change", handleChange);
+      document.removeEventListener("visibilitychange", handleVisible);
+      window.removeEventListener("focus", handleChange);
+    };
   }, []);
 
   const choose = (next: Theme) => {
