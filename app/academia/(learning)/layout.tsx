@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import FloatingTools from "@/components/academy/FloatingTools";
+import AssistantWidget from "@/components/academy/AssistantWidget";
 
 export const metadata: Metadata = {
   title: "Brightened Mind Academia — Cours de langues en ligne",
@@ -21,6 +22,7 @@ export default function AcademyLayout({
           have no header at all). One floating toggle here covers all of
           them uniformly instead of patching each page individually. */}
       <FloatingTools />
+      <AssistantWidget />
       {children}
     </div>
   );
