@@ -1599,6 +1599,29 @@ export default function AdminPage() {
     }
   };
 
+  // Moves the student to another program (e.g. French -> English): new Student ID, level 1, the old work stays recorded.
+  const changeProgram = async (student: any, langCode: string) => {
+    if (!langCode || langCode === student.langCode) return;
+    const from = languageLabel(student.langCode);
+    const to = languageLabel(langCode);
+    const approved = student.status === "Approved";
+    if (!confirm(`Changer la formation de ${student.name} : ${from} → ${to} ?\n\n${approved ? "• Il/elle reçoit un nouveau Student ID pour " + to + " (par e-mail).\n" : ""}• Il/elle repart au niveau 1 de ${to}.\n• Ce qu'il/elle a fait en ${from} reste enregistré.\n• Son professeur attribué est retiré (à réattribuer).\n• Il/elle en est informé(e).`)) return;
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/admin/change-program", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+        body: JSON.stringify({ id: student.id, langCode }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      alert(`Formation changée : ${to}.${result.matricule ? ` Nouveau Student ID : ${result.matricule}.` : ""}${result.matricule && !result.emailSent ? " E-mail non envoyé : communiquez-le à l'étudiant." : ""}`);
+      fetchStudents();
+    } catch (error: any) {
+      alert(`Erreur : ${error.message || error}`);
+    }
+  };
+
   // Sets the civility (Monsieur / Madame) used to address the student in e-mails.
   const changeGender = async (student: any, gender: "M" | "F") => {
     try {
@@ -2236,6 +2259,26 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <p className="text-ink"><b className="text-ink">Nom :</b> {s.name}</p>
                   <p className="text-ink"><b className="text-ink">Email :</b> {s.email}</p>
                   <p className="text-ink"><b className="text-ink">Formation :</b> {languageLabel(s.langCode)}</p>
+                  {s.kind !== "legacyStudent" && ["Pending", "Approved", "Suspended", "Expired"].includes(s.status) && (
+                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1 mb-1">
+                      <b className="text-ink">Changer de formation :</b>
+                      <select
+                        value=""
+                        onChange={(e) => changeProgram(s, e.target.value)}
+                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                      >
+                        <option value="">Choisir…</option>
+                        {[...availableLanguages, ...otherPrograms]
+                          .filter((p) => p.code !== s.langCode)
+                          .map((p) => (
+                            <option key={p.code} value={p.code}>
+                              {p.label}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                  )}
+                  {s.changedFrom && <p className="text-xs text-ink-soft">Ancienne formation : {languageLabel(s.changedFrom.langCode)}{s.changedFrom.matricule ? ` (${s.changedFrom.matricule})` : ""}</p>}
                   <p className="text-ink"><b className="text-ink">Niveau :</b> {s.level}</p>
                   <p className="text-ink">
                     <b className="text-ink">Statut :</b>{" "}
