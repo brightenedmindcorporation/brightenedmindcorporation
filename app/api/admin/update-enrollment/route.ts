@@ -46,6 +46,9 @@ export async function PATCH(request: Request) {
         levelChangedAt: new Date().toISOString(),
         levelRequest: FieldValue.delete(),
       };
+      // A level given by the administration settles a placement test still waiting for the student.
+      const pending = data.placement?.status === "requested" || data.placement?.status === "submitted";
+      if (pending) update.placement = { ...data.placement, status: "decided", level: newLevel, comment: "Niveau attribué par l'administration.", decidedAt: new Date().toISOString(), decidedBy: "admin" };
       // The access window starts at the start level: it can never be above the current level.
       // "Close the other levels": the levels below are closed too, so only this level stays open.
       if (Number(data.startLevel) > newLevel || closeOthers === true) update.startLevel = newLevel;

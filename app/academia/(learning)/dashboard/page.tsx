@@ -329,6 +329,27 @@ export default function Dashboard() {
     }
   };
 
+  // The student already knows their level: they start without the placement test.
+  const skipPlacement = async () => {
+    setLevelRequesting(true);
+    try {
+      const idToken = await auth.currentUser?.getIdToken();
+      const response = await fetch("/api/academy/placement/skip", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idToken, langCode: activeEnrollment.langCode }),
+      });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Erreur serveur");
+      const updated = await refreshLoggedStudent();
+      if (updated) setStudent(updated);
+    } catch (error: any) {
+      alert(error.message || "Erreur");
+    } finally {
+      setLevelRequesting(false);
+    }
+  };
+
   const handleContinue = () => {
     const current = levelNumber(activeEnrollment.level);
     // Continue where the student is: the next lesson of their level.
@@ -658,12 +679,21 @@ export default function Dashboard() {
               </p>
             </div>
             {(activeEnrollment as any).placement?.status !== "submitted" && (
-              <button
-                onClick={() => router.push(`/academia/placement/${langSlug}`)}
-                className="glow-accent shrink-0 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition"
-              >
-                Passer le test
-              </button>
+              <div className="shrink-0 flex flex-col gap-2 sm:items-end">
+                <button
+                  onClick={() => router.push(`/academia/placement/${langSlug}`)}
+                  className="glow-accent shrink-0 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition"
+                >
+                  Passer le test
+                </button>
+                <button
+                  onClick={skipPlacement}
+                  disabled={levelRequesting}
+                  className="text-sm font-semibold text-ink-soft hover:text-ink underline underline-offset-4 disabled:opacity-50"
+                >
+                  {levelRequesting ? "…" : `Je connais mon niveau : commencer au niveau ${levelNumber(activeEnrollment.level)}`}
+                </button>
+              </div>
             )}
           </div>
         )}
