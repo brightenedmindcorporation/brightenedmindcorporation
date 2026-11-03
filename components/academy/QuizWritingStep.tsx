@@ -5,6 +5,7 @@ import { Lightbulb } from "lucide-react";
 import ListenButton from "@/components/academy/ListenButton";
 import { CharPalette, ImeTextarea } from "@/components/academy/ImeField";
 import { DiffView } from "@/components/academy/WritingLab";
+import Zh from "@/components/academy/Zh";
 import { dialogueClipText } from "@/lib/academy/audioClips";
 import { playClip } from "@/lib/academy/lessonAudioPlayer";
 import { speakWithDeviceVoice } from "@/lib/academy/deviceSpeech";
@@ -167,9 +168,9 @@ export default function QuizWritingStep({
                 />
                 {submitted && (
                   <div className="space-y-1">
-                    <DiffView ops={diffAnswer(d.text, typed, writing.cjk).ops} />
-                    <p className="text-sm text-ink-soft">
-                      Phrase correcte : <span translate="no" className="notranslate text-ink font-semibold">{d.text}</span>
+                    <DiffView ops={diffAnswer(d.text, typed, writing.cjk).ops} cjk={writing.cjk} />
+                    <p className={`text-sm text-ink-soft ${writing.cjk ? "leading-[2.6]" : ""}`}>
+                      Phrase correcte : <span translate="no" className="notranslate text-ink font-semibold"><Zh text={d.text} on={writing.cjk} /></span>
                     </p>
                   </div>
                 )}
@@ -185,7 +186,7 @@ export default function QuizWritingStep({
             <div key={i} className="space-y-2">
               <div className="flex flex-wrap items-center gap-3">
                 <ListenButton play={(id) => playLine(langSlug, r.speaker, r.line, id)} label="Écouter" title="Écouter la question" className={listenBtn} />
-                <p translate="no" className="notranslate font-semibold text-ink">{r.question}</p>
+                <p translate="no" className={`notranslate font-semibold text-ink ${writing.cjk ? "leading-[2.6]" : ""}`}><Zh text={r.question} on={writing.cjk} /></p>
               </div>
               <ImeTextarea
                 value={state.replies[i] ?? ""}
@@ -205,7 +206,7 @@ export default function QuizWritingStep({
       <Part n={letter()} title="Écrivez votre texte" hint={`Au moins ${writing.minLength} ${unit}. Servez-vous des idées proposées et de ce que vous avez appris dans la leçon.`}>
         <div className="rounded-xl border border-red-700/30 bg-red-500/5 p-3">
           <p className="text-xs font-bold uppercase tracking-wide text-red-500">Sujet</p>
-          <p className="text-ink font-semibold mt-1">{writing.topic}</p>
+          <p className={`text-ink font-semibold mt-1 ${writing.cjk ? "leading-[2.6]" : ""}`}><Zh text={writing.topic} on={writing.cjk} /></p>
         </div>
         {writing.ideas.length > 0 && (
           <div className="text-sm text-ink-soft">
@@ -214,8 +215,8 @@ export default function QuizWritingStep({
             </p>
             <ul className="space-y-1" translate="no">
               {writing.ideas.map((idea) => (
-                <li key={idea} className="notranslate">
-                  • {idea}
+                <li key={idea} className={`notranslate ${writing.cjk ? "leading-[2.6]" : ""}`}>
+                  • <Zh text={idea} on={writing.cjk} />
                 </li>
               ))}
             </ul>

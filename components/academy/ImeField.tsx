@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { buildPinyinIndex, type PinyinIndex } from "@/lib/academy/pinyinIndex";
 import type { InputHTMLAttributes, TextareaHTMLAttributes } from "react";
+import Zh from "@/components/academy/Zh";
 
 /**
  * Text fields that behave with input-method editors (Chinese pinyin, etc.).
@@ -135,9 +136,9 @@ function PinyinBox({ corpus, onPick }: { corpus: string[]; onPick: (c: string) =
                 onPick(c);
                 setTyped("");
               }}
-              className="notranslate px-3 h-9 rounded-lg bg-surface border border-line text-lg text-ink hover:border-red-600/60 hover:bg-red-600 hover:text-white transition"
+              className="notranslate px-3 min-h-9 pt-3 pb-1 rounded-lg bg-surface border border-line text-lg text-ink hover:border-red-600/60 hover:bg-red-600 hover:text-white transition"
             >
-              {c}
+              <Zh text={c} />
             </button>
           ))}
         </div>
@@ -166,9 +167,9 @@ export function CharPalette({ chars, onPick, corpus }: { chars: string[]; onPick
             // Keep the focus in the field being filled.
             onMouseDown={(e) => e.preventDefault()}
             onClick={() => onPick(c)}
-            className="notranslate w-9 h-9 rounded-lg bg-surface border border-line text-lg text-ink hover:border-red-600/60 hover:bg-red-600 hover:text-white transition"
+            className="notranslate min-w-10 min-h-11 px-1 pt-3 pb-1 rounded-lg bg-surface border border-line text-lg text-ink hover:border-red-600/60 hover:bg-red-600 hover:text-white transition"
           >
-            {c}
+            <Zh text={c} />
           </button>
         ))}
       </div>

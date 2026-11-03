@@ -14,6 +14,7 @@ import swLevel3 from "./swahili-fr-level3";
 import zhLevel1 from "./chinese-fr-level1";
 import zhLevel2 from "./chinese-fr-level2";
 import zhLevel3 from "./chinese-fr-level3";
+import zhExercises from "./chinese-fr-exercises";
 
 // French translations shown under the lessons of a language (the voice always reads the language being learned).
 // Key: the exact line of the lesson. A language appears here once its lessons are translated.
@@ -22,7 +23,7 @@ const DICTIONARIES: Record<string, Record<string, string>> = {
   spanish: { ...esLevel1, ...esLevel2, ...esLevel3 },
   portuguese: { ...ptLevel1, ...ptLevel2, ...ptLevel3 },
   swahili: { ...swLevel1, ...swLevel2, ...swLevel3 },
-  chinese: { ...zhLevel1, ...zhLevel2, ...zhLevel3 },
+  chinese: { ...zhLevel1, ...zhLevel2, ...zhLevel3, ...zhExercises },
 };
 
 /** The French translation of a lesson line, when there is one. */

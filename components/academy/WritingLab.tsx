@@ -8,6 +8,9 @@ import { speakPhrase, speakWithDeviceVoice } from "@/lib/academy/deviceSpeech";
 import ListenButton from "@/components/academy/ListenButton";
 import { CharPalette, ImeInput, ImeTextarea } from "@/components/academy/ImeField";
 import { sfx } from "@/lib/academy/sfx";
+import Zh from "@/components/academy/Zh";
+import { frenchFor } from "@/content/translations";
+import { extractSpeechText } from "@/lib/academy/audioClips";
 import {
   buildWritingTask,
   diffAnswer,
@@ -54,27 +57,56 @@ function StepHeader({ n, title, hint, done }: { n: number; title: string; hint: 
   );
 }
 
-/** The typed answer, word by word: green = right, orange = accent, red = wrong/extra, "[…]" = forgotten. */
-export function DiffView({ ops }: { ops: DiffOp[] }) {
+/** The French translation of a sentence of the lesson: the exact line, or the line whose spoken text is this sentence. */
+function translationOf(langSlug: string, lesson: Lesson, text: string): string | undefined {
+  const direct = frenchFor(langSlug, text);
+  if (direct) return direct;
+  const lines = [...lesson.sections.flatMap((s) => s.body), ...lesson.reading];
+  const match = lines.find((line) => extractSpeechText(line).trim() === text.trim());
+  if (!match) return undefined;
+  const dictionary = frenchFor(langSlug, match);
+  if (dictionary) return dictionary;
+  if (langSlug !== "chinese") return undefined;
+  // "你好 (nǐ hǎo) - Bonjour": the meaning after the dash.
+  const dash = match.match(/\)\s*[-–—]\s*(\p{L}.*)$/u);
+  if (dash) return dash[1].trim();
+  // A reading line: "…中文。 (Traduction française)". A pinyin hint also sits in parentheses; it carries tone marks French lacks.
+  const tail = match.match(/\(([^()]+)\)\s*$/);
+  if (tail && !/[\u3400-\u9fff]/.test(tail[1]) && !/[āáǎēěīíǐōóǒūúǔǖǘǚǜ]/.test(tail[1]) && tail[1].trim().split(/\s+/).length >= 3) return tail[1].trim();
+  return undefined;
+}
+
+/** The French translation shown under a sentence. */
+function Translation({ text }: { text?: string }) {
+  if (!text) return null;
   return (
-    <p translate="no" className="notranslate leading-8 text-lg">
+    <p className="text-sm text-ink-soft">
+      <span className="font-semibold">Traduction :</span> {text}
+    </p>
+  );
+}
+
+/** The typed answer, word by word: green = right, orange = accent, red = wrong/extra, "[…]" = forgotten. */
+export function DiffView({ ops, cjk = false }: { ops: DiffOp[]; cjk?: boolean }) {
+  return (
+    <p translate="no" className={`notranslate text-lg ${cjk ? "leading-[2.6]" : "leading-8"}`}>
       {ops.map((op, i) => {
-        if (op.kind === "ok") return <span key={i} className="text-emerald-500 font-semibold mr-1.5">{op.typed}</span>;
+        if (op.kind === "ok") return <span key={i} className="text-emerald-500 font-semibold mr-1.5"><Zh text={op.typed ?? ""} on={cjk} /></span>;
         if (op.kind === "accent")
           return (
             <span key={i} className="text-amber-500 font-semibold mr-1.5" title="Attention aux accents">
-              {op.typed}
-              <span className="text-xs"> → {op.expected}</span>
+              <Zh text={op.typed ?? ""} on={cjk} />
+              <span className="text-xs"> → <Zh text={op.expected ?? ""} on={cjk} /></span>
             </span>
           );
-        if (op.kind === "extra") return <span key={i} className="text-red-500 line-through mr-1.5">{op.typed}</span>;
-        return <span key={i} className="text-red-500 font-semibold mr-1.5">[{op.expected}]</span>;
+        if (op.kind === "extra") return <span key={i} className="text-red-500 line-through mr-1.5"><Zh text={op.typed ?? ""} on={cjk} /></span>;
+        return <span key={i} className="text-red-500 font-semibold mr-1.5">[<Zh text={op.expected ?? ""} on={cjk} />]</span>;
       })}
     </p>
   );
 }
 
-function Dictation({ items, langSlug, cjk, chars, corpus, onDone }: { items: { text: string }[]; langSlug: string; cjk: boolean; chars: string[]; corpus: string[]; onDone: () => void }) {
+function Dictation({ items, langSlug, cjk, chars, corpus, tr, onDone }: { items: { text: string }[]; langSlug: string; cjk: boolean; chars: string[]; corpus: string[]; tr: (text: string) => string | undefined; onDone: () => void }) {
   const [typed, setTyped] = useState<string[]>(() => items.map(() => ""));
   const [focused, setFocused] = useState(0);
   const [results, setResults] = useState<(ReturnType<typeof diffAnswer> | null)[]>(() => items.map(() => null));
@@ -126,10 +158,11 @@ function Dictation({ items, langSlug, cjk, chars, corpus, onDone }: { items: { t
                   {Math.round(res.score * 100)} % de mots justes
                   {res.score >= 0.95 ? " — parfait !" : res.score >= 0.7 ? " — bien joué, corrigez les détails." : " — réécoutez et réessayez."}
                 </p>
-                <DiffView ops={res.ops} />
-                <div className="text-sm text-ink-soft">
-                  Phrase correcte : <span translate="no" className="notranslate text-ink font-semibold">{item.text}</span>
+                <DiffView ops={res.ops} cjk={cjk} />
+                <div className={`text-sm text-ink-soft ${cjk ? "leading-[2.6]" : ""}`}>
+                  Phrase correcte : <span translate="no" className="notranslate text-ink font-semibold"><Zh text={item.text} on={cjk} /></span>
                 </div>
+                <Translation text={tr(item.text)} />
                 <button onClick={() => retry(i)} className={ghostBtn}>
                   <RotateCcw size={14} /> Réessayer
                 </button>
@@ -143,7 +176,7 @@ function Dictation({ items, langSlug, cjk, chars, corpus, onDone }: { items: { t
   );
 }
 
-function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk: boolean; chars: string[]; corpus: string[]; onDone: () => void }) {
+function Cloze({ items, cjk, chars, corpus, tr, onDone }: { items: ClozeItem[]; cjk: boolean; chars: string[]; corpus: string[]; tr: (text: string) => string | undefined; onDone: () => void }) {
   const [answers, setAnswers] = useState<string[]>(() => items.map(() => ""));
   const [focused, setFocused] = useState(0);
   const [state, setState] = useState<("idle" | "ok" | "accent" | "wrong")[]>(() => items.map(() => "idle"));
@@ -167,8 +200,8 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
     <div className="space-y-4 mt-4">
       {items.map((it, i) => (
         <div key={i} className="rounded-2xl border border-line bg-surface-alt p-4 space-y-2">
-          <p translate="no" className="notranslate text-lg text-ink leading-10">
-            {it.before}
+          <p translate="no" className={`notranslate text-lg text-ink ${cjk ? "leading-[2.8]" : "leading-10"}`}>
+            <Zh text={it.before} on={cjk} />
             <ImeInput
               value={answers[i]}
               onValueChange={(v) => {
@@ -188,18 +221,19 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
               }`}
               aria-label={`Mot manquant, phrase ${i + 1}`}
             />
-            {it.after}
+            <Zh text={it.after} on={cjk} />
           </p>
+          {cjk && <Translation text={tr(it.full)} />}
           {state[i] === "ok" && <p className="text-sm font-semibold text-emerald-500">Correct !</p>}
           {state[i] === "accent" && (
             <p className="text-sm font-semibold text-amber-500">
-              Presque : attention aux accents → <span translate="no" className="notranslate">{it.answer}</span>
+              Presque : attention aux accents → <span translate="no" className="notranslate"><Zh text={it.answer} on={cjk} /></span>
             </p>
           )}
           {state[i] === "wrong" && <p className="text-sm font-semibold text-red-500">Pas tout à fait. Relisez la phrase et réessayez.</p>}
           {reveal && (
             <p className="text-sm font-semibold text-sky-500">
-              Réponse : <span translate="no" className="notranslate text-ink">{it.answer}</span>
+              Réponse : <span translate="no" className="notranslate text-ink"><Zh text={it.answer} on={cjk} /></span>
             </p>
           )}
         </div>
@@ -229,7 +263,7 @@ function Cloze({ items, cjk, chars, corpus, onDone }: { items: ClozeItem[]; cjk:
   );
 }
 
-function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onSolved: () => void }) {
+function OrderTask({ item, cjk, translation, onSolved }: { item: OrderItem; cjk: boolean; translation?: string; onSolved: () => void }) {
   const [built, setBuilt] = useState<number[]>([]);
   const [result, setResult] = useState<"idle" | "ok" | "wrong">("idle");
   const [reveal, setReveal] = useState(false);
@@ -246,6 +280,7 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
 
   return (
     <div className="rounded-2xl border border-line bg-surface-alt p-4 space-y-3">
+      {cjk && <Translation text={translation} />}
       <div
         translate="no"
         className={`notranslate min-h-14 rounded-xl border-2 border-dashed p-2 flex flex-wrap gap-2 ${
@@ -260,9 +295,9 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
               setBuilt(built.filter((b) => b !== id));
               setResult("idle");
             }}
-            className="px-3 py-1.5 rounded-lg bg-red-600 text-white font-semibold"
+            className={`px-3 rounded-lg bg-red-600 text-white font-semibold ${cjk ? "pt-3 pb-1.5" : "py-1.5"}`}
           >
-            {byId.get(id)}
+            <Zh text={byId.get(id) ?? ""} on={cjk} />
           </button>
         ))}
       </div>
@@ -275,9 +310,9 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
               setBuilt([...built, t.id]);
               setResult("idle");
             }}
-            className="px-3 py-1.5 rounded-lg bg-surface border border-line text-ink font-semibold hover:border-red-600/60"
+            className={`px-3 rounded-lg bg-surface border border-line text-ink font-semibold hover:border-red-600/60 ${cjk ? "pt-3 pb-1.5" : "py-1.5"}`}
           >
-            {t.text}
+            <Zh text={t.text} on={cjk} />
           </button>
         ))}
       </div>
@@ -299,12 +334,12 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
         </button>
         {reveal && (
           <span className="text-sm font-semibold text-sky-500">
-            Réponse : <span translate="no" className="notranslate text-ink">{item.full}</span>
+            Réponse : <span translate="no" className="notranslate text-ink"><Zh text={item.full} on={cjk} /></span>
           </span>
         )}
         {result === "ok" && (
           <span className="text-sm font-semibold text-emerald-500">
-            Correct ! <span translate="no" className="notranslate text-ink">{item.full}</span>
+            Correct ! <span translate="no" className="notranslate text-ink"><Zh text={item.full} on={cjk} /></span>
           </span>
         )}
         {result === "wrong" && <span className="text-sm font-semibold text-red-500">Ce n'est pas encore ça — déplacez les mots et vérifiez à nouveau.</span>}
@@ -315,6 +350,7 @@ function OrderTask({ item, cjk, onSolved }: { item: OrderItem; cjk: boolean; onS
 
 export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langSlug: string }) {
   const task = useMemo(() => buildWritingTask(langSlug, lesson), [langSlug, lesson]);
+  const tr = (text: string) => translationOf(langSlug, lesson, text);
   const storageKey = `bm-writing:${userScope()}:${langSlug}:${lesson.id}:${lesson.title}`;
   const [saved, setSaved] = useState<Saved>(EMPTY);
   const [loaded, setLoaded] = useState(false);
@@ -412,7 +448,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               hint="Écoutez, écrivez, puis comparez mot à mot. Les accents comptent ; les majuscules et la ponctuation ne sont pas notées."
               done={!!saved.done.dictation}
             />
-            <Dictation items={task.dictation} langSlug={langSlug} cjk={task.cjk} chars={task.chars} corpus={task.corpus} onDone={() => markDone("dictation")} />
+            <Dictation items={task.dictation} langSlug={langSlug} cjk={task.cjk} chars={task.chars} corpus={task.corpus} tr={tr} onDone={() => markDone("dictation")} />
           </section>
         )}
 
@@ -424,7 +460,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
               hint="Retrouvez le mot manquant dans chaque phrase du texte de lecture."
               done={!!saved.done.cloze}
             />
-            <Cloze items={task.cloze} cjk={task.cjk} chars={task.chars} corpus={task.corpus} onDone={() => markDone("cloze")} />
+            <Cloze items={task.cloze} cjk={task.cjk} chars={task.chars} corpus={task.corpus} tr={tr} onDone={() => markDone("cloze")} />
           </section>
         )}
 
@@ -442,6 +478,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
                   key={i}
                   item={item}
                   cjk={task.cjk}
+                  translation={tr(item.full)}
                   onSolved={() => setOrderSolved((prev) => prev.map((v, k) => (k === i ? true : v)))}
                 />
               ))}
@@ -465,7 +502,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
                   <p className="text-xs font-bold uppercase tracking-wide text-ink-soft mt-3">Pour démarrer</p>
                   <ul className="list-disc ml-5 mt-1 text-sm text-ink-soft space-y-0.5">
                     {task.starters.map((s, i) => (
-                      <li key={i} translate="no" className="notranslate">{s}</li>
+                      <li key={i} translate="no" className={`notranslate ${task.cjk ? "leading-[2.4]" : ""}`}><Zh text={s} on={task.cjk} /></li>
                     ))}
                   </ul>
                 </>
@@ -483,12 +520,12 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
                     return (
                       <span
                         key={w}
-                        className={`notranslate text-sm font-semibold px-3 py-1 rounded-full border ${
+                        className={`notranslate text-sm font-semibold px-3 ${task.cjk ? "pt-3 pb-1" : "py-1"} rounded-full border ${
                           ok ? "bg-emerald-500/10 text-emerald-500 border-emerald-500/40" : "bg-surface-alt text-ink-soft border-line"
                         }`}
                       >
                         {ok ? "✓ " : ""}
-                        {w}
+                        <Zh text={w} on={task.cjk} />
                       </span>
                     );
                   })}
@@ -566,7 +603,7 @@ export default function WritingLab({ lesson, langSlug }: { lesson: Lesson; langS
                 {showModel && (
                   <div className="mt-3 rounded-2xl border border-line bg-surface-alt p-4 space-y-1.5 text-ink-soft" translate="no">
                     {task.model.map((l, i) => (
-                      <p key={i} className="notranslate">{l}</p>
+                      <p key={i} className={`notranslate ${task.cjk ? "leading-[2.4]" : ""}`}><Zh text={l} on={task.cjk} />{task.cjk && tr(l) ? <span className="block text-xs text-ink-faint">{tr(l)}</span> : null}</p>
                     ))}
                   </div>
                 )}
