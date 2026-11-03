@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { X, CheckCircle2, XCircle, Circle, Award, Unlock, Lock, BadgeCheck, Printer } from "lucide-react";
+import { useEffect, useState } from "react";
+import { X, CheckCircle2, XCircle, Circle, Award, Unlock, Lock, BadgeCheck, Printer, FolderOpen } from "lucide-react";
+import { auth } from "@/lib/firebase";
 import { findProgramByCode, getLevelCurriculum } from "@/content/curriculum";
 import { summarizeLevel, type ProgressDoc } from "@/lib/academy/levelSummary";
 import { printDossier } from "@/lib/academy/dossierPrint";
@@ -50,6 +51,122 @@ function PartCells({ mark, taken, review }: { mark: QuizMark; taken: boolean; re
         {review && <span className="block text-[11px] text-amber-500">écoute non enregistrée : à vérifier</span>}
       </td>
     </>
+  );
+}
+
+interface WrittenReview {
+  id: string;
+  name: string;
+  email: string;
+  langCode: string;
+  level: number;
+  quizTitle: string;
+  items: { kind: "dictation" | "reply" | "free"; prompt: string; expected?: string; text: string }[];
+  status: "pending" | "reviewed";
+  submittedAt: string;
+  feedback?: { corrected: string; comment: string }[];
+  overall?: string;
+  mark?: number | null;
+  reviewedBy?: string;
+}
+
+const WRITTEN_KIND = { dictation: "Dictée", reply: "Réponse personnelle", free: "Texte libre" } as const;
+
+/** The student's written work and its corrections, in their own file: what they wrote, the corrected version, the comments, the mark. */
+function StudentCorrections({ student }: { student: { name: string; email?: string; langCode: string } }) {
+  const [list, setList] = useState<WrittenReview[] | null>(null);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const token = await auth.currentUser?.getIdToken();
+        const response = await fetch("/api/admin/writing-reviews", { headers: { Authorization: `Bearer ${token}` } });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || "Erreur serveur");
+        const mail = (student.email || "").toLowerCase();
+        const mine = ((result.reviews || []) as WrittenReview[]).filter(
+          (r) => r.langCode === student.langCode && (mail ? String(r.email || "").toLowerCase() === mail : r.name === student.name)
+        );
+        if (alive) setList(mine);
+      } catch (e: any) {
+        if (alive) setError(e.message || "Erreur");
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [student.email, student.name, student.langCode]);
+
+  const when = (iso: string) => new Date(iso).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+  const marks = (list ?? []).filter((r) => r.status === "reviewed" && r.mark != null).map((r) => Number(r.mark));
+  const average = marks.length ? Math.round((marks.reduce((a, b) => a + b, 0) / marks.length) * 10) / 10 : null;
+  const todo = (list ?? []).filter((r) => r.status === "pending").length;
+
+  return (
+    <section className="rounded-2xl border border-line bg-surface-alt/40 p-4 md:p-5 space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="flex items-center gap-2 font-bold text-ink">
+          <FolderOpen size={18} className="text-red-500" /> Corrections écrites
+        </h3>
+        {list && list.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+            {todo > 0 && <span className="rounded-full bg-amber-500 px-3 py-1 text-black">{todo} à corriger</span>}
+            {average !== null && <span className="rounded-full border border-line bg-surface px-3 py-1 text-ink-soft">Moyenne {average}/10</span>}
+            <span className="rounded-full border border-line bg-surface px-3 py-1 text-ink-soft">
+              {list.length} correction{list.length > 1 ? "s" : ""}
+            </span>
+          </div>
+        )}
+      </div>
+      {error && <p className="text-sm text-red-500">Corrections indisponibles : {error}</p>}
+      {!error && list === null && <p className="text-sm text-ink-soft">Chargement…</p>}
+      {list && list.length === 0 && <p className="text-sm text-ink-soft">Aucun travail écrit envoyé pour cette formation.</p>}
+      {list?.map((r) => (
+        <details key={r.id} className="rounded-xl border border-line bg-surface">
+          <summary className="flex cursor-pointer flex-wrap items-center justify-between gap-2 p-3">
+            <span className="text-sm text-ink">
+              <b>{r.quizTitle}</b> <span className="text-ink-faint">· niveau {r.level} · envoyé le {when(r.submittedAt)}</span>
+            </span>
+            <span className={`rounded-full px-3 py-1 text-xs font-bold ${r.status === "reviewed" ? "bg-emerald-600 text-white" : "bg-amber-500 text-black"}`}>
+              {r.status === "reviewed" ? `Corrigée${r.mark != null ? ` · ${r.mark}/10` : ""}` : "À corriger"}
+            </span>
+          </summary>
+          <div className="space-y-3 border-t border-line p-3">
+            {r.items.map((it, i) => {
+              const fb = r.feedback?.[i];
+              return (
+                <div key={i} className="space-y-1.5 rounded-lg bg-surface-alt/50 p-3 text-sm">
+                  <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">
+                    {WRITTEN_KIND[it.kind]} <span className="font-normal normal-case text-ink-faint">· {it.prompt}</span>
+                  </p>
+                  {it.kind === "dictation" && it.expected && (
+                    <p className="text-xs text-ink-faint">
+                      Phrase dictée : <span translate="no" className="notranslate text-ink-soft">{it.expected}</span>
+                    </p>
+                  )}
+                  <p translate="no" className="notranslate whitespace-pre-wrap text-ink">{it.text}</p>
+                  {fb?.corrected && (
+                    <p className="text-emerald-600">
+                      <span className="text-xs font-bold">Corrigé : </span>
+                      <span translate="no" className="notranslate whitespace-pre-wrap">{fb.corrected}</span>
+                    </p>
+                  )}
+                  {fb?.comment && <p className="text-xs text-ink-soft">Commentaire : {fb.comment}</p>}
+                </div>
+              );
+            })}
+            {r.overall && (
+              <p className="rounded-lg border border-line bg-surface p-3 text-sm text-ink">
+                <b>Commentaire général :</b> {r.overall}
+              </p>
+            )}
+            {r.status === "reviewed" && <p className="text-xs text-ink-faint">Corrigée par {r.reviewedBy || "—"}.</p>}
+          </div>
+        </details>
+      ))}
+    </section>
   );
 }
 
@@ -334,6 +451,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
               );
             })
           )}
+          <StudentCorrections student={student} />
         </div>
       </div>
       {editing && (
