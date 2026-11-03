@@ -2451,6 +2451,13 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         >
                           Date de fin d'accès
                         </button>
+                        <button
+                          onClick={() => rejectStudent(s)}
+                          disabled={processingIds.has(s.id)}
+                          className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Révoquer
+                        </button>
                       </>
                     ) : s.status === "Approved" ? (
                       <button
