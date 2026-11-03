@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { Folder, FolderOpen } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { availableLanguages } from "@/content/curriculum";
 
@@ -38,6 +39,9 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
   const [open, setOpen] = useState<string | null>(null);
   const [draft, setDraft] = useState<Record<string, { feedback: { corrected: string; comment: string }[]; overall: string; mark: string }>>({});
   const [busy, setBusy] = useState<string | null>(null);
+  // One folder per student; the folders the person opened or closed by hand (otherwise: open on the work to correct, closed on the finished work).
+  const [folders, setFolders] = useState<Record<string, boolean>>({});
+  const [q, setQ] = useState("");
 
   const token = async () => (getToken ? getToken() : auth.currentUser?.getIdToken());
 
@@ -89,38 +93,32 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
     }
   };
 
+  const pending = (reviews ?? []).filter((r) => r.status === "pending");
+  const reviewed = (reviews ?? []).filter((r) => r.status === "reviewed");
+  const shown = filter === "pending" ? pending : reviewed;
+
+  // Every student has a folder holding their corrections, the most recent student first.
+  const groups = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    const map = new Map<string, { key: string; name: string; email: string; items: Review[] }>();
+    for (const r of shown) {
+      if (needle && !`${r.name} ${r.email}`.toLowerCase().includes(needle)) continue;
+      const key = (r.email || r.name || r.id).toLowerCase();
+      const g = map.get(key) ?? { key, name: r.name, email: r.email, items: [] };
+      g.items.push(r);
+      map.set(key, g);
+    }
+    const list = Array.from(map.values());
+    for (const g of list) g.items.sort((x, y) => y.submittedAt.localeCompare(x.submittedAt));
+    return list.sort((x, y) => y.items[0].submittedAt.localeCompare(x.items[0].submittedAt));
+  }, [shown, q]);
+  const isOpenFolder = (key: string) => folders[key] ?? (filter === "pending" || groups.length === 1);
+  const langOf = (r: Review) => availableLanguages.find((l) => l.code === r.langCode)?.label ?? r.langCode;
+
   if (error) return <div className="p-4 rounded-2xl border border-line bg-surface text-red-500">Erreur : {error}</div>;
   if (!reviews) return <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>;
 
-  const pending = reviews.filter((r) => r.status === "pending");
-  const reviewed = reviews.filter((r) => r.status === "reviewed");
-  const shown = filter === "pending" ? pending : reviewed;
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2 items-center">
-        {(
-          [
-            ["pending", `À corriger (${pending.length})`],
-            ["reviewed", `Corrigées (${reviewed.length})`],
-          ] as const
-        ).map(([id, label]) => (
-          <button
-            key={id}
-            onClick={() => setFilter(id)}
-            className={`px-4 py-2 text-sm font-bold rounded-xl transition ${filter === id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"}`}
-          >
-            {label}
-          </button>
-        ))}
-        <p className="text-xs text-ink-soft max-w-xl">
-          Les questions à choix sont corrigées automatiquement. Ici : l&apos;orthographe et la grammaire des textes écrits par l&apos;étudiant.
-        </p>
-      </div>
-
-      {shown.length === 0 && <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">{filter === "pending" ? "Aucune rédaction à corriger." : "Aucune rédaction corrigée pour le moment."}</div>}
-
-      {shown.map((r) => {
+  const card = (r: Review) => {
         const isOpen = open === r.id;
         const lang = availableLanguages.find((l) => l.code === r.langCode)?.label ?? r.langCode;
         const d = draftFor(r);
@@ -205,6 +203,80 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                 )}
               </div>
             )}
+          </div>
+        );
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2 items-center">
+        {(
+          [
+            ["pending", `À corriger (${pending.length})`],
+            ["reviewed", `Corrigées (${reviewed.length})`],
+          ] as const
+        ).map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() => setFilter(id)}
+            className={`px-4 py-2 text-sm font-bold rounded-xl transition ${filter === id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"}`}
+          >
+            {label}
+          </button>
+        ))}
+        <p className="text-xs text-ink-soft max-w-xl">
+          Les questions à choix sont corrigées automatiquement. Ici : l&apos;orthographe et la grammaire des textes écrits par l&apos;étudiant.
+        </p>
+      </div>
+
+      {shown.length === 0 && <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">{filter === "pending" ? "Aucune rédaction à corriger." : "Aucune rédaction corrigée pour le moment."}</div>}
+
+      {groups.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Chercher un étudiant…"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+          />
+          <button onClick={() => setFolders(Object.fromEntries(groups.map((g) => [g.key, true])))} className="px-3 py-2 text-xs font-bold rounded-xl bg-surface-alt text-ink-soft hover:text-ink">
+            Tout ouvrir
+          </button>
+          <button onClick={() => setFolders(Object.fromEntries(groups.map((g) => [g.key, false])))} className="px-3 py-2 text-xs font-bold rounded-xl bg-surface-alt text-ink-soft hover:text-ink">
+            Tout fermer
+          </button>
+          <span className="text-xs text-ink-faint">{groups.length} étudiant{groups.length > 1 ? "s" : ""}</span>
+        </div>
+      )}
+
+      {groups.map((g) => {
+        const open = isOpenFolder(g.key);
+        const todo = g.items.filter((r) => r.status === "pending").length;
+        const marks = g.items.filter((r) => r.status === "reviewed" && r.mark != null).map((r) => Number(r.mark));
+        const average = marks.length ? Math.round((marks.reduce((x, y) => x + y, 0) / marks.length) * 10) / 10 : null;
+        const where = Array.from(new Set(g.items.map((r) => `${langOf(r)} · niveau ${r.level}`))).join(" ; ");
+        return (
+          <div key={g.key} className="rounded-2xl border border-line bg-surface-alt/30">
+            <button onClick={() => setFolders((f) => ({ ...f, [g.key]: !open }))} className="w-full text-left p-4 flex flex-wrap items-center justify-between gap-3" aria-expanded={open}>
+              <div className="flex items-center gap-3 min-w-0">
+                {open ? <FolderOpen size={26} className="text-red-500 shrink-0" /> : <Folder size={26} className="text-red-500 shrink-0" />}
+                <div className="min-w-0">
+                  <p className="font-extrabold text-ink truncate">{g.name}</p>
+                  <p className="text-xs text-ink-soft truncate">
+                    {where}
+                    {g.email ? ` · ${g.email}` : ""}
+                  </p>
+                </div>
+              </div>
+              <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                {todo > 0 && <span className="px-3 py-1 rounded-full bg-amber-500 text-black">{todo} à corriger</span>}
+                {average !== null && <span className="px-3 py-1 rounded-full bg-surface text-ink-soft border border-line">Moyenne {average}/10</span>}
+                <span className="px-3 py-1 rounded-full bg-surface text-ink-soft border border-line">
+                  {g.items.length} correction{g.items.length > 1 ? "s" : ""}
+                </span>
+              </div>
+            </button>
+            {open && <div className="border-t border-line p-3 space-y-3">{g.items.map(card)}</div>}
           </div>
         );
       })}
