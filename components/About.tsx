@@ -25,7 +25,7 @@ export default function About() {
           <div className="relative h-[520px] rounded-[35px] overflow-hidden shadow-2xl shadow-black/60 ring-1 ring-red-700/20">
 
             <Image
-              src="/about-business.png"
+              src="/about-business.webp"
               alt="About BM Corporation"
               fill
               priority

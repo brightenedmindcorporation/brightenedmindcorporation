@@ -3,113 +3,118 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { GraduationCap, Megaphone, Home } from "lucide-react";
 import FadeIn from "./FadeIn";
 import BmLogo from "./BmLogo";
+
+// The three doors of the company: the visitor must see them within five seconds, without scrolling.
+const ENTRIES = [
+  { href: "/academia", title: "Apprendre", sub: "BM Academia : langues, bureautique, logiciels", Icon: GraduationCap },
+  { href: "/communication", title: "Communiquer", sub: "BM Communication : image, vidéo, digital", Icon: Megaphone },
+  { href: "/domestica", title: "Recruter", sub: "BM Domestica : personnel domestique qualifié", Icon: Home },
+];
 
 export default function Hero() {
   return (
     <FadeIn>
-    <section className="relative pt-32 md:pt-44 pb-20 md:pb-32 bg-page overflow-hidden">
+      <section className="relative pt-28 md:pt-40 pb-14 md:pb-24 bg-page overflow-hidden">
+        {/* Decorative background */}
+        <div className="absolute inset-0 radial-fade pointer-events-none" />
 
-      {/* Decorative background */}
-
-      <div className="absolute inset-0 radial-fade pointer-events-none" />
-
-      <div className="absolute top-10 md:top-20 right-[-120px] md:right-[-150px]
+        <div
+          className="absolute top-10 md:top-20 right-[-120px] md:right-[-150px]
       w-[250px] md:w-[450px] h-[250px] md:h-[450px]
       border-[40px] md:border-[70px]
-      border-red-600 rounded-full opacity-[0.07] blur-[2px]"></div>
+      border-red-600 rounded-full opacity-[0.07] blur-[2px]"
+        ></div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-20 items-center relative z-10 [&>*]:min-w-0">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-center relative z-10 [&>*]:min-w-0">
+          {/* LEFT */}
+          <motion.div initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.7 }}>
+            <p className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 dark:text-red-300">
+              <BmLogo size={36} />
+              Brightened Mind Corporation · Lubumbashi
+            </p>
 
-        {/* LEFT */}
+            <h1 className="mt-5 text-[2rem] min-[400px]:text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] text-ink break-words">
+              Apprenez, communiquez,
+              <br />
+              <span className="text-gradient-red">recrutez avec confiance.</span>
+            </h1>
 
-        <motion.div
-          initial={{ opacity: 0, x: -80 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1 }}
-        >
+            <p className="mt-5 text-ink-soft leading-relaxed text-base md:text-lg max-w-xl font-sans">
+              Cours en ligne en six langues et en informatique, services de communication, et placement de personnel domestique qualifié.
+            </p>
 
-          <BmLogo size={100} />
-
-          <span className="mt-8 inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-700/40 bg-red-500/5 text-red-400 text-xs font-semibold tracking-[0.12em] sm:tracking-[0.2em] uppercase">
-            Groupe multidisciplinaire
-          </span>
-
-          <h1 className="mt-6 text-4xl min-[400px]:text-5xl sm:text-6xl lg:text-7xl font-black leading-[1.05] text-ink break-words">
-  FORMER.
-  <br />
-  <span className="text-gradient-red">
-    CONNECTER.
-  </span>
-  <br />
-  VALORISER.
-</h1>
-
-          <p className="mt-8 text-ink-soft leading-8 md:leading-9 text-base md:text-lg max-w-xl font-sans">
-  Brightened Mind Corporation développe le capital humain
-  en proposant des solutions innovantes en communication,
-  placement de personnel domestique et formation professionnelle.
-</p>
-
-          <div className="mt-8 md:mt-10 flex flex-col sm:flex-row gap-4 sm:gap-5">
-
-            <Link
-              href="#departments"
-              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 text-white px-6 md:px-8 py-3 md:py-4 rounded-xl hover:from-red-500 hover:to-red-800 transition duration-300 text-center font-semibold"
-            >
-              Nos départements
-            </Link>
-
-            <Link
-              href="#contact-form"
-              className="border border-line text-ink px-6 md:px-8 py-3 md:py-4 rounded-xl hover:border-red-500/60 hover:text-red-400 transition text-center font-semibold"
-            >
-              Contact
-            </Link>
-
-          </div>
-
-        </motion.div>
-
-        {/* RIGHT */}
-
-        <motion.div
-          initial={{ opacity: 0, x: 80 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 1.2 }}
-        >
-
-          <div className="relative h-[320px] sm:h-[420px] lg:h-[600px] rounded-[25px] lg:rounded-[40px] overflow-hidden shadow-2xl shadow-black/60 group ring-1 ring-red-700/20">
-
-            <Image
-              src="/hero-business.png"
-              alt="Corporate Business"
-              fill
-              priority
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              className="object-cover group-hover:scale-105 transition duration-700"
-            />
-
-            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
-
-            <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10 right-6 md:right-10">
-              <div className="glass-panel rounded-2xl px-6 py-5 inline-block">
-                <h3 className="text-xl md:text-2xl font-bold text-ink leading-snug">
-                  Vision. Leadership.
-                  <br />
-                  <span className="text-gradient-red">Transformation.</span>
-                </h3>
-              </div>
+            {/* One main action, one quieter one */}
+            <div className="mt-7 flex flex-col sm:flex-row gap-3 sm:gap-4">
+              <Link
+                href="/register"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 text-white px-7 min-h-[52px] inline-flex items-center justify-center rounded-xl hover:from-red-500 hover:to-red-800 transition text-center font-bold"
+              >
+                S&apos;inscrire à l&apos;Academia
+              </Link>
+              <a
+                href="https://wa.me/243988830799?text=Bonjour%20Brightened%20Mind%20Corporation%2C%20je%20souhaite%20avoir%20des%20informations."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="border border-line text-ink px-7 min-h-[52px] inline-flex items-center justify-center rounded-xl hover:border-emerald-600/60 transition text-center font-semibold"
+              >
+                Poser une question sur WhatsApp
+              </a>
             </div>
 
-          </div>
+            {/* The three doors */}
+            <ul className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-1 xl:grid-cols-3">
+              {ENTRIES.map(({ href, title, sub, Icon }) => (
+                <li key={href}>
+                  <Link
+                    href={href}
+                    className="group flex sm:flex-col lg:flex-row xl:flex-col items-center sm:items-start lg:items-center xl:items-start gap-3 min-h-[64px] h-full rounded-2xl border border-line bg-surface p-4 hover:border-red-600/50 transition"
+                  >
+                    <span className="shrink-0 w-11 h-11 rounded-xl bg-red-600/10 text-red-600 dark:text-red-300 inline-flex items-center justify-center">
+                      <Icon size={22} aria-hidden="true" />
+                    </span>
+                    <span>
+                      <span className="block font-bold text-ink">{title}</span>
+                      <span className="block text-sm text-ink-soft leading-snug">{sub}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
 
-        </motion.div>
+          {/* RIGHT: photo, only on large screens (on a phone it only pushes the content down) */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.9 }}
+            className="hidden lg:block"
+          >
+            <div className="relative h-[560px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/40 group ring-1 ring-red-700/20">
+              <Image
+                src="/hero-business.webp"
+                alt="Équipe de professionnels en réunion"
+                fill
+                sizes="(max-width: 1200px) 50vw, 33vw"
+                className="object-cover group-hover:scale-105 transition duration-700"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
 
-      </div>
-
-    </section>
+              <div className="absolute bottom-10 left-10 right-10">
+                <div className="glass-panel rounded-2xl px-6 py-5 inline-block">
+                  <p className="text-2xl font-bold text-ink leading-snug font-serif">
+                    Former. Connecter.
+                    <br />
+                    <span className="text-gradient-red">Valoriser.</span>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
     </FadeIn>
   );
 }

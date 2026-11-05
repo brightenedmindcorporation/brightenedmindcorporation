@@ -15,6 +15,7 @@ export default function Contact() {
   const [sent, setSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [checking, setChecking] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -28,6 +29,8 @@ export default function Contact() {
   const sendEmail = async (e: React.FormEvent) => {
     e.preventDefault();
     setEmailError(null);
+    setSendError(null);
+    setSent(false);
 
     try {
       setChecking(true);
@@ -76,23 +79,18 @@ export default function Contact() {
       });
       setAttachment(null);
 
-      setTimeout(() => {
-        setSent(false);
-      }, 4000);
-
     } catch (error: any) {
       console.error("EmailJS error:", error);
-      const detail = error?.text || error?.message || JSON.stringify(error);
-      alert(`Erreur lors de l'envoi : ${detail}`);
+      setSendError("Votre message n'a pas pu partir (connexion ou service indisponible). Réessayez dans un instant, ou écrivez-nous directement sur WhatsApp : +243 988 830 799.");
     } finally {
       setChecking(false);
     }
   };
 
   return (
-    <section id="contact-form" className="py-28 bg-page">
+    <section id="contact-form" className="py-14 md:py-28 bg-page">
 
-      <div className="max-w-3xl mx-auto px-8">
+      <div className="max-w-3xl mx-auto px-5 md:px-8">
 
         <div className="text-center mb-14">
 
@@ -108,9 +106,12 @@ export default function Contact() {
 
         </div>
 
-        <form onSubmit={sendEmail} className="glass-panel rounded-3xl p-8 md:p-10 flex flex-col gap-6 shadow-xl shadow-black/30">
+        <form onSubmit={sendEmail} className="glass-panel rounded-3xl p-5 md:p-10 flex flex-col gap-5 shadow-xl shadow-black/30">
 
+          <label htmlFor="contact-name" className="sr-only">Votre nom</label>
           <input
+            id="contact-name"
+            autoComplete="name"
             type="text"
             name="name"
             placeholder="Votre nom"
@@ -120,17 +121,29 @@ export default function Contact() {
             className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60"
           />
 
+          <label htmlFor="contact-email" className="sr-only">Votre adresse e-mail</label>
           <input
+            id="contact-email"
+            autoComplete="email"
             type="email"
             name="email"
-            placeholder="Votre email"
+            placeholder="Votre e-mail (pour vous répondre)"
             value={form.email}
             onChange={handleChange}
             required
-            className="font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60"
+            aria-invalid={!!emailError}
+            aria-describedby={emailError ? "contact-email-error" : undefined}
+            className={`${emailError ? "field-invalid " : ""}font-sans border border-line bg-surface-sunken/60 text-ink placeholder:text-ink-faint p-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-600/60 focus:border-red-600/60`}
           />
+          {emailError && (
+            <p id="contact-email-error" role="alert" className="field-error -mt-3">
+              {emailError}
+            </p>
+          )}
 
+          <label htmlFor="contact-message" className="sr-only">Votre message</label>
           <textarea
+            id="contact-message"
             name="message"
             placeholder="Votre message"
             value={form.message}
@@ -165,25 +178,34 @@ export default function Contact() {
             </label>
           )}
 
-          {emailError && (
-            <p className="text-red-500 text-sm text-center font-medium font-sans">
-              {emailError}
+          {sendError && (
+            <p role="alert" className="field-error text-center">
+              {sendError}
             </p>
           )}
 
           <button
             type="submit"
             disabled={checking}
-            className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-semibold py-4 rounded-xl transition disabled:opacity-50"
+            className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold min-h-[52px] rounded-xl transition disabled:opacity-60"
           >
-            {checking ? "Vérification..." : "Envoyer"}
+            {checking ? "Envoi en cours…" : "Envoyer le message"}
           </button>
 
           {sent && (
-            <p className="text-emerald-500 text-center font-medium font-sans">
-              Message envoyé avec succès.
-            </p>
+            <div role="status" className="rounded-xl border border-emerald-600/40 bg-emerald-600/10 p-4 text-center font-sans">
+              <p className="font-bold text-emerald-700 dark:text-emerald-300">Message bien reçu. Merci !</p>
+              <p className="text-sm text-ink-soft mt-1">Nous vous répondons en général dans la journée (au plus tard sous 24 heures ouvrables).</p>
+            </div>
           )}
+
+          <p className="text-center text-sm text-ink-soft">
+            Plus rapide ? Écrivez-nous sur{" "}
+            <a href="https://wa.me/243988830799" target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 dark:text-emerald-300 underline">
+              WhatsApp
+            </a>
+            .
+          </p>
 
         </form>
 

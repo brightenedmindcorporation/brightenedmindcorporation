@@ -6,25 +6,25 @@ const projects = [
     title: "Corporate Branding",
     description:
       "Développement d’identités de marque fortes pour entreprises et organisations.",
-    image: "/project1.png",
+    image: "/project1.webp",
   },
   {
     title: "Education Platform",
     description:
       "Conception de plateformes modernes de formation et développement des compétences.",
-    image: "/project2.png",
+    image: "/project2.webp",
   },
   {
     title: "Digital Solutions",
     description:
       "Création de solutions numériques innovantes adaptées aux besoins actuels.",
-    image: "/project3.png",
+    image: "/project3.webp",
   },
   {
     title: "Community Development",
     description:
       "Accompagnement des communautés vers une croissance durable et structurée.",
-    image: "/project4.png",
+    image: "/project4.webp",
   },
 ];
 

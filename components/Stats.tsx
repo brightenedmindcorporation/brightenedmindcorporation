@@ -26,11 +26,11 @@ const stats = [
 
 export default function Stats() {
   return (
-    <section className="py-24 bg-surface-sunken">
+    <section className="py-14 md:py-24 bg-surface-sunken">
 
-      <div className="max-w-7xl mx-auto px-8">
+      <div className="max-w-7xl mx-auto px-5 md:px-8">
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
 
           {stats.map((stat, index) => (
             <motion.div
@@ -39,14 +39,14 @@ export default function Stats() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.7, delay: index * 0.2 }}
-              className="bg-surface/60 border border-line hover:border-red-700/40 rounded-[25px] shadow-lg shadow-black/20 p-10 text-center hover:shadow-2xl transition"
+              className="bg-surface/60 border border-line hover:border-red-700/40 rounded-[25px] shadow-lg shadow-black/20 p-5 md:p-10 text-center hover:shadow-2xl transition"
             >
 
               <h2 className="text-3xl min-[400px]:text-4xl md:text-5xl font-black text-gradient-red">
                 {stat.number}
               </h2>
 
-              <p className="mt-4 text-ink-soft font-medium font-sans">
+              <p className="mt-2 md:mt-4 text-sm md:text-base text-ink-soft font-medium font-sans">
                 {stat.label}
               </p>
 

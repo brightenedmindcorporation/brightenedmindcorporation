@@ -21,7 +21,7 @@ const OPTIONS: { value: Theme; label: string; Icon: typeof Monitor }[] = [
   { value: "dark", label: "Sombre", Icon: Moon },
 ];
 
-export default function ThemeToggle({ className = "" }: { className?: string }) {
+export default function ThemeToggle({ className = "", large = false }: { className?: string; large?: boolean }) {
   const [theme, setTheme] = useState<Theme>("system");
   const [mounted, setMounted] = useState(false);
 
@@ -70,7 +70,7 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   // Reserve the same footprint before mount so the toggle doesn't cause
   // layout shift once client JS determines the real stored preference.
   if (!mounted) {
-    return <div className={`inline-flex w-[104px] h-9 ${className}`} aria-hidden="true" />;
+    return <div className={`inline-flex ${large ? "w-[168px] h-14" : "w-[104px] h-9"} ${className}`} aria-hidden="true" />;
   }
 
   return (
@@ -86,13 +86,13 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
           onClick={() => choose(opt.value)}
           aria-pressed={theme === opt.value}
           title={opt.label}
-          className={`p-1.5 rounded-lg transition ${
+          className={`${large ? "min-h-[44px] min-w-[44px]" : "p-1.5"} inline-flex items-center justify-center rounded-lg transition ${
             theme === opt.value
               ? "bg-red-600 text-white shadow"
               : "text-ink-soft hover:text-ink"
           }`}
         >
-          <opt.Icon size={14} strokeWidth={2} aria-hidden="true" />
+          <opt.Icon size={large ? 20 : 14} strokeWidth={2} aria-hidden="true" />
           <span className="sr-only">{opt.label}</span>
         </button>
       ))}

@@ -10,7 +10,7 @@ const departments = [
     title: "BM Communication",
     description:
       "Valoriser l’image des particuliers, des entreprises et des institutions grâce à des services professionnels de communication visuelle, audiovisuelle et digitale.",
-    image: "/communication.png",
+    image: "/communication.webp",
     url: "/communication"
   },
 
@@ -18,7 +18,7 @@ const departments = [
     title: "BM Academia",
     description:
       "Former et renforcer les compétences linguistiques, professionnelles et entrepreneuriales des apprenants pour favoriser leur insertion et leur réussite.",
-    image: "/academy.png",
+    image: "/academy.webp",
     url: "/academia"
   },
 
@@ -26,7 +26,7 @@ const departments = [
     title: "BM Domestica",
     description:
       "Assurer le recrutement, la sélection, la formation et le placement du personnel domestique qualifié afin de répondre aux besoins des ménages avec professionnalisme, confiance et efficacité.",
-    image: "/domestica.png",
+    image: "/domestica.webp",
     url: "/domestica"
   }
 ];

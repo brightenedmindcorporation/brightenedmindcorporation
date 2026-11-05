@@ -1,39 +1,29 @@
 import Hero from "@/components/Hero";
 import AnnouncementsTicker from "@/components/AnnouncementsTicker";
 import Announcements from "@/components/Announcements";
-import Departments from "@/components/Departments";
-import WhyChooseUs from "@/components/WhyChooseUs";
-import About from "@/components/About";
-import Vision from "@/components/Vision";
-import News from "@/components/News";
-import CTA from "@/components/CTA";
-import Projects from "@/components/Projects";
-import Contact from "@/components/Contact";
-import Identity from "@/components/Identity";
-import Slogan from "@/components/Slogan";
 import Stats from "@/components/Stats";
-import Testimonials from "@/components/Testimonials";
-import WhatsappFloat from "@/components/WhatsappFloat";
+import Contact from "@/components/Contact";
+import Link from "next/link";
 
+// Short on purpose: say what we do, give the three doors (in the Hero), show the announcements and the key
+// figures, then the contact form. The company story lives on /a-propos.
 export default function Home() {
   return (
     <>
       <Hero />
       <AnnouncementsTicker />
       <Announcements />
-      <Slogan />
-      <Identity />
-      <Departments />
-      <WhyChooseUs />
       <Stats />
-      <Testimonials />
-      <About />
-      <Vision />
-      <News />
-      <Projects />
-      <CTA />
+      <section className="py-12 bg-page text-center px-6">
+        <p className="text-ink-soft mb-4">Envie d&apos;en savoir plus sur notre vision, nos réalisations et nos actualités ?</p>
+        <Link
+          href="/a-propos"
+          className="inline-flex items-center justify-center min-h-[48px] px-6 rounded-xl border border-line text-ink font-semibold hover:border-red-600/60 transition"
+        >
+          Découvrir BM Corporation →
+        </Link>
+      </section>
       <Contact />
-      <WhatsappFloat />
     </>
   );
 }

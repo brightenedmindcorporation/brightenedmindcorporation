@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Fraunces } from "next/font/google";
+import { Inter, Source_Serif_4 } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./components/ClientLayout";
 
@@ -9,7 +9,8 @@ const inter = Inter({
   display: "swap",
 });
 
-const fraunces = Fraunces({
+// Titles: Source Serif 4, a sober, institutional serif (replaces the more decorative Fraunces).
+const serif = Source_Serif_4({
   subsets: ["latin"],
   variable: "--font-serif",
   style: ["normal", "italic"],
@@ -117,7 +118,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${fraunces.variable}`} suppressHydrationWarning>
+    <html lang="fr" data-scroll-behavior="smooth" className={`${inter.variable} ${serif.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script dangerouslySetInnerHTML={{ __html: desktopSiteFixScript }} />

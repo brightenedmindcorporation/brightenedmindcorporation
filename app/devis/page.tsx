@@ -66,6 +66,8 @@ export default function DevisPage() {
     if (wanted && ["Photographie", "Vidéographie", "Design & Supports", "Marketing Digital", "Site Web / Application"].includes(wanted)) setService(wanted);
   }, []);
   const [attachment, setAttachment] = useState<File | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const clear = (k: string) => setErrors((p) => (p[k] ? { ...p, [k]: "" } : p));
 
   // Renseigne ici le vrai numéro WhatsApp de ton entreprise (au format international sans le +)
   const whatsappNumber = "243988830799";
@@ -74,6 +76,17 @@ export default function DevisPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
+    // Check the form first and say, next to each field, what is missing (plain French).
+    const errs: Record<string, string> = {};
+    if (name.trim().length < 3) errs.name = "Écrivez votre nom complet.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) errs.email = "Cette adresse e-mail n'est pas complète. Exemple : prenom@gmail.com";
+    if (message.trim().length < 10) errs.message = "Décrivez votre besoin en quelques mots (au moins une phrase).";
+    setErrors(errs);
+    if (Object.keys(errs).length) {
+      const first = document.querySelector<HTMLElement>("[aria-invalid='true']");
+      first?.focus();
+      return;
+    }
     setSubmitting(true);
     try {
       const form = new FormData();
@@ -97,12 +110,12 @@ export default function DevisPage() {
   };
 
   return (
-    <main className="min-h-screen bg-page text-ink font-sans pt-28 pb-16 px-6 relative overflow-hidden">
+    <main className="min-h-screen bg-page text-ink font-sans pt-28 pb-16 px-4 sm:px-6 relative overflow-hidden">
       <div className="absolute inset-0 radial-fade pointer-events-none" />
-      <div className="max-w-3xl mx-auto glass-panel p-8 md:p-12 rounded-3xl shadow-2xl shadow-black/40 relative">
+      <div className="max-w-3xl mx-auto glass-panel p-5 sm:p-8 md:p-12 rounded-3xl shadow-2xl shadow-black/40 relative">
 
         <div className="text-center mb-10">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/5 text-red-400 font-semibold text-xs tracking-[0.2em] uppercase mb-3 border border-red-700/40">
+          <span className="inline-block px-4 py-1.5 rounded-full bg-red-500/5 text-red-600 dark:text-red-300 font-semibold text-xs tracking-[0.2em] uppercase mb-3 border border-red-700/40">
             DEMANDE DE DEVIS
           </span>
           <h1 className="text-3xl md:text-4xl font-extrabold text-ink">
@@ -119,7 +132,7 @@ export default function DevisPage() {
             href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3.5 rounded-2xl transition shadow-lg shadow-green-600/20"
+            className="inline-flex items-center gap-3 bg-green-600 hover:bg-green-700 text-white font-bold px-6 min-h-[52px] rounded-2xl transition shadow-lg shadow-green-600/20"
           >
             <svg className="w-6 h-6 fill-current" viewBox="0 0 24 24">
               <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/>
@@ -130,58 +143,78 @@ export default function DevisPage() {
 
         <div className="relative flex py-2 items-center mb-10">
           <div className="flex-grow border-t border-line"></div>
-          <span className="flex-shrink mx-4 text-ink-faint text-sm">OU REMPLISSEZ LE FORMULAIRE</span>
+          <span className="flex-shrink mx-4 text-ink-soft text-sm">OU REMPLISSEZ LE FORMULAIRE</span>
           <div className="flex-grow border-t border-line"></div>
         </div>
 
         {submitted ? (
           <div className="bg-red-600/10 border border-red-600 text-center p-8 rounded-2xl">
-            <h3 className="text-2xl font-bold text-ink mb-2">Message envoyé avec succès !</h3>
+            <h3 role="status" className="text-2xl font-bold text-ink mb-2">Demande bien reçue. Merci !</h3>
             <p className="text-ink-soft">
-              Merci ! L'équipe de BM Corporation a bien reçu votre demande et vous répondra sur votre e-mail ou votre WhatsApp très rapidement.
+              L&apos;équipe de BM Corporation vous répond en général dans la journée (au plus tard sous 24 heures ouvrables), sur votre e-mail ou votre WhatsApp.
+            </p>
+            <p className="text-ink-soft mt-3">
+              Urgent ?{" "}
+              <a href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`} target="_blank" rel="noopener noreferrer" className="font-bold text-emerald-700 dark:text-emerald-300 underline">
+                Écrivez-nous sur WhatsApp
+              </a>
+              .
             </p>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             {submitError && (
-              <p className="text-red-500 text-sm text-center font-medium">{submitError}</p>
+              <p role="alert" className="field-error text-center">{submitError}</p>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-ink-soft mb-2">Nom complet *</label>
+                <label htmlFor="devis-name" className="block text-sm font-semibold text-ink mb-2">Nom complet *</label>
                 <input
+                  id="devis-name"
                   type="text"
                   name="name"
-                  required
+                  autoComplete="name"
                   placeholder="Votre nom"
                   value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
+                  aria-invalid={!!errors.name}
+                  onChange={(e) => {
+                    setName(e.target.value);
+                    clear("name");
+                  }}
+                  className={`w-full min-h-[48px] bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition ${errors.name ? "field-invalid" : ""}`}
                 />
+                {errors.name && <p role="alert" className="field-error">{errors.name}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-ink-soft mb-2">Adresse E-mail *</label>
+                <label htmlFor="devis-email" className="block text-sm font-semibold text-ink mb-2">Adresse e-mail *</label>
                 <input
+                  id="devis-email"
                   type="email"
+                  inputMode="email"
+                  autoComplete="email"
                   name="email"
-                  required
                   placeholder="votre@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
+                  aria-invalid={!!errors.email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    clear("email");
+                  }}
+                  className={`w-full min-h-[48px] bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition ${errors.email ? "field-invalid" : ""}`}
                 />
+                {errors.email && <p role="alert" className="field-error">{errors.email}</p>}
               </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* CHAMP TÉLÉPHONE AVEC SÉLECTEUR D'INDICATIF */}
               <div>
-                <label className="block text-sm font-medium text-ink-soft mb-2">Téléphone / WhatsApp</label>
+                <label htmlFor="devis-phone" className="block text-sm font-semibold text-ink mb-2">Téléphone / WhatsApp (facultatif)</label>
                 <div className="flex gap-2">
                   <select
                     value={selectedCode}
                     onChange={(e) => setSelectedCode(e.target.value)}
-                    className="bg-surface-sunken/60 border border-line rounded-xl px-3 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition text-sm max-w-[130px]"
+                    aria-label="Indicatif du pays" className="min-h-[48px] bg-surface-sunken/60 border border-line rounded-xl px-3 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition max-w-[130px]"
                   >
                     {countryCodes.map((c, i) => (
                       <option key={i} value={c.code}>
@@ -191,11 +224,14 @@ export default function DevisPage() {
                   </select>
                   
                   <input
+                    id="devis-phone"
                     type="tel"
+                    inputMode="tel"
+                    autoComplete="tel-national"
                     placeholder="81 234 5678"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
+                    className="w-full min-h-[48px] bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
                   />
                   
                   {/* Champ caché transmis avec le numéro complet pour le formulaire */}
@@ -208,8 +244,9 @@ export default function DevisPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-ink-soft mb-2">Service / Département concerné</label>
+                <label htmlFor="devis-service" className="block text-sm font-semibold text-ink mb-2">Service concerné</label>
                 <select
+                  id="devis-service"
                   name="service"
                   value={service}
                   onChange={(e) => setService(e.target.value)}
@@ -241,20 +278,25 @@ export default function DevisPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink-soft mb-2">Détails de votre projet *</label>
+              <label htmlFor="devis-message" className="block text-sm font-semibold text-ink mb-2">Détails de votre projet *</label>
               <textarea
+                id="devis-message"
                 name="message"
                 rows={5}
-                required
                 placeholder="Décrivez vos besoins, délais, objectifs..."
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                className="w-full bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition"
+                aria-invalid={!!errors.message}
+                onChange={(e) => {
+                  setMessage(e.target.value);
+                  clear("message");
+                }}
+                className={`w-full min-h-[48px] bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink focus:outline-none focus:border-red-600/60 focus:ring-2 focus:ring-red-600/30 transition ${errors.message ? "field-invalid" : ""}`}
               ></textarea>
+              {errors.message && <p role="alert" className="field-error">{errors.message}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-ink-soft mb-2">Pièce jointe (optionnel)</label>
+              <p className="block text-sm font-semibold text-ink mb-2">Pièce jointe (facultatif)</p>
               {attachment ? (
                 <span className="inline-flex items-center gap-2 text-sm bg-surface-sunken/60 border border-line rounded-xl px-4 py-3 text-ink-soft">
                   <Paperclip size={15} className="shrink-0" />
@@ -263,13 +305,13 @@ export default function DevisPage() {
                     type="button"
                     onClick={() => setAttachment(null)}
                     aria-label="Retirer la pièce jointe"
-                    className="text-ink-faint hover:text-red-500"
+                    className="tap text-ink-soft hover:text-red-600"
                   >
-                    <X size={14} />
+                    <X size={16} />
                   </button>
                 </span>
               ) : (
-                <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-3 transition bg-surface-sunken/60">
+                <label className="inline-flex items-center gap-2 cursor-pointer text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 min-h-[48px] transition bg-surface-sunken/60">
                   <Paperclip size={15} />
                   Joindre un fichier (cahier des charges, plan, document...)
                   <input
@@ -284,15 +326,15 @@ export default function DevisPage() {
             <button
               type="submit"
               disabled={submitting}
-              className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold py-4 rounded-xl text-lg transition"
+              className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-60 text-white font-bold min-h-[56px] rounded-xl text-lg transition"
             >
-              {submitting ? "Envoi en cours..." : "Envoyer la demande de devis"}
+              {submitting ? "Envoi en cours…" : "Envoyer la demande de devis"}
             </button>
           </form>
         )}
 
         <div className="text-center mt-8">
-          <Link href="/communication" className="text-ink-faint hover:text-ink text-sm transition">
+          <Link href="/communication" className="inline-flex items-center min-h-[44px] text-ink-soft hover:text-ink text-base transition">
             ← Retour à BM Communication
           </Link>
         </div>

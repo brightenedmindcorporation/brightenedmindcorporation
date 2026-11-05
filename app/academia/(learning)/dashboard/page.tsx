@@ -19,6 +19,7 @@ import { isSessionJoinable, isSessionOpenNow, type LiveSession } from "@/lib/aca
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import AddProgramPanel from "@/components/academy/AddProgramPanel";
 import InstallApp from "@/components/academy/InstallApp";
+import ProgressPanel from "@/components/academy/ProgressPanel";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { logActivity } from "@/lib/academy/activity";
 import { getVerbReference } from "@/content/verbs";
@@ -597,7 +598,7 @@ export default function Dashboard() {
 
               <button
                 onClick={handleContinue}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3.5 rounded-xl transition transform active:scale-95 flex items-center justify-center gap-2"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 min-h-[56px] text-lg rounded-xl transition transform active:scale-95 flex items-center justify-center gap-2"
               >
                 <span>▶ {t("Continuer la leçon", "Continue Lesson")} {lastLesson}</span>
               </button>
@@ -608,22 +609,29 @@ export default function Dashboard() {
           <div className="bg-surface-sunken/80 border border-line rounded-2xl p-5 mb-6 relative">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-bold text-ink-soft font-sans">
-                {t("Progression", "Course Progress")} ({t("Niveau", "Level")} {levelNumber(activeEnrollment.level)})
+                {t("Voici où vous en êtes", "Where you are")} · {t("Niveau", "Level")} {levelNumber(activeEnrollment.level)}
               </span>
               <span className="text-sm font-extrabold text-red-500">
                 {progressPercentage}%
               </span>
             </div>
-            <div className="w-full bg-surface-alt rounded-full h-3 overflow-hidden">
+            <div className="w-full bg-surface-alt rounded-full h-3 overflow-hidden" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progressPercentage} aria-label="Progression du niveau">
               <div
                 className="bg-gradient-to-r from-red-600 to-red-800 h-full rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
-            <p className="text-xs text-ink-soft mt-2 font-medium">
-              {completedQuizzes} / {totalQuizzes} {t("quiz réussis", "quizzes completed")}
+            <p className="text-sm text-ink-soft mt-2 font-medium">
+              {completedQuizzes} / {totalQuizzes} {t("quiz réussis", "quizzes completed")} · {t("prochaine étape : leçon", "next step: lesson")} {lastLesson}
             </p>
           </div>
+
+          <ProgressPanel
+            completed={completedQuizzes}
+            total={totalQuizzes}
+            percent={progressPercentage}
+            finalPassed={getLevelProgress(langSlug, levelNumber(activeEnrollment.level)).finalQuizPassed}
+          />
 
           {/* Infos étudiant */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -697,6 +705,24 @@ export default function Dashboard() {
             )}
           </div>
         )}
+
+        {/* Result of the placement test, clearly visible for two weeks after the decision */}
+        {!isOtherProgram &&
+          (activeEnrollment as any).placement?.status === "decided" &&
+          (activeEnrollment as any).placement?.decidedBy &&
+          (activeEnrollment as any).placement?.decidedBy !== "student" &&
+          Date.now() - new Date((activeEnrollment as any).placement?.decidedAt || 0).getTime() < 14 * 86_400_000 && (
+            <div role="status" className="mb-6 p-5 rounded-2xl border border-emerald-600/40 bg-emerald-500/10">
+              <p className="text-sm font-bold text-emerald-800 dark:text-emerald-300">Résultat de votre test de niveau</p>
+              <p className="text-2xl font-black text-ink mt-1">
+                Votre niveau : {t("Niveau", "Level")} {levelNumber((activeEnrollment as any).placement?.level ?? activeEnrollment.level)}
+              </p>
+              {(activeEnrollment as any).placement?.comment && (
+                <p className="text-sm text-ink-soft mt-1">« {(activeEnrollment as any).placement.comment} »</p>
+              )}
+              <p className="text-sm text-ink-soft mt-2">Vos cours de ce niveau sont ouverts : cliquez sur « Continuer la leçon » pour commencer.</p>
+            </div>
+          )}
 
         {/* Sections des cours */}
         <div className={!isOtherProgram && placementPending(activeEnrollment as any) ? "opacity-50 pointer-events-none" : ""}>

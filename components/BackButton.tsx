@@ -11,7 +11,8 @@ import { ArrowLeft } from "lucide-react";
 export default function BackButton() {
   const pathname = usePathname() || "/";
   const router = useRouter();
-  if (pathname === "/" || /^\/academia\/[^/]+\/level\//.test(pathname)) return null;
+  // The site builder and the clients' own sites (/s/…) are full-screen pages with their own controls.
+  if (pathname === "/" || /^\/academia\/[^/]+\/level\//.test(pathname) || /^\/(dev\/sites|sites\/editeur|s\/|espace)/.test(pathname)) return null;
 
   const goBack = () => {
     if (window.history.length > 1) {
@@ -27,11 +28,12 @@ export default function BackButton() {
       type="button"
       onClick={goBack}
       aria-label="Retour à la page précédente"
-      className="notranslate fixed left-3 top-[84px] z-[60] inline-flex items-center gap-1.5 rounded-full border border-line bg-surface/95 px-3.5 py-2 text-sm font-bold text-ink shadow-lg backdrop-blur transition hover:border-red-600/60 hover:text-red-500 md:left-5"
+      className="notranslate fixed left-3 top-[84px] z-[60] inline-flex min-h-[44px] min-w-[44px] items-center justify-center gap-1.5 rounded-full border border-line bg-surface/95 text-sm font-bold text-ink shadow-lg backdrop-blur transition hover:border-red-600/60 hover:text-red-500 sm:px-4 md:left-5"
       translate="no"
     >
-      <ArrowLeft size={16} aria-hidden="true" />
-      Retour
+      <ArrowLeft size={18} aria-hidden="true" />
+      {/* On a phone only the arrow shows, so the button covers less of the page. */}
+      <span className="hidden sm:inline">Retour</span>
     </button>
   );
 }

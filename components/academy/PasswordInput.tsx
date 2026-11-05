@@ -45,16 +45,15 @@ export default function PasswordInput({
         minLength={minLength}
         placeholder={placeholder}
         autoComplete={autoComplete}
-        className={`${className} pr-11`}
+        className={`${className} pr-12`}
         value={value}
         onChange={onChange}
       />
       <button
         type="button"
         onClick={() => setVisible((v) => !v)}
-        tabIndex={-1}
         aria-label={visible ? "Masquer le mot de passe" : "Afficher le mot de passe"}
-        className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink-soft transition"
+        className="absolute right-0 top-1/2 -translate-y-1/2 min-w-[44px] min-h-[44px] inline-flex items-center justify-center text-ink-soft hover:text-ink transition"
       >
         {visible ? <EyeOffIcon /> : <EyeIcon />}
       </button>
