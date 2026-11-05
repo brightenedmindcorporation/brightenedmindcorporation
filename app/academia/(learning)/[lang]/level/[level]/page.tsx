@@ -5,7 +5,7 @@ import { canAccessLevel } from "@/lib/academy/levelAccess";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy } from "lucide-react";
+import { Lock, TrendingUp, BookOpen, PenLine, GraduationCap, Trophy, Check, Play } from "lucide-react";
 import AcademyHeader from "../../../components/AcademyHeader";
 import { getLevelCurriculum, isOfficeProgram } from "@/content/curriculum";
 import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
@@ -100,6 +100,8 @@ export default function LevelOverviewPage() {
   const completedQuizzes = lessonsBehind(progress);
   const progressPct = Math.round((completedQuizzes.length / curriculum.lessons.length) * 100);
   const base = `/academia/${langSlug}/level/${level}`;
+  const isDone = (id: number) => progress.completedQuizzes.includes(id);
+  const nextLesson = curriculum.lessons.find((l) => !isDone(l.id) && isLessonUnlocked(progress, l.id, studyDays)) ?? null;
 
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
@@ -110,15 +112,15 @@ export default function LevelOverviewPage() {
           <div className="mb-6">
             <Link
               href="/academia/dashboard"
-              className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
+              className="inline-flex items-center gap-2 min-h-[44px] text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 rounded-xl border border-line transition shadow-lg"
             >
               ← Back to Dashboard
             </Link>
           </div>
 
-          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-5 md:p-8 shadow-2xl border border-red-900/40 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
             <div>
-              <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
+              <h1 className="text-2xl md:text-5xl font-black tracking-tight text-red-50">{curriculum.levelTitle}</h1>
               <p className="text-red-200/80 mt-2 text-sm md:text-base">{curriculum.levelSubtitle}</p>
             </div>
             {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
@@ -133,7 +135,7 @@ export default function LevelOverviewPage() {
               </Link>
             ) : (
               <div
-                className="bg-black/20 border border-white/10 text-white/60 font-semibold px-5 py-3 rounded-xl flex items-center gap-2 whitespace-nowrap cursor-not-allowed"
+                className="bg-black/20 border border-white/10 text-white/70 font-semibold px-5 min-h-[44px] rounded-xl flex items-center gap-2 cursor-not-allowed text-sm"
                 title={liveSession ? "Le cours n'a pas encore commencé" : "Aucun cours en direct programmé pour ce niveau"}
               >
                 <Lock size={13} className="inline -mt-0.5" />{" "}
@@ -144,16 +146,35 @@ export default function LevelOverviewPage() {
             )}
           </div>
 
+          {nextLesson ? (
+            <Link
+              href={`${base}/lesson/${nextLesson.id}`}
+              className="mt-6 flex items-center gap-4 glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white rounded-2xl p-5 shadow-xl transition"
+            >
+              <span className="w-12 h-12 rounded-full bg-white/15 inline-flex items-center justify-center shrink-0">
+                <Play size={22} aria-hidden="true" />
+              </span>
+              <span className="min-w-0">
+                <span className="block text-sm font-semibold text-red-100">{completedQuizzes.length === 0 ? "Start here" : "Continue where you stopped"}</span>
+                <span className="block text-lg font-black leading-snug">Lesson {nextLesson.id}: {nextLesson.title}</span>
+              </span>
+            </Link>
+          ) : progressPct === 100 ? (
+            <div role="status" className="mt-6 rounded-2xl border border-emerald-600/40 bg-emerald-500/10 p-5 font-bold text-ink">
+              All lessons are done. Take the Final Quiz below to finish the level.
+            </div>
+          ) : null}
+
           {!isOfficeProgram(langSlug) && (
           <Link
             href={`${base}/vocabulary`}
-            className="mt-6 flex items-center justify-between gap-4 bg-surface hover:bg-surface-alt rounded-2xl border border-line px-6 py-4 shadow-lg transition"
+            className="mt-4 flex items-center justify-between gap-4 bg-surface hover:bg-surface-alt rounded-2xl border border-line px-5 md:px-6 py-4 min-h-[64px] shadow-lg transition"
           >
             <span>
               <span className="block font-bold text-ink">
                 {langSlug === "chinese" ? "Caractères chinois du niveau" : "Vocabulaire & prononciation du niveau"}
               </span>
-              <span className="block text-xs text-ink-soft mt-0.5">
+              <span className="block text-sm text-ink-soft mt-0.5">
                 {langSlug === "chinese"
                   ? "Tous les caractères et mots, avec pinyin, sens et audio."
                   : "Tous les mots et phrases avec leur phonétique et leur audio."}
@@ -163,70 +184,89 @@ export default function LevelOverviewPage() {
           </Link>
           )}
 
-          <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-8 mt-8">
-            <h2 className="text-2xl font-bold text-red-500 mb-4 flex items-center gap-2">
-<TrendingUp size={20} /> Course Progress
+          <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-5 md:p-8 mt-6">
+            <h2 className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-300 mb-4 flex items-center gap-2">
+              <TrendingUp size={20} aria-hidden="true" /> Course Progress
             </h2>
-            <div className="w-full bg-surface-sunken rounded-full h-7 overflow-hidden border border-line p-1">
+            <div
+              className="w-full bg-surface-sunken rounded-full h-7 overflow-hidden border border-line p-1"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={progressPct}
+              aria-label="Course progress"
+            >
               <div
                 className="bg-red-600 h-full rounded-full flex items-center justify-center text-white text-xs font-black transition-all duration-500 shadow-lg shadow-red-900/50"
                 style={{ width: `${progressPct}%` }}
               >
-                {progressPct > 5 && `${progressPct}%`}
+                {progressPct > 8 && `${progressPct}%`}
               </div>
             </div>
-            <p className="mt-4 text-ink-soft font-medium text-sm">
-              <span className="text-red-500 font-bold">{completedQuizzes.length}</span> / {curriculum.lessons.length} quizzes completed
+            <p className="mt-3 text-ink-soft font-medium">
+              <span className="text-red-600 dark:text-red-300 font-bold">{completedQuizzes.length}</span> / {curriculum.lessons.length} quizzes completed · {progressPct}%
             </p>
           </div>
 
-          <div className="mt-8 grid md:grid-cols-2 gap-6">
+          <div className="mt-8 grid md:grid-cols-2 gap-4 md:gap-6">
             {curriculum.lessons.map((lesson) => {
-              // Lesson N unlocks once Quiz (N-1) is passed AND the pacing
-              // cooldown for the student's chosen study track has elapsed
-              // (see lib/academy/progress.ts). Quiz N unlocks together with
-              // its lesson (the original app gated quizzes behind a
-              // separate "lesson completed" flag that nothing ever set for
-              // lesson 1, permanently locking quiz 1 — see
-              // content/curriculum/english/level1.ts's header comment).
+              // Lesson N unlocks once Quiz (N-1) is passed AND the pacing cooldown for the student's chosen study track
+              // has elapsed (see lib/academy/progress.ts). Quiz N unlocks together with its lesson.
               const unlocked = isLessonUnlocked(progress, lesson.id, studyDays);
               const unlockDate = !unlocked ? getLessonUnlockDate(progress, lesson.id, studyDays) : null;
+              const done = isDone(lesson.id);
+              const isNext = nextLesson?.id === lesson.id;
 
               return (
                 <div
                   key={lesson.id}
-                  className="bg-surface rounded-3xl p-6 shadow-xl border border-line/80 hover:border-red-950 transition duration-300 flex flex-col justify-between"
+                  className={`rounded-3xl p-5 md:p-6 shadow-xl border transition duration-300 flex flex-col justify-between bg-surface ${isNext ? "border-red-600" : "border-line/80 hover:border-red-950"}`}
                 >
-                  <h2 className="text-xl font-bold text-ink">
-                    <span className="text-red-500">Lesson {lesson.id} :</span> {lesson.title}
-                  </h2>
+                  <div className="flex items-start gap-3">
+                    <span
+                      className={`w-10 h-10 rounded-full inline-flex items-center justify-center shrink-0 font-black ${
+                        done ? "bg-emerald-600 text-white" : unlocked ? "bg-red-600/15 text-red-700 dark:text-red-300" : "bg-surface-alt text-ink-soft"
+                      }`}
+                    >
+                      {done ? <Check size={20} aria-hidden="true" /> : unlocked ? lesson.id : <Lock size={16} aria-hidden="true" />}
+                    </span>
+                    <div className="min-w-0">
+                      <h2 className="text-lg md:text-xl font-bold text-ink leading-snug">
+                        <span className="text-red-600 dark:text-red-300">Lesson {lesson.id}:</span> {lesson.title}
+                      </h2>
+                      {/* The state is written in words, never only with a colour or an icon. */}
+                      <p className="mt-1 text-sm font-semibold text-ink-soft">
+                        {done ? "Done: quiz passed" : isNext ? "Next lesson" : unlocked ? "Available" : "Locked"}
+                      </p>
+                    </div>
+                  </div>
 
-                  <div className="flex gap-3 mt-6 flex-wrap items-center">
+                  <div className="flex gap-3 mt-5 flex-wrap items-center">
                     {unlocked ? (
                       <>
-                        <Link href={`${base}/lesson/${lesson.id}`}>
-                          <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-3 rounded-xl transition-all shadow-md hover:shadow-red-900/40 inline-flex items-center gap-2">
-                            <BookOpen size={16} /> Lesson
+                        <Link href={`${base}/lesson/${lesson.id}`} className="flex-1 min-w-[120px]">
+                          <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 min-h-[48px] w-full rounded-xl transition-all shadow-md hover:shadow-red-900/40 inline-flex items-center justify-center gap-2">
+                            <BookOpen size={16} aria-hidden="true" /> {done ? "Review" : "Lesson"}
                           </button>
                         </Link>
-                        <Link href={`${base}/quiz/${lesson.id}`}>
-                          <button className="bg-neutral-100 hover:bg-white text-black font-bold px-5 py-3 rounded-xl transition-all shadow-md inline-flex items-center gap-2">
-                            <PenLine size={16} /> Quiz
+                        <Link href={`${base}/quiz/${lesson.id}`} className="flex-1 min-w-[120px]">
+                          <button className="bg-neutral-100 hover:bg-white text-black font-bold px-5 min-h-[48px] w-full rounded-xl transition-all shadow-md inline-flex items-center justify-center gap-2">
+                            <PenLine size={16} aria-hidden="true" /> Quiz
                           </button>
                         </Link>
                       </>
                     ) : (
                       <>
-                        <button disabled className="bg-surface-alt text-ink-faint px-5 py-3 rounded-xl font-medium cursor-not-allowed border border-line inline-flex items-center gap-2">
-                          <Lock size={14} /> Locked
+                        <button disabled className="bg-surface-alt text-ink-soft px-5 min-h-[48px] rounded-xl font-medium cursor-not-allowed border border-line inline-flex items-center gap-2">
+                          <Lock size={14} aria-hidden="true" /> Locked
                         </button>
                         {!unlockDate && lesson.id > 1 && progress.quizScores[lesson.id - 1] !== undefined && !progress.completedQuizzes.includes(lesson.id - 1) && (
-                          <p className="text-xs text-ink-faint">
+                          <p className="text-sm text-ink-soft">
                             Le quiz {lesson.id - 1} n&apos;a pas été réussi au premier essai : l&apos;administration décide de la suite.
                           </p>
                         )}
                         {unlockDate && (
-                          <p className="text-xs text-ink-faint">
+                          <p className="text-sm text-ink-soft">
                             Disponible le {unlockDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
                           </p>
                         )}
@@ -238,30 +278,30 @@ export default function LevelOverviewPage() {
             })}
           </div>
 
-          <div className="bg-surface rounded-3xl shadow-2xl border border-line p-8 mt-10">
+          <div className="bg-surface rounded-3xl shadow-2xl border border-line p-5 md:p-8 mt-10">
             <h2 className="text-2xl font-bold text-center text-ink mb-6 flex items-center justify-center gap-2"><GraduationCap size={24} /> Level Completion</h2>
 
             <div className="flex flex-col md:flex-row gap-4">
               {progressPct === 100 ? (
                 <Link href={`${base}/final-quiz`} className="w-full">
-                  <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60 inline-flex items-center justify-center gap-2">
+                  <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-6 min-h-[56px] rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60 inline-flex items-center justify-center gap-2">
                     <GraduationCap size={18} /> Final Quiz
                   </button>
                 </Link>
               ) : (
-                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
+                <button disabled className="bg-surface-alt text-ink-faint px-6 min-h-[56px] rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
                   <Lock size={16} /> Complete 100% Course First
                 </button>
               )}
 
               {progress.finalQuizPassed ? (
                 <Link href={`${base}/certificate`} className="w-full">
-                  <button className="bg-amber-500 hover:bg-amber-600 text-black px-8 py-4 rounded-2xl w-full font-bold transition-all shadow-lg inline-flex items-center justify-center gap-2">
+                  <button className="bg-amber-500 hover:bg-amber-600 text-black px-6 min-h-[56px] rounded-2xl w-full font-bold transition-all shadow-lg inline-flex items-center justify-center gap-2">
                     <Trophy size={18} /> Request Certificate
                   </button>
                 </Link>
               ) : (
-                <button disabled className="bg-surface-alt text-ink-faint px-8 py-4 rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
+                <button disabled className="bg-surface-alt text-ink-faint px-6 min-h-[56px] rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
                   <Lock size={16} /> Pass Final Quiz First
                 </button>
               )}

@@ -17,9 +17,6 @@ import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/aca
 import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 
-// Lessons shown one step at a time while the format is being tested (key: language-level-lesson).
-const STEP_LESSONS = new Set(["english-1-1"]);
-
 export default function LessonPage() {
   const [showFr] = useFrenchVisible();
   const router = useRouter();
@@ -29,8 +26,8 @@ export default function LessonPage() {
   const lessonId = Number(params.n);
   const base = `/academia/${langSlug}/level/${level}`;
 
-  // Step-by-step view: on for the test lessons, and every student can switch to the whole lesson at once.
-  const stepEligible = STEP_LESSONS.has(`${langSlug}-${level}-${lessonId}`);
+  // Every lesson is shown one step at a time; a student can switch to the whole lesson at once.
+  const stepEligible = true;
   const [stepMode, setStepMode] = useState(true);
   const [checked, setChecked] = useState(false);
   const [unlocked, setUnlocked] = useState(false);

@@ -240,16 +240,51 @@ export default function LessonRenderer({ lesson, langSlug, statsKey, stepMode = 
   const narration = useMemo(() => lessonNarrations(langSlug, lesson), [langSlug, lesson]);
   const [step, setStep] = useState(0);
   const go = (n: number) => {
-    setStep(Math.max(0, Math.min(STEP_LABELS.length - 1, n)));
+    setStep(Math.max(0, Math.min(9, n)));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   // Outside step mode every block is visible; in step mode only the current one.
   const show = (k: number) => (!stepMode || step === k ? "" : "hidden");
+  // Previous / Next buttons shared by the language lessons and the office lessons.
+  const stepNav = (labels: string[]) =>
+    stepMode && (
+      <nav aria-label="Étapes de la leçon" className="flex items-center gap-3 pt-2">
+        {step > 0 && (
+          <button type="button" onClick={() => go(step - 1)} className="min-h-[56px] px-6 rounded-2xl border border-line bg-surface text-ink font-bold hover:border-red-600/60 transition">
+            ← Précédent
+          </button>
+        )}
+        {step < labels.length - 1 ? (
+          <button
+            type="button"
+            onClick={() => go(step + 1)}
+            className="flex-1 min-h-[56px] px-6 rounded-2xl glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg transition"
+          >
+            Suivant : {labels[step + 1].toLowerCase()} →
+          </button>
+        ) : (
+          quizHref && (
+            <a
+              href={quizHref}
+              className="flex-1 min-h-[56px] px-6 rounded-2xl glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg transition inline-flex items-center justify-center gap-2"
+            >
+              <PenLine size={18} aria-hidden="true" /> Passer au quiz
+            </a>
+          )
+        )}
+      </nav>
+    );
 
   // Office course (Windows, Word, Excel, PowerPoint): text, optional video and practical work, no audio.
   if (isOfficeProgram(langSlug)) {
+    // Steps: the lesson, the video (when there is one), the case study, the practical work, the goals.
+    const officeLabels = ["La leçon", ...(lesson.videoUrl ? ["La vidéo"] : []), "Le cas pratique", "Les travaux pratiques", "Les objectifs"];
+    const base = lesson.videoUrl ? 1 : 0;
+    const officeShow = (k: number) => (!stepMode || step === k ? "" : "hidden");
     return (
       <div className="space-y-8">
+        {stepMode && <StepBar step={step + 1} labels={officeLabels} />}
+        <div className={officeShow(0)}>
         <Card>
           <CardTitle icon={BookOpen}>Leçon</CardTitle>
           <div className="text-ink-soft mt-4 space-y-6">
@@ -269,9 +304,11 @@ export default function LessonRenderer({ lesson, langSlug, statsKey, stepMode = 
           </div>
           <OfficeFigure id={lesson.figure} />
         </Card>
+        </div>
 
-        {lesson.videoUrl && <VideoCard lesson={lesson} statsKey={statsKey} />}
+        {lesson.videoUrl && (!stepMode || step === 1) && <VideoCard lesson={lesson} statsKey={statsKey} />}
 
+        <div className={officeShow(1 + base)}>
         <Card>
           <CardTitle icon={FileText}>Cas pratique</CardTitle>
           <div className="text-ink-soft mt-4 space-y-3">
@@ -281,7 +318,9 @@ export default function LessonRenderer({ lesson, langSlug, statsKey, stepMode = 
             ))}
           </div>
         </Card>
+        </div>
 
+        <div className={officeShow(2 + base)}>
         <Card>
           <CardTitle icon={Mic}>Travaux pratiques</CardTitle>
           <p className="text-ink-soft mt-4">Faites ces exercices sur votre ordinateur :</p>
@@ -291,11 +330,16 @@ export default function LessonRenderer({ lesson, langSlug, statsKey, stepMode = 
             ))}
           </ol>
         </Card>
+        </div>
 
+        <div className={officeShow(3 + base)}>
         <Card>
           <CardTitle icon={Target}>À la fin de cette leçon, vous saurez</CardTitle>
           <p className="text-ink-soft mt-4">{lesson.speakingTopic}</p>
         </Card>
+        </div>
+
+        {stepNav(officeLabels)}
       </div>
     );
   }
@@ -390,33 +434,7 @@ export default function LessonRenderer({ lesson, langSlug, statsKey, stepMode = 
       </Card>
       </div>
 
-      {stepMode && (
-        <nav aria-label="Étapes de la leçon" className="flex items-center gap-3 pt-2">
-          {step > 0 && (
-            <button type="button" onClick={() => go(step - 1)} className="min-h-[56px] px-6 rounded-2xl border border-line bg-surface text-ink font-bold hover:border-red-600/60 transition">
-              ← Précédent
-            </button>
-          )}
-          {step < STEP_LABELS.length - 1 ? (
-            <button
-              type="button"
-              onClick={() => go(step + 1)}
-              className="flex-1 min-h-[56px] px-6 rounded-2xl glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg transition"
-            >
-              Suivant : {STEP_LABELS[step + 1].toLowerCase()} →
-            </button>
-          ) : (
-            quizHref && (
-              <a
-                href={quizHref}
-                className="flex-1 min-h-[56px] px-6 rounded-2xl glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg transition inline-flex items-center justify-center gap-2"
-              >
-                <PenLine size={18} aria-hidden="true" /> Passer au quiz
-              </a>
-            )
-          )}
-        </nav>
-      )}
+      {stepNav(STEP_LABELS)}
     </div>
   );
 }
