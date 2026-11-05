@@ -54,6 +54,7 @@ import CorrectionsTab from "@/components/admin/CorrectionsTab";
 import DomesticaTab from "@/components/admin/DomesticaTab";
 import ShipmentsTab from "@/components/admin/ShipmentsTab";
 import TrucksTab from "@/components/admin/TrucksTab";
+import BackupTab from "@/components/admin/BackupTab";
 import { TRACKING_ENABLED } from "@/lib/features";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
@@ -76,7 +77,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections" | "domestica" | "shipments" | "trucks";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections" | "domestica" | "shipments" | "trucks" | "backups";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1430,7 +1431,7 @@ export default function AdminPage() {
       // storage blocked
     }
     const requestedTab = params.get("tab") || savedTab;
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "shipments", "trucks"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "shipments", "trucks", "backups"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -2062,6 +2063,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "corrections", label: "Corrections", badge: 0 },
             { id: "placement", label: "Tests de niveau", badge: 0 },
             { id: "domestica", label: "Domestica", badge: 0 },
+            { id: "backups", label: "Sauvegardes", badge: 0 },
             ...(TRACKING_ENABLED ? [{ id: "shipments" as const, label: "Suivi colis", badge: 0 }, { id: "trucks" as const, label: "Camions (carte)", badge: 0 }] : []),
             { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[];
@@ -2749,6 +2751,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "placement" && <PlacementTab />}
         {tab === "corrections" && <CorrectionsTab />}
         {tab === "domestica" && <DomesticaTab />}
+        {tab === "backups" && <BackupTab />}
         {TRACKING_ENABLED && tab === "shipments" && <ShipmentsTab />}
         {TRACKING_ENABLED && tab === "trucks" && <TrucksTab />}
 
