@@ -31,24 +31,42 @@ const clamp = (value: unknown, min: number, max: number, fallback: number) => {
 export async function getReminderSettings(): Promise<ReminderSettings> {
   const snap = await getAdminDb().collection("system").doc("reminders").get();
   const d = snap.data() || {};
+  // v2 = the daily "Duolingo" rhythm; settings saved before it (the old 7-day rule) give way to it once.
+  const saved = d.v === 2 ? d : {};
   return {
     enabled: d.enabled !== false,
-    afterDays: clamp(d.afterDays, 1, 365, 7),
-    repeatDays: clamp(d.repeatDays, 1, 90, 7),
-    maxReminders: clamp(d.maxReminders, 1, 30, 4),
+    afterDays: clamp(saved.afterDays, 1, 365, 1),
+    repeatDays: clamp(saved.repeatDays, 1, 90, 1),
+    maxReminders: clamp(saved.maxReminders, 1, 30, 10),
   };
 }
 
 /** Normalises settings typed by the administration. */
 export function cleanReminderSettings(input: { afterDays?: unknown; repeatDays?: unknown; maxReminders?: unknown }) {
-  const out: Record<string, number> = {};
+  const out: Record<string, number> = { v: 2 };
   if (input.afterDays !== undefined) out.afterDays = clamp(input.afterDays, 1, 365, 7);
   if (input.repeatDays !== undefined) out.repeatDays = clamp(input.repeatDays, 1, 90, 7);
   if (input.maxReminders !== undefined) out.maxReminders = clamp(input.maxReminders, 1, 30, 4);
   return out;
 }
 
-/** Sends the "we miss you" reminders to inactive students (at most 25 per run, 4 per student, one a week). */
+/**
+ * Friendly nudges, a little more insistent each time but never guilt-tripping. The reminder number picks the
+ * message; a notification goes out every time, an e-mail only on the reminders listed in EMAIL_ON (so the
+ * mailbox and the daily sending limit are spared).
+ */
+const NUDGES: { title: string; body: (days: number) => string }[] = [
+  { title: "C'est l'heure de votre leçon", body: () => "Quelques minutes aujourd'hui, et vous gardez votre élan. Votre progression est sauvegardée." },
+  { title: "On ne vous a pas vu hier", body: () => "Une seule leçon suffit pour reprendre. Votre place est gardée." },
+  { title: "Votre leçon vous attend 📚", body: () => "Elle est prête, il ne manque que vous. Cinq minutes ?" },
+  { title: "Un peu de pratique, un grand progrès", body: (d) => `Cela fait ${d} jours. Une langue se perd vite sans pratique : une courte révision aujourd'hui suffit.` },
+  { title: "Reprenez là où vous vous êtes arrêté", body: () => "Pas besoin de tout recommencer : ouvrez votre tableau de bord et continuez." },
+  { title: "Nous croyons en vous", body: () => "Chaque jour compte, même pour une seule phrase. Revenez quand vous voulez, nous sommes là." },
+  { title: "Prêt à reprendre ?", body: (d) => `Vous êtes absent depuis ${d} jours. Répondez-nous si quelque chose vous bloque : nous vous aiderons.` },
+];
+const EMAIL_ON = new Set([0, 2, 5, 9]);
+
+/** Sends the reminders to inactive students (at most 60 per run). */
 async function sendReminders(settings: ReminderSettings): Promise<{ sent: number; skipped: number }> {
   const db = getAdminDb();
   const now = Date.now();
@@ -76,7 +94,7 @@ async function sendReminders(settings: ReminderSettings): Promise<{ sent: number
   let sent = 0;
   let skipped = 0;
   for (const uid of uids) {
-    if (sent >= 25) break;
+    if (sent >= 60) break;
     const s = students.get(uid);
     if (!s?.email) continue;
     const seen = Math.max(s.lastSeenAt ? new Date(s.lastSeenAt).getTime() : 0, lastSignIn.get(uid) ?? 0);
@@ -90,12 +108,15 @@ async function sendReminders(settings: ReminderSettings): Promise<{ sent: number
     }
 
     const days = Math.floor(inactiveDays);
-    const subject = neverCame ? "Votre espace BM Academia vous attend" : "Votre formation BM Academia vous attend";
+    const count = Number(s.reminderCount) || 0;
+    const nudge = NUDGES[Math.min(count, NUDGES.length - 1)];
+    const subject = neverCame ? "Votre espace BM Academia vous attend" : nudge.title;
+    const title = neverCame ? "Votre espace BM Academia vous attend" : nudge.title;
     const body = neverCame
       ? "Votre inscription est validée, mais vous ne vous êtes pas encore connecté. Votre premier cours est prêt : il suffit de vous connecter avec l'adresse e-mail de votre inscription."
-      : `Cela fait ${days} jours que nous ne vous avons pas vu sur BM Academia. Votre progression est sauvegardée : vous pouvez reprendre exactement là où vous vous êtes arrêté.`;
+      : nudge.body(days);
     try {
-      if (resend) {
+      if (resend && (neverCame || EMAIL_ON.has(count))) {
         const { error } = await sendWithText(resend, {
           from: mailFrom("BM Academia"),
           to: String(s.email),
@@ -114,7 +135,7 @@ async function sendReminders(settings: ReminderSettings): Promise<{ sent: number
         }
         await new Promise((r) => setTimeout(r, 600)); // below the provider's rate limit
       }
-      await createNotification({ audience: uid, type: "reminder", title: "Votre formation vous attend", message: body, link: "/academia/dashboard" });
+      await createNotification({ audience: uid, type: "reminder", title, message: body, link: "/academia/dashboard" });
       await logActivitySafe(uid, "reminder", neverCame ? "Rappel automatique : première connexion" : `Rappel automatique : inactif depuis ${days} jours`, {});
       await db.collection("students").doc(uid).set({ lastReminderAt: new Date().toISOString(), reminderCount: FieldValue.increment(1) }, { merge: true });
       sent++;
