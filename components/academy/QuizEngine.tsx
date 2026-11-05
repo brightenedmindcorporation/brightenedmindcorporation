@@ -10,6 +10,7 @@ import DialoguePlayer from "@/components/academy/DialoguePlayer";
 import { computeQuizMark, PASS_AT, passesQuiz, type QuizPartsRecord } from "@/lib/academy/quizScoring";
 import Zh, { withoutHint } from "@/components/academy/Zh";
 import PinyinToggle from "@/components/academy/PinyinToggle";
+import StepBar from "@/components/StepBar";
 import QuizReadingStep, { emptyReadingState, readingDone, type QuizReading } from "@/components/academy/QuizReadingStep";
 import QuizWritingStep, { emptyWritingState, writingItems, writingMissing, writingSummary, type QuizWriting, type WritingItem } from "@/components/academy/QuizWritingStep";
 
@@ -54,7 +55,7 @@ function StepTitle({ n, icon: Icon, title, hint }: { n: number; icon: React.Comp
         <h2 className="text-xl font-black text-ink flex items-center gap-2">
           <Icon size={18} /> {title}
         </h2>
-        <p className="text-xs text-ink-soft mt-0.5">{hint}</p>
+        <p className="text-sm text-ink-soft mt-0.5">{hint}</p>
       </div>
     </div>
   );
@@ -66,18 +67,21 @@ function Questions({
   submitted,
   onSelect,
   zh = false,
+  only,
 }: {
   questions: QuizQuestion[];
   answers: string[];
   submitted: boolean;
   onSelect: (index: number, option: string) => void;
+  /** Step-by-step: the only question shown (-1 hides them all); undefined shows every question. */
+  only?: number;
   /** Chinese: pinyin above the characters. */
   zh?: boolean;
 }) {
   return (
     <>
       {questions.map((q, index) => (
-        <div key={index} className="border-b border-line/80 pb-6 last:border-b-0 last:pb-0">
+        <div key={index} className={`border-b border-line/80 pb-6 last:border-b-0 last:pb-0 ${only !== undefined && only !== index ? "hidden" : ""}`}>
           <h3 className="font-bold text-lg text-ink mb-4 flex items-start gap-3">
             <span className="text-red-500 font-extrabold">{index + 1}.</span>
             <span className={zh ? "leading-[2.2]" : undefined}>
@@ -109,13 +113,14 @@ function Questions({
                   key={option}
                   disabled={submitted}
                   onClick={() => onSelect(index, option)}
-                  className={`w-full text-left px-5 py-3.5 rounded-2xl border transition-all duration-200 flex items-center justify-between ${buttonStyle}`}
+                  aria-pressed={isSelected}
+                  className={`w-full text-left px-5 py-3.5 min-h-[56px] text-base rounded-2xl border transition-all duration-200 flex items-center justify-between ${buttonStyle}`}
                 >
                   <span className={zh ? "leading-[2.2]" : undefined}>
                     <Zh text={zh ? withoutHint(option) : option} on={zh} />
                   </span>
-                  {submitted && isCorrect && <CheckCircle2 size={16} className="inline text-emerald-400 ml-2" />}
-                  {submitted && isSelected && !isCorrect && <XCircle size={16} className="inline text-red-400 ml-2" />}
+                  {submitted && isCorrect && <span className="inline-flex items-center gap-1 text-emerald-400 ml-2 shrink-0 text-sm font-bold"><CheckCircle2 size={16} aria-hidden="true" /> <span>Correct</span></span>}
+                  {submitted && isSelected && !isCorrect && <span className="inline-flex items-center gap-1 text-red-400 ml-2 shrink-0 text-sm font-bold"><XCircle size={16} aria-hidden="true" /> <span>Votre réponse</span></span>}
                 </button>
               );
             })}
@@ -145,6 +150,10 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const [submitted, setSubmitted] = useState(alreadyDone);
   const [score, setScore] = useState(alreadyScore ?? 0);
   const [dialogueScore, setDialogueScore] = useState(0);
+  // One thing at a time: a conversation, then each question on its own screen, then reading, writing and the final send.
+  // Once the quiz is sent everything is shown again (the corrections); the student can also choose the full view.
+  const [stepMode, setStepMode] = useState(true);
+  const [unit, setUnit] = useState(0);
 
   // Unfinished answers are kept on this device: the student can go back to the lesson to check something and find them as they were.
   const [restored, setRestored] = useState(false);
@@ -238,6 +247,32 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const passed = passesQuiz(mark.percent);
   const mainPassed = passed;
 
+  type Unit = { kind: "dialogue" | "question" | "reading" | "writing" | "submit"; q?: number; label: string };
+  const units: Unit[] = [
+    ...(useDialogue ? [{ kind: "dialogue" as const, label: "Conversation" }] : []),
+    ...quiz.questions.map((_, i) => ({ kind: "question" as const, q: i, label: `Question ${i + 1} / ${quiz.questions.length}` })),
+    ...(useReading ? [{ kind: "reading" as const, label: "Lecture à voix haute" }] : []),
+    ...(useWriting ? [{ kind: "writing" as const, label: "Rédaction" }] : []),
+    { kind: "submit" as const, label: "Envoyer le quiz" },
+  ];
+  const stepping = stepMode && !submitted;
+  const cur = units[Math.min(unit, units.length - 1)];
+  const hideUnless = (kind: Unit["kind"]) => (stepping && cur.kind !== kind ? "hidden" : "");
+  const canNext =
+    cur.kind === "dialogue" ? !dialogueAnswers.includes("") :
+    cur.kind === "question" ? answers[cur.q as number] !== "" :
+    cur.kind === "reading" ? readingOk :
+    cur.kind === "writing" ? writingOk : true;
+  const nextHint =
+    cur.kind === "dialogue" ? "Répondez à toutes les questions de la conversation pour continuer." :
+    cur.kind === "question" ? "Choisissez une réponse pour continuer." :
+    cur.kind === "reading" ? "Faites la lecture à voix haute pour continuer." :
+    `Complétez la rédaction pour continuer : ${writingGaps.join(", ")}.`;
+  const goUnit = (n: number) => {
+    setUnit(Math.max(0, Math.min(units.length - 1, n)));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   let step = 0;
   const missing = [
     useDialogue && dialogueAnswers.includes("") ? "la conversation" : null,
@@ -248,13 +283,27 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
 
   return (
     <div className="space-y-6">
-      {langSlug === "chinese" && (
-        <div className="flex justify-end">
-          <PinyinToggle />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {!submitted ? (
+          <button
+            type="button"
+            onClick={() => setStepMode((v) => !v)}
+            className="min-h-[44px] px-4 rounded-xl border border-line bg-surface text-sm font-bold text-ink-soft hover:text-ink hover:border-red-600/60 transition"
+          >
+            {stepMode ? "Voir toutes les questions d'un coup" : "Revenir au pas à pas"}
+          </button>
+        ) : (
+          <span />
+        )}
+        {langSlug === "chinese" && <PinyinToggle />}
+      </div>
+      {stepping && (
+        <div>
+          <StepBar step={unit + 1} labels={units.map((u) => u.label)} />
         </div>
       )}
       {useDialogue && (
-        <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-6">
+        <div className={`bg-surface rounded-3xl p-5 md:p-8 border border-line shadow-xl space-y-6 ${hideUnless("dialogue")}`}>
           <StepTitle n={++step} icon={Headphones} title="Conversation à écouter" hint="Écoutez la conversation, puis répondez. Le texte n'est pas affiché pendant l'écoute." />
           <DialoguePlayer dialogue={useDialogue} langSlug={langSlug} showTranscript={submitted} />
           <Questions
@@ -267,22 +316,22 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
         </div>
       )}
 
-      <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-8">
-        {(useDialogue || useWriting || useReading) && (
+      <div className={`bg-surface rounded-3xl p-5 md:p-8 border border-line shadow-xl space-y-8 ${hideUnless("question")}`}>
+        {(useDialogue || useWriting || useReading) && !stepping && (
           <StepTitle n={++step} icon={ListChecks} title="Questions du quiz" hint="Répondez à toutes les questions." />
         )}
-        <Questions questions={quiz.questions} answers={answers} submitted={submitted} onSelect={select(answers, setAnswers)} zh={langSlug === "chinese"} />
+        <Questions questions={quiz.questions} answers={answers} submitted={submitted} onSelect={select(answers, setAnswers)} zh={langSlug === "chinese"} only={stepping ? (cur.kind === "question" ? cur.q : -1) : undefined} />
       </div>
 
       {useReading && (
-        <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-5">
+        <div className={`bg-surface rounded-3xl p-5 md:p-8 border border-line shadow-xl space-y-5 ${hideUnless("reading")}`}>
           <StepTitle n={++step} icon={Mic} title="Lecture à voix haute" hint="Lisez le texte ci-dessous avec le micro, d'une voix claire. Le site compare ce qu'il entend avec le texte (20 points)." />
           <QuizReadingStep reading={useReading} state={readingState} onChange={setReadingState} submitted={submitted} langSlug={langSlug} />
         </div>
       )}
 
       {useWriting && (
-        <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl space-y-5">
+        <div className={`bg-surface rounded-3xl p-5 md:p-8 border border-line shadow-xl space-y-5 ${hideUnless("writing")}`}>
           <StepTitle
             n={++step}
             icon={PenLine}
@@ -293,19 +342,22 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
         </div>
       )}
 
-      <div className="bg-surface rounded-3xl p-6 md:p-8 border border-line shadow-xl">
+      <div className={`bg-surface rounded-3xl p-5 md:p-8 border border-line shadow-xl ${hideUnless("submit")}`}>
         {!submitted ? (
           <div>
+            <p className="mb-4 text-ink-soft font-medium">
+              Vous avez répondu à <b className="text-ink">{answers.filter(Boolean).length} sur {quiz.questions.length}</b> questions. Vérifiez si vous voulez, puis envoyez.
+            </p>
             <button
               onClick={submitQuiz}
               disabled={!ready}
-              className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl ${
+              className={`w-full min-h-[60px] rounded-2xl font-bold text-lg transition-all shadow-xl ${
                 !ready
                   ? "bg-surface-alt text-ink-faint cursor-not-allowed border border-line"
                   : "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white shadow-red-950/60"
               }`}
             >
-              {!ready ? `À compléter : ${missing.join(", ")}` : badge ? `Submit ${badge}` : "Submit Quiz"}
+              {!ready ? `À compléter : ${missing.join(", ")}` : badge ? `Submit ${badge} · Envoyer` : "Submit Quiz · Envoyer le quiz"}
             </button>
           </div>
         ) : (
@@ -313,7 +365,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-2xl font-black text-ink">
-                  Your Score: <span className={mainPassed ? "text-emerald-400" : "text-red-500"}>{score} / {quiz.questions.length}</span>
+                  Your Score <span className="text-base font-semibold text-ink-soft">(Votre score)</span>: <span className={mainPassed ? "text-emerald-400" : "text-red-500"}>{score} / {quiz.questions.length}</span>
                 </h2>
                 {useDialogue && (
                   <p className="text-sm font-semibold mt-1 text-ink-soft">
@@ -331,14 +383,14 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                     {mark.provisional && <span className="ml-2 text-xs font-semibold text-amber-500">provisoire : la rédaction n&apos;est pas encore corrigée</span>}
                   </p>
                 )}
-                <p className="text-xs text-ink-soft mt-0.5">{mark.lines.map((l) => `${l.label} ${l.detail}`).join(" · ")}</p>
+                <p className="text-sm text-ink-soft mt-0.5">{mark.lines.map((l) => `${l.label} ${l.detail}`).join(" · ")}</p>
                 <p className="mt-2 font-semibold text-sm">
                   {passed ? (
-                    <span className="text-emerald-400 inline-flex items-center gap-1.5"><CheckCircle2 size={16} /> Passed! Great job.</span>
+                    <span className="text-emerald-400 inline-flex items-center gap-1.5"><CheckCircle2 size={16} aria-hidden="true" /> Passed! Great job. · Réussi, bravo !</span>
                   ) : (
                     <span className="text-red-400 inline-flex items-center gap-1.5">
                       <XCircle size={16} />{" "}
-                      {`Failed. Votre note générale (${mark.percent ?? 0}/100) doit être d'au moins ${PASS_AT}/100 (${PASS_AT / 10}/10) pour réussir.`}
+                      {`Failed · Échoué. Votre note générale (${mark.percent ?? 0}/100) doit être d'au moins ${PASS_AT}/100 (${PASS_AT / 10}/10) pour réussir.`}
                     </span>
                   )}
                 </p>
@@ -351,20 +403,50 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                   setWritingState(emptyWritingState(writing));
                   setReadingState(emptyReadingState());
                   setPractice(true);
+                  setUnit(0);
                   setSubmitted(false);
                 }}
-                className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 py-3 rounded-xl border border-line transition self-start sm:self-auto inline-flex items-center gap-2"
+                className="bg-surface-alt hover:bg-surface text-ink font-bold px-6 min-h-[48px] rounded-xl border border-line transition self-start sm:self-auto inline-flex items-center gap-2"
               >
-                <RefreshCw size={15} /> Retake (practice only)
+                <RefreshCw size={15} aria-hidden="true" /> Retake · Refaire pour s&apos;entraîner
               </button>
             </div>
 
-            <p className="text-xs text-red-400/80 italic font-medium pt-2 border-t border-line">
+            <p className="text-sm text-red-500 dark:text-red-300 italic font-medium pt-2 border-t border-line">
               Note: Only your first attempt score is recorded in your progress. Retakes are practice only.{!alreadyDone && !passed ? " The administration will review your result and decide what happens next." : ""}
             </p>
           </div>
         )}
       </div>
+
+      {stepping && (
+        <div className="space-y-2">
+          {!canNext && cur.kind !== "submit" && (
+            <p role="status" className="text-center text-sm font-semibold text-ink-soft">
+              {nextHint}
+            </p>
+          )}
+          <nav aria-label="Étapes du quiz" className="flex items-center gap-3">
+            {unit > 0 && (
+              <button type="button" onClick={() => goUnit(unit - 1)} className="min-h-[56px] px-6 rounded-2xl border border-line bg-surface text-ink font-bold hover:border-red-600/60 transition">
+                ← Précédent
+              </button>
+            )}
+            {cur.kind !== "submit" && (
+              <button
+                type="button"
+                disabled={!canNext}
+                onClick={() => goUnit(unit + 1)}
+                className={`flex-1 min-h-[56px] px-6 rounded-2xl font-bold text-lg transition ${
+                  canNext ? "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white" : "bg-surface-alt text-ink-soft border border-line cursor-not-allowed"
+                }`}
+              >
+                {units[Math.min(unit + 1, units.length - 1)].kind === "submit" ? "Terminer →" : "Suivant →"}
+              </button>
+            )}
+          </nav>
+        </div>
+      )}
     </div>
   );
 }

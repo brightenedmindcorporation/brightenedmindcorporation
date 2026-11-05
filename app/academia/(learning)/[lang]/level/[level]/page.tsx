@@ -114,7 +114,7 @@ export default function LevelOverviewPage() {
               href="/academia/dashboard"
               className="inline-flex items-center gap-2 min-h-[44px] text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 rounded-xl border border-line transition shadow-lg"
             >
-              ← Back to Dashboard
+              ← Back to Dashboard · Retour au tableau de bord
             </Link>
           </div>
 
@@ -155,13 +155,13 @@ export default function LevelOverviewPage() {
                 <Play size={22} aria-hidden="true" />
               </span>
               <span className="min-w-0">
-                <span className="block text-sm font-semibold text-red-100">{completedQuizzes.length === 0 ? "Start here" : "Continue where you stopped"}</span>
+                <span className="block text-sm font-semibold text-red-100">{completedQuizzes.length === 0 ? "Start here · Commencez ici" : "Continue where you stopped · Reprenez où vous vous êtes arrêté(e)"}</span>
                 <span className="block text-lg font-black leading-snug">Lesson {nextLesson.id}: {nextLesson.title}</span>
               </span>
             </Link>
           ) : progressPct === 100 ? (
             <div role="status" className="mt-6 rounded-2xl border border-emerald-600/40 bg-emerald-500/10 p-5 font-bold text-ink">
-              All lessons are done. Take the Final Quiz below to finish the level.
+              All lessons are done. Take the Final Quiz below to finish the level. · Toutes les leçons sont terminées : passez le quiz final ci-dessous.
             </div>
           ) : null}
 
@@ -186,7 +186,7 @@ export default function LevelOverviewPage() {
 
           <div className="bg-surface/90 backdrop-blur rounded-3xl shadow-xl border border-line p-5 md:p-8 mt-6">
             <h2 className="text-xl md:text-2xl font-bold text-red-600 dark:text-red-300 mb-4 flex items-center gap-2">
-              <TrendingUp size={20} aria-hidden="true" /> Course Progress
+              <TrendingUp size={20} aria-hidden="true" /> Course Progress <span lang="fr" className="text-base font-semibold text-ink-soft">· Votre progression</span>
             </h2>
             <div
               className="w-full bg-surface-sunken rounded-full h-7 overflow-hidden border border-line p-1"
@@ -204,7 +204,7 @@ export default function LevelOverviewPage() {
               </div>
             </div>
             <p className="mt-3 text-ink-soft font-medium">
-              <span className="text-red-600 dark:text-red-300 font-bold">{completedQuizzes.length}</span> / {curriculum.lessons.length} quizzes completed · {progressPct}%
+              <span className="text-red-600 dark:text-red-300 font-bold">{completedQuizzes.length}</span> / {curriculum.lessons.length} quizzes completed · quiz réussis · {progressPct}%
             </p>
           </div>
 
@@ -236,7 +236,7 @@ export default function LevelOverviewPage() {
                       </h2>
                       {/* The state is written in words, never only with a colour or an icon. */}
                       <p className="mt-1 text-sm font-semibold text-ink-soft">
-                        {done ? "Done: quiz passed" : isNext ? "Next lesson" : unlocked ? "Available" : "Locked"}
+                        {done ? "Done: quiz passed · Terminé : quiz réussi" : isNext ? "Next lesson · Leçon suivante" : unlocked ? "Available · Disponible" : "Locked · Verrouillée"}
                       </p>
                     </div>
                   </div>
@@ -246,19 +246,19 @@ export default function LevelOverviewPage() {
                       <>
                         <Link href={`${base}/lesson/${lesson.id}`} className="flex-1 min-w-[120px]">
                           <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 min-h-[48px] w-full rounded-xl transition-all shadow-md hover:shadow-red-900/40 inline-flex items-center justify-center gap-2">
-                            <BookOpen size={16} aria-hidden="true" /> {done ? "Review" : "Lesson"}
+                            <BookOpen size={16} aria-hidden="true" /> {done ? "Review · Revoir" : "Lesson · Leçon"}
                           </button>
                         </Link>
                         <Link href={`${base}/quiz/${lesson.id}`} className="flex-1 min-w-[120px]">
                           <button className="bg-neutral-100 hover:bg-white text-black font-bold px-5 min-h-[48px] w-full rounded-xl transition-all shadow-md inline-flex items-center justify-center gap-2">
-                            <PenLine size={16} aria-hidden="true" /> Quiz
+                            <PenLine size={16} aria-hidden="true" /> Quiz · Test
                           </button>
                         </Link>
                       </>
                     ) : (
                       <>
                         <button disabled className="bg-surface-alt text-ink-soft px-5 min-h-[48px] rounded-xl font-medium cursor-not-allowed border border-line inline-flex items-center gap-2">
-                          <Lock size={14} aria-hidden="true" /> Locked
+                          <Lock size={14} aria-hidden="true" /> Locked · Verrouillée
                         </button>
                         {!unlockDate && lesson.id > 1 && progress.quizScores[lesson.id - 1] !== undefined && !progress.completedQuizzes.includes(lesson.id - 1) && (
                           <p className="text-sm text-ink-soft">
@@ -279,30 +279,30 @@ export default function LevelOverviewPage() {
           </div>
 
           <div className="bg-surface rounded-3xl shadow-2xl border border-line p-5 md:p-8 mt-10">
-            <h2 className="text-2xl font-bold text-center text-ink mb-6 flex items-center justify-center gap-2"><GraduationCap size={24} /> Level Completion</h2>
+            <h2 className="text-2xl font-bold text-center text-ink mb-6 flex items-center justify-center gap-2"><GraduationCap size={24} aria-hidden="true" /> Level Completion <span lang="fr" className="text-base font-semibold text-ink-soft">· Fin du niveau</span></h2>
 
             <div className="flex flex-col md:flex-row gap-4">
               {progressPct === 100 ? (
                 <Link href={`${base}/final-quiz`} className="w-full">
                   <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-6 min-h-[56px] rounded-2xl w-full font-bold transition-all shadow-lg hover:shadow-red-950/60 inline-flex items-center justify-center gap-2">
-                    <GraduationCap size={18} /> Final Quiz
+                    <GraduationCap size={18} aria-hidden="true" /> Final Quiz · Quiz final
                   </button>
                 </Link>
               ) : (
                 <button disabled className="bg-surface-alt text-ink-faint px-6 min-h-[56px] rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
-                  <Lock size={16} /> Complete 100% Course First
+                  <Lock size={16} aria-hidden="true" /> Complete 100% of the course first · Terminez d'abord tout le cours
                 </button>
               )}
 
               {progress.finalQuizPassed ? (
                 <Link href={`${base}/certificate`} className="w-full">
                   <button className="bg-amber-500 hover:bg-amber-600 text-black px-6 min-h-[56px] rounded-2xl w-full font-bold transition-all shadow-lg inline-flex items-center justify-center gap-2">
-                    <Trophy size={18} /> Request Certificate
+                    <Trophy size={18} aria-hidden="true" /> Request Certificate · Demander le certificat
                   </button>
                 </Link>
               ) : (
                 <button disabled className="bg-surface-alt text-ink-faint px-6 min-h-[56px] rounded-2xl w-full cursor-not-allowed font-bold border border-line inline-flex items-center justify-center gap-2">
-                  <Lock size={16} /> Pass Final Quiz First
+                  <Lock size={16} aria-hidden="true" /> Pass the Final Quiz first · Réussissez d'abord le quiz final
                 </button>
               )}
             </div>

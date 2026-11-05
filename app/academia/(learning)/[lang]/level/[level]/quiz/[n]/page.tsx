@@ -100,15 +100,15 @@ export default function QuizPage() {
 
   return (
     <div className="min-h-screen bg-surface-sunken text-ink selection:bg-red-600 selection:text-white">
-      <main className="p-6 md:p-10 pt-28 md:pt-28">
-        <div className="max-w-4xl mx-auto space-y-8">
+      <main className="p-4 md:p-10 pt-28 md:pt-28">
+        <div className="max-w-4xl mx-auto space-y-6 md:space-y-8">
           <div className="sticky top-24 z-30"><BackToLesson href={`${base}/lesson/${lessonId}`} langSlug={langSlug} /></div>
 
-          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
-            <span className="text-xs font-bold uppercase tracking-widest text-red-300 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
-              Assessment
+          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-5 md:p-8 shadow-2xl border border-red-900/40">
+            <span className="text-xs font-bold uppercase tracking-widest text-red-200 bg-red-950/80 px-3 py-1 rounded-full border border-red-800/40">
+              Assessment · Évaluation
             </span>
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50 mt-3">{quiz.title}</h1>
+            <h1 className="text-2xl md:text-5xl font-black tracking-tight text-red-50 mt-3">{quiz.title}</h1>
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{quiz.subtitle}</p>
           </div>
 
