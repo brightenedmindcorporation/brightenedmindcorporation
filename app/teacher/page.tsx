@@ -12,6 +12,7 @@ import { getOtherProgramLabel } from "@/content/programs";
 import { getJaasAppId, getLiveRoomName, isJitsiConfigured } from "@/lib/academy/liveRooms";
 import JitsiEmbed from "@/components/academy/JitsiEmbed";
 import StudentDossier from "@/components/academy/StudentDossier";
+import PasswordInput from "@/components/academy/PasswordInput";
 import ActivityTimeline, { ago, duration, type Timeline } from "@/components/academy/ActivityTimeline";
 import type { ProgressDoc } from "@/lib/academy/levelSummary";
 
@@ -65,9 +66,9 @@ async function api(url: string, init: RequestInit = {}) {
 }
 
 const input =
-  "w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60";
+  "w-full min-h-[44px] bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60";
 const primaryBtn =
-  "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition";
+  "glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-60 text-white text-base font-bold px-5 min-h-[48px] rounded-xl transition inline-flex items-center justify-center";
 
 type Tab = "news" | "live" | "students" | "placement" | "corrections" | "stats" | "messages";
 
@@ -83,6 +84,8 @@ export default function TeacherPage() {
   const [loginError, setLoginError] = useState<string | null>(null);
   const [loginInfo, setLoginInfo] = useState<string | null>(null);
   const [loggingIn, setLoggingIn] = useState(false);
+  // What is waiting for this teacher: written work to correct and placement tests to decide.
+  const [waiting, setWaiting] = useState<{ corrections: number; placement: number } | null>(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -105,6 +108,24 @@ export default function TeacherPage() {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (!teacher) return;
+    let alive = true;
+    Promise.all([
+      api("/api/admin/writing-reviews").catch(() => ({ reviews: [] })),
+      api("/api/admin/placement").catch(() => ({ tests: [] })),
+    ]).then(([w, p]) => {
+      if (!alive) return;
+      setWaiting({
+        corrections: (w.reviews || []).filter((r: any) => r.status === "pending").length,
+        placement: (p.tests || []).filter((t: any) => t.status === "submitted").length,
+      });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [teacher]);
 
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -151,18 +172,24 @@ export default function TeacherPage() {
   if (!teacher) {
     return (
       <main className="min-h-screen bg-page text-ink flex items-center justify-center px-6 pt-28 pb-10">
-        <form onSubmit={login} className="w-full max-w-md bg-surface border border-line rounded-3xl p-8 shadow-2xl space-y-4">
+        <form onSubmit={login} className="w-full max-w-md bg-surface border border-line rounded-3xl p-5 sm:p-8 shadow-2xl space-y-4">
           <h1 className="text-2xl font-bold text-center">Espace enseignant</h1>
-          <p className="text-sm text-ink-soft text-center">BM Academia — connectez-vous pour gérer vos cours.</p>
-          {authError && <p className="text-sm text-red-500">{authError}</p>}
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Votre e-mail" className={input} required />
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Mot de passe" className={input} required />
-          {loginError && <p className="text-sm text-red-500">{loginError}</p>}
-          {loginInfo && <p className="text-sm text-emerald-500">{loginInfo}</p>}
+          <p className="text-base text-ink-soft text-center">BM Academia — connectez-vous pour gérer vos cours.</p>
+          {authError && <p role="alert" className="field-error">{authError}</p>}
+          <div>
+            <label htmlFor="teacher-email" className="block text-sm font-semibold text-ink mb-1">Votre e-mail</label>
+            <input id="teacher-email" type="email" inputMode="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="prenom@exemple.com" className={input} required />
+          </div>
+          <div>
+            <label htmlFor="teacher-password" className="block text-sm font-semibold text-ink mb-1">Mot de passe</label>
+            <PasswordInput id="teacher-password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Votre mot de passe" className={input} required />
+          </div>
+          {loginError && <p role="alert" className="field-error">{loginError}</p>}
+          {loginInfo && <p role="status" className="text-sm font-semibold text-emerald-700 dark:text-emerald-300">{loginInfo}</p>}
           <button type="submit" disabled={loggingIn} className={`${primaryBtn} w-full`}>
-            {loggingIn ? "Connexion…" : "Se connecter"}
+            {loggingIn ? "Connexion en cours…" : "Se connecter"}
           </button>
-          <button type="button" onClick={forgot} className="w-full text-xs font-semibold text-ink-soft hover:text-ink">
+          <button type="button" onClick={forgot} className="w-full min-h-[44px] text-sm font-semibold text-ink-soft hover:text-ink underline">
             Mot de passe oublié ?
           </button>
         </form>
@@ -176,14 +203,14 @@ export default function TeacherPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-line pb-5 mb-6">
           <div>
             <h1 className="text-2xl font-black">Bonjour, {teacher.name}</h1>
-            <p className="text-xs text-ink-soft mt-1">
+            <p className="text-sm text-ink-soft mt-1">
               Vous enseignez :{" "}
               {teacher.assignments
                 .map((a) => `${label(a.langCode)} (${a.levels.length > 1 || availableLanguages.some((l) => l.code === a.langCode) ? "niv. " + a.levels.join(", ") : "cours"})`)
                 .join(" · ")}
             </p>
           </div>
-          <button onClick={() => signOut(auth)} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2">
+          <button onClick={() => signOut(auth)} className="min-h-[44px] text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4">
             Se déconnecter
           </button>
         </div>
@@ -193,24 +220,49 @@ export default function TeacherPage() {
             { id: "news", label: "Actualités" },
             { id: "live", label: "Mes cours en direct" },
             { id: "students", label: "Mes étudiants" },
-            { id: "corrections", label: "Corrections" },
-            { id: "placement", label: "Tests de niveau" },
+            { id: "corrections", label: "Corrections", badge: waiting?.corrections ?? 0 },
+            { id: "placement", label: "Tests de niveau", badge: waiting?.placement ?? 0 },
             { id: "stats", label: "Statistiques" },
             { id: "messages", label: "Messages" },
-          ] as { id: Tab; label: string }[];
+          ] as { id: Tab; label: string; badge?: number }[];
+          const todo = tabItems.filter((t) => (t.badge ?? 0) > 0);
           return (
             <>
+              {waiting && (
+                <div role="status" className={`mb-5 rounded-2xl border px-4 py-3 ${todo.length ? "border-amber-500/50 bg-amber-500/10" : "border-emerald-600/40 bg-emerald-500/10"}`}>
+                  {todo.length ? (
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold text-ink mr-1">À faire :</span>
+                      {todo.map((t) => (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setTab(t.id)}
+                          className="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-full border border-line bg-surface text-sm font-bold text-ink hover:border-red-600/60 transition"
+                        >
+                          {t.id === "corrections" ? "Corrections à faire" : "Tests de niveau à décider"}
+                          <span className="text-sm font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="font-bold text-ink">Rien à corriger ni à décider pour le moment. Merci !</p>
+                  )}
+                </div>
+              )}
               {/* A list on phones, a tab bar from tablet size up */}
               <div className="md:hidden mb-6">
-                <label className="block text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Section</label>
+                <label htmlFor="teacher-section" className="block text-sm font-bold text-ink-soft mb-1.5">Section</label>
                 <select
+                  id="teacher-section"
                   value={tab}
                   onChange={(e) => setTab(e.target.value as Tab)}
-                  className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-base font-bold text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full min-h-[48px] bg-surface border border-line rounded-xl px-4 py-3 text-base font-bold text-ink focus:outline-none focus:border-red-600/60"
                 >
                   {tabItems.map((t) => (
                     <option key={t.id} value={t.id}>
                       {t.label}
+                      {(t.badge ?? 0) > 0 ? ` (${t.badge})` : ""}
                     </option>
                   ))}
                 </select>
@@ -220,11 +272,15 @@ export default function TeacherPage() {
                   <button
                     key={t.id}
                     onClick={() => setTab(t.id)}
-                    className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px ${
-                      tab === t.id ? "border-red-600 text-red-500" : "border-transparent text-ink-soft hover:text-ink"
+                    aria-current={tab === t.id ? "page" : undefined}
+                    className={`px-4 min-h-[44px] text-sm font-bold transition border-b-2 -mb-px inline-flex items-center gap-1.5 ${
+                      tab === t.id ? "border-red-600 text-red-600 dark:text-red-300" : "border-transparent text-ink-soft hover:text-ink"
                     }`}
                   >
                     {t.label}
+                    {(t.badge ?? 0) > 0 && (
+                      <span className="text-sm font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
+                    )}
                   </button>
                 ))}
               </div>
@@ -394,7 +450,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
           <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Titre (optionnel)" className={input} />
         </div>
         <div>
-          <p className="text-xs font-semibold text-ink-soft mb-1.5">Qui peut entrer ?</p>
+          <p className="text-sm font-semibold text-ink-soft mb-1.5">Qui peut entrer ?</p>
           <LiveAudiencePicker candidates={candidatesFor(choice.split(":")[0])} value={audience} onChange={setAudience} />
         </div>
         <button onClick={create} disabled={saving || !when || !choice} className={primaryBtn}>
@@ -418,12 +474,12 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
                     {label(s.langCode)} — Niveau {s.level}
                     {s.title ? ` · ${s.title}` : ""}
                   </p>
-                  <p className="text-xs text-ink-soft mt-1">
+                  <p className="text-sm text-ink-soft mt-1">
                     {date.toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })} · {s.durationMinutes} min
                     {s.open && " · 🟢 Ouvert aux étudiants"}
                     {isPast && !s.open && " · Terminée"}
                   </p>
-                  <p className="text-xs text-ink-soft mt-1">
+                  <p className="text-sm text-ink-soft mt-1">
                     {audienceLabel((s as any).studentUids)}
                     <button
                       type="button"
@@ -484,7 +540,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
                 Salle en direct — {label(hosting.langCode)} — Niveau {hosting.level}
                 {hosting.title ? ` · ${hosting.title}` : ""}
               </p>
-              <p className="text-xs text-ink-soft mt-1">Vous êtes enseignant/modérateur : micro, caméra, partage d'écran, mise en sourdine des participants.</p>
+              <p className="text-sm text-ink-soft mt-1">Vous êtes enseignant/modérateur : micro, caméra, partage d'écran, mise en sourdine des participants.</p>
             </div>
             <button onClick={leave} className="bg-surface-alt text-ink-soft font-bold px-4 py-2 rounded-xl border border-line whitespace-nowrap">
               Quitter
@@ -494,7 +550,7 @@ function LiveTab({ teacher }: { teacher: TeacherProfile }) {
           <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border ${isOpen ? "border-emerald-600/40 bg-emerald-500/10" : "border-amber-600/40 bg-amber-500/10"}`}>
             <div>
               <p className="font-bold text-sm">{isOpen ? "Cours ouvert — les étudiants peuvent entrer" : "Cours fermé — les étudiants sont en salle d'attente"}</p>
-              <p className="text-xs text-ink-soft mt-0.5">
+              <p className="text-sm text-ink-soft mt-0.5">
                 {isOpen
                   ? "Les étudiants voient la vidéo, peuvent lever la main et écrire dans le chat. Clôturez à la fin du cours."
                   : "Préparez-vous, puis ouvrez le cours : l'accès démarre aussitôt chez les étudiants."}
@@ -589,7 +645,7 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
         <div className="overflow-x-auto border border-line rounded-2xl bg-surface">
           <table className="w-full text-sm">
             <thead>
-              <tr className="text-left text-xs text-ink-soft uppercase tracking-wide border-b border-line">
+              <tr className="text-left text-sm text-ink-soft uppercase tracking-wide border-b border-line">
                 <th className="p-3">Étudiant</th>
                 <th className="p-3">Cours</th>
                 <th className="p-3">Student ID</th>
@@ -603,17 +659,17 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                 <tr key={`${s.uid}_${s.langCode}`} className="border-b border-line/60 align-top">
                   <td className="p-3">
                     <p className="font-semibold">{s.name}</p>
-                    <p className="text-xs text-ink-faint">{s.email}</p>
+                    <p className="text-sm text-ink-faint">{s.email}</p>
                   </td>
                   <td className="p-3">{label(s.langCode)}</td>
-                  <td className="p-3 font-mono text-xs text-ink-soft">{s.studentId || "—"}</td>
+                  <td className="p-3 font-mono text-sm text-ink-soft">{s.studentId || "—"}</td>
                   <td className="p-3 space-y-1">
                     {teacher.assignments
                       .find((a) => a.langCode === s.langCode)
                       ?.levels.map((level) => {
                         const p = s.levels[level];
                         return (
-                          <p key={level} className="text-xs text-ink-soft">
+                          <p key={level} className="text-sm text-ink-soft">
                             <span className="font-semibold text-ink">Niv. {level} :</span>{" "}
                             {p ? `${p.completedLessons} leçon(s) étudiée(s) · ${p.completedQuizzes} quiz réussi(s)${p.finalQuizPassed ? ` · quiz final réussi (${p.finalQuizScore ?? "–"})` : ""}` : "pas encore commencé"}
                           </p>
@@ -622,18 +678,18 @@ function StudentsTab({ teacher }: { teacher: TeacherProfile }) {
                   </td>
                   <td className="p-3">
                     <p className={`text-sm font-semibold ${s.lastActiveAt && Date.now() - new Date(s.lastActiveAt).getTime() < 7 * 86_400_000 ? "text-emerald-500" : "text-amber-500"}`}>{ago(s.lastActiveAt)}</p>
-                    {!!s.activeSeconds && <p className="text-xs text-ink-faint">{duration(s.activeSeconds)} de travail</p>}
+                    {!!s.activeSeconds && <p className="text-sm text-ink-faint">{duration(s.activeSeconds)} de travail</p>}
                   </td>
                   <td className="p-3 space-y-1.5">
                     <button
                       onClick={() => setActivityOf(s)}
-                      className="block text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
+                      className="block text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
                     >
                       Activité
                     </button>
                     <button
                       onClick={() => setOpen(s)}
-                      className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
+                      className="text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
                     >
                       Ouvrir
                     </button>
@@ -715,7 +771,7 @@ function MessageComposer({
           <p className="font-bold">Destinataires</p>
           <button
             onClick={() => setSelected(selected.size === unique.length ? new Set() : new Set(unique.map(keyOf)))}
-            className="text-xs font-semibold text-red-500"
+            className="text-sm font-semibold text-red-500"
           >
             {selected.size === unique.length ? "Tout désélectionner" : "Tout sélectionner"}
           </button>
@@ -730,7 +786,7 @@ function MessageComposer({
               <label key={s.uid} className="flex items-center gap-3 py-2 cursor-pointer">
                 <input type="checkbox" checked={selected.has(s.uid)} onChange={() => toggle(s.uid)} />
                 <span className="text-sm">
-                  {s.name} <span className="text-xs text-ink-faint">· {s.email}</span>
+                  {s.name} <span className="text-sm text-ink-faint">· {s.email}</span>
                 </span>
               </label>
             ))}
@@ -742,18 +798,18 @@ function MessageComposer({
         <p className="font-bold">Message</p>
         <input value={subject} onChange={(e) => setSubject(e.target.value)} placeholder="Sujet" className={input} />
         <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={7} placeholder="Votre message…" className={input} />
-        <label className="inline-flex items-center gap-2 text-xs font-semibold text-ink-soft border border-line rounded-lg px-3 py-2 cursor-pointer bg-surface-alt">
+        <label className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft border border-line rounded-lg px-3 py-2 cursor-pointer bg-surface-alt">
           Joindre un fichier
           <input type="file" multiple className="hidden" onChange={(e) => setFiles((p) => [...p, ...Array.from(e.target.files || [])])} />
         </label>
-        {files.length > 0 && <p className="text-xs text-ink-soft">{files.map((f) => f.name).join(", ")}</p>}
+        {files.length > 0 && <p className="text-sm text-ink-soft">{files.map((f) => f.name).join(", ")}</p>}
         <div>
           <button onClick={send} disabled={sending || selected.size === 0 || !subject.trim() || !body.trim()} className={primaryBtn}>
             {sending ? "Envoi…" : `Envoyer à ${selected.size} étudiant(s)`}
           </button>
         </div>
         {notice && <p className="text-sm text-ink break-words">{notice}</p>}
-        <p className="text-xs text-ink-faint">Les étudiants reçoivent le message dans leur tableau de bord et par e-mail. Leurs réponses vous reviennent à votre adresse.</p>
+        <p className="text-sm text-ink-faint">Les étudiants reçoivent le message dans leur tableau de bord et par e-mail. Leurs réponses vous reviennent à votre adresse.</p>
       </div>
     </div>
   );
@@ -823,8 +879,8 @@ function NewsTab() {
               <span className="text-2xl shrink-0">{FEED_ICON[item.kind] ?? "•"}</span>
               <div className="min-w-0">
                 <p className="font-bold text-sm">{item.title}</p>
-                {item.detail && <p className="text-xs text-ink-soft mt-0.5 line-clamp-2">{item.detail}</p>}
-                <p className="text-xs text-ink-faint mt-1">{fmtDate(item.at)}</p>
+                {item.detail && <p className="text-sm text-ink-soft mt-0.5 line-clamp-2">{item.detail}</p>}
+                <p className="text-sm text-ink-faint mt-1">{fmtDate(item.at)}</p>
               </div>
             </div>
           ))}
@@ -900,14 +956,14 @@ function MessagesTab() {
               <div key={m.id} className="rounded-2xl border border-line bg-surface">
                 <button onClick={() => setOpenId(openId === m.id ? null : m.id)} className="w-full text-left p-4">
                   <p className="font-bold text-sm">{m.subject}</p>
-                  <p className="text-xs text-ink-soft mt-0.5">
+                  <p className="text-sm text-ink-soft mt-0.5">
                     {m.name} · {m.email} · {fmtDate(m.createdAt)}
                   </p>
                 </button>
                 {openId === m.id && (
                   <div className="px-4 pb-4 space-y-3 border-t border-line pt-3">
                     <p className="text-sm whitespace-pre-wrap">{m.message}</p>
-                    {m.attachmentNames?.length > 0 && <p className="text-xs text-ink-faint">Pièces jointes : {m.attachmentNames.join(", ")}</p>}
+                    {m.attachmentNames?.length > 0 && <p className="text-sm text-ink-faint">Pièces jointes : {m.attachmentNames.join(", ")}</p>}
                     <button
                       onClick={() => {
                         setReply({ uid: m.uid, subject: m.subject?.startsWith("Re:") ? m.subject : `Re: ${m.subject}` });
@@ -935,15 +991,15 @@ function MessagesTab() {
               <div key={m.id} className="rounded-2xl border border-line bg-surface">
                 <button onClick={() => setOpenId(openId === m.id ? null : m.id)} className="w-full text-left p-4">
                   <p className="font-bold text-sm">{m.subject}</p>
-                  <p className="text-xs text-ink-soft mt-0.5">
+                  <p className="text-sm text-ink-soft mt-0.5">
                     À {m.recipients.length} étudiant(s) · {fmtDate(m.createdAt)}
                   </p>
                 </button>
                 {openId === m.id && (
                   <div className="px-4 pb-4 space-y-2 border-t border-line pt-3">
                     <p className="text-sm whitespace-pre-wrap">{m.body}</p>
-                    <p className="text-xs text-ink-faint">Destinataires : {m.recipients.map((r: any) => r.email).join(", ")}</p>
-                    {m.attachmentNames?.length > 0 && <p className="text-xs text-ink-faint">Pièces jointes : {m.attachmentNames.join(", ")}</p>}
+                    <p className="text-sm text-ink-faint">Destinataires : {m.recipients.map((r: any) => r.email).join(", ")}</p>
+                    {m.attachmentNames?.length > 0 && <p className="text-sm text-ink-faint">Pièces jointes : {m.attachmentNames.join(", ")}</p>}
                   </div>
                 )}
               </div>

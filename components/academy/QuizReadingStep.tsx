@@ -337,8 +337,8 @@ export default function QuizReadingStep({
             </p>
           )}
 
-          {/* Way 3: no microphone at all */}
-          {!state.skipped && state.percent === null && !recording && rec !== "recording" && (
+          {/* Way 3: only when this browser can neither recognise speech nor record (Opera Mini): otherwise the student could never send the quiz */}
+          {!supported && !canRecord && !state.skipped && state.percent === null && (
             <button
               type="button"
               onClick={() => onChange({ transcript: "", percent: null, skipped: true })}
