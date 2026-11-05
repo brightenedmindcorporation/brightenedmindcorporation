@@ -6,8 +6,9 @@ import { auth } from "@/lib/firebase";
 import { availableLanguages } from "@/content/curriculum";
 
 interface Item {
-  kind: "dictation" | "reply" | "free";
+  kind: "dictation" | "reply" | "free" | "reading";
   prompt: string;
+  audioUrl?: string;
   expected?: string;
   text: string;
 }
@@ -28,7 +29,9 @@ interface Review {
   reviewedBy?: string;
 }
 
-const KIND_LABEL: Record<Item["kind"], string> = { dictation: "Dictée", reply: "Réponse personnelle", free: "Texte libre" };
+const KIND_LABEL: Record<Item["kind"], string> = { dictation: "Dictée", reply: "Réponse personnelle", free: "Texte libre", reading: "Lecture à voix haute (audio)" };
+// Cloudinary can serve the same recording as mp3, which every browser plays; the original is kept as a second source.
+const mp3 = (url: string) => url.replace(/\.[a-z0-9]+$/i, ".mp3");
 const date = (iso: string) => new Date(iso).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
 
 /** Written work of the quizzes, to correct: the texts, a corrected version and a comment for each, a mark. */
@@ -150,6 +153,22 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                         Phrase dictée : <span translate="no" className="notranslate text-ink-soft">{it.expected}</span>
                       </p>
                     )}
+                    {it.kind === "reading" && it.audioUrl ? (
+                      <div className="space-y-2">
+                        {it.expected && (
+                          <p className="text-xs text-ink-faint">
+                            Texte à lire : <span translate="no" className="notranslate text-ink-soft">{it.expected}</span>
+                          </p>
+                        )}
+                        <audio controls preload="none" className="w-full">
+                          <source src={mp3(it.audioUrl)} type="audio/mpeg" />
+                          <source src={it.audioUrl} />
+                        </audio>
+                        <a href={it.audioUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-red-600 underline">Ouvrir l&apos;enregistrement</a>
+                        <p className="text-xs text-ink-soft">Écoutez la lecture, puis tenez-en compte dans votre commentaire général ou dans la note de la lecture de l&apos;étudiant.</p>
+                      </div>
+                    ) : (
+                    <>
                     <p translate="no" className="notranslate whitespace-pre-wrap text-ink">{it.text}</p>
                     <div>
                       <label className="block text-xs font-semibold text-ink-soft mb-1">Version corrigée (modifiez le texte ci-dessous)</label>
@@ -172,6 +191,8 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                       placeholder="Commentaire (facultatif) : faute à retenir, règle, conseil…"
                       className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70"
                     />
+                    </>
+                    )}
                   </div>
                 ))}
 

@@ -107,7 +107,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
               <button
                 onClick={() => setMenuOpen((v) => !v)}
-                className="xl:hidden text-ink tap -mr-2 rounded-xl"
+                className="xl:hidden text-ink inline-flex items-center justify-center min-h-[44px] min-w-[44px] -mr-2 rounded-xl"
                 aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
                 aria-expanded={menuOpen}
                 aria-controls="menu-mobile"

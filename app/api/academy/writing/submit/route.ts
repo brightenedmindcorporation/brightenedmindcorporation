@@ -5,7 +5,7 @@ import { createNotification } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
-const KINDS = new Set(["dictation", "reply", "free"]);
+const KINDS = new Set(["dictation", "reply", "free", "reading"]);
 
 /**
  * The written part of a quiz goes to the teachers: the student hands in their texts with the quiz (first
@@ -34,6 +34,8 @@ export async function POST(request: Request) {
         prompt: String(i.prompt || "").slice(0, 400),
         ...(typeof i.expected === "string" ? { expected: i.expected.slice(0, 400) } : {}),
         text: i.text.trim().slice(0, 4000),
+        // A recording of the student reading aloud: only our own Cloudinary addresses are accepted.
+        ...(i.kind === "reading" && typeof i.audioUrl === "string" && i.audioUrl.startsWith("https://res.cloudinary.com/") ? { audioUrl: i.audioUrl.slice(0, 500) } : {}),
       }));
     if (items.length === 0) return NextResponse.json({ ok: true, skipped: "empty" });
 

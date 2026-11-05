@@ -64,12 +64,14 @@ export function writingMissing(w: QuizWriting, s: WritingState): string[] {
 
 /** What a teacher reads and corrects: every text the student wrote, with what it was an answer to. */
 export interface WritingItem {
-  kind: "dictation" | "reply" | "free";
+  kind: "dictation" | "reply" | "free" | "reading";
   /** The instruction or question the student answered. */
   prompt: string;
   /** For a dictation: the sentence that was dictated. */
   expected?: string;
   text: string;
+  /** For the reading item: the recording of the student's voice. */
+  audioUrl?: string;
 }
 
 export function writingItems(w: QuizWriting, s: WritingState): WritingItem[] {

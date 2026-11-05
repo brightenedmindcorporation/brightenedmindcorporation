@@ -227,7 +227,16 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
       dialoguePassed: !useDialogue || dScore >= dialoguePassNeeded,
       passed: passedNow,
       writing: useWriting ? writingSummary(useWriting, writingState) : "",
-      writingItems: useWriting ? writingItems(useWriting, writingState) : undefined,
+      // The written texts, plus the recording of the student reading aloud when there is one (the administration listens to it).
+      writingItems: (() => {
+        const list: WritingItem[] = [
+          ...(useWriting ? writingItems(useWriting, writingState) : []),
+          ...(useReading && readingState.audioUrl
+            ? [{ kind: "reading" as const, prompt: "Lecture à voix haute", expected: useReading.text, text: "Lecture enregistrée en audio", audioUrl: readingState.audioUrl }]
+            : []),
+        ];
+        return list.length ? list : undefined;
+      })(),
       record,
     });
   };

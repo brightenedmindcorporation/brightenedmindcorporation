@@ -88,7 +88,7 @@ export async function submitWritingForReview(opts: {
   langCode: string;
   level: number;
   key: number | "final";
-  items: { kind: string; prompt: string; expected?: string; text: string }[];
+  items: { kind: string; prompt: string; expected?: string; text: string; audioUrl?: string }[];
 }) {
   try {
     const user =

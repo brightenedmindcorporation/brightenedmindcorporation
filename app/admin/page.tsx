@@ -1976,10 +1976,10 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
       <main className="min-h-screen flex items-center justify-center bg-page px-4 py-24">
         <div className="bg-surface-sunken border border-line p-8 shadow-xl shadow-black/40 rounded-2xl w-full max-w-md text-ink">
           <h1 className="text-2xl font-bold text-center mb-1">Connexion Administrateur</h1>
-          <p className="text-sm text-ink-faint text-center mb-6">Accès réservé à l'administration BM Corporation</p>
+          <p className="text-sm text-ink-soft text-center mb-6">Accès réservé à l'administration BM Corporation</p>
 
           {loginError && (
-            <div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded-lg">
+            <div role="alert" className="mb-4 p-3 bg-red-50 dark:bg-red-950 border border-red-300 dark:border-red-800 text-red-900 dark:text-red-200 text-sm rounded-lg">
               {loginError}
             </div>
           )}
@@ -2011,9 +2011,9 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             <button
               type="submit"
               disabled={loginLoading}
-              className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
+              className="w-full min-h-[52px] glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-3 rounded-lg font-bold transition disabled:opacity-60"
             >
-              {loginLoading ? "Connexion..." : "Se connecter"}
+              {loginLoading ? "Connexion en cours…" : "Se connecter"}
             </button>
           </form>
         </div>
@@ -2023,27 +2023,27 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
   return (
     <main className="px-4 sm:px-6 md:px-10 pt-36 md:pt-36 pb-10 min-h-screen bg-surface-sunken text-ink font-sans overflow-x-hidden [overflow-wrap:anywhere]">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between gap-3 mb-6 flex-wrap bg-surface border border-line rounded-2xl px-4 py-3">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink">Admin Panel</h1>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-ink">Administration</h1>
           <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
             <NotificationBell scope="admin" />
             <button
               onClick={() => refreshTab(tab)}
-              className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-3 sm:px-4 py-2 rounded-xl transition-all duration-200 bg-surface whitespace-nowrap"
+              className="flex items-center gap-2 min-h-[44px] text-sm font-semibold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-3 sm:px-4 rounded-xl transition-all duration-200 bg-surface whitespace-nowrap"
             >
               <RefreshCw size={15} /> Actualiser
             </button>
             <button
               onClick={handleAdminLogout}
-              className="flex items-center gap-2 text-sm font-semibold text-white bg-red-700 hover:bg-red-600 border border-red-700 px-3 sm:px-4 py-2 rounded-xl transition-all duration-200 whitespace-nowrap"
+              className="flex items-center gap-2 min-h-[44px] text-sm font-semibold text-white bg-red-700 hover:bg-red-600 border border-red-700 px-3 sm:px-4 rounded-xl transition-all duration-200 whitespace-nowrap"
             >
               <LogOut size={15} /> Déconnexion
             </button>
           </div>
         </div>
 
-        {/* TABS: a list on phones (17 tabs would fill the screen), a tab bar from tablet size up */}
+        {/* NAVIGATION: five groups, each with its own tabs (21 flat tabs were hard to scan). On phones: one list grouped by theme. */}
         {(() => {
           const tabItems = [
             { id: "students", label: "Étudiants", badge: stats.pending },
@@ -2067,41 +2067,111 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             ...(TRACKING_ENABLED ? [{ id: "shipments" as const, label: "Suivi colis", badge: 0 }, { id: "trucks" as const, label: "Camions (carte)", badge: 0 }] : []),
             { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[];
+          const byId = new Map(tabItems.map((t) => [t.id, t]));
+          // The groups, in the order a day of work goes: people first, then money and requests, then messages, then follow-up, then tools.
+          const groups: { label: string; ids: Tab[] }[] = [
+            { label: "Étudiants et cours", ids: ["students", "placement", "live", "progress", "certificates", "corrections", "teachers"] },
+            { label: "Demandes et argent", ids: ["payments", "devis", "projects", "applications", "requests", "domestica"] },
+            { label: "Communication", ids: ["mail", "announcements"] },
+            { label: "Suivi du site", ids: ["activity", "visits", "stats"] },
+            { label: "Outils", ids: ["backups", "shipments", "trucks"] },
+          ].map((g) => ({ label: g.label, ids: g.ids as Tab[] }));
+          const groupTabs = groups.map((g) => ({ label: g.label, tabs: g.ids.map((id) => byId.get(id)).filter(Boolean) as { id: Tab; label: string; badge: number }[] })).filter((g) => g.tabs.length > 0);
+          const current = groupTabs.find((g) => g.tabs.some((t) => t.id === tab)) ?? groupTabs[0];
+          // What needs the administration's attention right now (the numbers already loaded).
+          const todo = tabItems.filter((t) => t.badge > 0);
+          const todoTotal = todo.reduce((sum, t) => sum + t.badge, 0);
           return (
             <>
+              <div
+                role="status"
+                className={`mb-5 rounded-2xl border px-4 py-3 ${todoTotal > 0 ? "border-amber-500/50 bg-amber-500/10" : "border-emerald-600/40 bg-emerald-500/10"}`}
+              >
+                {todoTotal > 0 ? (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="font-bold text-ink mr-1">À traiter ({todoTotal}) :</span>
+                    {todo.map((t) => (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => setTab(t.id)}
+                        className="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-full border border-line bg-surface text-sm font-bold text-ink hover:border-red-600/60 transition"
+                      >
+                        {t.label}
+                        <span className="text-xs font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="font-bold text-ink">Rien d&apos;urgent à traiter pour le moment.</p>
+                )}
+              </div>
+
+              {/* Phones: one list, grouped */}
               <div className="md:hidden mb-6">
-                <label className="block text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Section</label>
+                <label htmlFor="admin-section" className="block text-sm font-bold text-ink-soft mb-1.5">Section</label>
                 <select
+                  id="admin-section"
                   value={tab}
                   onChange={(e) => setTab(e.target.value as Tab)}
-                  className="w-full bg-surface border border-line rounded-xl px-4 py-3 text-base font-bold text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full min-h-[48px] bg-surface border border-line rounded-xl px-4 py-3 text-base font-bold text-ink focus:outline-none focus:border-red-600/60"
                 >
-                  {tabItems.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.label}
-                      {t.badge > 0 ? ` (${t.badge})` : ""}
-                    </option>
+                  {groupTabs.map((g) => (
+                    <optgroup key={g.label} label={g.label}>
+                      {g.tabs.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.label}
+                          {t.badge > 0 ? ` (${t.badge})` : ""}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </div>
-              <div className="hidden md:flex gap-2 mb-8 border-b border-line flex-wrap">
-                {tabItems.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => setTab(t.id)}
-                    className={`px-4 py-2.5 text-sm font-bold transition border-b-2 -mb-px inline-flex items-center gap-1.5 ${
-                      tab === t.id ? "border-red-600 text-red-500" : "border-transparent text-ink-soft hover:text-ink"
-                    }`}
-                  >
-                    {t.label}
-                    {t.badge > 0 && (
-                      <span className="text-[10px] font-black bg-red-600 text-white rounded-full min-w-[18px] h-[18px] px-1 inline-flex items-center justify-center">
-                        {t.badge}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
+
+              {/* Tablets and computers: the five groups, then the tabs of the open group */}
+              <nav aria-label="Sections de l'administration" className="hidden md:block mb-8">
+                <div className="flex flex-wrap gap-2">
+                  {groupTabs.map((g) => {
+                    const total = g.tabs.reduce((sum, t) => sum + t.badge, 0);
+                    const active = g === current;
+                    return (
+                      <button
+                        key={g.label}
+                        type="button"
+                        aria-current={active ? "true" : undefined}
+                        onClick={() => setTab((g.tabs.find((t) => t.badge > 0) ?? g.tabs[0]).id)}
+                        className={`inline-flex items-center gap-2 min-h-[44px] px-4 rounded-xl border text-sm font-bold transition ${
+                          active ? "bg-red-700 border-red-700 text-white" : "bg-surface border-line text-ink-soft hover:text-ink hover:border-red-600/50"
+                        }`}
+                      >
+                        {g.label}
+                        {total > 0 && (
+                          <span className={`text-xs font-black rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center ${active ? "bg-white text-red-700" : "bg-red-600 text-white"}`}>{total}</span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+                <div className="mt-3 flex flex-wrap gap-1 border-b border-line">
+                  {current.tabs.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      aria-current={tab === t.id ? "page" : undefined}
+                      onClick={() => setTab(t.id)}
+                      className={`px-4 min-h-[44px] text-sm font-bold transition border-b-2 -mb-px inline-flex items-center gap-1.5 ${
+                        tab === t.id ? "border-red-600 text-red-600 dark:text-red-300" : "border-transparent text-ink-soft hover:text-ink"
+                      }`}
+                    >
+                      {t.label}
+                      {t.badge > 0 && (
+                        <span className="text-xs font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </nav>
             </>
           );
         })()}

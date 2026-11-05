@@ -61,7 +61,7 @@ interface WrittenReview {
   langCode: string;
   level: number;
   quizTitle: string;
-  items: { kind: "dictation" | "reply" | "free"; prompt: string; expected?: string; text: string }[];
+  items: { kind: "dictation" | "reply" | "free" | "reading"; prompt: string; expected?: string; text: string; audioUrl?: string }[];
   status: "pending" | "reviewed";
   submittedAt: string;
   feedback?: { corrected: string; comment: string }[];
@@ -70,7 +70,7 @@ interface WrittenReview {
   reviewedBy?: string;
 }
 
-const WRITTEN_KIND = { dictation: "Dictée", reply: "Réponse personnelle", free: "Texte libre" } as const;
+const WRITTEN_KIND = { dictation: "Dictée", reply: "Réponse personnelle", free: "Texte libre", reading: "Lecture à voix haute" } as const;
 
 /** The student's written work and its corrections, in their own file: what they wrote, the corrected version, the comments, the mark. */
 function StudentCorrections({ student }: { student: { name: string; email?: string; langCode: string } }) {
@@ -146,7 +146,14 @@ function StudentCorrections({ student }: { student: { name: string; email?: stri
                       Phrase dictée : <span translate="no" className="notranslate text-ink-soft">{it.expected}</span>
                     </p>
                   )}
-                  <p translate="no" className="notranslate whitespace-pre-wrap text-ink">{it.text}</p>
+                  {it.kind === "reading" && it.audioUrl ? (
+                    <audio controls preload="none" className="w-full">
+                      <source src={it.audioUrl.replace(/\.[a-z0-9]+$/i, ".mp3")} type="audio/mpeg" />
+                      <source src={it.audioUrl} />
+                    </audio>
+                  ) : (
+                    <p translate="no" className="notranslate whitespace-pre-wrap text-ink">{it.text}</p>
+                  )}
                   {fb?.corrected && (
                     <p className="text-emerald-600">
                       <span className="text-xs font-bold">Corrigé : </span>
