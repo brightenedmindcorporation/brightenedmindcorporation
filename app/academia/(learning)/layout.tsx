@@ -3,7 +3,7 @@ import FloatingTools from "@/components/academy/FloatingTools";
 import AssistantWidget from "@/components/academy/AssistantWidget";
 
 export const metadata: Metadata = {
-  title: "Brightened Mind Academia — Cours de langues en ligne",
+  title: { absolute: "Brightened Mind Academia — Cours de langues en ligne" },
   description:
     "Apprenez l'anglais, le français, le swahili, l'espagnol, le portugais ou le chinois avec Brightened Mind Academia. Cours en ligne pour particuliers et entreprises, du niveau débutant au niveau professionnel. Inscrivez-vous dès aujourd'hui.",
 };

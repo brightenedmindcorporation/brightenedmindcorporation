@@ -16,8 +16,12 @@ const fraunces = Fraunces({
   display: "swap",
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://bmcorporation-cd.com";
+
 export const metadata: Metadata = {
-  title: "Brightened Mind Corporation",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "Brightened Mind Corporation", template: "%s | Brightened Mind" },
+  alternates: { canonical: "./" },
   description:
     "Construire, développer et transformer grâce à la communication, aux services et à l’éducation.",
 
@@ -52,7 +56,9 @@ export const metadata: Metadata = {
       "Construire, développer et transformer grâce à la communication, aux services et à l’éducation.",
     siteName: "Brightened Mind Corporation",
     type: "website",
+    locale: "fr_FR",
   },
+  twitter: { card: "summary_large_image" },
 };
 
 export const viewport: Viewport = {
@@ -79,6 +85,28 @@ const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var
 // no-op for them either way — only mobile desktop-site requests are
 // affected. A genuine phone in its normal (non-desktop-site) mode keeps
 // "Mobile"/"iPhone"/"iPod" in its UA and is left alone.
+// Structured data: tells Google who the company is (name, logo, phone, e-mail, town).
+const structuredData = JSON.stringify({
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": SITE_URL + "/#organization",
+      name: "Brightened Mind Corporation",
+      alternateName: "BM Corporation",
+      url: SITE_URL,
+      logo: SITE_URL + "/logo-bm.png",
+      description: "Brightened Mind Corporation : BM Academia (formations en ligne), BM Communication et BM Domestica, à Lubumbashi, en République démocratique du Congo.",
+      email: "info@bmcorporation-cd.com",
+      telephone: "+243988830799",
+      address: { "@type": "PostalAddress", addressLocality: "Lubumbashi", addressCountry: "CD" },
+      areaServed: "CD",
+      contactPoint: [{ "@type": "ContactPoint", contactType: "customer support", telephone: "+243988830799", email: "info@bmcorporation-cd.com", availableLanguage: ["fr", "en", "sw"] }],
+    },
+    { "@type": "WebSite", "@id": SITE_URL + "/#website", url: SITE_URL, name: "Brightened Mind Corporation", inLanguage: "fr", publisher: { "@id": SITE_URL + "/#organization" } },
+  ],
+});
+
 // Android/Chrome fires its install event once, early; kept here so the install buttons can use it whenever they appear.
 const installCaptureScript = `(function(){window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bmInstall=e;window.dispatchEvent(new Event('bm-install-ready'));});})();`;
 const desktopSiteFixScript = `(function(){try{var ua=navigator.userAgent||"";var looksMobile=/Mobi|iPhone|iPod/i.test(ua);var hasTouch=('ontouchstart' in window)||(navigator.maxTouchPoints>0);if(!looksMobile&&hasTouch){var m=document.querySelector('meta[name="viewport"]');if(m)m.setAttribute('content','width=1280');}}catch(e){}})();`;
@@ -94,6 +122,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script dangerouslySetInnerHTML={{ __html: desktopSiteFixScript }} />
         <script dangerouslySetInnerHTML={{ __html: installCaptureScript }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: structuredData }} />
       </head>
       <body className="bg-page text-ink font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
         <ClientLayout>{children}</ClientLayout>
