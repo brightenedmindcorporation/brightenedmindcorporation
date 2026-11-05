@@ -79,6 +79,8 @@ const themeInitScript = `(function(){try{var s=localStorage.getItem('theme');var
 // no-op for them either way — only mobile desktop-site requests are
 // affected. A genuine phone in its normal (non-desktop-site) mode keeps
 // "Mobile"/"iPhone"/"iPod" in its UA and is left alone.
+// Android/Chrome fires its install event once, early; kept here so the install buttons can use it whenever they appear.
+const installCaptureScript = `(function(){window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__bmInstall=e;window.dispatchEvent(new Event('bm-install-ready'));});})();`;
 const desktopSiteFixScript = `(function(){try{var ua=navigator.userAgent||"";var looksMobile=/Mobi|iPhone|iPod/i.test(ua);var hasTouch=('ontouchstart' in window)||(navigator.maxTouchPoints>0);if(!looksMobile&&hasTouch){var m=document.querySelector('meta[name="viewport"]');if(m)m.setAttribute('content','width=1280');}}catch(e){}})();`;
 
 export default function RootLayout({
@@ -91,6 +93,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <script dangerouslySetInnerHTML={{ __html: desktopSiteFixScript }} />
+        <script dangerouslySetInnerHTML={{ __html: installCaptureScript }} />
       </head>
       <body className="bg-page text-ink font-sans antialiased min-h-screen flex flex-col selection:bg-red-600 selection:text-white">
         <ClientLayout>{children}</ClientLayout>

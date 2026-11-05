@@ -33,10 +33,17 @@ export default function InstallApp() {
       setPrompt(e as InstallPromptEvent);
       setHidden(false);
     };
+    const onKept = () => {
+      setPrompt((window as any).__bmInstall as InstallPromptEvent);
+      setHidden(false);
+    };
+    if ((window as any).__bmInstall) onKept();
+    window.addEventListener("bm-install-ready", onKept);
     const onInstalled = () => setHidden(true);
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
     return () => {
+      window.removeEventListener("bm-install-ready", onKept);
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };

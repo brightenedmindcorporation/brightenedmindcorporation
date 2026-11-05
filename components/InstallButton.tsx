@@ -17,18 +17,25 @@ export default function InstallButton({ className = "", label = "Télécharger l
   const [installed, setInstalled] = useState(false);
   const [help, setHelp] = useState(false);
   const [ios, setIos] = useState(false);
+  const [inApp, setInApp] = useState(false);
 
   useEffect(() => {
     setInstalled(window.matchMedia("(display-mode: standalone)").matches || (navigator as any).standalone === true);
     setIos(/iphone|ipad|ipod/i.test(navigator.userAgent));
+    // WhatsApp, Facebook, Instagram, TikTok… open links in their own browser, which cannot install apps.
+    setInApp(/FBAN|FBAV|FB_IAB|Instagram|WhatsApp|musical_ly|TikTok|Line\/|; wv\)/i.test(navigator.userAgent));
+    if ((window as any).__bmInstall) setPrompt((window as any).__bmInstall as InstallPromptEvent);
     const onPrompt = (e: Event) => {
       e.preventDefault();
       setPrompt(e as InstallPromptEvent);
     };
+    const onKept = () => setPrompt((window as any).__bmInstall as InstallPromptEvent);
+    window.addEventListener("bm-install-ready", onKept);
     const onInstalled = () => setInstalled(true);
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
     return () => {
+      window.removeEventListener("bm-install-ready", onKept);
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };
@@ -42,6 +49,7 @@ export default function InstallButton({ className = "", label = "Télécharger l
     const choice = await prompt.userChoice;
     if (choice.outcome === "accepted") setInstalled(true);
     setPrompt(null);
+    (window as any).__bmInstall = null;
   };
 
   return (
@@ -65,6 +73,12 @@ export default function InstallButton({ className = "", label = "Télécharger l
                   Touchez <Share size={14} className="mx-0.5 inline align-text-bottom" /> (Partager) en bas de Safari.
                 </li>
                 <li>Choisissez « Sur l&apos;écran d&apos;accueil », puis « Ajouter ».</li>
+              </ol>
+            ) : inApp ? (
+              <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-ink-soft">
+                <li>Vous êtes dans le navigateur d&apos;une autre application (WhatsApp, Facebook…) : il ne peut pas installer BM.</li>
+                <li>Touchez le menu ⋮ puis « Ouvrir dans Chrome » (ou « Ouvrir dans le navigateur »).</li>
+                <li>Dans Chrome, touchez ⋮ puis « Installer l&apos;application ».</li>
               </ol>
             ) : (
               <ol className="mt-4 list-decimal space-y-2 pl-5 text-sm text-ink-soft">
