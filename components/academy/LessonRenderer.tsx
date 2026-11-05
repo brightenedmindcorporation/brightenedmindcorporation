@@ -2,7 +2,7 @@
 
 import type { Lesson } from "@/content/curriculum/types";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2, Target } from "lucide-react";
+import { Volume2, BookOpen, FileText, Mic, MessageSquare, PlayCircle, Download, CheckCircle2, Target, PenLine } from "lucide-react";
 import { isOfficeProgram } from "@/content/curriculum";
 import { extractSpeechText, isSpokenText, lessonNarrations } from "@/lib/academy/audioClips";
 import OfficeFigure from "@/components/academy/OfficeFigure";
@@ -15,6 +15,7 @@ import { frenchFor, hasFrenchTranslations } from "@/content/translations";
 import { useFrenchVisible } from "@/lib/academy/frenchHelp";
 import Zh from "@/components/academy/Zh";
 import PinyinToggle from "@/components/academy/PinyinToggle";
+import StepBar from "@/components/StepBar";
 import { playClipUrl } from "@/lib/academy/lessonAudioPlayer";
 import { hasVoiceFor, speakPhrase as speak, speakWithDeviceVoice, stopSpeaking } from "@/lib/academy/deviceSpeech";
 
@@ -228,8 +229,22 @@ function OfflineAudioButton({ lesson, langSlug }: { lesson: Lesson; langSlug: st
   );
 }
 
-export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson: Lesson; langSlug: string; statsKey?: string }) {
+const STEP_LABELS = ["La leçon", "La vidéo", "La lecture", "Les exercices", "L'écriture", "À l'oral"];
+
+/**
+ * stepMode: one thing at a time. The lesson is shown in six short steps (lesson, video, reading, exercises, writing,
+ * speaking) with a progress bar and "Précédent / Suivant"; the last step ends with the button that opens the quiz.
+ * The same blocks are kept mounted (only hidden) so nothing a student typed is lost when they move between steps.
+ */
+export default function LessonRenderer({ lesson, langSlug, statsKey, stepMode = false, quizHref }: { lesson: Lesson; langSlug: string; statsKey?: string; stepMode?: boolean; quizHref?: string }) {
   const narration = useMemo(() => lessonNarrations(langSlug, lesson), [langSlug, lesson]);
+  const [step, setStep] = useState(0);
+  const go = (n: number) => {
+    setStep(Math.max(0, Math.min(STEP_LABELS.length - 1, n)));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  // Outside step mode every block is visible; in step mode only the current one.
+  const show = (k: number) => (!stepMode || step === k ? "" : "hidden");
 
   // Office course (Windows, Word, Excel, PowerPoint): text, optional video and practical work, no audio.
   if (isOfficeProgram(langSlug)) {
@@ -291,6 +306,8 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
         <FrenchToggle langSlug={langSlug} />
         {langSlug === "chinese" && <PinyinToggle />}
       </div>
+      {stepMode && <StepBar step={step + 1} labels={STEP_LABELS} />}
+      <div className={show(0)}>
       <Card>
         <CardTitle icon={BookOpen}>Lesson</CardTitle>
         <div className="text-ink-soft mt-4 space-y-4">
@@ -317,9 +334,12 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
         />
         <OfflineAudioButton lesson={lesson} langSlug={langSlug} />
       </Card>
+      </div>
 
-      <VideoCard lesson={lesson} statsKey={statsKey} />
+      {/* The video is only mounted on its own step so it never keeps playing behind another one. */}
+      {(!stepMode || step === 1) && <VideoCard lesson={lesson} statsKey={statsKey} />}
 
+      <div className={show(2)}>
       <Card>
         <CardTitle icon={FileText}>Reading Text</CardTitle>
         <div className="text-ink-soft mt-4 space-y-3">
@@ -339,7 +359,9 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
           onFallbackStop={stopSpeaking}
         />
       </Card>
+      </div>
 
+      <div className={show(3)}>
       <Card>
         <CardTitle icon={Mic}>Exercises</CardTitle>
         <p className="text-ink-soft mt-4">Complete the sentences:</p>
@@ -352,9 +374,13 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
           ))}
         </ul>
       </Card>
+      </div>
 
-      <WritingLab lesson={lesson} langSlug={langSlug} />
+      <div className={show(4)}>
+        <WritingLab lesson={lesson} langSlug={langSlug} />
+      </div>
 
+      <div className={show(5)}>
       <Card>
         <CardTitle icon={MessageSquare}>Speaking Topic</CardTitle>
         <p className="text-ink-soft mt-4">
@@ -362,6 +388,35 @@ export default function LessonRenderer({ lesson, langSlug, statsKey }: { lesson:
           <Fr langSlug={langSlug} text={lesson.speakingTopic} />
         </p>
       </Card>
+      </div>
+
+      {stepMode && (
+        <nav aria-label="Étapes de la leçon" className="flex items-center gap-3 pt-2">
+          {step > 0 && (
+            <button type="button" onClick={() => go(step - 1)} className="min-h-[56px] px-6 rounded-2xl border border-line bg-surface text-ink font-bold hover:border-red-600/60 transition">
+              ← Précédent
+            </button>
+          )}
+          {step < STEP_LABELS.length - 1 ? (
+            <button
+              type="button"
+              onClick={() => go(step + 1)}
+              className="flex-1 min-h-[56px] px-6 rounded-2xl glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg transition"
+            >
+              Suivant : {STEP_LABELS[step + 1].toLowerCase()} →
+            </button>
+          ) : (
+            quizHref && (
+              <a
+                href={quizHref}
+                className="flex-1 min-h-[56px] px-6 rounded-2xl glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg transition inline-flex items-center justify-center gap-2"
+              >
+                <PenLine size={18} aria-hidden="true" /> Passer au quiz
+              </a>
+            )
+          )}
+        </nav>
+      )}
     </div>
   );
 }

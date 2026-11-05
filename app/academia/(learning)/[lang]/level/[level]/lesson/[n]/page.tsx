@@ -17,6 +17,9 @@ import { getLevelProgress, isLessonUnlocked, markLessonStudied } from "@/lib/aca
 import { pullProgress, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 
+// Lessons shown one step at a time while the format is being tested (key: language-level-lesson).
+const STEP_LESSONS = new Set(["english-1-1"]);
+
 export default function LessonPage() {
   const [showFr] = useFrenchVisible();
   const router = useRouter();
@@ -26,6 +29,9 @@ export default function LessonPage() {
   const lessonId = Number(params.n);
   const base = `/academia/${langSlug}/level/${level}`;
 
+  // Step-by-step view: on for the test lessons, and every student can switch to the whole lesson at once.
+  const stepEligible = STEP_LESSONS.has(`${langSlug}-${level}-${lessonId}`);
+  const [stepMode, setStepMode] = useState(true);
   const [checked, setChecked] = useState(false);
   const [unlocked, setUnlocked] = useState(false);
 
@@ -108,8 +114,8 @@ export default function LessonPage() {
         <div className="max-w-5xl mx-auto space-y-8">
           <div className="sticky top-24 z-30"><BackToLevel href={base} langSlug={langSlug} /></div>
 
-          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-8 shadow-2xl border border-red-900/40">
-            <h1 className="text-3xl md:text-5xl font-black tracking-tight text-red-50">
+          <div className="bg-gradient-to-r from-red-950 via-red-900 to-black text-white rounded-3xl p-5 md:p-8 shadow-2xl border border-red-900/40">
+            <h1 className="text-2xl md:text-5xl font-black tracking-tight text-red-50">
               {isOfficeProgram(langSlug) ? "Leçon" : "Lesson"} {lesson.id}{isOfficeProgram(langSlug) ? " :" : ":"} {lesson.title}
             </h1>
             <p className="text-red-200/80 mt-2 text-sm md:text-base">{lesson.subtitle}</p>
@@ -121,9 +127,27 @@ export default function LessonPage() {
             )}
           </div>
 
-          <LessonRenderer lesson={lesson} langSlug={langSlug} statsKey={curriculum ? `${curriculum.langCode}-${level}-${lessonId}` : undefined} />
+          {stepEligible && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setStepMode((v) => !v)}
+                className="min-h-[44px] px-4 rounded-xl border border-line bg-surface text-sm font-bold text-ink-soft hover:text-ink hover:border-red-600/60 transition"
+              >
+                {stepMode ? "Voir toute la leçon d'un coup" : "Revenir au pas à pas"}
+              </button>
+            </div>
+          )}
 
-          <div className="text-center pt-4 pb-10">
+          <LessonRenderer
+            lesson={lesson}
+            langSlug={langSlug}
+            statsKey={curriculum ? `${curriculum.langCode}-${level}-${lessonId}` : undefined}
+            stepMode={stepEligible && stepMode}
+            quizHref={`${base}/quiz/${lesson.id}`}
+          />
+
+          <div className={`text-center pt-4 pb-10 ${stepEligible && stepMode ? "hidden" : ""}`}>
             <Link href={`${base}/quiz/${lesson.id}`}>
               <button className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold text-lg px-10 py-4 rounded-2xl transition shadow-xl shadow-red-950/60 inline-flex items-center gap-2">
                 <PenLine size={18} /> Take Quiz
