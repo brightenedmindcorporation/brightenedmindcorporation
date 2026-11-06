@@ -123,3 +123,18 @@ export class VideoMeter {
     this.pending = 0;
   }
 }
+
+/** The steps of the registration, counted anonymously (how many people reach each step). */
+export type FunnelStep = "register_1" | "register_2" | "register_3" | "register_done";
+
+export function trackFunnel(step: FunnelStep) {
+  try {
+    const vid = visitorId();
+    if (!vid) return;
+    const payload = JSON.stringify({ step, vid });
+    if (navigator.sendBeacon) navigator.sendBeacon("/api/track/funnel", new Blob([payload], { type: "application/json" }));
+    else fetch("/api/track/funnel", { method: "POST", body: payload, headers: { "Content-Type": "application/json" }, keepalive: true }).catch(() => {});
+  } catch {
+    // never break the page for statistics
+  }
+}

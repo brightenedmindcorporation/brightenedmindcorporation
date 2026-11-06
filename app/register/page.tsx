@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -9,6 +9,7 @@ import { availableLanguages, findProgramByCode, programLevels } from "@/content/
 import { otherPrograms, isOtherProgramCode, getOtherProgramLabel } from "@/content/programs";
 import PasswordInput from "@/components/academy/PasswordInput";
 import StepBar from "@/components/StepBar";
+import { trackFunnel } from "@/lib/trackEvent";
 
 export default function RegisterPage() {
   return (
@@ -52,6 +53,14 @@ function RegisterForm() {
   const hasLevels = Boolean(findProgramByCode(programCode));
   // A course with one level only (BM Domestica training): no level to choose and no placement test.
   const singleLevel = hasLevels && programLevels(findProgramByCode(programCode)!.slug).length === 1;
+
+  // Anonymous count of how many people reach each step (shown to the administration in the visits tab).
+  useEffect(() => {
+    trackFunnel(`register_${step}` as "register_1" | "register_2" | "register_3");
+  }, [step]);
+  useEffect(() => {
+    if (done) trackFunnel("register_done");
+  }, [done]);
 
   const clearField = (key: string) => setFieldErrors((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
 

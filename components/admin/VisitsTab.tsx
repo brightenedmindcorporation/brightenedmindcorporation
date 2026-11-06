@@ -37,6 +37,68 @@ async function load(days: number): Promise<Stats> {
   return result;
 }
 
+/** How many visitors reach each step of the registration form, and where they leave. */
+function FunnelCard({ days }: { days: number }) {
+  const [steps, setSteps] = useState<Record<string, number> | null>(null);
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        const response = await fetch(`/api/admin/funnel?days=${days}`, { headers: { Authorization: `Bearer ${idToken}` } });
+        const result = await response.json();
+        if (alive && response.ok) setSteps(result.steps);
+      } catch {
+        // the card simply stays empty
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [days]);
+  const rows = [
+    { key: "register_1", label: "1. Formation et niveau" },
+    { key: "register_2", label: "2. Vos informations" },
+    { key: "register_3", label: "3. Mot de passe" },
+    { key: "register_done", label: "Inscription terminée" },
+  ];
+  const first = steps?.register_1 ?? 0;
+  return (
+    <div className="p-5 rounded-2xl border border-line bg-surface">
+      <p className="font-bold text-ink">Parcours d&apos;inscription ({days} jours)</p>
+      <p className="text-sm text-ink-soft mb-4">Combien de visiteurs arrivent à chaque étape, et combien abandonnent en route.</p>
+      {!steps || first === 0 ? (
+        <p className="text-sm text-ink-faint">Pas encore de données : le comptage commence avec la nouvelle inscription en 3 étapes.</p>
+      ) : (
+        <div className="space-y-3">
+          {rows.map((r, i) => {
+            const n = steps[r.key] ?? 0;
+            const prev = i === 0 ? n : steps[rows[i - 1].key] ?? 0;
+            const lost = i > 0 && prev > 0 ? Math.max(0, Math.round(((prev - n) / prev) * 100)) : null;
+            return (
+              <div key={r.key}>
+                <div className="flex justify-between text-sm">
+                  <span className="text-ink font-semibold">{r.label}</span>
+                  <span className="text-ink-soft">
+                    <b className="text-ink">{n}</b> visiteur{n > 1 ? "s" : ""}
+                    {lost !== null && lost > 0 ? <span className="ml-2 text-red-700 dark:text-red-300 font-semibold">−{lost} % abandonnent</span> : null}
+                  </span>
+                </div>
+                <div className="h-3 rounded-full bg-surface-alt mt-1 overflow-hidden">
+                  <div className="h-full bg-red-600" style={{ width: `${Math.round((n / first) * 100)}%` }} />
+                </div>
+              </div>
+            );
+          })}
+          <p className="text-sm text-ink-soft pt-1">
+            Au total, <b className="text-ink">{Math.round(((steps.register_done ?? 0) / first) * 100)} %</b> des visiteurs qui commencent l&apos;inscription la terminent.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function Card({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
   return (
     <div className="p-5 rounded-2xl border border-line bg-surface">
@@ -155,6 +217,8 @@ export default function VisitsTab() {
           hint="Visiteurs jamais vus / déjà venus"
         />
       </div>
+
+      <FunnelCard days={days} />
 
       <div className="p-5 rounded-2xl border border-line bg-surface">
         <p className="font-bold text-ink mb-4">Pages vues par jour</p>
