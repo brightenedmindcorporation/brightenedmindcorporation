@@ -11,8 +11,7 @@ import { ArrowLeft } from "lucide-react";
 export default function BackButton() {
   const pathname = usePathname() || "/";
   const router = useRouter();
-  // The site builder and the clients' own sites (/s/…) are full-screen pages with their own controls.
-  if (pathname === "/" || /^\/academia\/[^/]+\/level\//.test(pathname) || /^\/(dev\/sites|sites\/editeur|s\/|espace)/.test(pathname)) return null;
+  if (pathname === "/" || /^\/academia\/[^/]+\/level\//.test(pathname) ) return null;
 
   const goBack = () => {
     if (window.history.length > 1) {

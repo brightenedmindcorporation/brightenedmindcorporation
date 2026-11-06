@@ -1,6 +1,6 @@
 // BM service worker: keeps the site installable and fast, and shows a friendly page when there is no connection.
 // It never stores pages, API answers or the audio clips (the lessons manage their own audio cache).
-const VERSION = "bm-pwa-v1";
+const VERSION = "bm-pwa-v2";
 const STATIC = VERSION + "-static";
 const OFFLINE = "/offline.html";
 

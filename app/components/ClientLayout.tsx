@@ -14,14 +14,12 @@ import InstallButton from "@/components/InstallButton";
 import BmLogo from "@/components/BmLogo";
 import WhatsappFloat from "@/components/WhatsappFloat";
 import { availableLanguages } from "@/content/curriculum";
-import { TRACKING_ENABLED } from "@/lib/features";
 
 const NAV_LINKS = [
   { href: "/", label: "Accueil" },
   { href: "/academia", label: "Academia" },
   { href: "/communication", label: "Communication" },
   { href: "/domestica", label: "Domestica" },
-  ...(TRACKING_ENABLED ? [{ href: "/suivi", label: "Suivi colis" }] : []),
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
@@ -34,10 +32,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   // Le panneau admin (/admin) garde le header public — sa page réserve
   // l'espace en haut (pt-28) pour que son propre en-tête reste visible.
   const LEARNING_PREFIXES = ["/academia/dashboard", "/academia/program", ...availableLanguages.map((l) => `/academia/${l.slug}`)];
-  // L'éditeur de sites et les sites des clients (/s/…) occupent tout l'écran.
-  const BUILDER_PREFIXES = ["/dev/sites", "/sites/editeur", "/s/", "/espace"];
   const hideLayoutElements =
-    pathname === "/academia" || LEARNING_PREFIXES.some((p) => pathname?.startsWith(p)) || BUILDER_PREFIXES.some((p) => pathname?.startsWith(p)) || false;
+    pathname === "/academia" || LEARNING_PREFIXES.some((p) => pathname?.startsWith(p)) || false;
   const isHome = pathname === "/";
   const phoneOfficial = "+243988830799";
   // Le bouton WhatsApp flottant suit le visiteur sur toutes les pages publiques (pas dans les espaces de travail).

@@ -52,11 +52,8 @@ import AddStudentModal from "@/components/admin/AddStudentModal";
 import PlacementTab from "@/components/admin/PlacementTab";
 import CorrectionsTab from "@/components/admin/CorrectionsTab";
 import DomesticaTab from "@/components/admin/DomesticaTab";
-import ShipmentsTab from "@/components/admin/ShipmentsTab";
-import TrucksTab from "@/components/admin/TrucksTab";
 import BackupTab from "@/components/admin/BackupTab";
 import AnnouncementsTab from "@/components/admin/AnnouncementsTab";
-import { TRACKING_ENABLED } from "@/lib/features";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
 import StudentDossier from "@/components/academy/StudentDossier";
@@ -78,7 +75,7 @@ const MAIL_FOLDERS: { id: MailFolderId; label: string }[] = [
 
 const MAIL_SENDERS = ["info@bmcorporation-cd.com", "brightenedmindcorporation@gmail.com"];
 
-type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections" | "domestica" | "shipments" | "trucks" | "backups";
+type Tab = "students" | "live" | "payments" | "announcements" | "applications" | "projects" | "devis" | "mail" | "requests" | "progress" | "certificates" | "teachers" | "visits" | "activity" | "stats" | "placement" | "corrections" | "domestica" | "backups";
 
 export default function AdminPage() {
   const [students, setStudents] = useState<any[]>([]);
@@ -1237,7 +1234,7 @@ export default function AdminPage() {
       // storage blocked
     }
     const requestedTab = params.get("tab") || savedTab;
-    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "shipments", "trucks", "backups"];
+    const validTabs: Tab[] = ["students", "live", "payments", "announcements", "applications", "projects", "devis", "mail", "requests", "progress", "certificates", "teachers", "visits", "activity", "stats", "placement", "corrections", "domestica", "backups"];
     if (requestedTab && (validTabs as string[]).includes(requestedTab)) {
       setTab(requestedTab as Tab);
     }
@@ -1868,7 +1865,6 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { id: "placement", label: "Tests de niveau", badge: 0 },
             { id: "domestica", label: "Domestica", badge: 0 },
             { id: "backups", label: "Sauvegardes", badge: 0 },
-            ...(TRACKING_ENABLED ? [{ id: "shipments" as const, label: "Suivi colis", badge: 0 }, { id: "trucks" as const, label: "Camions (carte)", badge: 0 }] : []),
             { id: "stats", label: "Statistiques", badge: 0 },
           ] as { id: Tab; label: string; badge: number }[];
           const byId = new Map(tabItems.map((t) => [t.id, t]));
@@ -1877,8 +1873,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             { label: "Étudiants et cours", ids: ["students", "placement", "live", "progress", "certificates", "corrections", "teachers"] },
             { label: "Demandes et argent", ids: ["payments", "devis", "projects", "applications", "requests", "domestica"] },
             { label: "Communication", ids: ["mail", "announcements"] },
-            { label: "Suivi du site", ids: ["activity", "visits", "stats"] },
-            { label: "Outils", ids: ["backups", "shipments", "trucks"] },
+            { label: "Suivi du site", ids: ["activity", "visits", "stats", "backups"] },
           ].map((g) => ({ label: g.label, ids: g.ids as Tab[] }));
           const groupTabs = groups.map((g) => ({ label: g.label, tabs: g.ids.map((id) => byId.get(id)).filter(Boolean) as { id: Tab; label: string; badge: number }[] })).filter((g) => g.tabs.length > 0);
           const current = groupTabs.find((g) => g.tabs.some((t) => t.id === tab)) ?? groupTabs[0];
@@ -2626,8 +2621,6 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "corrections" && <CorrectionsTab />}
         {tab === "domestica" && <DomesticaTab />}
         {tab === "backups" && <BackupTab />}
-        {TRACKING_ENABLED && tab === "shipments" && <ShipmentsTab />}
-        {TRACKING_ENABLED && tab === "trucks" && <TrucksTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
         {tab === "payments" && (

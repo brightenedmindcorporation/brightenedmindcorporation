@@ -11,16 +11,16 @@ export default function manifest(): MetadataRoute.Manifest {
     scope: "/",
     display: "standalone",
     orientation: "portrait",
-    background_color: "#f6f3ee",
+    background_color: "#1a1613",
     theme_color: "#7a1f2b",
     categories: ["education"],
     icons: [
-      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
-      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
-      { src: "/icons/icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
+      { src: "/icons/icon-192.png?v=2", sizes: "192x192", type: "image/png", purpose: "any" },
+      { src: "/icons/icon-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "any" },
+      { src: "/icons/icon-maskable-512.png?v=2", sizes: "512x512", type: "image/png", purpose: "maskable" },
     ],
     shortcuts: [
-      { name: "Mon tableau de bord", short_name: "Tableau de bord", url: "/academia/dashboard", icons: [{ src: "/icons/icon-192.png", sizes: "192x192" }] },
+      { name: "Mon tableau de bord", short_name: "Tableau de bord", url: "/academia/dashboard", icons: [{ src: "/icons/icon-192.png?v=2", sizes: "192x192" }] },
       { name: "Connexion", url: "/login" },
     ],
   };
