@@ -1,32 +1,10 @@
 import { NextResponse } from "next/server";
-import { isAdminConfigured, getAdminDb } from "@/lib/firebase-admin";
+import { listPublicAnnouncements } from "@/lib/announcementsServer";
 
 /**
- * Public, read-only: returns active announcements for the homepage
- * advertising space. Goes through the Admin SDK rather than the client SDK
- * so it never depends on Firestore security rules being configured for
- * anonymous reads (same reasoning as /api/live-sessions).
+ * Public, read-only: the announcements of the advertising space (published, started, not ended; pinned first).
+ * Goes through the Admin SDK so it never depends on Firestore security rules for anonymous reads.
  */
 export async function GET() {
-  try {
-    if (!isAdminConfigured()) {
-      return NextResponse.json({ announcements: [] });
-    }
-
-    const adminDb = getAdminDb();
-    const snap = await adminDb.collection("announcements").where("active", "==", true).get();
-    const now = new Date().toISOString();
-    const announcements = snap.docs
-      .map((doc) => ({ id: doc.id, ...doc.data() }))
-      // A scheduled duration (expiresAt) that has passed hides the
-      // announcement from the public site without the admin having to
-      // remember to come back and deactivate it manually.
-      .filter((a: any) => !a.expiresAt || a.expiresAt > now)
-      .sort((a: any, b: any) => (b.createdAt > a.createdAt ? 1 : -1));
-
-    return NextResponse.json({ announcements });
-  } catch (error: any) {
-    console.error("Error fetching announcements:", error);
-    return NextResponse.json({ announcements: [] });
-  }
+  return NextResponse.json({ announcements: await listPublicAnnouncements() });
 }

@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Paperclip, X } from "lucide-react";
 import { trackContent } from "@/lib/trackEvent";
+import { optimizedImage } from "@/lib/announcements";
 
 interface Announcement {
   id: string;
@@ -136,7 +137,7 @@ export default function JobApplyPage() {
         <div className="bg-surface-sunken border border-line rounded-3xl overflow-hidden shadow-xl mb-8">
           {announcement.imageUrl && (
             <div className="relative w-full aspect-video bg-surface-alt">
-              <Image src={announcement.imageUrl} alt={announcement.title} fill unoptimized className="object-cover" />
+              <Image src={optimizedImage(announcement.imageUrl, 1200)} alt={announcement.title} fill unoptimized className="object-cover" />
             </div>
           )}
           <div className="p-8">

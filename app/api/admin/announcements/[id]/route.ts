@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { parseAnnouncementFields, storeAnnouncementMedia } from "@/lib/announcementForm";
 
 const ADMIN_EMAIL = "brightenedmindcorporation@gmail.com";
 
@@ -10,58 +10,42 @@ async function requireAdmin(idToken: string | undefined) {
   if (decoded.email !== ADMIN_EMAIL) throw { status: 403, message: "Non autorisé." };
 }
 
-// Edits an already-published announcement's content. A new photo/video
-// replaces the existing one; left blank, the existing one is kept. The
-// duration field is omitted to leave the expiry untouched, "0" to clear it
-// (make it unlimited again), or a day count to recompute it from today.
+// Edits an announcement. A new photo/video replaces the existing one (a picture is made light automatically); left blank,
+// the existing one is kept. The duration field is omitted to leave the end date untouched, "0" for no end, or a number of days
+// counted from the start day (today, or the scheduled day).
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     if (!isAdminConfigured()) {
       return NextResponse.json({ error: "Serveur non configuré." }, { status: 503 });
     }
-
     const idToken = request.headers.get("authorization")?.replace(/^Bearer /, "");
     await requireAdmin(idToken);
 
     const { id } = await params;
     const form = await request.formData();
-
-    const title = form.get("title")?.toString()?.trim();
-    const description = form.get("description")?.toString()?.trim();
-    const type = form.get("type")?.toString() === "job" ? "job" : "normal";
-    const details = form.get("details")?.toString()?.trim() || "";
-
-    if (!title || !description) {
-      return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
-    }
-
-    const showInTicker = form.get("showInTicker")?.toString() !== "false";
-    const updates: Record<string, any> = { title, description, type, details, showInTicker };
+    const fields = parseAnnouncementFields(form);
+    const updates: Record<string, any> = { ...fields };
 
     const durationDaysRaw = form.get("durationDays")?.toString();
     if (durationDaysRaw) {
       const durationDays = Number(durationDaysRaw);
       if (durationDays > 0) {
-        const expiry = new Date();
-        expiry.setDate(expiry.getDate() + durationDays);
-        updates.expiresAt = expiry.toISOString();
+        const from = fields.startAt ? new Date(fields.startAt) : new Date();
+        from.setDate(from.getDate() + durationDays);
+        updates.expiresAt = from.toISOString();
       } else {
         updates.expiresAt = null;
       }
     }
 
-    const imageFile = form.get("image");
-    if (imageFile instanceof File && imageFile.size > 0) {
-      updates.imageUrl = await uploadToCloudinary(imageFile, "announcements", "image");
-    }
-    const videoFile = form.get("video");
-    if (videoFile instanceof File && videoFile.size > 0) {
-      updates.videoUrl = await uploadToCloudinary(videoFile, "announcements", "video");
-    }
+    const media = await storeAnnouncementMedia(form);
+    if (media.imageUrl) updates.imageUrl = media.imageUrl;
+    if (media.videoUrl) updates.videoUrl = media.videoUrl;
+    if (form.get("removeImage")?.toString() === "true" && !media.imageUrl) updates.imageUrl = null;
+    if (form.get("removeVideo")?.toString() === "true" && !media.videoUrl) updates.videoUrl = null;
 
     await getAdminDb().collection("announcements").doc(id).update(updates);
-
-    return NextResponse.json({ status: "success" });
+    return NextResponse.json({ status: "success", saved: media.saved ?? null });
   } catch (error: any) {
     console.error("Error updating announcement:", error);
     const status = error?.status ?? 500;
@@ -69,7 +53,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
   }
 }
 
-// Toggles an announcement's visibility on the homepage without deleting it.
+// Shows or hides an announcement, and pins it first (or not), without touching the rest.
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     if (!isAdminConfigured()) {
@@ -78,9 +62,13 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     const idToken = request.headers.get("authorization")?.replace(/^Bearer /, "");
     await requireAdmin(idToken);
 
-    const { active } = await request.json();
+    const body = await request.json();
     const { id } = await params;
-    await getAdminDb().collection("announcements").doc(id).update({ active: Boolean(active) });
+    const updates: Record<string, boolean> = {};
+    if (typeof body.active === "boolean") updates.active = body.active;
+    if (typeof body.pinned === "boolean") updates.pinned = body.pinned;
+    if (Object.keys(updates).length === 0) return NextResponse.json({ error: "Rien à modifier." }, { status: 400 });
+    await getAdminDb().collection("announcements").doc(id).update(updates);
 
     return NextResponse.json({ status: "success" });
   } catch (error: any) {

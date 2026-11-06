@@ -10,12 +10,15 @@ export default function TrackedVideo({
   statsKey,
   title,
   className,
+  poster,
 }: {
   src: string;
   type: TrackedType;
   statsKey: string;
   title: string;
   className?: string;
+  /** A still picture shown before play: nothing heavy loads until the visitor presses play. */
+  poster?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const meter = useRef<VideoMeter | null>(null);
@@ -40,6 +43,9 @@ export default function TrackedVideo({
     <video
       ref={ref}
       src={src}
+      poster={poster || undefined}
+      preload={poster ? "none" : "metadata"}
+      playsInline
       controls
       className={className}
       onPlay={() => meter.current?.start()}

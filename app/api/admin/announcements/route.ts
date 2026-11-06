@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdminConfigured, getAdminAuth, getAdminDb } from "@/lib/firebase-admin";
-import { uploadToCloudinary } from "@/lib/cloudinary";
+import { parseAnnouncementFields, storeAnnouncementMedia } from "@/lib/announcementForm";
 
 // GET routes are cached by Next.js by default unless marked dynamic — this
 // serves live admin data and must never be stale.
@@ -35,9 +35,8 @@ export async function GET(request: Request) {
   }
 }
 
-// Photos/videos are uploaded straight to Cloudinary (not Firebase
-// Storage, which needs the paid Blaze plan) and the resulting URL is
-// stored on the announcement doc.
+// Pictures are made light automatically (see lib/imageOptimize.ts) and stored on Cloudinary (not Firebase Storage, which needs
+// the paid Blaze plan); the resulting address is kept on the announcement.
 export async function POST(request: Request) {
   try {
     if (!isAdminConfigured()) {
@@ -45,56 +44,33 @@ export async function POST(request: Request) {
     }
 
     const form = await request.formData();
-    const idToken = form.get("idToken")?.toString();
-    await requireAdmin(idToken);
+    await requireAdmin(form.get("idToken")?.toString());
 
-    const title = form.get("title")?.toString()?.trim();
-    const description = form.get("description")?.toString()?.trim();
-    const type = form.get("type")?.toString() === "job" ? "job" : "normal";
-    const details = form.get("details")?.toString()?.trim() || "";
+    const fields = parseAnnouncementFields(form);
     const durationDaysRaw = form.get("durationDays")?.toString();
     const durationDays = durationDaysRaw ? Number(durationDaysRaw) : null;
-    const showInTicker = form.get("showInTicker")?.toString() !== "false";
-
-    if (!title || !description) {
-      return NextResponse.json({ error: "title et description sont requis." }, { status: 400 });
-    }
-
+    // The duration counts from the day the announcement starts (today, or the scheduled day).
     let expiresAt: string | null = null;
     if (durationDays && durationDays > 0) {
-      const expiry = new Date();
-      expiry.setDate(expiry.getDate() + durationDays);
-      expiresAt = expiry.toISOString();
+      const from = fields.startAt ? new Date(fields.startAt) : new Date();
+      from.setDate(from.getDate() + durationDays);
+      expiresAt = from.toISOString();
     }
 
-    const imageFile = form.get("image");
-    const videoFile = form.get("video");
+    const media = await storeAnnouncementMedia(form);
+    const draft = form.get("draft")?.toString() === "true";
 
-    let imageUrl: string | null = null;
-    let videoUrl: string | null = null;
-
-    if (imageFile instanceof File && imageFile.size > 0) {
-      imageUrl = await uploadToCloudinary(imageFile, "announcements", "image");
-    }
-    if (videoFile instanceof File && videoFile.size > 0) {
-      videoUrl = await uploadToCloudinary(videoFile, "announcements", "video");
-    }
-
-    const adminDb = getAdminDb();
-    const docRef = await adminDb.collection("announcements").add({
-      title,
-      description,
-      type,
-      details,
-      imageUrl,
-      videoUrl,
-      active: true,
-      showInTicker,
+    const docRef = await getAdminDb().collection("announcements").add({
+      ...fields,
+      imageUrl: media.imageUrl ?? null,
+      videoUrl: media.videoUrl ?? null,
+      active: !draft,
+      showInTicker: false,
       expiresAt,
       createdAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ status: "success", id: docRef.id });
+    return NextResponse.json({ status: "success", id: docRef.id, saved: media.saved ?? null });
   } catch (error: any) {
     console.error("Error creating announcement:", error);
     const status = error?.status ?? 500;

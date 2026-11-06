@@ -1,9 +1,11 @@
 import Hero from "@/components/Hero";
-import AnnouncementsTicker from "@/components/AnnouncementsTicker";
 import Announcements from "@/components/Announcements";
 import Stats from "@/components/Stats";
 import Contact from "@/components/Contact";
 import Link from "next/link";
+
+// The announcements are read from the server and refreshed every minute.
+export const revalidate = 60;
 
 // Short on purpose: say what we do, give the three doors (in the Hero), show the announcements and the key
 // figures, then the contact form. The company story lives on /a-propos.
@@ -11,7 +13,6 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <AnnouncementsTicker />
       <Announcements />
       <Stats />
       <section className="py-12 bg-page text-center px-6">

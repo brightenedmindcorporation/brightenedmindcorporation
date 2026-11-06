@@ -8,7 +8,7 @@ import { bump, contentDocId, CONTENT_COLLECTION, type ContentKind } from "@/lib/
 export const dynamic = "force-dynamic";
 
 const BOTS = /bot|crawl|spider|slurp|headless|lighthouse|preview|facebookexternalhit|whatsapp|telegram|monitor|curl|wget|python|axios|node-fetch|pingdom|uptime/i;
-const CLICKS = new Set(["detail", "apply", "apply_page", "register"]);
+const CLICKS = new Set(["detail", "apply", "apply_page", "register", "whatsapp", "call", "devis", "link", "share"]);
 
 export async function POST(request: Request) {
   try {

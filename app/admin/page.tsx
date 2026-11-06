@@ -55,6 +55,7 @@ import DomesticaTab from "@/components/admin/DomesticaTab";
 import ShipmentsTab from "@/components/admin/ShipmentsTab";
 import TrucksTab from "@/components/admin/TrucksTab";
 import BackupTab from "@/components/admin/BackupTab";
+import AnnouncementsTab from "@/components/admin/AnnouncementsTab";
 import { TRACKING_ENABLED } from "@/lib/features";
 import LiveAudiencePicker, { audienceLabel } from "@/components/LiveAudiencePicker";
 import { levelNumber } from "@/lib/academy/levelAccess";
@@ -163,31 +164,8 @@ export default function AdminPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
 
-  // --- Announcements ---
-  const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [announcementsLoading, setAnnouncementsLoading] = useState(false);
-  const [annTitle, setAnnTitle] = useState("");
-  const [annDescription, setAnnDescription] = useState("");
-  const [annType, setAnnType] = useState<"normal" | "job">("normal");
-  const [annDetails, setAnnDetails] = useState("");
-  const [annDuration, setAnnDuration] = useState("");
-  const [annDurationCustom, setAnnDurationCustom] = useState("");
-  const [annShowInTicker, setAnnShowInTicker] = useState(true);
-  const [annImage, setAnnImage] = useState<File | null>(null);
-  const [annVideo, setAnnVideo] = useState<File | null>(null);
-  const [annSubmitting, setAnnSubmitting] = useState(false);
-
-  const [editingAnnouncement, setEditingAnnouncement] = useState<any | null>(null);
-  const [editAnnTitle, setEditAnnTitle] = useState("");
-  const [editAnnDescription, setEditAnnDescription] = useState("");
-  const [editAnnType, setEditAnnType] = useState<"normal" | "job">("normal");
-  const [editAnnDetails, setEditAnnDetails] = useState("");
-  const [editAnnDuration, setEditAnnDuration] = useState("");
-  const [editAnnDurationCustom, setEditAnnDurationCustom] = useState("");
-  const [editAnnShowInTicker, setEditAnnShowInTicker] = useState(true);
-  const [editAnnImage, setEditAnnImage] = useState<File | null>(null);
-  const [editAnnVideo, setEditAnnVideo] = useState<File | null>(null);
-  const [editAnnSubmitting, setEditAnnSubmitting] = useState(false);
+  // --- Announcements: the whole tab lives in components/admin/AnnouncementsTab.tsx ---
+  const [annRefresh, setAnnRefresh] = useState(0);
 
   // --- Job applications ---
   const [jobApplications, setJobApplications] = useState<any[]>([]);
@@ -422,142 +400,6 @@ export default function AdminPage() {
     }
   };
 
-  // Views / clicks per announcement over the last 90 days (shown on each announcement's card).
-  const [annStats, setAnnStats] = useState<Record<string, { views: number; clicks: number; plays: number }>>({});
-  const fetchAnnStats = async () => {
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/content-stats?days=90", { headers: { Authorization: `Bearer ${idToken}` } });
-      const result = await response.json();
-      if (!response.ok) return;
-      const map: Record<string, { views: number; clicks: number; plays: number }> = {};
-      for (const it of result.items || []) {
-        if (it.type === "ann") map[it.key] = { views: it.n.views || 0, clicks: (it.n.click_detail || 0) + (it.n.click_apply || 0), plays: it.n.plays || 0 };
-      }
-      setAnnStats(map);
-    } catch {
-      // statistics are optional here
-    }
-  };
-
-  const fetchAnnouncements = async (silent = false) => {
-    if (!silent) setAnnouncementsLoading(true);
-    fetchAnnStats();
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch("/api/admin/announcements", {
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
-      const result = await response.json();
-      if (response.ok) setAnnouncements(result.announcements || []);
-    } catch (error) {
-      console.error("Error fetching announcements:", error);
-    } finally {
-      if (!silent) setAnnouncementsLoading(false);
-    }
-  };
-
-  const createAnnouncement = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!annTitle.trim() || !annDescription.trim()) {
-      alert("Titre et description requis.");
-      return;
-    }
-    const resolvedDuration = annDuration === "custom" ? annDurationCustom : annDuration;
-    if (annDuration === "custom" && (!resolvedDuration || Number(resolvedDuration) <= 0)) {
-      alert("Indiquez un nombre de jours valide pour la durée personnalisée.");
-      return;
-    }
-    setAnnSubmitting(true);
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const form = new FormData();
-      form.append("idToken", idToken || "");
-      form.append("title", annTitle);
-      form.append("description", annDescription);
-      form.append("type", annType);
-      form.append("details", annDetails);
-      form.append("showInTicker", String(annShowInTicker));
-      if (resolvedDuration) form.append("durationDays", resolvedDuration);
-      if (annImage) form.append("image", annImage);
-      if (annVideo) form.append("video", annVideo);
-
-      const response = await fetch("/api/admin/announcements", { method: "POST", body: form });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Erreur serveur");
-
-      setAnnTitle("");
-      setAnnDescription("");
-      setAnnType("normal");
-      setAnnDetails("");
-      setAnnDuration("");
-      setAnnShowInTicker(true);
-      setAnnDurationCustom("");
-      setAnnImage(null);
-      setAnnVideo(null);
-      fetchAnnouncements();
-    } catch (error: any) {
-      alert(`Erreur : ${error.message || error}`);
-    } finally {
-      setAnnSubmitting(false);
-    }
-  };
-
-  const openEditAnnouncement = (a: any) => {
-    setEditingAnnouncement(a);
-    setEditAnnTitle(a.title || "");
-    setEditAnnDescription(a.description || "");
-    setEditAnnType(a.type === "job" ? "job" : "normal");
-    setEditAnnDetails(a.details || "");
-    setEditAnnDuration("");
-    setEditAnnDurationCustom("");
-    setEditAnnShowInTicker(a.showInTicker !== false);
-    setEditAnnImage(null);
-    setEditAnnVideo(null);
-  };
-
-  const updateAnnouncement = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingAnnouncement) return;
-    if (!editAnnTitle.trim() || !editAnnDescription.trim()) {
-      alert("Titre et description requis.");
-      return;
-    }
-    const resolvedEditDuration = editAnnDuration === "custom" ? editAnnDurationCustom : editAnnDuration;
-    if (editAnnDuration === "custom" && (!resolvedEditDuration || Number(resolvedEditDuration) <= 0)) {
-      alert("Indiquez un nombre de jours valide pour la durée personnalisée.");
-      return;
-    }
-    setEditAnnSubmitting(true);
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const form = new FormData();
-      form.append("title", editAnnTitle);
-      form.append("description", editAnnDescription);
-      form.append("type", editAnnType);
-      form.append("details", editAnnDetails);
-      form.append("showInTicker", String(editAnnShowInTicker));
-      if (resolvedEditDuration) form.append("durationDays", resolvedEditDuration);
-      if (editAnnImage) form.append("image", editAnnImage);
-      if (editAnnVideo) form.append("video", editAnnVideo);
-
-      const response = await fetch(`/api/admin/announcements/${editingAnnouncement.id}`, {
-        method: "PUT",
-        headers: { Authorization: `Bearer ${idToken}` },
-        body: form,
-      });
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.error || "Erreur serveur");
-
-      setEditingAnnouncement(null);
-      fetchAnnouncements();
-    } catch (error: any) {
-      alert(`Erreur : ${error.message || error}`);
-    } finally {
-      setEditAnnSubmitting(false);
-    }
-  };
-
   const fetchJobApplications = async (silent = false) => {
     if (!silent) setJobApplicationsLoading(true);
     try {
@@ -571,42 +413,6 @@ export default function AdminPage() {
       console.error("Error fetching job applications:", error);
     } finally {
       if (!silent) setJobApplicationsLoading(false);
-    }
-  };
-
-  const toggleAnnouncement = async (id: string, active: boolean) => {
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch(`/api/admin/announcements/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
-        body: JSON.stringify({ active }),
-      });
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || "Erreur serveur");
-      }
-      fetchAnnouncements();
-    } catch (error: any) {
-      alert(`Erreur : ${error.message || error}`);
-    }
-  };
-
-  const deleteAnnouncement = async (id: string) => {
-    if (!confirm("Supprimer cette annonce ?")) return;
-    try {
-      const idToken = await auth.currentUser?.getIdToken();
-      const response = await fetch(`/api/admin/announcements/${id}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${idToken}` },
-      });
-      if (!response.ok) {
-        const result = await response.json();
-        throw new Error(result.error || "Erreur serveur");
-      }
-      fetchAnnouncements();
-    } catch (error: any) {
-      alert(`Erreur : ${error.message || error}`);
     }
   };
 
@@ -1441,7 +1247,6 @@ export default function AdminPage() {
     if (!authorized) return;
     if (tab === "live" && liveSessions.length === 0) fetchLiveSessions();
     if (tab === "payments" && payments.length === 0) fetchPayments();
-    if (tab === "announcements" && announcements.length === 0) fetchAnnouncements();
     if (tab === "applications" && jobApplications.length === 0) fetchJobApplications();
     if (tab === "projects" && projectRequests.length === 0) fetchProjectRequests();
     if (tab === "devis" && devisRequests.length === 0) fetchDevisRequests();
@@ -1463,7 +1268,6 @@ export default function AdminPage() {
       students: fetchStudents,
       live: () => fetchLiveSessions(true),
       payments: () => fetchPayments(true),
-      announcements: () => fetchAnnouncements(true),
       applications: () => fetchJobApplications(true),
       projects: () => fetchProjectRequests(true),
       devis: () => fetchDevisRequests(true),
@@ -1882,7 +1686,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
     if (t === "students") fetchStudents();
     else if (t === "live") fetchLiveSessions();
     else if (t === "payments") fetchPayments();
-    else if (t === "announcements") fetchAnnouncements();
+    else if (t === "announcements") setAnnRefresh((n) => n + 1);
     else if (t === "applications") fetchJobApplications();
     else if (t === "projects") fetchProjectRequests();
     else if (t === "devis") fetchDevisRequests();
@@ -2893,202 +2697,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         )}
 
         {/* ================= ANNOUNCEMENTS TAB ================= */}
-        {tab === "announcements" && (
-          <div>
-            <p className="text-xs text-ink-soft mb-6">
-              Les annonces actives s'affichent dans un bandeau bien visible juste sous l'en-tête de la page d'accueil
-              du site (offres d'emploi, promotions, informations diverses...).
-            </p>
-
-            <form onSubmit={createAnnouncement} className="bg-surface border border-line rounded-2xl p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Type</label>
-                <select
-                  value={annType}
-                  onChange={(e) => setAnnType(e.target.value as "normal" | "job")}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                >
-                  <option value="normal">Annonce normale (bouton "Voir le détail")</option>
-                  <option value="job">Offre d'emploi (bouton "Postuler")</option>
-                </select>
-              </div>
-              <div className="hidden sm:block" />
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre</label>
-                <input
-                  type="text"
-                  value={annTitle}
-                  onChange={(e) => setAnnTitle(e.target.value)}
-                  placeholder="Ex: Nous recrutons !"
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">
-                  Description courte (affichée dans le bandeau de la page d'accueil)
-                </label>
-                <textarea
-                  value={annDescription}
-                  onChange={(e) => setAnnDescription(e.target.value)}
-                  rows={2}
-                  placeholder="Ex: BM Corporation recrute un(e) formateur/formatrice en anglais. Postulez dès maintenant."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">
-                  Détails complets (affichés uniquement sur la page "Voir le détail" / "Postuler")
-                </label>
-                <textarea
-                  value={annDetails}
-                  onChange={(e) => setAnnDetails(e.target.value)}
-                  rows={5}
-                  placeholder="Description complète de l'offre ou de l'annonce..."
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Durée de publication</label>
-                <select
-                  value={annDuration}
-                  onChange={(e) => setAnnDuration(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                >
-                  <option value="">Illimitée (jusqu'à masquage manuel)</option>
-                  <option value="3">3 jours</option>
-                  <option value="7">7 jours</option>
-                  <option value="14">14 jours</option>
-                  <option value="30">30 jours</option>
-                  <option value="60">60 jours</option>
-                  <option value="90">90 jours</option>
-                  <option value="custom">Personnalisée…</option>
-                </select>
-                {annDuration === "custom" && (
-                  <input
-                    type="number"
-                    min={1}
-                    value={annDurationCustom}
-                    onChange={(e) => setAnnDurationCustom(e.target.value)}
-                    placeholder="Nombre de jours"
-                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 mt-2"
-                  />
-                )}
-                <p className="text-xs text-ink-faint mt-1">L'annonce se masque automatiquement du site public à la fin de cette durée.</p>
-              </div>
-              <div className="sm:col-span-2">
-                <label className="inline-flex items-center gap-2 text-sm text-ink-soft cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={annShowInTicker}
-                    onChange={(e) => setAnnShowInTicker(e.target.checked)}
-                    className="rounded border-line accent-red-600"
-                  />
-                  Afficher dans la bande défilante de la page d'accueil
-                </label>
-                <p className="text-xs text-ink-faint mt-1">Décochez pour que cette annonce apparaisse dans le carrousel mais pas dans le bandeau défilant.</p>
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Photo (optionnel)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setAnnImage(e.target.files?.[0] ?? null)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-semibold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Vidéo (optionnel)</label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => setAnnVideo(e.target.files?.[0] ?? null)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface file:text-ink file:font-semibold"
-                />
-              </div>
-              <div className="sm:col-span-2">
-                <button
-                  type="submit"
-                  disabled={annSubmitting}
-                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-6 py-2.5 rounded-xl transition disabled:opacity-50"
-                >
-                  {annSubmitting ? "Publication..." : "Publier l'annonce"}
-                </button>
-              </div>
-            </form>
-
-            {announcementsLoading ? (
-              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
-            ) : announcements.length === 0 ? (
-              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
-                Aucune annonce pour le moment.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {announcements.map((a) => (
-                  <div
-                    key={a.id}
-                    className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl border border-line bg-surface ${a.active ? "" : "opacity-50"}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      {a.imageUrl && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={a.imageUrl} alt="" className="w-16 h-16 rounded-xl object-cover border border-line shrink-0" />
-                      )}
-                      <div>
-                        <p className="font-bold text-ink">
-                          {a.title}
-                          <span className="ml-2 text-xs font-semibold text-ink-faint">
-                            {a.type === "job" ? "· Offre d'emploi" : "· Annonce"}
-                          </span>
-                          {!a.active && <span className="ml-2 text-xs font-semibold text-ink-faint">(masquée)</span>}
-                        </p>
-                        <p className="text-xs text-ink-soft mt-1">{a.description}</p>
-                        <p className="text-xs font-semibold text-ink-soft mt-1">
-                          👁 {annStats[a.id]?.views ?? 0} vues · 🖱 {annStats[a.id]?.clicks ?? 0} clics
-                          {(annStats[a.id]?.plays ?? 0) > 0 && ` · ▶️ ${annStats[a.id].plays} lectures`}
-                          <span className="font-normal text-ink-faint"> (90 jours)</span>
-                        </p>
-                        {a.expiresAt && (
-                          <p className="text-xs text-ink-faint mt-1">
-                            {a.expiresAt > new Date().toISOString()
-                              ? `Expire le ${new Date(a.expiresAt).toLocaleDateString("fr-FR")}`
-                              : `Expirée le ${new Date(a.expiresAt).toLocaleDateString("fr-FR")}`}
-                          </p>
-                        )}
-                        {a.showInTicker === false && (
-                          <p className="text-xs text-ink-faint mt-1">Pas dans la bande défilante</p>
-                        )}
-                        <Link href={`/annonces/${a.id}`} className="text-xs text-red-500 hover:text-red-400 hover:underline mt-1 inline-block">
-                          Voir la page publique →
-                        </Link>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 self-start sm:self-center">
-                      <button
-                        onClick={() => openEditAnnouncement(a)}
-                        className="flex items-center gap-1.5 bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-4 py-2 rounded-xl border border-line transition"
-                      >
-                        <SquarePen size={14} /> Modifier
-                      </button>
-                      <button
-                        onClick={() => toggleAnnouncement(a.id, !a.active)}
-                        className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-4 py-2 rounded-xl border border-line transition"
-                      >
-                        {a.active ? "Masquer" : "Afficher"}
-                      </button>
-                      <button
-                        onClick={() => deleteAnnouncement(a.id)}
-                        className="text-red-500 hover:text-red-400 text-sm font-semibold"
-                      >
-                        Supprimer
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {tab === "announcements" && <AnnouncementsTab refreshKey={annRefresh} />}
 
         {/* ================= JOB APPLICATIONS TAB ================= */}
         {tab === "applications" && (
@@ -4675,129 +4284,6 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
               >
                 {replySending ? "Envoi…" : "Envoyer"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ================= EDIT ANNOUNCEMENT MODAL ================= */}
-      {editingAnnouncement && (
-        <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
-          <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Modifier l'annonce</h3>
-
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Type</label>
-            <select
-              value={editAnnType}
-              onChange={(e) => setEditAnnType(e.target.value as "normal" | "job")}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
-            >
-              <option value="normal">Annonce normale (bouton "Voir le détail")</option>
-              <option value="job">Offre d'emploi (bouton "Postuler")</option>
-            </select>
-
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre</label>
-            <input
-              type="text"
-              value={editAnnTitle}
-              onChange={(e) => setEditAnnTitle(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
-            />
-
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Description courte</label>
-            <textarea
-              value={editAnnDescription}
-              onChange={(e) => setEditAnnDescription(e.target.value)}
-              rows={2}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
-            />
-
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Détails complets</label>
-            <textarea
-              value={editAnnDetails}
-              onChange={(e) => setEditAnnDetails(e.target.value)}
-              rows={5}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
-            />
-
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Durée de publication</label>
-            <select
-              value={editAnnDuration}
-              onChange={(e) => setEditAnnDuration(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-1 focus:outline-none focus:border-red-600/60"
-            >
-              <option value="">Ne pas changer</option>
-              <option value="0">Illimitée (retirer l'expiration)</option>
-              <option value="3">3 jours à partir d'aujourd'hui</option>
-              <option value="7">7 jours à partir d'aujourd'hui</option>
-              <option value="14">14 jours à partir d'aujourd'hui</option>
-              <option value="30">30 jours à partir d'aujourd'hui</option>
-              <option value="60">60 jours à partir d'aujourd'hui</option>
-              <option value="90">90 jours à partir d'aujourd'hui</option>
-              <option value="custom">Personnalisée…</option>
-            </select>
-            {editAnnDuration === "custom" && (
-              <input
-                type="number"
-                min={1}
-                value={editAnnDurationCustom}
-                onChange={(e) => setEditAnnDurationCustom(e.target.value)}
-                placeholder="Nombre de jours, à partir d'aujourd'hui"
-                className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 mt-2 mb-1"
-              />
-            )}
-            <p className="text-xs text-ink-faint mb-4">
-              {editingAnnouncement.expiresAt
-                ? `Actuellement : ${editingAnnouncement.expiresAt > new Date().toISOString() ? "expire" : "expirée"} le ${new Date(editingAnnouncement.expiresAt).toLocaleDateString("fr-FR")}.`
-                : "Actuellement : illimitée."}
-            </p>
-
-            <label className="inline-flex items-center gap-2 text-sm text-ink-soft cursor-pointer mb-4">
-              <input
-                type="checkbox"
-                checked={editAnnShowInTicker}
-                onChange={(e) => setEditAnnShowInTicker(e.target.checked)}
-                className="rounded border-line accent-red-600"
-              />
-              Afficher dans la bande défilante de la page d'accueil
-            </label>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-              <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nouvelle photo (optionnel)</label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setEditAnnImage(e.target.files?.[0] ?? null)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-red-600 file:text-white file:font-semibold"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nouvelle vidéo (optionnel)</label>
-                <input
-                  type="file"
-                  accept="video/*"
-                  onChange={(e) => setEditAnnVideo(e.target.files?.[0] ?? null)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-xs text-ink file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surface file:text-ink file:font-semibold"
-                />
-              </div>
-            </div>
-            <p className="text-xs text-ink-faint mb-4">Laissez vide pour garder la photo/vidéo actuelle.</p>
-
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setEditingAnnouncement(null)}
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
-              >
-                Annuler
-              </button>
-              <button
-                onClick={updateAnnouncement}
-                disabled={editAnnSubmitting || !editAnnTitle.trim() || !editAnnDescription.trim()}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
-              >
-                {editAnnSubmitting ? "Enregistrement…" : "Enregistrer"}
               </button>
             </div>
           </div>

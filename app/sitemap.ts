@@ -17,6 +17,7 @@ const PAGES: [string, number][] = [
   ["/domestica", 0.8],
   ["/communication", 0.8],
   ["/a-propos", 0.6],
+  ["/annonces", 0.7],
   ["/register", 0.7],
   ["/devis", 0.6],
   ["/suivi", 0.5],

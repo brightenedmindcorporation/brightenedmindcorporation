@@ -14,7 +14,7 @@ export interface ContentEvent {
   title?: string;
   event: "view" | "click" | "play" | "progress";
   where?: "list" | "page";
-  kind?: "detail" | "apply" | "apply_page" | "register";
+  kind?: "detail" | "apply" | "apply_page" | "register" | "whatsapp" | "call" | "devis" | "link" | "share";
   seconds?: number;
   milestones?: number[];
   exit?: number;

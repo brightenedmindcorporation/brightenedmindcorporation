@@ -41,7 +41,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const isHome = pathname === "/";
   const phoneOfficial = "+243988830799";
   // Le bouton WhatsApp flottant suit le visiteur sur toutes les pages publiques (pas dans les espaces de travail).
-  const showWhatsapp = !hideLayoutElements && !/^\/(admin|teacher|chauffeur|paiement|verify-email)/.test(pathname || "");
+  const showWhatsapp = !hideLayoutElements && !/^\/(admin|teacher|chauffeur|paiement|verify-email|annonces\/[^/]+)/.test(pathname || "");
 
   useEffect(() => {
     if (!isHome) return;
