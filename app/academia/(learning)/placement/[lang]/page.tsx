@@ -360,7 +360,7 @@ export default function PlacementPage() {
                   type="button"
                   onClick={playing ? stopListening : playListening}
                   disabled={!playing && plays >= 2}
-                  className="inline-flex items-center gap-2 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-3 rounded-xl transition"
+                  className="inline-flex items-center gap-2 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-3 rounded-xl transition min-h-[44px]"
                 >
                   {playing ? <Square size={16} /> : <Play size={16} />}
                   {playing ? "Arrêter" : plays === 0 ? "Écouter la conversation" : plays === 1 ? "Réécouter (dernière fois)" : "Écoutes terminées"}
@@ -410,7 +410,7 @@ export default function PlacementPage() {
                 value={writing}
                 onValueChange={setWriting}
                 rows={7}
-                className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 placeholder="Écrivez votre texte ici…"
                 lang={cjk ? "zh-CN" : undefined}
                 {...(cjk ? {} : { spellCheck: false, autoCorrect: "off" })}

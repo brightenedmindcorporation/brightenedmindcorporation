@@ -47,7 +47,7 @@ function OfflineVerbsAudio({ reference, langSlug }: { reference: VerbReference; 
         setState(stored > 0 ? "done" : "idle");
       }}
       disabled={state === "loading"}
-      className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 transition disabled:opacity-60"
+      className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 transition disabled:opacity-60 min-h-[44px]"
     >
       <Download size={15} />
       {state === "loading" ? `Téléchargement… ${progress}/${phrases.length}` : "Télécharger les audios pour les écouter hors ligne"}
@@ -115,7 +115,7 @@ export default function VerbsReference({
         <button
           onClick={download}
           disabled={downloading}
-          className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all bg-surface-alt shrink-0 disabled:opacity-50"
+          className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink border border-line hover:border-red-600/50 px-4 py-2 rounded-xl transition-all bg-surface-alt shrink-0 disabled:opacity-50 min-h-[44px]"
         >
           <Download size={15} /> {downloading ? "Préparation du PDF…" : "Télécharger en PDF"}
         </button>

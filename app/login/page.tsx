@@ -273,7 +273,7 @@ function LoginForm() {
                 setResetEmail(email);
                 setShowResetModal(true);
               }}
-              className="text-xs text-red-500 hover:text-red-400 hover:underline font-medium"
+              className="inline-flex items-center min-h-[44px] text-sm text-red-600 dark:text-red-300 hover:underline font-semibold"
             >
               Mot de passe oublié ?
             </button>
@@ -282,9 +282,9 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white p-3 rounded-lg font-semibold transition disabled:opacity-50"
+            className="w-full glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white px-3 min-h-[52px] rounded-lg font-bold transition disabled:opacity-60"
           >
-            {loading ? "Connexion..." : "Se connecter"}
+            {loading ? "Connexion en cours…" : "Se connecter"}
           </button>
         </form>
 
@@ -292,7 +292,7 @@ function LoginForm() {
           <p className="text-sm text-ink-faint">Pas encore inscrit ?</p>
           <Link
             href="/register"
-            className="inline-block mt-2 text-sm font-bold text-red-500 hover:text-red-400 hover:underline transition"
+            className="inline-flex items-center min-h-[44px] mt-1 text-base font-bold text-red-600 dark:text-red-300 hover:underline transition"
           >
             → S'inscrire ici
           </Link>
@@ -343,7 +343,7 @@ function LoginForm() {
                 <button
                   type="submit"
                   disabled={resetLoading}
-                  className="px-4 py-2 text-sm font-semibold text-white glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 rounded-lg disabled:opacity-50"
+                  className="px-4 py-2 text-sm font-semibold text-white glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 rounded-lg disabled:opacity-50 min-h-[44px]"
                 >
                   {resetLoading ? "Envoi..." : "Envoyer le lien"}
                 </button>

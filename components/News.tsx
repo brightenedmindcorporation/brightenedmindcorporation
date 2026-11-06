@@ -1,6 +1,6 @@
 export default function News() {
   return (
-    <section id="news" className="py-28 bg-surface-sunken">
+    <section id="news" className="py-14 md:py-28 bg-surface-sunken">
 
       <div className="max-w-7xl mx-auto px-8">
 

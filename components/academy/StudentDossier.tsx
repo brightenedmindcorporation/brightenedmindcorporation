@@ -299,7 +299,7 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
           </div>
           <div className="flex items-center gap-2">
             {lang && (
-              <button onClick={() => print([1, 2, 3])} className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500">
+              <button onClick={() => print([1, 2, 3])} className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 min-h-[44px]">
                 <Printer size={14} /> Imprimer la fiche
               </button>
             )}
@@ -333,11 +333,11 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
                       Niveau {level} <span className="text-ink-faint font-normal text-sm">· {curriculum.levelTitle}</span>
                     </h3>
                     <div className="flex flex-wrap items-center gap-3">
-                      <button onClick={() => print([level])} className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:text-ink">
+                      <button onClick={() => print([level])} className="inline-flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:text-ink min-h-[44px]">
                         <Printer size={12} /> Imprimer ce niveau
                       </button>
                       {onAct && canEditScores && (
-                        <button disabled={busy !== null} onClick={() => act("resetLevel", level, 0, 0)} className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:border-red-600/60 hover:text-red-500 disabled:opacity-50">
+                        <button disabled={busy !== null} onClick={() => act("resetLevel", level, 0, 0)} className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink-soft hover:border-red-600/60 hover:text-red-500 disabled:opacity-50 min-h-[44px]">
                           Faire recommencer ce niveau
                         </button>
                       )}

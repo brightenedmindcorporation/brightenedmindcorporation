@@ -118,7 +118,7 @@ export default function NarrationPlayer({
             setFallbackPlaying(true);
             onFallbackSpeak();
           }}
-          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50 inline-flex items-center gap-2"
+          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition shadow-lg shadow-red-950/50 inline-flex items-center gap-2 min-h-[44px]"
         >
           <Volume2 size={16} /> {label}
         </button>
@@ -128,7 +128,7 @@ export default function NarrationPlayer({
               onFallbackStop();
               setFallbackPlaying(false);
             }}
-            className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-6 py-3 rounded-xl border border-line transition"
+            className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-6 py-3 rounded-xl border border-line transition min-h-[44px]"
           >
             ⏹ Stop
           </button>
@@ -139,7 +139,7 @@ export default function NarrationPlayer({
 
   const ready = status === "ready";
   const btn =
-    "inline-flex items-center justify-center w-9 h-9 rounded-full text-ink-soft hover:text-ink hover:bg-surface-alt transition disabled:opacity-40";
+    "inline-flex items-center justify-center w-11 h-11 rounded-full text-ink-soft hover:text-ink hover:bg-surface-alt transition disabled:opacity-40";
 
   return (
     <div className="mt-6 rounded-2xl border border-line bg-surface-alt/60 p-4">
@@ -187,7 +187,7 @@ export default function NarrationPlayer({
               key={r}
               onClick={() => changeRate(r)}
               disabled={!ready}
-              className={`text-xs font-bold px-2.5 py-1 rounded-lg transition ${
+              className={`text-sm font-bold px-3 min-h-[44px] rounded-lg transition ${
                 rate === r ? "bg-red-600 text-white" : "text-ink-soft hover:text-ink hover:bg-surface-alt"
               }`}
             >

@@ -73,7 +73,7 @@ export default function ChineseCoursePage() {
       {/* HERO SECTION */}
       <section className="relative flex items-center justify-center py-16 px-6 text-center border-b border-line">
         <div className="relative z-10 max-w-4xl">
-          <Link href="/academia" className="inline-flex items-center gap-2 text-red-400 font-semibold text-sm mb-6 hover:underline">
+          <Link href="/academia" className="inline-flex items-center gap-2 min-h-[44px] text-red-700 dark:text-red-300 font-semibold text-base mb-4 hover:underline">
             ← Retour aux formations BM Academia
           </Link>
           <div className="flex justify-center mb-4">
@@ -219,7 +219,7 @@ export default function ChineseCoursePage() {
       </div>
 
       {/* CALL TO ACTION */}
-      <section className="bg-surface-sunken py-20 px-6 border-t border-line text-center">
+      <section className="bg-surface-sunken py-12 md:py-20 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-extrabold text-ink mb-6">
             Prêt à apprendre le Chinois ?

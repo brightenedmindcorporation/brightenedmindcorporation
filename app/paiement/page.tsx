@@ -132,10 +132,10 @@ export default function PaymentPage() {
             Créez votre compte ou connectez-vous avant de procéder au paiement de votre formation.
           </p>
           <div className="flex flex-col gap-3">
-            <Link href="/register" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 py-3 rounded-xl transition">
+            <Link href="/register" className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-6 min-h-[52px] inline-flex items-center justify-center rounded-xl transition">
               Créer un compte
             </Link>
-            <Link href="/login?next=/paiement" className="text-red-500 hover:text-red-400 font-semibold text-sm">
+            <Link href="/login?next=/paiement" className="inline-flex items-center justify-center min-h-[44px] text-red-600 dark:text-red-300 hover:underline font-semibold text-base">
               → J'ai déjà un compte
             </Link>
           </div>
@@ -173,7 +173,7 @@ export default function PaymentPage() {
             <div>
               <Link
                 href="/login"
-                className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition mt-4"
+                className="inline-block bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3 rounded-xl transition mt-4 min-h-[44px]"
               >
                 Aller à la page de connexion
               </Link>
@@ -303,7 +303,7 @@ export default function PaymentPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg shadow-red-600/30"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-8 py-3.5 rounded-xl transition shadow-lg shadow-red-600/30 min-h-[44px]"
               >
                 {loading ? "Traitement en cours..." : "Payer maintenant ↗"}
               </button>

@@ -126,7 +126,7 @@ export default function CommunicationPage() {
       <Portfolio />
 
       {/* GRILLES DE SERVICES */}
-      <div className="max-w-7xl mx-auto px-6 py-20 space-y-24">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-20 space-y-24">
         {bmServicesData.map((category, index) => (
           <section key={index} id={index === 0 ? "visuelle" : "marketing"} className="relative">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-12 border-b border-line pb-6">
@@ -155,7 +155,7 @@ export default function CommunicationPage() {
                     <p className="text-ink-soft leading-relaxed">
                       {service.description}
                     </p>
-                    <Link href={`/devis?service=${encodeURIComponent(service.quote)}`} className="mt-6 inline-block text-sm font-bold text-red-500 hover:text-red-400">
+                    <Link href={`/devis?service=${encodeURIComponent(service.quote)}`} className="mt-5 inline-flex items-center min-h-[44px] text-base font-bold text-red-700 dark:text-red-300 hover:underline">
                       Demander un devis pour ce service →
                     </Link>
                   </div>
@@ -167,7 +167,7 @@ export default function CommunicationPage() {
       </div>
 
       {/* COMMENT NOUS TRAVAILLONS */}
-      <section className="bg-surface-sunken border-t border-line py-20 px-6">
+      <section className="bg-surface-sunken border-t border-line py-12 md:py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-ink mb-3">Comment nous travaillons</h2>
@@ -186,7 +186,7 @@ export default function CommunicationPage() {
       </section>
 
       {/* CALL TO ACTION */}
-      <section className="bg-surface-sunken py-24 px-6 border-t border-line text-center">
+      <section className="bg-surface-sunken py-14 md:py-24 px-6 border-t border-line text-center">
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl min-[400px]:text-3xl md:text-4xl font-extrabold text-ink mb-6">
             Vous avez un projet en tête ?

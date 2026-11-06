@@ -365,30 +365,30 @@ export default function Dashboard() {
       <main className="flex-1 max-w-5xl w-full mx-auto p-6 md:p-10 pt-28 flex flex-col gap-8">
         
         {/* En-tête avec boutons Retour & Déconnexion */}
-        <div className="flex justify-between items-center bg-surface/80 border border-line p-4 rounded-2xl backdrop-blur-md">
+        <div className="flex flex-wrap justify-between items-center gap-3 bg-surface/80 border border-line p-4 rounded-2xl backdrop-blur-md">
           <button 
             onClick={() => router.back()}
-            className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2"
+            className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 min-h-[44px]"
           >
             ← Back / Retour
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => router.push("/academia/corrections")}
-              className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line"
+              className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line min-h-[44px]"
             >
               ✍️ Mes corrections
             </button>
             <button
               onClick={() => setRequestOpen(true)}
-              className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line"
+              className="px-4 py-2 bg-surface-alt hover:bg-surface text-ink text-sm font-semibold rounded-xl transition flex items-center gap-2 border border-line min-h-[44px]"
             >
               <MessageSquarePlus size={15} /> Contacter l'administration
             </button>
             <button
               onClick={handleLogout}
-              className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-800/40 text-sm font-semibold rounded-xl transition"
+              className="px-4 py-2 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-800/40 text-sm font-semibold rounded-xl transition min-h-[44px]"
             >
               Logout / Déconnexion
             </button>
@@ -503,7 +503,7 @@ export default function Dashboard() {
               {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
                   onClick={() => router.push(`/academia/program/${activeEnrollment.langCode}/live`)}
-                  className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0"
+                  className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 shrink-0 min-h-[44px]"
                 >
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -567,7 +567,7 @@ export default function Dashboard() {
               {liveSession && (isSessionJoinable(liveSession) || isSessionOpenNow(liveSession)) ? (
                 <button
                   onClick={() => router.push(`/academia/${langSlug}/level/${levelNumber(activeEnrollment.level)}/live`)}
-                  className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                  className="border border-red-600/40 hover:border-red-500 text-red-400 hover:text-red-300 font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   <span className="relative flex h-2.5 w-2.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75" />
@@ -590,7 +590,7 @@ export default function Dashboard() {
               {getVerbReference(activeEnrollment.langCode) && (
                 <button
                   onClick={() => router.push(`/academia/${langSlug}/verbs`)}
-                  className="border border-line hover:border-red-600/50 text-ink-soft hover:text-ink font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2"
+                  className="border border-line hover:border-red-600/50 text-ink-soft hover:text-ink font-bold px-5 py-3.5 rounded-xl transition flex items-center justify-center gap-2 min-h-[44px]"
                 >
                   <BookText size={16} /> Verbes
                 </button>
@@ -690,7 +690,7 @@ export default function Dashboard() {
               <div className="shrink-0 flex flex-col gap-2 sm:items-end">
                 <button
                   onClick={() => router.push(`/academia/placement/${langSlug}`)}
-                  className="glow-accent shrink-0 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition"
+                  className="glow-accent shrink-0 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition min-h-[44px]"
                 >
                   Passer le test
                 </button>
@@ -826,7 +826,7 @@ export default function Dashboard() {
             <select
               value={requestType}
               onChange={(e) => setRequestType(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             >
               <option value="complaint">Plainte</option>
               <option value="concern">Inquiétude</option>
@@ -839,7 +839,7 @@ export default function Dashboard() {
               value={requestSubject}
               onChange={(e) => setRequestSubject(e.target.value)}
               placeholder="Résumez votre message en quelques mots"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
             <textarea
@@ -847,7 +847,7 @@ export default function Dashboard() {
               onChange={(e) => setRequestMessage(e.target.value)}
               rows={6}
               placeholder="Décrivez votre plainte, inquiétude ou demande en détail…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             {requestAttachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
@@ -859,7 +859,7 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4 min-h-[44px]">
               <Paperclip size={13} /> Joindre un fichier
               <input
                 type="file"
@@ -871,14 +871,14 @@ export default function Dashboard() {
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setRequestOpen(false)}
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition min-h-[44px]"
               >
                 Annuler
               </button>
               <button
                 onClick={submitRequest}
                 disabled={requestSending || !requestSubject.trim() || !requestMessage.trim()}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
               >
                 {requestSending ? "Envoi…" : "Envoyer"}
               </button>

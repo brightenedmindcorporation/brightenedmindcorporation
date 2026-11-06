@@ -108,7 +108,7 @@ export default function DomesticaPage() {
       </section>
 
       {/* SERVICES */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-20">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Nos services</h2>
           <p className="text-ink-soft max-w-xl mx-auto text-sm">Un accompagnement complet, de la sélection du personnel jusqu'à son intégration durable dans le foyer.</p>
@@ -127,7 +127,7 @@ export default function DomesticaPage() {
       </div>
 
       {/* PROFILS */}
-      <div className="bg-surface-sunken border-t border-line py-20 px-6">
+      <div className="bg-surface-sunken border-t border-line py-12 md:py-20 px-6">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Les métiers que nous proposons</h2>
@@ -158,7 +158,7 @@ export default function DomesticaPage() {
       </div>
 
       {/* FORMATION */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-20">
         <div className="rounded-3xl border border-line bg-surface/60 p-8 md:p-12 text-center">
           <span className="inline-block rounded-full border border-red-700/40 bg-red-500/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-red-400">BM Academia</span>
           <h2 className="mt-4 text-3xl md:text-4xl font-bold text-ink">La formation du personnel domestique</h2>
@@ -178,7 +178,7 @@ export default function DomesticaPage() {
       </div>
 
       {/* COMMENT ÇA MARCHE */}
-      <div className="max-w-7xl mx-auto px-6 py-20">
+      <div className="max-w-7xl mx-auto px-6 py-12 md:py-20">
         <div className="text-center mb-14">
           <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Comment ça marche</h2>
           <p className="text-ink-soft max-w-xl mx-auto text-sm">Un processus simple et encadré, pour les deux côtés.</p>
@@ -207,7 +207,7 @@ export default function DomesticaPage() {
       </div>
 
       {/* FORMULES */}
-      <div className="bg-surface-sunken border-t border-line py-20 px-6">
+      <div className="bg-surface-sunken border-t border-line py-12 md:py-20 px-6">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Nos formules</h2>
@@ -237,7 +237,7 @@ export default function DomesticaPage() {
       </div>
 
       {/* GARANTIES */}
-      <div className="max-w-5xl mx-auto px-6 py-20">
+      <div className="max-w-5xl mx-auto px-6 py-12 md:py-20">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-ink mb-4">Pourquoi choisir BM Domestica</h2>
         </div>
@@ -252,19 +252,19 @@ export default function DomesticaPage() {
       </div>
 
       {/* FAQ */}
-      <div className="bg-surface-sunken border-t border-line py-20 px-6">
+      <div className="bg-surface-sunken border-t border-line py-12 md:py-20 px-6">
         <div className="max-w-3xl mx-auto">
           <h2 className="text-3xl md:text-4xl font-bold text-ink mb-10 text-center">Questions fréquentes</h2>
           <div className="space-y-3">
             {faqs.map((f) => (
               <details key={f.q} className="group rounded-2xl border border-line bg-surface p-5 open:border-red-600/50">
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-bold text-ink">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-4 min-h-[44px] font-bold text-ink">
                   {f.q}
                   <span className="text-red-500 transition group-open:rotate-45 text-xl leading-none" aria-hidden="true">
                     +
                   </span>
                 </summary>
-                <p className="mt-3 text-sm text-ink-soft leading-relaxed">{f.a}</p>
+                <p className="mt-3 text-base text-ink-soft leading-relaxed">{f.a}</p>
               </details>
             ))}
           </div>
@@ -272,7 +272,7 @@ export default function DomesticaPage() {
       </div>
 
       {/* DEMANDE */}
-      <section id="demande" className="scroll-mt-28 py-20 px-6 border-t border-line">
+      <section id="demande" className="scroll-mt-28 py-12 md:py-20 px-6 border-t border-line">
         <div className="max-w-3xl mx-auto">
           <div id="demande-candidat" className="scroll-mt-28" />
           <div className="text-center mb-8">

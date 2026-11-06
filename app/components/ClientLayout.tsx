@@ -167,11 +167,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
                 </p>
                 <p>
                   <span className="text-ink font-semibold">Téléphone :</span>{" "}
-                  <a href={`tel:${phoneOfficial}`} className="text-red-600 font-semibold hover:underline">{phoneOfficial}</a>
+                  <a href={`tel:${phoneOfficial}`} className="inline-flex items-center min-h-[44px] text-red-600 font-semibold hover:underline">{phoneOfficial}</a>
                 </p>
                 <p>
                   <span className="text-ink font-semibold">E-mail :</span>{" "}
-                  <a href="mailto:info@bmcorporation-cd.com" className="text-red-600 font-semibold hover:underline break-all">info@bmcorporation-cd.com</a>
+                  <a href="mailto:info@bmcorporation-cd.com" className="inline-flex items-center min-h-[44px] text-red-600 font-semibold hover:underline break-all">info@bmcorporation-cd.com</a>
                 </p>
               </address>
             </div>
@@ -213,7 +213,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
           <div className="divider-red max-w-7xl mx-auto" />
 
-          <div className="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row justify-between items-center text-xs text-ink-faint">
+          <div className="max-w-7xl mx-auto pt-8 flex flex-col sm:flex-row justify-between items-center text-sm text-ink-soft">
             <p>© 2026 BM Corporation. Tous droits réservés.</p>
             <p className="mt-2 sm:mt-0">Propulsé par BM Corporation</p>
           </div>

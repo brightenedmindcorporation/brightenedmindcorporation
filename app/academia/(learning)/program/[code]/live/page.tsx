@@ -75,7 +75,7 @@ export default function ProgramLiveClassPage() {
         <div className="max-w-5xl mx-auto space-y-6">
           <Link
             href="/academia/dashboard"
-            className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
+            className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg min-h-[44px]"
           >
             ← Back to Dashboard
           </Link>

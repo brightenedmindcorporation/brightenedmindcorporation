@@ -30,14 +30,9 @@ export default function HeroSlideshow({ children }: { children: React.ReactNode 
       <div className="relative z-10 max-w-4xl text-white">{children}</div>
       <div className="absolute bottom-5 left-1/2 z-10 flex -translate-x-1/2 gap-2" role="tablist" aria-label="Photos du portfolio">
         {HERO_SLIDES.map((s, i) => (
-          <button
-            key={s.id}
-            role="tab"
-            aria-selected={i === index}
-            aria-label={`Photo ${i + 1}`}
-            onClick={() => setIndex(i)}
-            className={`h-2 rounded-full transition-all ${i === index ? "w-8 bg-red-500" : "w-2 bg-white/50 hover:bg-white/80"}`}
-          />
+          <button key={s.id} role="tab" aria-selected={i === index} aria-label={`Photo ${i + 1}`} onClick={() => setIndex(i)} className="flex h-11 items-center justify-center px-1.5">
+            <span className={`block h-2 rounded-full transition-all ${i === index ? "w-8 bg-red-500" : "w-2 bg-white/50"}`} />
+          </button>
         ))}
       </div>
     </section>

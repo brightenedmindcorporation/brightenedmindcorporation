@@ -80,7 +80,7 @@ export default function InstallApp() {
             if (choice.outcome === "accepted") setHidden(true);
             setPrompt(null);
           }}
-          className="shrink-0 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500"
+          className="shrink-0 rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white hover:bg-red-500 min-h-[44px]"
         >
           Installer
         </button>

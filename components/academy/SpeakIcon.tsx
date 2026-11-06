@@ -20,7 +20,7 @@ export default function SpeakIcon({
       play={(id) => speakPhrase(text, langSlug, id)}
       title={label}
       size={13}
-      className={`inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition ${className}`}
+      className={`inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition ${className}`}
     />
   );
 }

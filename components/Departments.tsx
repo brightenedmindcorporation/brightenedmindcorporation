@@ -36,7 +36,7 @@ export default function Departments() {
     <FadeIn>
       <section
         id="departments"
-        className="py-32 bg-page"
+        className="py-16 md:py-32 bg-page"
       >
         <div className="max-w-7xl mx-auto px-8">
 

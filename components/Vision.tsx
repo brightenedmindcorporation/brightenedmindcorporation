@@ -6,7 +6,7 @@ export default function Vision() {
   return (
     <section
       id="vision"
-      className="py-32 bg-surface-sunken"
+      className="py-16 md:py-32 bg-surface-sunken"
     >
 
       <div className="max-w-6xl mx-auto px-8 text-center">

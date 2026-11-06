@@ -7,7 +7,7 @@ export default function CTA() {
   return (
     <section
       id="contact"
-      className="py-32 bg-page text-ink relative overflow-hidden"
+      className="py-16 md:py-32 bg-page text-ink relative overflow-hidden"
     >
 
       {/* Decorative glow */}

@@ -6,7 +6,7 @@ export default function BackToLevel({ href, langSlug, className = "" }: { href: 
   return (
     <Link
       href={href}
-      className={`inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg ${className}`}
+      className={`inline-flex items-center gap-2 min-h-[44px] text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 rounded-xl border border-line transition shadow-lg ${className}`}
     >
       {isOfficeProgram(langSlug) ? "← Retour au niveau" : "← Back to Level"}
     </Link>

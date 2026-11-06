@@ -7,6 +7,9 @@ import { CATEGORIES, PHOTOS, photoSrc, photoThumb, type PhotoCategory } from "@/
 export default function Portfolio() {
   const [filter, setFilter] = useState<"all" | PhotoCategory>("all");
   const [open, setOpen] = useState<number | null>(null);
+  // The wall starts with 8 photos (a phone would otherwise scroll through dozens); "Voir plus" adds 8 each time.
+  const [count, setCount] = useState(8);
+  const [touchX, setTouchX] = useState<number | null>(null);
 
   const list = useMemo(() => PHOTOS.filter((p) => filter === "all" || p.category === filter), [filter]);
   const move = useCallback((d: number) => setOpen((i) => (i === null ? i : (i + d + list.length) % list.length)), [list.length]);
@@ -29,7 +32,7 @@ export default function Portfolio() {
   const current = open !== null ? list[open] : null;
 
   return (
-    <section id="portfolio" className="mx-auto max-w-7xl scroll-mt-28 px-6 py-20">
+    <section id="portfolio" className="mx-auto max-w-7xl scroll-mt-28 px-6 py-12 md:py-20">
       <div className="mb-10 text-center">
         <span className="mb-3 inline-block rounded-full border border-red-700/40 bg-red-500/5 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-red-400">Portfolio</span>
         <h2 className="text-3xl font-bold text-ink md:text-4xl">Nos réalisations</h2>
@@ -42,8 +45,11 @@ export default function Portfolio() {
             key={c.key}
             role="tab"
             aria-selected={filter === c.key}
-            onClick={() => setFilter(c.key)}
-            className={`rounded-full px-5 py-2 text-sm font-bold transition ${filter === c.key ? "bg-red-600 text-white" : "border border-line bg-surface text-ink-soft hover:text-ink"}`}
+            onClick={() => {
+              setFilter(c.key);
+              setCount(8);
+            }}
+            className={`rounded-full px-5 min-h-[44px] text-sm font-bold transition ${filter === c.key ? "bg-red-600 text-white" : "border border-line bg-surface text-ink-soft hover:text-ink"}`}
           >
             {c.label}
           </button>
@@ -51,7 +57,7 @@ export default function Portfolio() {
       </div>
 
       <div className="columns-2 gap-4 md:columns-3 lg:columns-4 [&>*]:mb-4">
-        {list.map((p, i) => (
+        {list.slice(0, count).map((p, i) => (
           <button
             key={p.id}
             onClick={() => setOpen(i)}
@@ -65,14 +71,39 @@ export default function Portfolio() {
         ))}
       </div>
 
+      {list.length > count && (
+        <div className="mt-4 text-center">
+          <button
+            type="button"
+            onClick={() => setCount((n) => n + 8)}
+            className="min-h-[52px] rounded-xl border border-line bg-surface px-8 font-bold text-ink hover:border-red-600/60"
+          >
+            Voir plus de photos ({list.length - count} restantes)
+          </button>
+        </div>
+      )}
+
       {current && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4" role="dialog" aria-modal="true" aria-label={current.alt} onClick={() => setOpen(null)}>
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-label={current.alt}
+          onClick={() => setOpen(null)}
+          onTouchStart={(e) => setTouchX(e.touches[0].clientX)}
+          onTouchEnd={(e) => {
+            if (touchX === null) return;
+            const dx = e.changedTouches[0].clientX - touchX;
+            setTouchX(null);
+            if (Math.abs(dx) > 60) move(dx < 0 ? 1 : -1);
+          }}
+        >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={photoSrc(current.id)} alt={current.alt} className="max-h-[88vh] max-w-full rounded-xl object-contain shadow-2xl" onClick={(e) => e.stopPropagation()} />
           <p className="absolute bottom-5 left-1/2 w-[90%] max-w-xl -translate-x-1/2 text-center text-sm text-white/80">{current.alt} · {open! + 1} / {list.length}</p>
-          <button aria-label="Fermer" onClick={() => setOpen(null)} className="absolute right-4 top-4 rounded-full bg-white/15 px-4 py-2 text-xl font-bold text-white hover:bg-white/30">×</button>
-          <button aria-label="Photo précédente" onClick={(e) => { e.stopPropagation(); move(-1); }} className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 px-4 py-3 text-2xl font-bold text-white hover:bg-white/30">‹</button>
-          <button aria-label="Photo suivante" onClick={(e) => { e.stopPropagation(); move(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 px-4 py-3 text-2xl font-bold text-white hover:bg-white/30">›</button>
+          <button aria-label="Fermer" onClick={() => setOpen(null)} className="absolute right-4 top-4 min-h-[48px] min-w-[48px] rounded-full bg-white/15 text-2xl font-bold text-white hover:bg-white/30">×</button>
+          <button aria-label="Photo précédente" onClick={(e) => { e.stopPropagation(); move(-1); }} className="absolute left-3 top-1/2 -translate-y-1/2 min-h-[48px] min-w-[48px] rounded-full bg-white/15 text-2xl font-bold text-white hover:bg-white/30">‹</button>
+          <button aria-label="Photo suivante" onClick={(e) => { e.stopPropagation(); move(1); }} className="absolute right-3 top-1/2 -translate-y-1/2 min-h-[48px] min-w-[48px] rounded-full bg-white/15 text-2xl font-bold text-white hover:bg-white/30">›</button>
         </div>
       )}
     </section>

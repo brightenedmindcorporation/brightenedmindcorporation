@@ -122,7 +122,7 @@ export default function Home() {
       </section>
 
       {/* SECTION 4 PÔLES DE FORMATION */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-12 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
             Nos Pôles de Formation
@@ -150,7 +150,7 @@ export default function Home() {
       </section>
 
       {/* SECTION LANGUES */}
-      <section id="langues" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-10">
+      <section id="langues" className="py-12 md:py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 scroll-mt-10">
         <div className="text-center mb-16">
           <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
             Choose Your Language
@@ -194,7 +194,7 @@ export default function Home() {
       </section>
 
       {/* SECTION AVANTAGES */}
-      <section className="py-20 bg-surface/60 border-y border-line">
+      <section className="py-12 md:py-20 bg-surface/60 border-y border-line">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-xs font-bold text-red-500 uppercase tracking-widest mb-2">
@@ -250,9 +250,9 @@ export default function Home() {
             © {new Date().getFullYear()} Brightened Mind Academia. All rights reserved.
           </p>
 
-          <div className="flex items-center gap-6 text-xs text-ink-soft font-medium">
-            <Link href="/academia/dashboard" className="hover:text-ink transition">Dashboard</Link>
-            <Link href="/login" className="hover:text-ink transition">Login</Link>
+          <div className="flex items-center gap-2 text-sm text-ink-soft font-medium">
+            <Link href="/academia/dashboard" className="inline-flex items-center min-h-[44px] px-3 hover:text-ink transition">Tableau de bord</Link>
+            <Link href="/login" className="inline-flex items-center min-h-[44px] px-3 hover:text-ink transition">Connexion</Link>
           </div>
 
         </div>

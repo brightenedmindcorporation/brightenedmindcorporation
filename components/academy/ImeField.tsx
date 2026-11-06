@@ -123,7 +123,7 @@ function PinyinBox({ corpus, onPick }: { corpus: string[]; onPick: (c: string) =
         autoCapitalize="off"
         autoCorrect="off"
         spellCheck={false}
-        className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+        className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
       />
       {typed && (
         <div className="flex flex-wrap gap-1.5" translate="no">

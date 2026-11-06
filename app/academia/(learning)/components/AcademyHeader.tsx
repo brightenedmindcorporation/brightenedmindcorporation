@@ -31,7 +31,7 @@ export default function AcademyHeader() {
         <div className="flex items-center gap-4">
           <Link
             href="/"
-            className="flex items-center gap-1 text-sm font-medium text-ink-soft hover:text-ink transition"
+            className="flex items-center gap-1 min-h-[44px] text-sm font-medium text-ink-soft hover:text-ink transition"
             title="Retour au site principal"
           >
             ← Site Général
@@ -42,7 +42,7 @@ export default function AcademyHeader() {
               <span className="text-ink-faint">|</span>
               <Link
                 href="/academia/dashboard"
-                className="text-sm font-semibold text-red-500 hover:text-red-400 transition flex items-center gap-1.5"
+                className="text-sm font-semibold text-red-600 dark:text-red-300 hover:text-red-500 transition flex items-center gap-1.5 min-h-[44px]"
               >
                 <LayoutDashboard size={15} /> Mon Dashboard
               </Link>
@@ -55,7 +55,7 @@ export default function AcademyHeader() {
           <NotificationBell scope="student" />
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 py-2 rounded-xl transition-all duration-200 bg-red-950/30"
+            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 min-h-[44px] rounded-xl transition-all duration-200 bg-red-950/30"
           >
             <LogOut size={15} /> Déconnexion
           </button>

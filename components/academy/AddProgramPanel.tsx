@@ -101,7 +101,7 @@ export default function AddProgramPanel({ name, onChanged }: { name: string; onC
     <div className="rounded-2xl border border-line bg-surface/80 p-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-ink-soft">Vous voulez suivre une autre formation avec ce même compte ?</p>
-        <button onClick={toggle} className="rounded-xl border border-red-600/60 bg-red-600/10 px-4 py-2 text-sm font-bold text-red-500 transition hover:bg-red-600/20">
+        <button onClick={toggle} className="rounded-xl border border-red-600/60 bg-red-600/10 px-4 py-2 text-sm font-bold text-red-500 transition hover:bg-red-600/20 min-h-[44px]">
           {open ? "Fermer" : "+ Ajouter une formation"}
         </button>
       </div>

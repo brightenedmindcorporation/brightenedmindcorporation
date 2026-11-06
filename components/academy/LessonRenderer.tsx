@@ -67,7 +67,7 @@ function SpeakIconButton({ text, langSlug }: { text: string; langSlug: string })
       play={(id) => speak(text, langSlug, id)}
       title="Écouter cette phrase"
       size={13}
-      className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition mt-0.5"
+      className="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-surface-alt hover:bg-red-600 hover:text-white text-ink-soft transition mt-0.5"
     />
   );
 }
@@ -102,7 +102,7 @@ function LetterRow({ text, langSlug }: { text: string; langSlug: string }) {
             }}
             title={`Écouter la lettre ${letter}`}
             size={13}
-            className="inline-flex items-center justify-center w-7 h-7 shrink-0 rounded-full bg-surface hover:bg-red-600 hover:text-white text-ink-soft transition"
+            className="inline-flex items-center justify-center w-10 h-10 shrink-0 rounded-full bg-surface hover:bg-red-600 hover:text-white text-ink-soft transition"
           />
           <span className="text-lg font-semibold text-ink">{letter}</span>
         </span>

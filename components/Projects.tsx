@@ -31,7 +31,7 @@ const projects = [
 export default function Projects() {
   return (
     <FadeIn>
-    <section className="py-28 bg-page">
+    <section className="py-14 md:py-28 bg-page">
 
       <div className="max-w-7xl mx-auto px-8">
 

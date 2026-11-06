@@ -193,7 +193,7 @@ export default function VocabularyPage() {
         <div className="max-w-5xl mx-auto space-y-6">
           <Link
             href={base}
-            className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg"
+            className="inline-flex items-center gap-2 text-sm font-bold text-ink-soft hover:text-ink bg-surface hover:bg-surface-alt px-4 py-2 rounded-xl border border-line transition shadow-lg min-h-[44px]"
           >
             ← Back to Level
           </Link>
@@ -215,7 +215,7 @@ export default function VocabularyPage() {
             </div>
             <button
               onClick={downloadPage}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-ink border border-line hover:border-red-600/60 rounded-xl px-4 py-2 transition bg-surface"
+              className="inline-flex items-center gap-2 text-sm font-semibold text-ink border border-line hover:border-red-600/60 rounded-xl px-4 py-2 transition bg-surface min-h-[44px]"
             >
               <FileDown size={15} /> Télécharger la page (PDF)
             </button>
@@ -227,7 +227,7 @@ export default function VocabularyPage() {
               <button
                 onClick={downloadAll}
                 disabled={offline === "loading"}
-                className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 transition disabled:opacity-60 bg-surface"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-xl px-4 py-2 transition disabled:opacity-60 bg-surface min-h-[44px]"
               >
                 <Download size={15} />
                 {offline === "loading" ? `Téléchargement… ${progress}/${phrases.length}` : "Télécharger les audios (hors ligne)"}

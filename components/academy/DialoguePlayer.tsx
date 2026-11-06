@@ -100,7 +100,7 @@ export default function DialoguePlayer({
       <div className="flex flex-wrap items-center gap-4">
         <button
           onClick={playing ? stop : start}
-          className="inline-flex items-center gap-2 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-3 rounded-xl transition"
+          className="inline-flex items-center gap-2 bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-5 py-3 rounded-xl transition min-h-[44px]"
         >
           {playing ? <Square size={16} /> : <Play size={16} />}
           {playing ? "Arrêter" : plays > 0 ? "Réécouter la conversation" : "Écouter la conversation"}
