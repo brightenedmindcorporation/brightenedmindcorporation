@@ -81,12 +81,12 @@ function AssignmentPicker({ value, onChange }: { value: Assignment[]; onChange: 
   };
   const everything = PROGRAMS.every(rowAll);
 
-  const linkBtn = "text-xs font-semibold text-red-500 hover:text-red-400";
+  const linkBtn = "text-sm font-semibold text-red-500 hover:text-red-400";
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-xs text-ink-faint">
+        <p className="text-sm text-ink-faint">
           {value.reduce((n, a) => n + a.levels.length, 0)} cours sélectionné(s)
         </p>
         <button type="button" onClick={() => onChange(everything ? [] : PROGRAMS.reduce<Assignment[]>((acc, p) => setLevels(acc, p.code, p.levels), []))} className={linkBtn}>
@@ -96,7 +96,7 @@ function AssignmentPicker({ value, onChange }: { value: Assignment[]; onChange: 
       {CATEGORIES.map((cat) => (
         <div key={cat.id} className="space-y-2">
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-bold text-ink uppercase tracking-wide">{cat.label}</p>
+            <p className="text-sm font-bold text-ink uppercase tracking-wide">{cat.label}</p>
             <button type="button" onClick={() => toggleGroup(cat.items)} className={linkBtn}>
               {groupAll(cat.items) ? "Désélectionner la catégorie" : "Sélectionner toute la catégorie"}
             </button>
@@ -107,13 +107,13 @@ function AssignmentPicker({ value, onChange }: { value: Assignment[]; onChange: 
                 <span className="text-sm font-semibold text-ink">{p.label}</span>
                 <span className="flex items-center gap-3">
                   {p.levels.length > 1 && (
-                    <label className="flex items-center gap-1 text-xs font-semibold text-ink cursor-pointer">
+                    <label className="flex items-center gap-1 text-sm font-semibold text-ink cursor-pointer">
                       <input type="checkbox" checked={rowAll(p)} onChange={() => toggleRow(p)} />
                       Tous
                     </label>
                   )}
                   {p.levels.map((level) => (
-                    <label key={level} className="flex items-center gap-1 text-xs text-ink-soft cursor-pointer">
+                    <label key={level} className="flex items-center gap-1 text-sm text-ink-soft cursor-pointer">
                       <input type="checkbox" checked={has(p.code, level)} onChange={() => toggle(p.code, level)} />
                       {p.levels.length > 1 ? `Niv. ${level}` : "Cours"}
                     </label>
@@ -286,7 +286,7 @@ export default function TeachersTab() {
 
   return (
     <div className="space-y-8">
-      <p className="text-xs text-ink-soft max-w-2xl">
+      <p className="text-sm text-ink-soft max-w-2xl">
         Chaque professeur a son propre compte et un tableau de bord limité à ses langues/niveaux : ses classes en
         direct, ses étudiants et leur progression, et l'envoi de messages à ses étudiants. Adresse de connexion :{" "}
         <span className="font-mono text-ink">bmcorporation-cd.com/teacher</span>
@@ -306,28 +306,28 @@ export default function TeachersTab() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Nom complet"
-            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="E-mail (ex. jordimukosa@bmcorporation-cd.com)"
-            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
           />
         </div>
         <div>
-          <p className="text-xs font-semibold text-ink-soft mb-2">Langues / niveaux enseignés</p>
+          <p className="text-sm font-semibold text-ink-soft mb-2">Langues / niveaux enseignés</p>
           <AssignmentPicker value={assignments} onChange={setAssignments} />
         </div>
         <button
           onClick={create}
           disabled={creating || !name.trim() || !email.trim() || assignments.length === 0}
-          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
+          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition min-h-[44px]"
         >
           {creating ? "Création…" : "Créer le compte et envoyer l'invitation"}
         </button>
-        <p className="text-xs text-ink-faint">
+        <p className="text-sm text-ink-faint">
           Le professeur reçoit un e-mail avec un lien pour choisir son mot de passe. Si l'e-mail professionnel n'existe
           pas encore, utilisez une adresse qu'il consulte déjà.
         </p>
@@ -344,21 +344,21 @@ export default function TeachersTab() {
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div>
                   <p className="font-bold text-ink">
-                    {t.name} {t.active === false && <span className="text-xs text-red-500 font-semibold">· désactivé</span>}
+                    {t.name} {t.active === false && <span className="text-sm text-red-500 font-semibold">· désactivé</span>}
                   </p>
-                  <p className="text-xs text-ink-soft mt-0.5">{t.email}</p>
-                  <p className="text-xs text-ink mt-1">
+                  <p className="text-sm text-ink-soft mt-0.5">{t.email}</p>
+                  <p className="text-sm text-ink mt-1">
                     <b>{countFor(t.id)}</b> étudiant(s) attribué(s)
                   </p>
                   <div className="flex flex-wrap gap-2 mt-3">
                     {(t.assignments || []).map((a) => (
-                      <span key={a.langCode} className="text-xs font-semibold px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-700/30">
+                      <span key={a.langCode} className="text-sm font-semibold px-3 py-1 rounded-full bg-red-500/10 text-red-500 border border-red-700/30">
                         {labelOf(a.langCode)} · {(PROGRAMS.find((p) => p.code === a.langCode)?.levels.length ?? 1) > 1 ? `Niv. ${a.levels.join(", ")}` : "Cours"}
                       </span>
                     ))}
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-2 text-xs font-semibold">
+                <div className="flex flex-wrap gap-2 text-sm font-semibold">
                   <button
                     onClick={() => {
                       setEditingId(editingId === t.id ? null : t.id);
@@ -401,7 +401,7 @@ export default function TeachersTab() {
                       setEditingId(null);
                     }}
                     disabled={editAssignments.length === 0}
-                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+                    className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-bold px-4 py-2 rounded-lg transition min-h-[44px]"
                   >
                     Enregistrer
                   </button>
@@ -415,7 +415,7 @@ export default function TeachersTab() {
       <div ref={assignRef} className="bg-surface border border-line rounded-2xl p-6 space-y-4 scroll-mt-24">
         <div>
           <p className="font-bold text-ink">Étudiants des professeurs</p>
-          <p className="text-xs text-ink-soft mt-1 max-w-2xl">
+          <p className="text-sm text-ink-soft mt-1 max-w-2xl">
             Attribuez des étudiants à un professeur, ou faites-les passer d'un professeur à un autre : filtrez sur le
             professeur actuel, cochez les étudiants (ou « tout sélectionner »), choisissez le nouveau professeur et
             appliquez. Un étudiant attribué n'est vu que par son professeur ; tant qu'il n'est pas attribué
@@ -427,7 +427,7 @@ export default function TeachersTab() {
           <select
             value={filterTeacher}
             onChange={(e) => { setFilterTeacher(e.target.value); setSelected(new Set()); }}
-            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
           >
             <option value="all">Tous les étudiants ({students.length})</option>
             <option value="none">Non attribués ({unattributed})</option>
@@ -440,7 +440,7 @@ export default function TeachersTab() {
           <select
             value={filterLang}
             onChange={(e) => { setFilterLang(e.target.value); setSelected(new Set()); }}
-            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
           >
             <option value="all">Toutes les langues / formations</option>
             {PROGRAMS.map((p) => (
@@ -451,20 +451,20 @@ export default function TeachersTab() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher (nom, e-mail, Student ID)"
-            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
           />
         </div>
 
         <div className="flex flex-wrap items-center gap-3 p-3 rounded-xl bg-surface-alt border border-line">
-          <label className="flex items-center gap-2 text-xs font-semibold text-ink cursor-pointer">
+          <label className="flex items-center gap-2 text-sm font-semibold text-ink cursor-pointer">
             <input type="checkbox" checked={allVisibleSelected} onChange={toggleAllVisible} />
             Tout sélectionner ({visibleStudents.length})
           </label>
-          <span className="text-xs text-ink-soft">{selected.size} sélectionné(s)</span>
+          <span className="text-sm text-ink-soft">{selected.size} sélectionné(s)</span>
           <select
             value={targetTeacher}
             onChange={(e) => setTargetTeacher(e.target.value)}
-            className="bg-surface border border-line rounded-lg px-2 py-1.5 text-xs text-ink focus:outline-none focus:border-red-600/60 sm:ml-auto"
+            className="bg-surface border border-line rounded-lg px-2 py-1.5 text-base text-ink focus:outline-none focus:border-red-600/60 sm:ml-auto min-h-[44px]"
           >
             <option value="">Attribuer à…</option>
             {teachers.filter((t) => t.active !== false).map((t) => (
@@ -475,7 +475,7 @@ export default function TeachersTab() {
           <button
             onClick={applyAssignment}
             disabled={assigning || selected.size === 0 || !targetTeacher}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-xs font-bold px-4 py-2 rounded-lg transition"
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white text-sm font-bold px-4 py-2 rounded-lg transition min-h-[44px]"
           >
             {assigning ? "En cours…" : "Appliquer"}
           </button>
@@ -495,12 +495,12 @@ export default function TeachersTab() {
                   <input type="checkbox" checked={selected.has(rowKey(r))} onChange={() => toggleOne(r)} />
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-semibold text-ink truncate">{r.name || r.email}</span>
-                    <span className="block text-xs text-ink-soft truncate">
+                    <span className="block text-sm text-ink-soft truncate">
                       {labelOf(r.langCode!)} · {r.matricule || "—"} · {r.email}
                     </span>
                   </span>
                   <span
-                    className={`text-xs font-semibold px-2.5 py-1 rounded-full border shrink-0 ${
+                    className={`text-sm font-semibold px-2.5 py-1 rounded-full border shrink-0 ${
                       r.teacherUid
                         ? owner
                           ? "bg-red-500/10 text-red-500 border-red-700/30"

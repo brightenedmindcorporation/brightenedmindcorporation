@@ -132,11 +132,11 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                 <p className="font-bold text-ink">
                   {r.name} <span className="text-ink-faint font-normal text-sm">· {lang} · niveau {r.level}</span>
                 </p>
-                <p className="text-xs text-ink-soft mt-0.5">
+                <p className="text-sm text-ink-soft mt-0.5">
                   {r.quizTitle} · envoyé le {date(r.submittedAt)}
                 </p>
               </div>
-              <span className={`text-xs font-bold px-3 py-1 rounded-full ${r.status === "reviewed" ? "bg-emerald-600 text-white" : "bg-amber-500 text-black"}`}>
+              <span className={`text-sm font-bold px-3 py-1 rounded-full ${r.status === "reviewed" ? "bg-emerald-600 text-white" : "bg-amber-500 text-black"}`}>
                 {r.status === "reviewed" ? `Corrigée${r.mark != null ? ` · ${r.mark}/10` : ""}` : "À corriger"}
               </span>
             </button>
@@ -145,18 +145,18 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
               <div className="border-t border-line p-4 space-y-5">
                 {r.items.map((it, i) => (
                   <div key={i} className="rounded-xl border border-line bg-surface-alt/50 p-3 space-y-2.5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">
+                    <p className="text-sm font-bold uppercase tracking-wide text-ink-soft">
                       {KIND_LABEL[it.kind]} <span className="normal-case font-normal text-ink-faint">· {it.prompt}</span>
                     </p>
                     {it.kind === "dictation" && it.expected && (
-                      <p className="text-xs text-ink-faint">
+                      <p className="text-sm text-ink-faint">
                         Phrase dictée : <span translate="no" className="notranslate text-ink-soft">{it.expected}</span>
                       </p>
                     )}
                     {it.kind === "reading" && it.audioUrl ? (
                       <div className="space-y-2">
                         {it.expected && (
-                          <p className="text-xs text-ink-faint">
+                          <p className="text-sm text-ink-faint">
                             Texte à lire : <span translate="no" className="notranslate text-ink-soft">{it.expected}</span>
                           </p>
                         )}
@@ -164,14 +164,14 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                           <source src={mp3(it.audioUrl)} type="audio/mpeg" />
                           <source src={it.audioUrl} />
                         </audio>
-                        <a href={it.audioUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-bold text-red-600 underline">Ouvrir l&apos;enregistrement</a>
-                        <p className="text-xs text-ink-soft">Écoutez la lecture, puis tenez-en compte dans votre commentaire général ou dans la note de la lecture de l&apos;étudiant.</p>
+                        <a href={it.audioUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-red-600 underline">Ouvrir l&apos;enregistrement</a>
+                        <p className="text-sm text-ink-soft">Écoutez la lecture, puis tenez-en compte dans votre commentaire général ou dans la note de la lecture de l&apos;étudiant.</p>
                       </div>
                     ) : (
                     <>
                     <p translate="no" className="notranslate whitespace-pre-wrap text-ink">{it.text}</p>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Version corrigée (modifiez le texte ci-dessous)</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Version corrigée (modifiez le texte ci-dessous)</label>
                       <textarea
                         value={d.feedback[i]?.corrected ?? ""}
                         onChange={(e) =>
@@ -179,7 +179,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                         }
                         rows={Math.min(8, Math.max(2, Math.ceil(it.text.length / 70)))}
                         disabled={r.status === "reviewed"}
-                        className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60 disabled:opacity-70"
+                        className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
                       />
                     </div>
                     <input
@@ -189,7 +189,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                       }
                       disabled={r.status === "reviewed"}
                       placeholder="Commentaire (facultatif) : faute à retenir, règle, conseil…"
-                      className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70"
+                      className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
                     />
                     </>
                     )}
@@ -203,7 +203,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                     disabled={r.status === "reviewed"}
                     rows={2}
                     placeholder="Commentaire général pour l'étudiant (points forts, ce qu'il faut travailler)…"
-                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70"
+                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
                   />
                   <input
                     value={d.mark}
@@ -211,12 +211,12 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                     disabled={r.status === "reviewed"}
                     inputMode="decimal"
                     placeholder="Note /10"
-                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70"
+                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
                   />
                 </div>
 
                 {r.status === "pending" ? (
-                  <button onClick={() => save(r)} disabled={busy === r.id} className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold">
+                  <button onClick={() => save(r)} disabled={busy === r.id} className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold min-h-[44px]">
                     {busy === r.id ? "Envoi…" : "Envoyer la correction à l'étudiant"}
                   </button>
                 ) : (
@@ -245,7 +245,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
             {label}
           </button>
         ))}
-        <p className="text-xs text-ink-soft max-w-xl">
+        <p className="text-sm text-ink-soft max-w-xl">
           Les questions à choix sont corrigées automatiquement. Ici : l&apos;orthographe et la grammaire des textes écrits par l&apos;étudiant.
         </p>
       </div>
@@ -258,15 +258,15 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
             value={q}
             onChange={(e) => setQ(e.target.value)}
             placeholder="Chercher un étudiant…"
-            className="bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+            className="bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
           />
-          <button onClick={() => setFolders(Object.fromEntries(groups.map((g) => [g.key, true])))} className="px-3 py-2 text-xs font-bold rounded-xl bg-surface-alt text-ink-soft hover:text-ink">
+          <button onClick={() => setFolders(Object.fromEntries(groups.map((g) => [g.key, true])))} className="px-3 py-2 text-sm font-bold rounded-xl bg-surface-alt text-ink-soft hover:text-ink min-h-[44px]">
             Tout ouvrir
           </button>
-          <button onClick={() => setFolders(Object.fromEntries(groups.map((g) => [g.key, false])))} className="px-3 py-2 text-xs font-bold rounded-xl bg-surface-alt text-ink-soft hover:text-ink">
+          <button onClick={() => setFolders(Object.fromEntries(groups.map((g) => [g.key, false])))} className="px-3 py-2 text-sm font-bold rounded-xl bg-surface-alt text-ink-soft hover:text-ink min-h-[44px]">
             Tout fermer
           </button>
-          <span className="text-xs text-ink-faint">{groups.length} étudiant{groups.length > 1 ? "s" : ""}</span>
+          <span className="text-sm text-ink-faint">{groups.length} étudiant{groups.length > 1 ? "s" : ""}</span>
         </div>
       )}
 
@@ -283,13 +283,13 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                 {open ? <FolderOpen size={26} className="text-red-500 shrink-0" /> : <Folder size={26} className="text-red-500 shrink-0" />}
                 <div className="min-w-0">
                   <p className="font-extrabold text-ink truncate">{g.name}</p>
-                  <p className="text-xs text-ink-soft truncate">
+                  <p className="text-sm text-ink-soft truncate">
                     {where}
                     {g.email ? ` · ${g.email}` : ""}
                   </p>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+              <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
                 {todo > 0 && <span className="px-3 py-1 rounded-full bg-amber-500 text-black">{todo} à corriger</span>}
                 {average !== null && <span className="px-3 py-1 rounded-full bg-surface text-ink-soft border border-line">Moyenne {average}/10</span>}
                 <span className="px-3 py-1 rounded-full bg-surface text-ink-soft border border-line">

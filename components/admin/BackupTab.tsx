@@ -153,7 +153,7 @@ export default function BackupTab() {
         <h3 className="font-extrabold text-ink">{title}</h3>
       </div>
       <p className="text-sm text-ink-soft flex-1">{text}</p>
-      <button onClick={onClick} disabled={busy !== ""} className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl transition disabled:opacity-50">
+      <button onClick={onClick} disabled={busy !== ""} className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2.5 rounded-xl transition disabled:opacity-50 min-h-[44px]">
         {busy === key ? "Préparation…" : label}
       </button>
     </div>
@@ -196,7 +196,7 @@ export default function BackupTab() {
           </div>
         </details>
       )}
-      <p className="text-xs text-ink-faint">
+      <p className="text-sm text-ink-faint">
         Les mots de passe ne figurent pas dans la sauvegarde (ils sont gérés par le service de connexion), ni les clés et connexions externes, par sécurité.
       </p>
     </div>

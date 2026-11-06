@@ -60,9 +60,9 @@ export default function ProgressAudit() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-bold text-ink">Vérifier les mélanges de progression</p>
-          <p className="text-xs text-ink-soft">Repère les élèves dont la progression n&apos;a aucune trace dans leur propre activité (deux élèves sur le même navigateur).</p>
+          <p className="text-sm text-ink-soft">Repère les élèves dont la progression n&apos;a aucune trace dans leur propre activité (deux élèves sur le même navigateur).</p>
         </div>
-        <button onClick={run} disabled={busy} className="rounded-xl border border-line bg-surface-alt px-4 py-2 text-sm font-bold text-ink disabled:opacity-50">
+        <button onClick={run} disabled={busy} className="rounded-xl border border-line bg-surface-alt px-4 py-2 text-sm font-bold text-ink disabled:opacity-50 min-h-[44px]">
           {busy ? "Analyse…" : "Lancer la vérification"}
         </button>
       </div>
@@ -82,11 +82,11 @@ export default function ProgressAudit() {
                 {s.lessons.length > 0 && <> · leçons étudiées sans trace : {s.lessons.join(", ")}</>}
                 {s.quizzes.length > 0 && <> · quiz notés sans trace : {s.quizzes.join(", ")}</>}
               </p>
-              <p className="text-xs text-ink-faint">
+              <p className="text-sm text-ink-faint">
                 {s.events} événement(s) d&apos;activité{s.lastEvent ? `, dernier le ${new Date(s.lastEvent).toLocaleDateString("fr-FR")}` : ", aucune connexion enregistrée"}.
                 Une progression ancienne, d&apos;avant le journal d&apos;activité, peut aussi apparaître ici.
               </p>
-              <button onClick={() => reset(s)} className="mt-2 rounded-lg bg-amber-600 px-3 py-1.5 text-xs font-bold text-white">
+              <button onClick={() => reset(s)} className="mt-2 rounded-lg bg-amber-600 px-3 py-1.5 text-sm font-bold text-white">
                 Faire recommencer ce niveau
               </button>
             </div>

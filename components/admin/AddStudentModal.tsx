@@ -104,9 +104,9 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
             )}
             {result.setupLink && (
               <div className="space-y-2">
-                <p className="text-xs text-ink-soft">Lien pour choisir son mot de passe (à ne donner qu&apos;à cet étudiant) :</p>
-                <code className="block px-3 py-2 rounded-lg bg-surface-alt border border-line text-xs text-ink break-all max-h-24 overflow-y-auto">{result.setupLink}</code>
-                <button onClick={copyLink} className="px-4 py-2 rounded-lg bg-surface-alt border border-line text-sm font-bold text-ink hover:bg-surface">
+                <p className="text-sm text-ink-soft">Lien pour choisir son mot de passe (à ne donner qu&apos;à cet étudiant) :</p>
+                <code className="block px-3 py-2 rounded-lg bg-surface-alt border border-line text-sm text-ink break-all max-h-24 overflow-y-auto">{result.setupLink}</code>
+                <button onClick={copyLink} className="px-4 py-2 rounded-lg bg-surface-alt border border-line text-sm font-bold text-ink hover:bg-surface min-h-[44px]">
                   {copied ? "Copié ✓" : "Copier le lien"}
                 </button>
               </div>
@@ -118,11 +118,11 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
                   setName("");
                   setEmail("");
                 }}
-                className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink"
+                className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink min-h-[44px]"
               >
                 Inscrire un autre
               </button>
-              <button onClick={onClose} className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold">
+              <button onClick={onClose} className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold min-h-[44px]">
                 Fermer
               </button>
             </div>
@@ -131,20 +131,20 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
           <form onSubmit={submit} className="space-y-4">
             <div>
               <h3 className="text-lg font-bold text-ink">Inscrire un étudiant</h3>
-              <p className="text-xs text-ink-soft mt-1">
+              <p className="text-sm text-ink-soft mt-1">
                 Le compte est créé et l&apos;inscription approuvée tout de suite. L&apos;étudiant reçoit un e-mail pour choisir son mot de passe.
               </p>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nom complet *</label>
+              <label className="block text-sm font-semibold text-ink-soft mb-1.5">Nom complet *</label>
               <input value={name} onChange={(e) => setName(e.target.value)} required minLength={2} className={field} placeholder="Ex. Marie Kabongo" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-ink-soft mb-1.5">Adresse e-mail *</label>
+              <label className="block text-sm font-semibold text-ink-soft mb-1.5">Adresse e-mail *</label>
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={field} placeholder="nom@exemple.com" />
             </div>
             <div className="flex gap-4 text-sm text-ink">
-              <span className="text-xs font-semibold text-ink-soft self-center">Civilité</span>
+              <span className="text-sm font-semibold text-ink-soft self-center">Civilité</span>
               {[
                 ["M", "Homme"],
                 ["F", "Femme"],
@@ -156,7 +156,7 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Formation *</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Formation *</label>
                 <select value={langCode} onChange={(e) => setLangCode(e.target.value)} className={field}>
                   <optgroup label="Langues">
                     {availableLanguages.map((l) => (
@@ -176,7 +176,7 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
               </div>
               {isLanguage && (
                 <div>
-                  <label className="block text-xs font-semibold text-ink-soft mb-1.5">Niveau de départ</label>
+                  <label className="block text-sm font-semibold text-ink-soft mb-1.5">Niveau de départ</label>
                   <select value={level} onChange={(e) => setLevel(Number(e.target.value))} className={field}>
                     {(findProgramByCode(langCode) ? programLevels(findProgramByCode(langCode)!.slug) : [1, 2, 3]).map((n) => (
                       <option key={n} value={n}>
@@ -188,7 +188,7 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
               )}
               {isLanguage && (
                 <div>
-                  <label className="block text-xs font-semibold text-ink-soft mb-1.5">Rythme</label>
+                  <label className="block text-sm font-semibold text-ink-soft mb-1.5">Rythme</label>
                   <select value={studyDays} onChange={(e) => setStudyDays(Number(e.target.value))} className={field}>
                     <option value={3}>3 jours par semaine</option>
                     <option value={5}>5 jours par semaine</option>
@@ -196,7 +196,7 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
                 </div>
               )}
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Professeur (facultatif)</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Professeur (facultatif)</label>
                 <select value={teacherUid} onChange={(e) => setTeacherUid(e.target.value)} className={field}>
                   <option value="">Aucun pour l&apos;instant</option>
                   {teachers.map((t) => (
@@ -209,10 +209,10 @@ export default function AddStudentModal({ onClose, onDone }: { onClose: () => vo
             </div>
             {error && <p className="text-sm text-red-500">{error}</p>}
             <div className="flex gap-2 justify-end pt-1">
-              <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink">
+              <button type="button" onClick={onClose} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink min-h-[44px]">
                 Annuler
               </button>
-              <button type="submit" disabled={busy} className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold">
+              <button type="submit" disabled={busy} className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold min-h-[44px]">
                 {busy ? "Inscription…" : "Inscrire l'étudiant"}
               </button>
             </div>

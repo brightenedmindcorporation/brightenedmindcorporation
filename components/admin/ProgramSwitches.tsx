@@ -57,12 +57,12 @@ export default function ProgramSwitches() {
     <div className="mb-6 rounded-2xl border border-line bg-surface p-4">
       <button onClick={() => setOpen((v) => !v)} className="flex w-full items-center justify-between text-left font-bold text-ink">
         <span>Accès aux formations</span>
-        <span className="text-xs font-semibold text-ink-soft">{open ? "Masquer" : "Gérer"}</span>
+        <span className="text-sm font-semibold text-ink-soft">{open ? "Masquer" : "Gérer"}</span>
       </button>
       {error && <p className="mt-2 text-sm text-red-500">{error}</p>}
       {open && rows && (
         <div className="mt-3 space-y-2">
-          <p className="text-xs text-ink-soft">
+          <p className="text-sm text-ink-soft">
             Fermer une formation bloque les nouvelles demandes (les élèves déjà inscrits gardent leur accès). L&apos;approbation automatique donne tout de suite le Student ID : réservez-la aux formations gratuites.
           </p>
           {rows.map((r) => (

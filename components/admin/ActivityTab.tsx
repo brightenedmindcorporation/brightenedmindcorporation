@@ -47,9 +47,9 @@ async function api(url: string, init: RequestInit = {}) {
 function Card({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
   return (
     <div className="p-5 rounded-2xl border border-line bg-surface">
-      <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">{label}</p>
+      <p className="text-sm font-bold uppercase tracking-wide text-ink-soft">{label}</p>
       <p className="text-3xl font-black text-ink mt-1">{value}</p>
-      {hint && <p className="text-xs text-ink-faint mt-1">{hint}</p>}
+      {hint && <p className="text-sm text-ink-faint mt-1">{hint}</p>}
     </div>
   );
 }
@@ -189,7 +189,7 @@ export default function ActivityTab() {
     <button
       key={id}
       onClick={() => setFilter(id)}
-      className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition ${filter === id ? "bg-red-600 text-white border-red-600" : "border-line text-ink-soft hover:text-ink"}`}
+      className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition ${filter === id ? "bg-red-600 text-white border-red-600" : "border-line text-ink-soft hover:text-ink"}`}
     >
       {label}
     </button>
@@ -198,7 +198,7 @@ export default function ActivityTab() {
 
   return (
     <div className="space-y-6">
-      <p className="text-xs text-ink-soft max-w-2xl">
+      <p className="text-sm text-ink-soft max-w-2xl">
         Quand chaque étudiant s'est connecté pour la dernière fois et ce qu'il a fait : leçons ouvertes, quiz (avec la note), temps passé, cours
         en direct, messages, certificats. « Voir » ouvre son historique complet, jour par jour.
       </p>
@@ -217,7 +217,7 @@ export default function ActivityTab() {
           <p className="text-sm text-ink-soft mt-1">Aucun étudiant bloqué : tout va bien.</p>
         ) : (
           <>
-            <p className="text-xs text-ink-soft mt-1">
+            <p className="text-sm text-ink-soft mt-1">
               Étudiants dont le premier essai à un quiz est échoué : seul le premier essai compte, la leçon suivante reste donc verrouillée. Contactez-les (message ou professeur).
             </p>
             <div className="mt-3 space-y-1.5 max-h-60 overflow-y-auto">
@@ -227,7 +227,7 @@ export default function ActivityTab() {
                     <b>{s.name || s.email}</b> — {s.quiz} · {langLabel(s.langCode)} niveau {s.level} <span className="text-red-500 font-semibold">(note {s.score})</span>
                   </span>
                   {byUid.get(s.uid) && (
-                    <button onClick={() => setOpen(byUid.get(s.uid)!)} className="text-xs font-bold text-red-500 hover:text-red-400">Voir l'activité</button>
+                    <button onClick={() => setOpen(byUid.get(s.uid)!)} className="text-sm font-bold text-red-500 hover:text-red-400">Voir l'activité</button>
                   )}
                 </div>
               ))}
@@ -239,7 +239,7 @@ export default function ActivityTab() {
       {/* Automatic follow-up */}
       <div className="p-5 rounded-2xl border border-line bg-surface space-y-3">
         <p className="font-bold text-ink">Suivi automatique</p>
-        <p className="text-xs text-ink-soft max-w-2xl">
+        <p className="text-sm text-ink-soft max-w-2xl">
           Chaque jour, le site envoie un rappel (e-mail + notification) aux étudiants inactifs, selon les nombres de jours que vous tapez
           ci-dessous. Le rapport hebdomadaire par e-mail est désactivé. Il s'exécute tout seul à la première visite du jour, après 8 h.
           Pour relancer un seul étudiant tout de suite, utilisez le bouton « Relancer » de sa ligne.
@@ -253,10 +253,10 @@ export default function ActivityTab() {
             <DaysInput label="après" value={job.settings.afterDays} unit="jours d'inactivité" min={1} max={365} onSave={(n) => saveSettings({ afterDays: n })} />
             <DaysInput label="puis tous les" value={job.settings.repeatDays} unit="jours" min={1} max={90} onSave={(n) => saveSettings({ repeatDays: n })} />
             <DaysInput label="au plus" value={job.settings.maxReminders} unit="rappels par étudiant" min={1} max={30} onSave={(n) => saveSettings({ maxReminders: n })} />
-            <button onClick={runNow} disabled={busy} className="px-3 py-1.5 rounded-lg border border-line text-xs font-bold text-ink hover:border-red-600/60 disabled:opacity-50">
+            <button onClick={runNow} disabled={busy} className="px-3 py-1.5 rounded-lg border border-line text-sm font-bold text-ink hover:border-red-600/60 disabled:opacity-50 min-h-[44px]">
               {busy ? "En cours…" : "Lancer le suivi maintenant"}
             </button>
-            <span className="text-xs text-ink-faint">Dernière exécution : {job.lastRunAt ? fullDate(job.lastRunAt) : "jamais"}{job.lastWeeklyReport ? ` · dernier rapport : ${job.lastWeeklyReport}` : ""}</span>
+            <span className="text-sm text-ink-faint">Dernière exécution : {job.lastRunAt ? fullDate(job.lastRunAt) : "jamais"}{job.lastWeeklyReport ? ` · dernier rapport : ${job.lastWeeklyReport}` : ""}</span>
           </div>
         )}
         {note && <p className="text-sm text-ink">{note}</p>}
@@ -272,14 +272,14 @@ export default function ActivityTab() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="Rechercher un étudiant…"
-          className="ml-auto bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+          className="ml-auto bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
         />
       </div>
 
       <div className="overflow-x-auto border border-line rounded-2xl bg-surface">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-xs text-ink-soft uppercase tracking-wide border-b border-line">
+            <tr className="text-left text-sm text-ink-soft uppercase tracking-wide border-b border-line">
               <th className="p-3">Étudiant</th>
               <th className="p-3">Cours</th>
               <th className="p-3">Dernière connexion</th>
@@ -302,18 +302,18 @@ export default function ActivityTab() {
                   <tr key={r.uid} className="border-b border-line/60">
                     <td className="p-3">
                       <p className="font-semibold text-ink flex items-center gap-2"><span className={`w-2 h-2 rounded-full ${dot}`} />{r.name || "(sans nom)"}</p>
-                      <p className="text-xs text-ink-faint">{r.email}</p>
+                      <p className="text-sm text-ink-faint">{r.email}</p>
                     </td>
                     <td className="p-3 text-ink-soft">{r.langCodes.map(langLabel).join(", ") || "—"}</td>
                     <td className="p-3">
                       <p className="text-ink">{ago(r.lastSignInAt)}</p>
-                      <p className="text-xs text-ink-faint">{fullDate(r.lastSignInAt)}</p>
+                      <p className="text-sm text-ink-faint">{fullDate(r.lastSignInAt)}</p>
                     </td>
                     <td className="p-3 text-ink">{ago(r.lastActivityAt)}</td>
                     <td className="p-3 text-ink-soft">{duration(r.stats.seconds || 0)}</td>
                     <td className="p-3 text-ink-soft">{r.stats.lessonOpens || 0}</td>
                     <td className="p-3 text-ink-soft">{(r.stats.quizzes || 0) + (r.stats.finalQuizzes || 0)}</td>
-                    <td className="p-3 text-xs text-ink-soft whitespace-nowrap">
+                    <td className="p-3 text-sm text-ink-soft whitespace-nowrap">
                       {(r.reminderCount ?? 0) > 0 ? (
                         <>
                           {r.reminderCount} rappel{(r.reminderCount ?? 0) > 1 ? "s" : ""}
@@ -325,8 +325,8 @@ export default function ActivityTab() {
                     </td>
                     <td className="p-3">
                       <div className="flex gap-2">
-                        <button onClick={() => { setFollowUp(r); setFollowText(""); }} className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-amber-500/60 hover:text-amber-500 transition">Relancer</button>
-                        <button onClick={() => setOpen(r)} className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition">Voir</button>
+                        <button onClick={() => { setFollowUp(r); setFollowText(""); }} className="text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-amber-500/60 hover:text-amber-500 transition min-h-[44px]">Relancer</button>
+                        <button onClick={() => setOpen(r)} className="text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition min-h-[44px]">Voir</button>
                       </div>
                     </td>
                   </tr>
@@ -342,7 +342,7 @@ export default function ActivityTab() {
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl my-8 space-y-4" onClick={(e) => e.stopPropagation()}>
             <div>
               <h3 className="text-lg font-bold text-ink">Relancer {followUp.name || followUp.email}</h3>
-              <p className="text-xs text-ink-soft mt-1">
+              <p className="text-sm text-ink-soft mt-1">
                 Dernière connexion : {ago(followUp.lastSignInAt)} · {(followUp.reminderCount ?? 0) > 0 ? `${followUp.reminderCount} rappel(s) déjà envoyé(s)` : "aucun rappel envoyé"}.
                 L&apos;étudiant reçoit un e-mail et une notification dans son espace.
               </p>
@@ -352,11 +352,11 @@ export default function ActivityTab() {
               onChange={(e) => setFollowText(e.target.value)}
               rows={5}
               placeholder="Message personnel (facultatif). Laissez vide pour envoyer le message habituel : « Cela fait N jours que nous ne vous avons pas vu… »"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             <div className="flex justify-end gap-2">
-              <button onClick={() => setFollowUp(null)} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink">Annuler</button>
-              <button onClick={sendFollowUp} disabled={followBusy} className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold">
+              <button onClick={() => setFollowUp(null)} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink min-h-[44px]">Annuler</button>
+              <button onClick={sendFollowUp} disabled={followBusy} className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold min-h-[44px]">
                 {followBusy ? "Envoi…" : "Envoyer la relance"}
               </button>
             </div>

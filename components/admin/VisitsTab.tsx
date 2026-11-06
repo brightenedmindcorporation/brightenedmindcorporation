@@ -40,9 +40,9 @@ async function load(days: number): Promise<Stats> {
 function Card({ label, value, hint }: { label: string; value: number | string; hint?: string }) {
   return (
     <div className="p-5 rounded-2xl border border-line bg-surface">
-      <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">{label}</p>
+      <p className="text-sm font-bold uppercase tracking-wide text-ink-soft">{label}</p>
       <p className="text-3xl font-black text-ink mt-1">{value}</p>
-      {hint && <p className="text-xs text-ink-faint mt-1">{hint}</p>}
+      {hint && <p className="text-sm text-ink-faint mt-1">{hint}</p>}
     </div>
   );
 }
@@ -128,7 +128,7 @@ export default function VisitsTab() {
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-ink-soft max-w-2xl">
+        <p className="text-sm text-ink-soft max-w-2xl">
           Visites du site public. Compteur anonyme : aucun cookie, aucune adresse IP enregistrée. Vos propres visites (depuis ce navigateur) et
           celles des robots ne sont pas comptées.
         </p>
@@ -137,7 +137,7 @@ export default function VisitsTab() {
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition ${days === d ? "bg-red-600 text-white border-red-600" : "border-line text-ink-soft hover:text-ink"}`}
+              className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition ${days === d ? "bg-red-600 text-white border-red-600" : "border-line text-ink-soft hover:text-ink"}`}
             >
               {d} jours
             </button>
@@ -165,7 +165,7 @@ export default function VisitsTab() {
             </div>
           ))}
         </div>
-        <div className="flex justify-between text-[11px] text-ink-faint mt-2">
+        <div className="flex justify-between text-sm text-ink-faint mt-2">
           <span>{stats.series[0]?.day}</span>
           <span>{stats.series[stats.series.length - 1]?.day}</span>
         </div>

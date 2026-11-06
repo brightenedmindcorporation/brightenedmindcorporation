@@ -32,7 +32,7 @@ export default function RenameIdsButton() {
     }
   };
   return (
-    <button onClick={run} disabled={busy} className="text-xs font-bold text-ink-soft hover:text-ink bg-surface px-3 py-2 rounded-xl border border-line disabled:opacity-50">
+    <button onClick={run} disabled={busy} className="text-sm font-bold text-ink-soft hover:text-ink bg-surface px-3 py-2 rounded-xl border border-line disabled:opacity-50 min-h-[44px]">
       {busy ? "Traitement…" : "Renommer les ID Bureautique (BU)"}
     </button>
   );

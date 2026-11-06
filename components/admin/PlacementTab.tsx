@@ -103,7 +103,7 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
             {label}
           </button>
         ))}
-        <p className="text-xs text-ink-soft">
+        <p className="text-sm text-ink-soft">
           {teacher
             ? "Le niveau suggéré vient des notes automatiques. Vous pouvez recommander un niveau : l'administration décide."
             : "Le niveau suggéré vient des notes automatiques ; vous décidez après avoir lu, écouté et lu le texte de l'étudiant."}
@@ -123,11 +123,11 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
                 <p className="font-bold text-ink">
                   {t.name} <span className="text-ink-faint font-normal text-sm">· {lang}</span>
                 </p>
-                <p className="text-xs text-ink-soft mt-0.5">
+                <p className="text-sm text-ink-soft mt-0.5">
                   {t.email} · envoyé le {date(t.submittedAt)}
                 </p>
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+              <div className="flex flex-wrap items-center gap-2 text-sm font-bold">
                 {[1, 2, 3].map((l) => (
                   <span key={l} className="px-2.5 py-1 rounded-full border border-line bg-surface-alt text-ink-soft">
                     N{l} : <b className="text-ink">{t.byLevel?.[l] ? `${t.byLevel[l].score}/${t.byLevel[l].total}` : "—"}</b>
@@ -153,16 +153,16 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
               <div className="border-t border-line p-4 space-y-5">
                 {t.readAloud && (
                 <div className="space-y-2">
-                  <p className="text-xs font-bold uppercase tracking-wide text-ink-soft">Lecture à voix haute</p>
+                  <p className="text-sm font-bold uppercase tracking-wide text-ink-soft">Lecture à voix haute</p>
                   {t.readAloud?.skipped && !t.readAloud.audioUrl ? (
                     <p className="text-sm text-amber-500">L&apos;étudiant n&apos;a pas pu utiliser le micro et a passé cette partie.</p>
                   ) : (
                     <>
                       {t.readAloud?.audioUrl && <audio controls src={t.readAloud.audioUrl} className="w-full" />}
-                      <p className="text-xs text-ink-faint">
+                      <p className="text-sm text-ink-faint">
                         Texte à lire : <span translate="no" className="notranslate text-ink-soft">{t.readAloud?.expected}</span>
                       </p>
-                      <p className="text-xs text-ink-faint">
+                      <p className="text-sm text-ink-faint">
                         Compris par le micro : <span translate="no" className="notranslate text-ink-soft">{t.readAloud?.transcript || "(rien)"}</span>
                         {t.readAloud?.score != null && <b className="text-ink"> · ressemblance {t.readAloud.score} %</b>}
                       </p>
@@ -173,13 +173,13 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
 
                 {t.readAloud && (
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Texte de présentation</p>
+                  <p className="text-sm font-bold uppercase tracking-wide text-ink-soft mb-1.5">Texte de présentation</p>
                   <p translate="no" className="notranslate whitespace-pre-wrap rounded-xl bg-surface-alt border border-line p-3 text-ink">{t.writing || "—"}</p>
                 </div>
                 )}
 
                 <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-ink-soft mb-1.5">Réponses aux questions</p>
+                  <p className="text-sm font-bold uppercase tracking-wide text-ink-soft mb-1.5">Réponses aux questions</p>
                   <div className="rounded-xl border border-line divide-y divide-line max-h-72 overflow-y-auto">
                     {t.answers.map((a, i) => (
                       <div key={a.id} className="p-2.5 text-sm flex gap-3">
@@ -203,7 +203,7 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
                       {[1, 2, 3].map((l) => (
                         <label key={l} className="inline-flex items-center gap-1.5 cursor-pointer">
                           <input type="radio" name={`lvl-${t.id}`} checked={chosen === l} onChange={() => setLevel((s) => ({ ...s, [t.id]: l }))} /> Niveau {l}
-                          {l === t.suggestedLevel && <span className="text-[11px] text-ink-faint">(suggéré)</span>}
+                          {l === t.suggestedLevel && <span className="text-sm text-ink-faint">(suggéré)</span>}
                         </label>
                       ))}
                     </div>
@@ -212,7 +212,7 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
                       onChange={(e) => setComment((s) => ({ ...s, [t.id]: e.target.value }))}
                       rows={2}
                       placeholder="Un mot pour l'étudiant (facultatif) : points forts, conseils…"
-                      className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                      className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
                     />
                     {t.recommendation && (
                       <p className="text-sm text-amber-500">
@@ -223,7 +223,7 @@ export default function PlacementTab({ getToken, teacher = false }: { getToken?:
                     <button
                       onClick={() => decide(t)}
                       disabled={busy === t.id}
-                      className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold"
+                      className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 disabled:opacity-50 text-white text-sm font-bold min-h-[44px]"
                     >
                       {busy === t.id ? "Enregistrement…" : teacher ? `Recommander le niveau ${chosen}` : `Attribuer le niveau ${chosen}`}
                     </button>

@@ -161,6 +161,9 @@ export default function AdminPage() {
   const [payments, setPayments] = useState<any[]>([]);
   const [paymentsLoading, setPaymentsLoading] = useState(false);
 
+  // --- Students: how many cards are shown (25 at a time) ---
+  const [studentsShown, setStudentsShown] = useState(25);
+
   // --- Announcements: the whole tab lives in components/admin/AnnouncementsTab.tsx ---
   const [annRefresh, setAnnRefresh] = useState(0);
 
@@ -1764,6 +1767,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
     return { paid, totalAmount, pendingAmount, count: payments.length };
   }, [payments]);
 
+  // A new search or filter starts again from the first 25 cards.
+  useEffect(() => {
+    setStudentsShown(25);
+  }, [search, langFilter, statusFilter]);
+
   if (checking) {
     return (
       <main className="flex items-center justify-center min-h-screen bg-surface-sunken text-ink-soft">
@@ -1897,7 +1905,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         className="inline-flex items-center gap-1.5 min-h-[40px] px-3 rounded-full border border-line bg-surface text-sm font-bold text-ink hover:border-red-600/60 transition"
                       >
                         {t.label}
-                        <span className="text-xs font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
+                        <span className="text-sm font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
                       </button>
                     ))}
                   </div>
@@ -1946,7 +1954,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       >
                         {g.label}
                         {total > 0 && (
-                          <span className={`text-xs font-black rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center ${active ? "bg-white text-red-700" : "bg-red-600 text-white"}`}>{total}</span>
+                          <span className={`text-sm font-black rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center ${active ? "bg-white text-red-700" : "bg-red-600 text-white"}`}>{total}</span>
                         )}
                       </button>
                     );
@@ -1965,7 +1973,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     >
                       {t.label}
                       {t.badge > 0 && (
-                        <span className="text-xs font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
+                        <span className="text-sm font-black bg-red-600 text-white rounded-full min-w-[20px] h-5 px-1.5 inline-flex items-center justify-center">{t.badge}</span>
                       )}
                     </button>
                   ))}
@@ -1978,125 +1986,82 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= STUDENTS TAB ================= */}
         {tab === "students" && (
           <div>
-            <ProgramSwitches />
-            <ProgressAudit />
-            <div className="mb-4 flex flex-wrap justify-end gap-2"><RecomputePassButton /><RenameIdsButton /></div>
-            {/* STATS */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-ink">{stats.total}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Total</p>
-              </div>
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-amber-400">{stats.pending}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">En attente</p>
-              </div>
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-emerald-400">{stats.approved}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Approuvés</p>
-              </div>
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-red-500">{stats.rejected}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Rejetés / Retirés</p>
-              </div>
+            {/* The numbers: each one is also a shortcut to the matching list */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {([
+                ["all", stats.total, "Total", "text-ink"],
+                ["Pending", stats.pending, "En attente", "text-amber-600 dark:text-amber-300"],
+                ["Approved", stats.approved, "Approuvés", "text-emerald-700 dark:text-emerald-300"],
+                ["Rejected", stats.rejected, "Rejetés / retirés", "text-red-700 dark:text-red-300"],
+              ] as const).map(([value, count, label, tone]) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setStatusFilter(value)}
+                  aria-pressed={statusFilter === value}
+                  className={`text-left p-4 rounded-2xl border bg-surface transition ${statusFilter === value ? "border-red-600 ring-2 ring-red-600/30" : "border-line hover:border-red-600/50"}`}
+                >
+                  <span className={`block text-3xl font-black ${tone}`}>{count}</span>
+                  <span className="block text-sm font-semibold text-ink-soft mt-1">{label}</span>
+                </button>
+              ))}
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {Object.entries(stats.byLang).map(([code, count]) => (
-                <span key={code} className="text-xs font-semibold px-3 py-1.5 rounded-full bg-surface border border-line text-ink-soft">
-                  {languageLabel(code)} : <span className="text-red-500">{count}</span>
-                </span>
+                <button
+                  key={code}
+                  type="button"
+                  onClick={() => setLangFilter(langFilter === code ? "all" : code)}
+                  aria-pressed={langFilter === code}
+                  className={`min-h-[40px] text-sm font-semibold px-4 rounded-full border transition ${langFilter === code ? "bg-red-700 border-red-700 text-white" : "bg-surface border-line text-ink-soft hover:border-red-600/50"}`}
+                >
+                  {languageLabel(code)} : <b>{count}</b>
+                </button>
               ))}
             </div>
 
             <div className="mb-6 flex flex-wrap gap-3">
               <button
                 onClick={() => setAddStudentOpen(true)}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+                className="bg-emerald-700 hover:bg-emerald-600 text-white text-base font-bold px-5 min-h-[48px] rounded-xl transition inline-flex items-center gap-2"
               >
                 + Inscrire un étudiant
               </button>
               <button
                 onClick={() => setMessageOpen(true)}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-base font-bold px-5 min-h-[48px] rounded-xl transition inline-flex items-center gap-2"
               >
-                <Mail size={15} /> Message aux étudiants
+                <Mail size={16} /> Message aux étudiants
               </button>
               <button
                 onClick={() => {
                   setSentMessagesOpen(true);
                   fetchSentMessages();
                 }}
-                className="bg-surface-alt hover:bg-surface text-ink-soft hover:text-ink border border-line text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+                className="bg-surface hover:bg-surface-alt text-ink-soft hover:text-ink border border-line text-base font-bold px-5 min-h-[48px] rounded-xl transition inline-flex items-center gap-2"
               >
-                <SquarePen size={15} /> Messages envoyés
+                <SquarePen size={16} /> Messages envoyés
               </button>
             </div>
 
-            {/* VÉRIFICATION DE COMPTE FIREBASE — diagnostic pour "mot de passe incorrect" */}
-            <div className="bg-surface border border-line rounded-2xl p-5 mb-8">
-              <p className="text-sm font-bold text-ink mb-1">Vérifier un compte (connexion impossible)</p>
-              <p className="text-xs text-ink-soft mb-3">
-                Si un étudiant dit que son mot de passe est refusé, vérifie d'abord ici si un compte existe vraiment pour son email —
-                ça distingue "mauvais mot de passe" de "ce compte n'a jamais été créé".
-              </p>
-              <div className="flex flex-col sm:flex-row gap-2">
-                <input
-                  type="email"
-                  value={checkEmail}
-                  onChange={(e) => setCheckEmail(e.target.value)}
-                  placeholder="email@exemple.com"
-                  className="flex-1 bg-surface-alt border border-line rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
-                />
-                <button
-                  onClick={checkAccount}
-                  disabled={checkLoading || !checkEmail.trim()}
-                  className="bg-surface-alt hover:bg-surface text-ink font-bold px-5 py-2.5 rounded-xl border border-line transition disabled:opacity-50 whitespace-nowrap"
-                >
-                  {checkLoading ? "Vérification…" : "Vérifier"}
-                </button>
-              </div>
-              {checkResult && (
-                <div className={`mt-4 p-4 rounded-xl text-sm border text-white ${
-                  checkResult.exists ? "bg-emerald-700 border-emerald-600" : "bg-red-700 border-red-600"
-                }`}>
-                  {checkResult.exists ? (
-                    <>
-                      <p className="font-bold">✓ Ce compte existe bien dans Firebase.</p>
-                      <p className="mt-1 text-xs opacity-80">
-                        Créé le {checkResult.createdAt ? new Date(checkResult.createdAt).toLocaleString("fr-FR") : "?"}
-                        {checkResult.lastSignInAt ? ` · Dernière connexion réussie : ${new Date(checkResult.lastSignInAt).toLocaleString("fr-FR")}` : " · Jamais connecté avec succès"}
-                        {checkResult.disabled ? " · ⚠ Compte désactivé" : ""}
-                      </p>
-                      <p className="mt-2 text-xs opacity-80">
-                        Le compte existe donc le souci vient du mot de passe saisi : demande à l'étudiant d'utiliser "Mot de passe oublié ?" sur la page de connexion.
-                      </p>
-                    </>
-                  ) : (
-                    <>
-                      <p className="font-bold">✗ Aucun compte Firebase pour cet email.</p>
-                      <p className="mt-1 text-xs opacity-80">
-                        L'inscription n'a jamais abouti côté authentification (ou l'email est différent de celui réellement utilisé). L'étudiant doit se réinscrire via /register avec cet email.
-                      </p>
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
             {/* FILTERS */}
-            <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="flex flex-col sm:flex-row gap-3 mb-3">
+              <label className="sr-only" htmlFor="students-search">Rechercher un étudiant</label>
               <input
-                type="text"
-                placeholder="Rechercher par nom, email, matricule…"
+                id="students-search"
+                type="search"
+                placeholder="Rechercher par nom, e-mail ou Student ID…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="flex-1 bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                className="flex-1 min-h-[48px] bg-surface border border-line rounded-xl px-4 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
               />
+              <label className="sr-only" htmlFor="students-lang">Formation</label>
               <select
+                id="students-lang"
                 value={langFilter}
                 onChange={(e) => setLangFilter(e.target.value)}
-                className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                className="min-h-[48px] bg-surface border border-line rounded-xl px-4 text-base text-ink focus:outline-none focus:border-red-600/60"
               >
                 <option value="all">Toutes les formations</option>
                 {availableLanguages.map((l) => (
@@ -2106,259 +2071,341 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <option key={p.code} value={p.code}>{p.label}</option>
                 ))}
               </select>
+              <label className="sr-only" htmlFor="students-status">Statut</label>
               <select
+                id="students-status"
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="bg-surface border border-line rounded-xl px-4 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                className="min-h-[48px] bg-surface border border-line rounded-xl px-4 text-base text-ink focus:outline-none focus:border-red-600/60"
               >
                 <option value="all">Tous les statuts</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Suspended">Suspendu</option>
+                <option value="Pending">En attente</option>
+                <option value="Approved">Approuvés</option>
+                <option value="Rejected">Rejetés</option>
+                <option value="Suspended">Suspendus</option>
                 <option value="Expired">Accès terminé</option>
               </select>
             </div>
+            <p role="status" className="mb-5 text-sm font-semibold text-ink-soft">
+              {filteredStudents.length} {filteredStudents.length > 1 ? "inscriptions" : "inscription"}
+              {(search || langFilter !== "all" || statusFilter !== "all") && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch("");
+                    setLangFilter("all");
+                    setStatusFilter("all");
+                  }}
+                  className="ml-3 min-h-[40px] font-bold text-red-700 dark:text-red-300 underline"
+                >
+                  Effacer les filtres
+                </button>
+              )}
+            </p>
 
             {filteredStudents.length === 0 ? (
-              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
+              <div className="p-6 rounded-2xl border border-line bg-surface text-ink-soft text-base">
                 Aucun étudiant ne correspond à ces filtres.
               </div>
             ) : (
-              filteredStudents.map((s) => (
-                <div key={s.id} className="p-5 mb-4 rounded-2xl border border-line bg-surface shadow-xl">
-                  <p className="text-ink"><b className="text-ink">Nom :</b> {s.name}</p>
-                  <p className="text-ink"><b className="text-ink">Email :</b> {s.email}</p>
-                  <p className="text-ink"><b className="text-ink">Formation :</b> {languageLabel(s.langCode)}</p>
-                  {s.kind !== "legacyStudent" && ["Pending", "Approved", "Suspended", "Expired"].includes(s.status) && (
-                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1 mb-1">
-                      <b className="text-ink">Changer de formation :</b>
-                      <select
-                        value=""
-                        onChange={(e) => changeProgram(s, e.target.value)}
-                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                      >
-                        <option value="">Choisir…</option>
-                        {[...availableLanguages, ...otherPrograms]
-                          .filter((p) => p.code !== s.langCode)
-                          .map((p) => (
-                            <option key={p.code} value={p.code}>
-                              {p.label}
-                            </option>
-                          ))}
-                      </select>
+              filteredStudents.slice(0, studentsShown).map((s) => {
+                const stLabel = s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : s.status === "Suspended" ? "Suspendu" : s.status === "Expired" ? "Accès terminé" : "En attente";
+                const stTone =
+                  s.status === "Approved" ? "bg-emerald-700 text-white" : s.status === "Rejected" ? "bg-red-700 text-white" : s.status === "Suspended" ? "bg-amber-600 text-white" : s.status === "Expired" ? "bg-slate-600 text-white" : "bg-amber-500 text-black";
+                const busy = processingIds.has(s.id);
+                const isLang = !isOtherProgramCode(s.langCode);
+                const maxLevel = findProgramByCode(s.langCode) ? programLevels(findProgramByCode(s.langCode)!.slug).length || 3 : 3;
+                const lastSeen = s.lastSignInAt || s.lastSeenAt ? new Date([s.lastSignInAt, s.lastSeenAt].filter(Boolean).sort().pop() as string).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" }) : "jamais";
+                const field = "bg-surface-alt border border-line rounded-lg px-3 min-h-[44px] text-base text-ink focus:outline-none focus:border-red-600/60";
+                const btn = "inline-flex items-center justify-center min-h-[44px] px-4 rounded-xl font-bold text-sm transition disabled:opacity-40 disabled:cursor-not-allowed";
+                return (
+                  <article key={s.id} className="p-4 sm:p-5 mb-4 rounded-2xl border border-line bg-surface shadow-lg">
+                    {/* Who, and in what state */}
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <h3 className="text-xl font-black text-ink break-words">{s.name}</h3>
+                        <p className="text-base text-ink-soft break-all">{s.email}</p>
+                      </div>
+                      <span className={`rounded-full px-3 py-1.5 text-sm font-bold ${stTone}`}>{stLabel}</span>
                     </div>
-                  )}
-                  {s.changedFrom && <p className="text-xs text-ink-soft">Ancienne formation : {languageLabel(s.changedFrom.langCode)}{s.changedFrom.matricule ? ` (${s.changedFrom.matricule})` : ""}</p>}
-                  <p className="text-ink"><b className="text-ink">Niveau :</b> {s.level}</p>
-                  <p className="text-ink">
-                    <b className="text-ink">Statut :</b>{" "}
-                    {s.status === "Approved" ? "Approuvé" : s.status === "Rejected" ? "Rejeté" : s.status === "Suspended" ? "Suspendu" : s.status === "Expired" ? "Accès terminé" : "En attente"}
-                    {s.addedFromAccount && <span className="ml-2 rounded-full border border-red-600/40 bg-red-500/10 px-2 py-0.5 text-[11px] font-bold text-red-500">Formation supplémentaire</span>}
-                    {s.statusReason && s.status !== "Approved" && <span className="ml-2 text-xs text-ink-soft">— {s.statusReason}</span>}
-                  </p>
-                  {s.kind === "enrollment" && (s.accessUntil || (s.history?.length ?? 0) > 0) && (
-                    <div className="mt-1 text-xs text-ink-soft">
-                      {s.accessUntil && <p>Accès jusqu'au <b className="text-ink">{s.accessUntil}</b></p>}
-                      {(s.history?.length ?? 0) > 0 && (
-                        <details className="mt-1">
-                          <summary className="cursor-pointer font-semibold">Historique ({s.history.length})</summary>
-                          <ul className="mt-1 space-y-0.5">
-                            {[...s.history].reverse().map((h: any, i: number) => (
-                              <li key={i}>
-                                {new Date(h.at).toLocaleDateString("fr-FR", { dateStyle: "medium" })} · {h.by} · {({ requested: "demande", approved: "approuvée", rejected: "refusée", suspended: "suspendue", reactivated: "rétablie", expired: "accès terminé", expiry: "date de fin" } as Record<string, string>)[h.action] ?? h.action}
-                                {h.reason ? ` : ${h.reason}` : ""}
-                              </li>
-                            ))}
-                          </ul>
-                        </details>
+                    <div className="mt-3 flex flex-wrap gap-2 text-sm font-semibold">
+                      <span className="rounded-full border border-line bg-surface-alt px-3 py-1 text-ink">{languageLabel(s.langCode)}</span>
+                      <span className="rounded-full border border-line bg-surface-alt px-3 py-1 text-ink">{/^Level/i.test(String(s.level)) ? `Niveau ${levelNumber(s.level)}` : s.level}</span>
+                      <span className="rounded-full border border-line bg-surface-alt px-3 py-1 text-ink">ID : {s.matricule || "-"}</span>
+                      {s.addedFromAccount && <span className="rounded-full border border-red-600/40 bg-red-500/10 px-3 py-1 text-red-700 dark:text-red-300">Formation supplémentaire</span>}
+                    </div>
+                    <p className="mt-3 text-sm text-ink-soft">
+                      Dernière connexion : <b className="text-ink">{lastSeen}</b>
+                      <button onClick={() => setTab("activity")} className="ml-2 min-h-[40px] font-semibold text-red-700 dark:text-red-300 underline">Voir l&apos;activité</button>
+                    </p>
+                    {s.statusReason && s.status !== "Approved" && <p className="text-sm text-ink-soft">Motif : {s.statusReason}</p>}
+                    {s.accessUntil && <p className="text-sm text-ink-soft">Accès jusqu&apos;au <b className="text-ink">{s.accessUntil}</b></p>}
+                    {s.changedFrom && <p className="text-sm text-ink-soft">Ancienne formation : {languageLabel(s.changedFrom.langCode)}{s.changedFrom.matricule ? ` (${s.changedFrom.matricule})` : ""}</p>}
+
+                    {/* What needs attention */}
+                    <div className="mt-3 space-y-2">
+                      {s.paid && s.status !== "Approved" && (
+                        <p className="rounded-lg bg-emerald-500/10 border border-emerald-600/30 px-3 py-2 text-sm font-semibold text-emerald-800 dark:text-emerald-300">💰 Paiement reçu : l&apos;inscription attend votre approbation.</p>
+                      )}
+                      {isLang && s.status === "Approved" && s.levelRequest && (
+                        <p className="rounded-lg bg-amber-500/10 border border-amber-600/30 px-3 py-2 text-sm font-semibold text-amber-800 dark:text-amber-300">⏳ L&apos;étudiant demande le niveau {s.levelRequest.level} (quiz final du niveau précédent réussi).</p>
+                      )}
+                      {s.emailUnverified && (
+                        <p className="rounded-lg bg-amber-500/10 border border-amber-600/30 px-3 py-2 text-sm font-semibold text-amber-800 dark:text-amber-300">✉ E-mail non confirmé par l&apos;étudiant (information : vous pouvez approuver quand même).</p>
+                      )}
+                      {!s.lastSignInAt && (
+                        <div className="rounded-lg bg-amber-500/10 border border-amber-600/30 px-3 py-2 flex flex-wrap items-center gap-3">
+                          <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">🔑 Ne s&apos;est jamais connecté : il n&apos;a peut-être pas encore choisi son mot de passe.</p>
+                          <button
+                            onClick={async () => {
+                              try {
+                                const idToken = await auth.currentUser?.getIdToken();
+                                const response = await fetch("/api/admin/send-password-link", {
+                                  method: "POST",
+                                  headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
+                                  body: JSON.stringify({ uid: s.uid || s.id?.split("_")[0] }),
+                                });
+                                const result = await response.json();
+                                if (!response.ok) throw new Error(result.error || "Erreur serveur");
+                                if (result.emailSent) alert("E-mail envoyé avec le lien pour choisir son mot de passe.");
+                                else window.prompt(`L'e-mail n'a pas pu partir${result.emailError ? ` (${result.emailError})` : ""}. Copiez ce lien et envoyez-le-lui par WhatsApp :`, result.link);
+                              } catch (error: any) {
+                                alert(`Erreur : ${error.message || error}`);
+                              }
+                            }}
+                            className={`${btn} border border-line bg-surface text-ink hover:border-red-600/60`}
+                          >
+                            Renvoyer le lien du mot de passe
+                          </button>
+                        </div>
                       )}
                     </div>
-                  )}
-                  <p className="text-ink"><b className="text-ink">Student ID :</b> {s.matricule || "-"}</p>
-                  <p className="text-ink">
-                    <b className="text-ink">Dernière connexion :</b>{" "}
-                    {s.lastSignInAt || s.lastSeenAt
-                      ? new Date([s.lastSignInAt, s.lastSeenAt].filter(Boolean).sort().pop() as string).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })
-                      : "jamais"}
-                    <button onClick={() => setTab("activity")} className="ml-2 text-xs font-semibold text-red-500 hover:text-red-400">Voir l'activité</button>
-                  </p>
-                  <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
-                    <b className="text-ink">Civilité :</b>
-                    <select
-                      value={s.gender === "M" || s.gender === "F" ? s.gender : ""}
-                      onChange={(e) => e.target.value && changeGender(s, e.target.value as "M" | "F")}
-                      className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                    >
-                      <option value="">Non renseignée</option>
-                      <option value="M">Monsieur</option>
-                      <option value="F">Madame</option>
-                    </select>
-                  </div>
-                  {!isOtherProgramCode(s.langCode) && s.status === "Approved" && (
-                    <div className="mt-1 space-y-1">
-                      {s.levelRequest && (
-                        <p className="text-amber-500 text-xs font-semibold">⏳ L'étudiant demande le niveau {s.levelRequest.level} (quiz final du niveau précédent réussi).</p>
+
+                    {/* The main action */}
+                    <div className="mt-4 flex flex-wrap gap-3">
+                      {(s.status === "Pending" || s.status === "Rejected") && (
+                        <button onClick={() => approveStudent(s)} disabled={busy} className={`${btn} bg-green-700 hover:bg-green-600 text-white text-base min-h-[48px]`}>
+                          {busy ? "Traitement…" : s.status === "Rejected" ? "Réintégrer (approuver)" : "Approuver"}
+                        </button>
                       )}
-                      {levelNumber(s.level) < (findProgramByCode(s.langCode) ? programLevels(findProgramByCode(s.langCode)!.slug).length || 3 : 3) && (
-                        <button
-                          onClick={() => unlockLevel(s)}
-                          className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition ${s.levelRequest ? "bg-green-600 text-white border-green-600 hover:bg-green-700" : "border-line text-ink-soft hover:text-ink hover:border-red-600/50"}`}
-                        >
+                      {s.status === "Pending" && (
+                        <button onClick={() => rejectStudent(s)} disabled={busy} className={`${btn} bg-red-700 hover:bg-red-600 text-white text-base min-h-[48px]`}>
+                          Rejeter
+                        </button>
+                      )}
+                      {s.kind === "enrollment" && (s.status === "Suspended" || s.status === "Expired") && (
+                        <button onClick={() => accessAction(s, "reactivate")} disabled={busy} className={`${btn} bg-green-700 hover:bg-green-600 text-white text-base min-h-[48px]`}>
+                          Réactiver l&apos;accès
+                        </button>
+                      )}
+                      {s.status === "Approved" && isLang && s.levelRequest && levelNumber(s.level) < maxLevel && (
+                        <button onClick={() => unlockLevel(s)} className={`${btn} bg-green-700 hover:bg-green-600 text-white text-base min-h-[48px]`}>
                           Débloquer le niveau {levelNumber(s.level) + 1}
                         </button>
                       )}
                     </div>
-                  )}
-                  {!isOtherProgramCode(s.langCode) && s.status === "Approved" && (
-                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
-                      <b className="text-ink">Niveau actuel :</b>
-                      <select
-                        value={levelNumber(s.level)}
-                        onChange={(e) => changeLevel(s, Number(e.target.value))}
-                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                      >
-                        {Array.from({ length: findProgramByCode(s.langCode) ? programLevels(findProgramByCode(s.langCode)!.slug).length || 3 : 3 }, (_, i) => i + 1).map((n) => (
-                          <option key={n} value={n}>
-                            Niveau {n}
-                          </option>
-                        ))}
-                      </select>
-                      <span className="text-xs text-ink-faint">(modifiable vers le haut ou vers le bas)</span>
-                    </div>
-                  )}
-                  {!isOtherProgramCode(s.langCode) && (
-                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
-                      <b className="text-ink">Accès aux niveaux :</b>
-                      <span className="text-sm text-ink-soft">du niveau</span>
-                      <select
-                        value={Number(s.startLevel) >= 1 && Number(s.startLevel) <= 3 ? Number(s.startLevel) : 1}
-                        onChange={(e) => changeStartLevel(s, Number(e.target.value))}
-                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                      >
-                        <option value={1}>1</option>
-                        <option value={2}>2</option>
-                        <option value={3}>3</option>
-                      </select>
-                      <span className="text-sm text-ink-soft">au niveau {Number(String(s.level ?? "").slice(-1)) || 1}</span>
-                    </div>
-                  )}
-                  {!isOtherProgramCode(s.langCode) && (
-                    <div className="text-ink flex flex-wrap items-center gap-2 mt-1">
-                      <b className="text-ink">Rythme d'étude :</b>
-                      <select
-                        value={s.studyDays === 5 ? 5 : 3}
-                        onChange={(e) => changeStudyDays(s, Number(e.target.value) as 3 | 5)}
-                        className="bg-surface-alt border border-line rounded-lg px-2 py-1 text-sm text-ink focus:outline-none focus:border-red-600/60"
-                      >
-                        <option value={3}>3 jours / semaine</option>
-                        <option value={5}>5 jours / semaine</option>
-                      </select>
-                    </div>
-                  )}
-                  {s.paid && s.status !== "Approved" && (
-                    <p className="text-emerald-500 text-xs font-semibold">💰 Paiement reçu : l&apos;inscription attend votre approbation.</p>
-                  )}
-                  {!s.lastSignInAt && (
-                    <div className="flex flex-wrap items-center gap-3">
-                      <p className="text-amber-500 text-xs font-semibold">🔑 Ne s&apos;est jamais connecté : il n&apos;a peut-être pas encore choisi son mot de passe.</p>
-                      <button
-                        onClick={async () => {
-                          try {
-                            const idToken = await auth.currentUser?.getIdToken();
-                            const response = await fetch("/api/admin/send-password-link", {
-                              method: "POST",
-                              headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` },
-                              body: JSON.stringify({ uid: s.uid || s.id?.split("_")[0] }),
-                            });
-                            const result = await response.json();
-                            if (!response.ok) throw new Error(result.error || "Erreur serveur");
-                            if (result.emailSent) alert("E-mail envoyé avec le lien pour choisir son mot de passe.");
-                            else window.prompt(`L'e-mail n'a pas pu partir${result.emailError ? ` (${result.emailError})` : ""}. Copiez ce lien et envoyez-le-lui par WhatsApp :`, result.link);
-                          } catch (error: any) {
-                            alert(`Erreur : ${error.message || error}`);
-                          }
-                        }}
-                        className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500"
-                      >
-                        Renvoyer le lien du mot de passe
-                      </button>
-                    </div>
-                  )}
-                  {s.emailUnverified && (
-                    <p className="text-amber-500 text-xs font-semibold">✉ E-mail non confirmé par l'étudiant (information — vous pouvez approuver quand même)</p>
-                  )}
 
-                  <div className="flex flex-wrap gap-3 mt-4">
+                    {/* The settings, folded away */}
+                    <details className="mt-4 rounded-xl border border-line bg-surface-alt/40">
+                      <summary className="cursor-pointer min-h-[48px] flex items-center px-4 font-bold text-ink">Réglages de l&apos;étudiant</summary>
+                      <div className="px-4 pb-4 pt-1 space-y-3 text-base text-ink">
+                        <label className="flex flex-wrap items-center gap-3">
+                          <span className="font-semibold min-w-[170px]">Civilité</span>
+                          <select
+                            value={s.gender === "M" || s.gender === "F" ? s.gender : ""}
+                            onChange={(e) => e.target.value && changeGender(s, e.target.value as "M" | "F")}
+                            className={field}
+                          >
+                            <option value="">Non renseignée</option>
+                            <option value="M">Monsieur</option>
+                            <option value="F">Madame</option>
+                          </select>
+                        </label>
+                        {s.kind !== "legacyStudent" && ["Pending", "Approved", "Suspended", "Expired"].includes(s.status) && (
+                          <label className="flex flex-wrap items-center gap-3">
+                            <span className="font-semibold min-w-[170px]">Changer de formation</span>
+                            <select value="" onChange={(e) => changeProgram(s, e.target.value)} className={field}>
+                              <option value="">Choisir…</option>
+                              {[...availableLanguages, ...otherPrograms]
+                                .filter((p) => p.code !== s.langCode)
+                                .map((p) => (
+                                  <option key={p.code} value={p.code}>
+                                    {p.label}
+                                  </option>
+                                ))}
+                            </select>
+                          </label>
+                        )}
+                        {isLang && s.status === "Approved" && (
+                          <label className="flex flex-wrap items-center gap-3">
+                            <span className="font-semibold min-w-[170px]">Niveau actuel</span>
+                            <select value={levelNumber(s.level)} onChange={(e) => changeLevel(s, Number(e.target.value))} className={field}>
+                              {Array.from({ length: maxLevel }, (_, i) => i + 1).map((n) => (
+                                <option key={n} value={n}>
+                                  Niveau {n}
+                                </option>
+                              ))}
+                            </select>
+                            <span className="text-sm text-ink-soft">modifiable vers le haut ou vers le bas</span>
+                          </label>
+                        )}
+                        {isLang && s.status === "Approved" && !s.levelRequest && levelNumber(s.level) < maxLevel && (
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="font-semibold min-w-[170px]">Niveau suivant</span>
+                            <button onClick={() => unlockLevel(s)} className={`${btn} border border-line bg-surface text-ink hover:border-red-600/60`}>
+                              Débloquer le niveau {levelNumber(s.level) + 1}
+                            </button>
+                          </div>
+                        )}
+                        {isLang && (
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="font-semibold min-w-[170px]">Accès aux niveaux</span>
+                            <span className="text-sm text-ink-soft">du niveau</span>
+                            <select
+                              aria-label="Premier niveau accessible"
+                              value={Number(s.startLevel) >= 1 && Number(s.startLevel) <= 3 ? Number(s.startLevel) : 1}
+                              onChange={(e) => changeStartLevel(s, Number(e.target.value))}
+                              className={field}
+                            >
+                              <option value={1}>1</option>
+                              <option value={2}>2</option>
+                              <option value={3}>3</option>
+                            </select>
+                            <span className="text-sm text-ink-soft">au niveau {Number(String(s.level ?? "").slice(-1)) || 1}</span>
+                          </div>
+                        )}
+                        {isLang && (
+                          <label className="flex flex-wrap items-center gap-3">
+                            <span className="font-semibold min-w-[170px]">Rythme d&apos;étude</span>
+                            <select value={s.studyDays === 5 ? 5 : 3} onChange={(e) => changeStudyDays(s, Number(e.target.value) as 3 | 5)} className={field}>
+                              <option value={3}>3 jours / semaine</option>
+                              <option value={5}>5 jours / semaine</option>
+                            </select>
+                          </label>
+                        )}
+                        {s.kind === "enrollment" && s.status === "Approved" && (
+                          <div className="flex flex-wrap items-center gap-3">
+                            <span className="font-semibold min-w-[170px]">Fin d&apos;accès</span>
+                            <button onClick={() => accessAction(s, "setExpiry")} disabled={busy} className={`${btn} border border-line bg-surface text-ink hover:border-red-600/60`}>
+                              {s.accessUntil ? `Modifier la date (${s.accessUntil})` : "Fixer une date de fin d'accès"}
+                            </button>
+                          </div>
+                        )}
+                        {s.kind === "enrollment" && (s.history?.length ?? 0) > 0 && (
+                          <details>
+                            <summary className="cursor-pointer min-h-[44px] flex items-center font-semibold">Historique ({s.history.length})</summary>
+                            <ul className="mt-1 space-y-1 text-sm text-ink-soft">
+                              {[...s.history].reverse().map((h: any, i: number) => (
+                                <li key={i}>
+                                  {new Date(h.at).toLocaleDateString("fr-FR", { dateStyle: "medium" })} · {h.by} · {({ requested: "demande", approved: "approuvée", rejected: "refusée", suspended: "suspendue", reactivated: "rétablie", expired: "accès terminé", expiry: "date de fin" } as Record<string, string>)[h.action] ?? h.action}
+                                  {h.reason ? ` : ${h.reason}` : ""}
+                                </li>
+                              ))}
+                            </ul>
+                          </details>
+                        )}
+                      </div>
+                    </details>
+
+                    {/* The sensitive actions, folded away and clearly marked */}
+                    <details className="mt-3 rounded-xl border border-red-600/30 bg-red-500/5">
+                      <summary className="cursor-pointer min-h-[48px] flex items-center px-4 font-bold text-red-800 dark:text-red-300">Actions sensibles</summary>
+                      <div className="px-4 pb-4 pt-1 flex flex-wrap gap-3">
+                        {s.kind === "enrollment" && s.status === "Approved" && (
+                          <button onClick={() => accessAction(s, "suspend")} disabled={busy} className={`${btn} bg-amber-600 hover:bg-amber-700 text-white`}>
+                            Suspendre l&apos;accès
+                          </button>
+                        )}
+                        {s.status === "Approved" && (
+                          <button onClick={() => rejectStudent(s)} disabled={busy} className={`${btn} bg-red-700 hover:bg-red-600 text-white`}>
+                            Révoquer
+                          </button>
+                        )}
+                        {s.status === "Suspended" || s.status === "Expired" ? (
+                          <button onClick={() => rejectStudent(s)} disabled={busy} className={`${btn} bg-red-700 hover:bg-red-600 text-white`}>
+                            Rejeter
+                          </button>
+                        ) : null}
+                        <button onClick={() => removeStudent(s)} disabled={busy} className={`${btn} border border-red-600/50 bg-surface text-red-800 dark:text-red-300 hover:bg-red-500/10`}>
+                          Supprimer définitivement
+                        </button>
+                      </div>
+                    </details>
+                  </article>
+                );
+              })
+            )}
+
+            {filteredStudents.length > studentsShown && (
+              <div className="text-center my-6">
+                <button
+                  type="button"
+                  onClick={() => setStudentsShown((n) => n + 25)}
+                  className="min-h-[52px] px-8 rounded-xl border border-line bg-surface font-bold text-ink hover:border-red-600/60"
+                >
+                  Afficher 25 de plus ({filteredStudents.length - studentsShown} restants)
+                </button>
+              </div>
+            )}
+
+            {/* Rarely used tools, kept out of the way */}
+            <details className="mt-10 rounded-2xl border border-line bg-surface">
+              <summary className="cursor-pointer min-h-[52px] flex items-center px-5 font-bold text-ink">Outils d&apos;administration (rarement utiles)</summary>
+              <div className="px-5 pb-5 space-y-6">
+                <ProgramSwitches />
+                <ProgressAudit />
+                <div className="flex flex-wrap gap-2"><RecomputePassButton /><RenameIdsButton /></div>
+
+                <div className="bg-surface-alt/50 border border-line rounded-2xl p-4">
+                  <p className="text-base font-bold text-ink mb-1">Vérifier un compte (connexion impossible)</p>
+                  <p className="text-sm text-ink-soft mb-3">
+                    Si un étudiant dit que son mot de passe est refusé, vérifiez d&apos;abord ici si un compte existe vraiment pour son e-mail : cela distingue « mauvais mot de passe » de « ce compte n&apos;a jamais été créé ».
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <label className="sr-only" htmlFor="check-email">E-mail à vérifier</label>
+                    <input
+                      id="check-email"
+                      type="email"
+                      value={checkEmail}
+                      onChange={(e) => setCheckEmail(e.target.value)}
+                      placeholder="email@exemple.com"
+                      className="flex-1 min-h-[48px] bg-surface border border-line rounded-xl px-4 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                    />
                     <button
-                      onClick={() => approveStudent(s)}
-                      disabled={processingIds.has(s.id) || s.status === "Approved" || s.status === "Suspended" || s.status === "Expired"}
-                      className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
+                      onClick={checkAccount}
+                      disabled={checkLoading || !checkEmail.trim()}
+                      className="min-h-[48px] bg-surface hover:bg-surface-alt text-ink font-bold px-5 rounded-xl border border-line transition disabled:opacity-50 whitespace-nowrap"
                     >
-                      {processingIds.has(s.id) ? "Traitement..." : s.status === "Rejected" ? "Réintégrer (approuver)" : "Approuver"}
-                    </button>
-
-                    {s.kind === "enrollment" && (s.status === "Suspended" || s.status === "Expired") ? (
-                      <button
-                        onClick={() => accessAction(s, "reactivate")}
-                        disabled={processingIds.has(s.id)}
-                        className="bg-green-600 hover:bg-green-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40"
-                      >
-                        Réactiver l'accès
-                      </button>
-                    ) : s.kind === "enrollment" && s.status === "Approved" ? (
-                      <>
-                        <button
-                          onClick={() => accessAction(s, "suspend")}
-                          disabled={processingIds.has(s.id)}
-                          className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          Suspendre l'accès
-                        </button>
-                        <button
-                          onClick={() => accessAction(s, "setExpiry")}
-                          disabled={processingIds.has(s.id)}
-                          className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition disabled:opacity-40"
-                        >
-                          Date de fin d'accès
-                        </button>
-                        <button
-                          onClick={() => rejectStudent(s)}
-                          disabled={processingIds.has(s.id)}
-                          className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
-                        >
-                          Révoquer
-                        </button>
-                      </>
-                    ) : s.status === "Approved" ? (
-                      <button
-                        onClick={() => rejectStudent(s)}
-                        disabled={processingIds.has(s.id)}
-                        className="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        Révoquer
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => rejectStudent(s)}
-                        disabled={processingIds.has(s.id) || s.status === "Rejected"}
-                        className="bg-red-600 hover:bg-red-700 text-white font-bold px-4 py-2 rounded-xl transition disabled:opacity-40 disabled:cursor-not-allowed"
-                      >
-                        Rejeter
-                      </button>
-                    )}
-
-                    <button
-                      onClick={() => removeStudent(s)}
-                      disabled={processingIds.has(s.id)}
-                      className="bg-surface-alt hover:bg-surface text-ink-soft hover:text-red-500 font-bold px-4 py-2 rounded-xl border border-line transition disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      Supprimer
+                      {checkLoading ? "Vérification…" : "Vérifier"}
                     </button>
                   </div>
+                  {checkResult && (
+                    <div className={`mt-4 p-4 rounded-xl text-sm border text-white ${checkResult.exists ? "bg-emerald-700 border-emerald-600" : "bg-red-700 border-red-600"}`}>
+                      {checkResult.exists ? (
+                        <>
+                          <p className="font-bold">✓ Ce compte existe bien.</p>
+                          <p className="mt-1 opacity-90">
+                            Créé le {checkResult.createdAt ? new Date(checkResult.createdAt).toLocaleString("fr-FR") : "?"}
+                            {checkResult.lastSignInAt ? ` · Dernière connexion réussie : ${new Date(checkResult.lastSignInAt).toLocaleString("fr-FR")}` : " · Jamais connecté avec succès"}
+                            {checkResult.disabled ? " · ⚠ Compte désactivé" : ""}
+                          </p>
+                          <p className="mt-2 opacity-90">
+                            Le compte existe donc le souci vient du mot de passe saisi : demandez à l&apos;étudiant d&apos;utiliser « Mot de passe oublié ? » sur la page de connexion.
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="font-bold">✗ Aucun compte pour cet e-mail.</p>
+                          <p className="mt-1 opacity-90">
+                            L&apos;inscription n&apos;a jamais abouti côté authentification (ou l&apos;e-mail est différent de celui réellement utilisé). L&apos;étudiant doit se réinscrire via /register avec cet e-mail.
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))
-            )}
+              </div>
+            </details>
           </div>
         )}
 
@@ -2367,14 +2414,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
           <div>
             <form onSubmit={createLiveSession} className="bg-surface border border-line rounded-2xl p-6 mb-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 items-end">
               <div className="lg:col-span-1">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Formation</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Formation</label>
                 <select
                   value={sessionLangCode}
                   onChange={(e) => {
                     setSessionLangCode(e.target.value);
                     setSessionAudience(null);
                   }}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 >
                   <optgroup label="Langues">
                     {availableLanguages.map((l) => (
@@ -2390,7 +2437,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               </div>
 
               <div className="lg:col-span-1">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Niveau</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Niveau</label>
                 {isOtherProgramCode(sessionLangCode) ? (
                   <div className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink-faint">
                     Salle unique
@@ -2399,7 +2446,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <select
                     value={sessionLevel}
                     onChange={(e) => setSessionLevel(e.target.value)}
-                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                    className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                   >
                     <option value="1">Niveau 1</option>
                     <option value="2">Niveau 2</option>
@@ -2409,64 +2456,64 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               </div>
 
               <div className="lg:col-span-1">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Date</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Date</label>
                 <input
                   type="date"
                   value={sessionDate}
                   onChange={(e) => setSessionDate(e.target.value)}
                   required
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 />
               </div>
 
               <div className="lg:col-span-1">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Heure</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Heure</label>
                 <input
                   type="time"
                   value={sessionTime}
                   onChange={(e) => setSessionTime(e.target.value)}
                   required
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 />
               </div>
 
               <div className="lg:col-span-1">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Durée (min)</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Durée (min)</label>
                 <input
                   type="number"
                   min="15"
                   step="15"
                   value={sessionDuration}
                   onChange={(e) => setSessionDuration(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 />
               </div>
 
               <button
                 type="submit"
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition lg:col-span-1"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white font-bold px-4 py-2.5 rounded-xl text-sm transition lg:col-span-1 min-h-[44px]"
               >
                 Programmer
               </button>
 
               <div className="sm:col-span-2 lg:col-span-6">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre (optionnel)</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Titre (optionnel)</label>
                 <input
                   type="text"
                   placeholder="Ex. Session de conversation hebdomadaire"
                   value={sessionTitle}
                   onChange={(e) => setSessionTitle(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 />
               </div>
 
               <div className="sm:col-span-2 lg:col-span-6">
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Qui peut entrer ?</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Qui peut entrer ?</label>
                 <LiveAudiencePicker candidates={audienceCandidates(sessionLangCode)} value={sessionAudience} onChange={setSessionAudience} />
               </div>
             </form>
 
-            <p className="text-xs text-ink-soft mb-4">
+            <p className="text-sm text-ink-soft mb-4">
               Le bouton « Classe en direct » des étudiants reste verrouillé jusqu'à 10 minutes avant l'heure programmée, et se referme 10 minutes après la fin.
             </p>
 
@@ -2491,12 +2538,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           {languageLabel(session.langCode)} — Niveau {session.level}
                           {session.title ? ` · ${session.title}` : ""}
                         </p>
-                        <p className="text-xs text-ink-soft mt-1">
+                        <p className="text-sm text-ink-soft mt-1">
                           {date.toLocaleString("fr-FR", { dateStyle: "full", timeStyle: "short" })} · {session.durationMinutes} min
                           {isPast && " · Terminée"}
                           {session.open && !isPast && " · 🟢 Ouvert aux étudiants"}
                         </p>
-                        <p className="text-xs text-ink-soft mt-1">
+                        <p className="text-sm text-ink-soft mt-1">
                           {audienceLabel(session.studentUids)}
                           {session.teacherName ? ` · Prof : ${session.teacherName}` : ""}
                           <button
@@ -2511,7 +2558,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <div className="flex items-center gap-4 self-start sm:self-center">
                         <button
                           onClick={() => setHostingSession({ id: session.id, langCode: session.langCode || "EN", level: session.level, title: session.title })}
-                          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition inline-flex items-center gap-2"
+                          className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2 rounded-xl transition inline-flex items-center gap-2 min-h-[44px]"
                         >
                           <Video size={15} /> Rejoindre en tant qu'enseignant
                         </button>
@@ -2536,13 +2583,13 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       Salle en direct — {languageLabel(hostingSession.langCode)} — Niveau {hostingSession.level}
                       {hostingSession.title ? ` · ${hostingSession.title}` : ""}
                     </p>
-                    <p className="text-xs text-ink-soft mt-1">
+                    <p className="text-sm text-ink-soft mt-1">
                       Vous rejoignez en tant qu'enseignant/modérateur. Contrôle total de la session : micro, caméra, partage d'écran, mise en sourdine et exclusion des participants.
                     </p>
                   </div>
                   <button
                     onClick={leaveHostedRoom}
-                    className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition whitespace-nowrap"
+                    className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition whitespace-nowrap min-h-[44px]"
                   >
                     Quitter
                   </button>
@@ -2566,7 +2613,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           <p className="font-bold text-ink text-sm">
                             {isOpen ? "Cours ouvert — les étudiants peuvent entrer" : "Cours fermé — les étudiants sont en salle d'attente"}
                           </p>
-                          <p className="text-xs text-ink-soft mt-0.5">
+                          <p className="text-sm text-ink-soft mt-0.5">
                             {isOpen
                               ? "Les étudiants voient la vidéo, peuvent lever la main et écrire dans le chat. Clôturez à la fin du cours."
                               : "Préparez-vous (micro, caméra, supports), puis ouvrez le cours : l'accès démarre aussitôt chez les étudiants."}
@@ -2628,19 +2675,19 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
               <div className="p-4 rounded-2xl border border-line bg-surface">
                 <p className="text-2xl font-black text-ink">{paymentsStats.count}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Total</p>
+                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">Total</p>
               </div>
               <div className="p-4 rounded-2xl border border-line bg-surface">
                 <p className="text-2xl font-black text-emerald-400">{paymentsStats.paid}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Payés</p>
+                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">Payés</p>
               </div>
               <div className="p-4 rounded-2xl border border-line bg-surface">
                 <p className="text-2xl font-black text-red-500">${paymentsStats.totalAmount}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">Revenu confirmé</p>
+                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">Revenu confirmé</p>
               </div>
               <div className="p-4 rounded-2xl border border-line bg-surface">
                 <p className="text-2xl font-black text-amber-400">${paymentsStats.pendingAmount}</p>
-                <p className="text-xs text-ink-soft uppercase tracking-wide mt-1">En attente</p>
+                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">En attente</p>
               </div>
             </div>
 
@@ -2670,7 +2717,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         <td className="py-2 pr-4 text-ink-soft">{languageLabel(p.langCode)}</td>
                         <td className="py-2 pr-4 text-ink">{p.amount} {p.currency || "USD"}</td>
                         <td className="py-2 pr-4">
-                          <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                          <span className={`text-sm font-semibold px-2 py-1 rounded-full ${
                             p.status === "paid" ? "bg-emerald-700 text-white" :
                             p.status === "failed" ? "bg-red-700 text-white" :
                             "bg-amber-700 text-white"
@@ -2678,8 +2725,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                             {p.status}
                           </span>
                         </td>
-                        <td className="py-2 pr-4 text-ink-soft font-mono text-xs">{p.matricule || "-"}</td>
-                        <td className="py-2 pr-4 text-ink-faint font-mono text-xs">{p.id}</td>
+                        <td className="py-2 pr-4 text-ink-soft font-mono text-sm">{p.matricule || "-"}</td>
+                        <td className="py-2 pr-4 text-ink-faint font-mono text-sm">{p.id}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -2707,10 +2754,10 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <div key={app.id} className="p-5 rounded-2xl border border-line bg-surface">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
+                        <p className="text-sm text-ink-faint font-semibold uppercase tracking-wide mb-1">{app.announcementTitle}</p>
                         <p className="text-ink font-bold">{app.name}</p>
                       </div>
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                      <span className={`text-sm font-semibold px-2.5 py-1 rounded-full shrink-0 ${
                         app.status === "accepted" ? "bg-emerald-700 text-white" :
                         app.status === "rejected" ? "bg-red-700 text-white" :
                         app.status === "reviewing" ? "bg-amber-700 text-white" :
@@ -2729,14 +2776,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                             href={a.url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg"
+                            className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg"
                           >
                             <Paperclip size={12} /> {a.name}
                           </a>
                         ))}
                       </div>
                     ) : (
-                      <p className="text-xs text-ink-faint mt-3 flex items-center gap-1.5">
+                      <p className="text-sm text-ink-faint mt-3 flex items-center gap-1.5">
                         <Mail size={12} /> Fichiers envoyés par email à l'administration
                         {app.attachmentNames?.length ? ` — ${app.attachmentNames.join(", ")}` : ""}
                       </p>
@@ -2745,7 +2792,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "reviewing")}
                         disabled={app.status === "reviewing"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           app.status === "reviewing" ? "bg-amber-600 border-amber-600 text-white" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
@@ -2754,7 +2801,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "accepted")}
                         disabled={app.status === "accepted"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           app.status === "accepted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
@@ -2763,7 +2810,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateJobApplicationStatus(app.id, "rejected")}
                         disabled={app.status === "rejected"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           app.status === "rejected" ? "bg-red-900 text-white/80" : "bg-red-600 hover:bg-red-700 text-white"
                         }`}
                       >
@@ -2771,11 +2818,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       </button>
                       <button
                         onClick={() => openReply("jobApplications", app.id, app.email, `Votre candidature — ${app.announcementTitle}`)}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
+                        className="text-red-500 hover:text-red-400 text-sm font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
                         <Mail size={13} /> Répondre sur le site
                       </button>
-                      <a href={`mailto:${app.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
+                      <a href={`mailto:${app.email}`} className="text-ink-faint hover:text-ink text-sm font-semibold px-3 py-1.5 self-center">Email →</a>
                     </div>
                   </div>
                 ))}
@@ -2787,7 +2834,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= PROJECT REQUESTS TAB ================= */}
         {tab === "projects" && (
           <div>
-            <p className="text-xs text-ink-soft mb-6">
+            <p className="text-sm text-ink-soft mb-6">
               Demandes envoyées depuis le formulaire « Parlons de votre projet » de la page d'accueil.
             </p>
             {projectRequestsLoading ? (
@@ -2802,7 +2849,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <div key={req.id} className="p-5 rounded-2xl border border-line bg-surface">
                     <div className="flex items-start justify-between gap-3">
                       <p className="text-ink font-bold">{req.name}</p>
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                      <span className={`text-sm font-semibold px-2.5 py-1 rounded-full shrink-0 ${
                         req.status === "contacted" ? "bg-emerald-700 text-white" :
                         req.status === "closed" ? "bg-surface-alt text-ink-faint" :
                         "bg-amber-700 text-white"
@@ -2817,7 +2864,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         href={req.attachmentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg mt-3"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg mt-3"
                       >
                         <Paperclip size={12} /> {req.attachmentName || "Pièce jointe"}
                       </a>
@@ -2826,7 +2873,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateProjectRequestStatus(req.id, "contacted")}
                         disabled={req.status === "contacted"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "contacted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
@@ -2835,7 +2882,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateProjectRequestStatus(req.id, "closed")}
                         disabled={req.status === "closed"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "closed" ? "bg-surface text-ink-faint border-line" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
@@ -2843,12 +2890,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       </button>
                       <button
                         onClick={() => openReply("projectRequests", req.id, req.email, "Votre demande — BM Corporation")}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
+                        className="text-red-500 hover:text-red-400 text-sm font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
                         <Mail size={13} /> Répondre sur le site
                       </button>
-                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
-                      <button onClick={() => deleteProjectRequest(req.id)} className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5 self-center">Supprimer</button>
+                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-sm font-semibold px-3 py-1.5 self-center">Email →</a>
+                      <button onClick={() => deleteProjectRequest(req.id)} className="text-ink-faint hover:text-red-500 text-sm font-semibold px-3 py-1.5 self-center">Supprimer</button>
                     </div>
                   </div>
                 ))}
@@ -2860,7 +2907,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= DEVIS REQUESTS TAB ================= */}
         {tab === "devis" && (
           <div>
-            <p className="text-xs text-ink-soft mb-6">
+            <p className="text-sm text-ink-soft mb-6">
               Demandes envoyées depuis le formulaire de devis (/devis), tous départements confondus.
             </p>
             {devisRequestsLoading ? (
@@ -2875,10 +2922,10 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <div key={req.id} className="p-5 rounded-2xl border border-line bg-surface">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">{req.service}</p>
+                        <p className="text-sm text-ink-faint font-semibold uppercase tracking-wide mb-1">{req.service}</p>
                         <p className="text-ink font-bold">{req.name}</p>
                       </div>
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                      <span className={`text-sm font-semibold px-2.5 py-1 rounded-full shrink-0 ${
                         req.status === "contacted" ? "bg-emerald-700 text-white" :
                         req.status === "closed" ? "bg-surface-alt text-ink-faint" :
                         "bg-amber-700 text-white"
@@ -2893,7 +2940,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         href={req.attachmentUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg mt-3"
+                        className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1 rounded-lg mt-3"
                       >
                         <Paperclip size={12} /> {req.attachmentName || "Pièce jointe"}
                       </a>
@@ -2902,7 +2949,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateDevisRequestStatus(req.id, "contacted")}
                         disabled={req.status === "contacted"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "contacted" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
@@ -2911,7 +2958,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateDevisRequestStatus(req.id, "closed")}
                         disabled={req.status === "closed"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "closed" ? "bg-surface text-ink-faint border-line" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
@@ -2919,22 +2966,22 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       </button>
                       <button
                         onClick={() => openReply("devisRequests", req.id, req.email, `Votre demande de devis — ${req.service}`)}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
+                        className="text-red-500 hover:text-red-400 text-sm font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
                         <Mail size={13} /> Répondre sur le site
                       </button>
-                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
+                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-sm font-semibold px-3 py-1.5 self-center">Email →</a>
                       {req.phone && (
                         <a
                           href={`https://wa.me/${req.phone.replace(/[^0-9]/g, "")}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-emerald-500 hover:text-emerald-400 text-xs font-bold px-3 py-1.5 self-center"
+                          className="text-emerald-500 hover:text-emerald-400 text-sm font-bold px-3 py-1.5 self-center"
                         >
                           WhatsApp →
                         </a>
                       )}
-                      <button onClick={() => deleteDevisRequest(req.id)} className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5 self-center">Supprimer</button>
+                      <button onClick={() => deleteDevisRequest(req.id)} className="text-ink-faint hover:text-red-500 text-sm font-semibold px-3 py-1.5 self-center">Supprimer</button>
                     </div>
                   </div>
                 ))}
@@ -2946,7 +2993,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= STUDENT REQUESTS (PLAINTES) TAB ================= */}
         {tab === "requests" && (
           <div>
-            <p className="text-xs text-ink-soft mb-6">
+            <p className="text-sm text-ink-soft mb-6">
               Plaintes, inquiétudes et demandes particulières soumises par les étudiants depuis leur dashboard.
             </p>
             {studentRequestsLoading ? (
@@ -2961,13 +3008,13 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   <div key={req.id} className="p-5 rounded-2xl border border-line bg-surface">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <p className="text-xs text-ink-faint font-semibold uppercase tracking-wide mb-1">
+                        <p className="text-sm text-ink-faint font-semibold uppercase tracking-wide mb-1">
                           {req.type === "complaint" ? "Plainte" : req.type === "concern" ? "Inquiétude" : req.type === "request" ? "Demande particulière" : "Autre"}
                         </p>
                         <p className="text-ink font-bold">{req.subject}</p>
-                        <p className="text-xs text-ink-soft mt-0.5">{req.name} · {req.email}</p>
+                        <p className="text-sm text-ink-soft mt-0.5">{req.name} · {req.email}</p>
                       </div>
-                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${
+                      <span className={`text-sm font-semibold px-2.5 py-1 rounded-full shrink-0 ${
                         req.status === "resolved" ? "bg-emerald-700 text-white" :
                         req.status === "reviewing" ? "bg-amber-700 text-white" :
                         "bg-surface-alt text-ink-soft"
@@ -2977,7 +3024,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     </div>
                     {req.message && <p className="text-ink-soft text-sm mt-2">{req.message}</p>}
                     {req.attachmentNames?.length > 0 && (
-                      <p className="text-xs text-ink-faint mt-2 flex items-center gap-1.5">
+                      <p className="text-sm text-ink-faint mt-2 flex items-center gap-1.5">
                         <Paperclip size={12} /> Envoyé par email avec : {req.attachmentNames.join(", ")}
                       </p>
                     )}
@@ -2985,7 +3032,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateStudentRequestStatus(req.id, "reviewing")}
                         disabled={req.status === "reviewing"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg border transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "reviewing" ? "bg-amber-600 border-amber-600 text-white" : "bg-surface-alt hover:bg-surface text-ink-soft border-line"
                         }`}
                       >
@@ -2994,7 +3041,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => updateStudentRequestStatus(req.id, "resolved")}
                         disabled={req.status === "resolved"}
-                        className={`text-xs font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
+                        className={`text-sm font-bold px-3 py-1.5 rounded-lg transition disabled:cursor-default inline-flex items-center gap-1.5 ${
                           req.status === "resolved" ? "bg-green-800 text-white/80" : "bg-green-600 hover:bg-green-700 text-white"
                         }`}
                       >
@@ -3002,11 +3049,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       </button>
                       <button
                         onClick={() => openReply("studentRequests", req.id, req.email, `Re: ${req.subject}`)}
-                        className="text-red-500 hover:text-red-400 text-xs font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
+                        className="text-red-500 hover:text-red-400 text-sm font-bold px-3 py-1.5 self-center inline-flex items-center gap-1.5"
                       >
                         <Mail size={13} /> Répondre sur le site
                       </button>
-                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-xs font-semibold px-3 py-1.5 self-center">Email →</a>
+                      <a href={`mailto:${req.email}`} className="text-ink-faint hover:text-ink text-sm font-semibold px-3 py-1.5 self-center">Email →</a>
                     </div>
                   </div>
                 ))}
@@ -3018,7 +3065,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {/* ================= PROGRESS TAB ================= */}
         {tab === "progress" && (
           <div>
-            <p className="text-xs text-ink-soft mb-6">
+            <p className="text-sm text-ink-soft mb-6">
               Évolution des étudiants : leçons complétées, résultats de quiz et quiz final, par langue et par niveau.
               Synchronisé automatiquement à chaque quiz réussi — les étudiants qui n'ont pas encore passé de quiz depuis
               ce déploiement n'apparaîtront qu'après leur prochain quiz.
@@ -3054,18 +3101,18 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           <td className="py-2 pr-4 text-ink-soft">{(p.completedQuizzes || []).length}</td>
                           <td className="py-2 pr-4">
                             {p.finalQuizPassed ? (
-                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-emerald-700 text-white">Réussi ({p.finalQuizScore})</span>
+                              <span className="text-sm font-semibold px-2 py-1 rounded-full bg-emerald-700 text-white">Réussi ({p.finalQuizScore})</span>
                             ) : p.finalQuizScore != null ? (
-                              <span className="text-xs font-semibold px-2 py-1 rounded-full bg-red-700 text-white">Échoué ({p.finalQuizScore})</span>
+                              <span className="text-sm font-semibold px-2 py-1 rounded-full bg-red-700 text-white">Échoué ({p.finalQuizScore})</span>
                             ) : (
-                              <span className="text-xs text-ink-faint">—</span>
+                              <span className="text-sm text-ink-faint">—</span>
                             )}
                           </td>
-                          <td className="py-2 pr-4 text-ink-faint font-mono text-xs">{p.certificateId || "—"}</td>
+                          <td className="py-2 pr-4 text-ink-faint font-mono text-sm">{p.certificateId || "—"}</td>
                           <td className="py-2 pr-4">
                             <button
                               onClick={() => setDossierOf({ uid: p.uid, langCode: p.langCode })}
-                              className="text-xs font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition"
+                              className="text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition min-h-[44px]"
                             >
                               Ouvrir
                             </button>
@@ -3084,12 +3131,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "certificates" && (
           <div>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
-              <p className="text-xs text-ink-soft max-w-xl">
+              <p className="text-sm text-ink-soft max-w-xl">
                 Certificats auto-générés en fin de niveau, et certificats émis manuellement ici (sans passer par le parcours d'apprentissage).
               </p>
               <button
                 onClick={() => setCertGenerateOpen(true)}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2 shrink-0"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2 shrink-0 min-h-[44px]"
               >
                 <Trophy size={15} /> Générer un certificat
               </button>
@@ -3102,124 +3149,124 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               >
                 <span>
                   <span className="block font-bold text-ink">Modèle du certificat (modifier tous les textes)</span>
-                  <span className="block text-xs text-ink-soft mt-0.5">
+                  <span className="block text-sm text-ink-soft mt-0.5">
                     Nom de l'entreprise, signataires, intitulés, libellé de l'identifiant… Appliqué à tous les nouveaux PDF.
                   </span>
                 </span>
-                <span className="text-xs font-bold text-red-500 shrink-0 ml-4">{docSettingsOpen ? "Fermer" : "Modifier"}</span>
+                <span className="text-sm font-bold text-red-500 shrink-0 ml-4">{docSettingsOpen ? "Fermer" : "Modifier"}</span>
               </button>
               {docSettingsOpen && (
                 <div className="px-5 pb-5 space-y-5 border-t border-line pt-5">
                   <div className="grid sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Nom de l'entreprise</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Nom de l'entreprise</label>
                       <input
                         value={docSettings.companyName}
                         onChange={(e) => setDocSettings((d) => ({ ...d, companyName: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Département / sous-titre</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Département / sous-titre</label>
                       <input
                         value={docSettings.department}
                         onChange={(e) => setDocSettings((d) => ({ ...d, department: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Titre du certificat</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Titre du certificat</label>
                       <input
                         value={docSettings.certificateTitle}
                         onChange={(e) => setDocSettings((d) => ({ ...d, certificateTitle: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé du numéro de certificat</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Libellé du numéro de certificat</label>
                       <input
                         value={docSettings.certificateNumberLabel}
                         onChange={(e) => setDocSettings((d) => ({ ...d, certificateNumberLabel: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de l'identifiant étudiant</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Libellé de l'identifiant étudiant</label>
                       <input
                         value={docSettings.studentIdLabel}
                         onChange={(e) => setDocSettings((d) => ({ ...d, studentIdLabel: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Texte « décerné à »</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Texte « décerné à »</label>
                       <input
                         value={docSettings.presentedToText}
                         onChange={(e) => setDocSettings((d) => ({ ...d, presentedToText: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Texte « pour avoir réussi »</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Texte « pour avoir réussi »</label>
                       <input
                         value={docSettings.completionText}
                         onChange={(e) => setDocSettings((d) => ({ ...d, completionText: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de la moyenne</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Libellé de la moyenne</label>
                       <input
                         value={docSettings.averageLabel}
                         onChange={(e) => setDocSettings((d) => ({ ...d, averageLabel: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Libellé de la date</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Libellé de la date</label>
                       <input
                         value={docSettings.issuedLabel}
                         onChange={(e) => setDocSettings((d) => ({ ...d, issuedLabel: e.target.value }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                   </div>
                   <div className="grid sm:grid-cols-2 gap-6">
                     <div className="space-y-3">
-                      <p className="text-xs font-bold text-ink uppercase tracking-wide">Signature de gauche</p>
+                      <p className="text-sm font-bold text-ink uppercase tracking-wide">Signature de gauche</p>
                       <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Nom</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Nom</label>
                       <input
                         value={docSettings.signatory1.name}
                         onChange={(e) => setDocSettings((d) => ({ ...d, signatory1: { ...d.signatory1, name: e.target.value } }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                       <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Fonction</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Fonction</label>
                       <input
                         value={docSettings.signatory1.role}
                         onChange={(e) => setDocSettings((d) => ({ ...d, signatory1: { ...d.signatory1, role: e.target.value } }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     </div>
                     <div className="space-y-3">
-                      <p className="text-xs font-bold text-ink uppercase tracking-wide">Signature de droite</p>
+                      <p className="text-sm font-bold text-ink uppercase tracking-wide">Signature de droite</p>
                       <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Nom</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Nom</label>
                       <input
                         value={docSettings.signatory2.name}
                         onChange={(e) => setDocSettings((d) => ({ ...d, signatory2: { ...d.signatory2, name: e.target.value } }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                       <div>
-                      <label className="block text-xs font-semibold text-ink-soft mb-1">Fonction</label>
+                      <label className="block text-sm font-semibold text-ink-soft mb-1">Fonction</label>
                       <input
                         value={docSettings.signatory2.role}
                         onChange={(e) => setDocSettings((d) => ({ ...d, signatory2: { ...d.signatory2, role: e.target.value } }))}
-                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                        className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                       />
                     </div>
                     </div>
@@ -3228,7 +3275,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     <button
                       onClick={saveDocSettings}
                       disabled={docSettingsSaving}
-                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition"
+                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white text-sm font-bold px-5 py-2.5 rounded-xl transition min-h-[44px]"
                     >
                       {docSettingsSaving ? "Enregistrement…" : "Enregistrer"}
                     </button>
@@ -3243,13 +3290,13 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           settings: docSettings,
                         })
                       }
-                      className="bg-surface-alt hover:bg-surface text-ink-soft font-bold text-sm px-4 py-2.5 rounded-xl border border-line transition"
+                      className="bg-surface-alt hover:bg-surface text-ink-soft font-bold text-sm px-4 py-2.5 rounded-xl border border-line transition min-h-[44px]"
                     >
                       Aperçu avec ces textes
                     </button>
                     <button
                       onClick={() => setDocSettings(DEFAULT_DOCUMENT_SETTINGS)}
-                      className="text-xs font-semibold text-ink-soft hover:text-ink"
+                      className="text-sm font-semibold text-ink-soft hover:text-ink"
                     >
                       Remettre les textes d'origine
                     </button>
@@ -3271,28 +3318,28 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     {certEditingId === cert.id ? (
                       <div className="space-y-3">
                         <div>
-                          <label className="block text-xs font-semibold text-ink-soft mb-1">Nom de l'étudiant</label>
+                          <label className="block text-sm font-semibold text-ink-soft mb-1">Nom de l'étudiant</label>
                           <input
                             value={certEditName}
                             onChange={(e) => setCertEditName(e.target.value)}
-                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-ink-soft mb-1">Email</label>
+                          <label className="block text-sm font-semibold text-ink-soft mb-1">Email</label>
                           <input
                             value={certEditEmail}
                             onChange={(e) => setCertEditEmail(e.target.value)}
-                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                           />
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-xs font-semibold text-ink-soft mb-1">Langue</label>
+                            <label className="block text-sm font-semibold text-ink-soft mb-1">Langue</label>
                             <select
                               value={certEditLangCode}
                               onChange={(e) => setCertEditLangCode(e.target.value)}
-                              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                             >
                               {availableLanguages.map((l) => (
                                 <option key={l.code} value={l.code}>{l.label}</option>
@@ -3300,11 +3347,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                             </select>
                           </div>
                           <div>
-                            <label className="block text-xs font-semibold text-ink-soft mb-1">Niveau</label>
+                            <label className="block text-sm font-semibold text-ink-soft mb-1">Niveau</label>
                             <select
                               value={certEditLevel}
                               onChange={(e) => setCertEditLevel(e.target.value)}
-                              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                             >
                               <option value="1">Niveau 1</option>
                               <option value="2">Niveau 2</option>
@@ -3313,24 +3360,24 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-ink-soft mb-1">Titre du niveau</label>
+                          <label className="block text-sm font-semibold text-ink-soft mb-1">Titre du niveau</label>
                           <input
                             value={certEditLevelTitle}
                             onChange={(e) => setCertEditLevelTitle(e.target.value)}
-                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                           />
                         </div>
                         <div>
-                          <label className="block text-xs font-semibold text-ink-soft mb-1">Moyenne (%)</label>
+                          <label className="block text-sm font-semibold text-ink-soft mb-1">Moyenne (%)</label>
                           <input
                             type="number"
                             value={certEditAverage}
                             onChange={(e) => setCertEditAverage(e.target.value)}
-                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                           />
                         </div>
                         <div className="flex flex-wrap gap-2">
-                          <button onClick={() => saveCertificateEdit(cert.id)} className="bg-green-600 hover:bg-green-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition">Enregistrer</button>
+                          <button onClick={() => saveCertificateEdit(cert.id)} className="bg-green-600 hover:bg-green-700 text-white text-sm font-bold px-3 py-1.5 rounded-lg transition min-h-[44px]">Enregistrer</button>
                           <button
                             onClick={() =>
                               openCertificatePreview({
@@ -3341,11 +3388,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                                 studentId: cert.studentId || undefined,
                               })
                             }
-                            className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
+                            className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-3 py-1.5 rounded-lg border border-line transition min-h-[44px]"
                           >
                             Aperçu
                           </button>
-                          <button onClick={() => setCertEditingId(null)} className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition">Annuler</button>
+                          <button onClick={() => setCertEditingId(null)} className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-3 py-1.5 rounded-lg border border-line transition min-h-[44px]">Annuler</button>
                         </div>
                       </div>
                     ) : (
@@ -3353,17 +3400,17 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <p className="text-ink font-bold">{cert.studentName}</p>
-                            <p className="text-xs text-ink-soft mt-0.5">{cert.levelTitle || `${languageLabel(cert.langCode)} — Niveau ${cert.level}`}</p>
-                            <p className="text-xs text-ink-faint font-mono mt-1">
+                            <p className="text-sm text-ink-soft mt-0.5">{cert.levelTitle || `${languageLabel(cert.langCode)} — Niveau ${cert.level}`}</p>
+                            <p className="text-sm text-ink-faint font-mono mt-1">
                               {cert.certificateId}
                               {cert.studentId ? ` · Student ID : ${cert.studentId}` : ""}
                             </p>
                           </div>
                           <div className="text-right shrink-0">
-                            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cert.issuedBy === "admin" ? "bg-amber-700 text-white" : "bg-surface-alt text-ink-soft"}`}>
+                            <span className={`text-sm font-semibold px-2.5 py-1 rounded-full ${cert.issuedBy === "admin" ? "bg-amber-700 text-white" : "bg-surface-alt text-ink-soft"}`}>
                               {cert.issuedBy === "admin" ? "Émis par admin" : "Auto-généré"}
                             </span>
-                            <p className="text-xs text-ink-faint mt-1">{cert.average != null ? `${cert.average}%` : ""}</p>
+                            <p className="text-sm text-ink-faint mt-1">{cert.average != null ? `${cert.average}%` : ""}</p>
                           </div>
                         </div>
                         <div className="flex flex-wrap gap-2 mt-4">
@@ -3377,7 +3424,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                               setCertEditLevelTitle(cert.levelTitle || "");
                               setCertEditAverage(String(cert.average ?? ""));
                             }}
-                            className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
+                            className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-3 py-1.5 rounded-lg border border-line transition min-h-[44px]"
                           >
                             Modifier
                           </button>
@@ -3391,19 +3438,19 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                                 studentId: cert.studentId || undefined,
                               })
                             }
-                            className="bg-surface-alt hover:bg-surface text-ink-soft text-xs font-bold px-3 py-1.5 rounded-lg border border-line transition"
+                            className="bg-surface-alt hover:bg-surface text-ink-soft text-sm font-bold px-3 py-1.5 rounded-lg border border-line transition min-h-[44px]"
                           >
                             Télécharger
                           </button>
                           <button
                             onClick={() => toggleCertificateRevoked(cert)}
-                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${cert.revoked ? "bg-green-600 hover:bg-green-700 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"}`}
+                            className={`text-sm font-bold px-3 py-1.5 rounded-lg transition ${cert.revoked ? "bg-green-600 hover:bg-green-700 text-white" : "bg-amber-600 hover:bg-amber-700 text-white"}`}
                           >
                             {cert.revoked ? "Réactiver" : "Révoquer"}
                           </button>
                           <button
                             onClick={() => deleteCertificate(cert.id)}
-                            className="text-ink-faint hover:text-red-500 text-xs font-semibold px-3 py-1.5"
+                            className="text-ink-faint hover:text-red-500 text-sm font-semibold px-3 py-1.5"
                           >
                             Supprimer
                           </button>
@@ -3434,14 +3481,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 <p className="text-ink font-bold">Impossible de lire ta boîte mail</p>
                 <p className="text-sm text-ink-soft max-w-xl mx-auto">{mailError.message}</p>
                 <div className="flex flex-wrap justify-center gap-3">
-                  <button onClick={() => fetchMailMessages()} className="px-5 py-2.5 rounded-xl border border-line text-sm font-bold text-ink hover:border-red-600/60">
+                  <button onClick={() => fetchMailMessages()} className="px-5 py-2.5 rounded-xl border border-line text-sm font-bold text-ink hover:border-red-600/60 min-h-[44px]">
                     Réessayer
                   </button>
                   {mailError.reauth && (
                     <button
                       onClick={connectGmail}
                       disabled={mailConnecting}
-                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2"
+                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl transition inline-flex items-center gap-2 min-h-[44px]"
                     >
                       <Link2 size={16} /> {mailConnecting ? "Redirection…" : "Reconnecter Gmail"}
                     </button>
@@ -3458,7 +3505,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 <button
                   onClick={connectGmail}
                   disabled={mailConnecting}
-                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl transition inline-flex items-center gap-2"
+                  className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-6 py-3 rounded-xl transition inline-flex items-center gap-2 min-h-[44px]"
                 >
                   <Link2 size={16} /> {mailConnecting ? "Redirection…" : "Connecter Gmail"}
                 </button>
@@ -3468,13 +3515,13 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-4 border-b border-line bg-surface-alt/50">
                   <div>
                     <p className="font-black text-ink flex items-center gap-2"><Inbox size={16} /> brightenedmindcorporation@gmail.com</p>
-                    <p className="text-xs text-ink-soft mt-0.5">
+                    <p className="text-sm text-ink-soft mt-0.5">
                       {mailUnreadInbox} non lu(s) dans la réception · {mailMessages.length} affiché(s)
                     </p>
                   </div>
                   <button
                     onClick={() => openCompose()}
-                    className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shrink-0 inline-flex items-center gap-2"
+                    className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shrink-0 inline-flex items-center gap-2 min-h-[44px]"
                   >
                     <SquarePen size={15} /> Nouveau message
                   </button>
@@ -3488,7 +3535,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           <button
                             key={f.id}
                             onClick={() => changeMailFolder(f.id)}
-                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
+                            className={`text-sm font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
                               mailFolder === f.id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
                             }`}
                           >
@@ -3524,7 +3571,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           <button
                             key={f.id}
                             onClick={() => setMailFilter(f.id)}
-                            className={`text-xs font-bold px-3 py-1.5 rounded-lg transition ${
+                            className={`text-sm font-bold px-3 py-1.5 rounded-lg transition ${
                               mailFilter === f.id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
                             }`}
                           >
@@ -3549,7 +3596,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                               selectedMail?.id === m.id ? "bg-red-950/10" : "hover:bg-surface-alt"
                             }`}
                           >
-                            <span className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-black shrink-0 ${avatarColor(name)}`}>
+                            <span className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 ${avatarColor(name)}`}>
                               {name.trim().charAt(0).toUpperCase() || "?"}
                             </span>
                             <span className="min-w-0 flex-1">
@@ -3561,7 +3608,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                                 </span>
                               </span>
                               <span className={`block text-sm truncate ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject}</span>
-                              <span className="block text-xs text-ink-faint truncate mt-0.5">{m.snippet}</span>
+                              <span className="block text-sm text-ink-faint truncate mt-0.5">{m.snippet}</span>
                             </span>
                           </button>
                         );
@@ -3571,7 +3618,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                       <button
                         onClick={() => fetchMailMessages(true, mailNextToken)}
                         disabled={mailLoadingMore}
-                        className="w-full py-3 text-xs font-bold text-red-500 hover:bg-surface-alt disabled:opacity-50 transition"
+                        className="w-full py-3 text-sm font-bold text-red-500 hover:bg-surface-alt disabled:opacity-50 transition"
                       >
                         {mailLoadingMore ? "Chargement…" : "Charger plus"}
                       </button>
@@ -3591,59 +3638,59 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                           <button
                             onClick={() => setSelectedMail(null)}
-                            className="text-xs font-semibold text-ink-soft hover:text-ink inline-flex items-center gap-1.5"
+                            className="text-sm font-semibold text-ink-soft hover:text-ink inline-flex items-center gap-1.5"
                           >
                             <ArrowLeft size={14} /> Retour
                           </button>
                           <div className="flex items-center gap-2 flex-wrap">
-                            <button onClick={() => mailAction(selectedMail.id, selectedMail.starred ? "unstar" : "star")} title={selectedMail.starred ? "Retirer des favoris" : "Favori"} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                            <button onClick={() => mailAction(selectedMail.id, selectedMail.starred ? "unstar" : "star")} title={selectedMail.starred ? "Retirer des favoris" : "Favori"} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                               <Star size={14} className={selectedMail.starred ? "text-yellow-400 fill-yellow-400" : ""} /> Favori
                             </button>
                             {mailFolder === "trash" ? (
-                              <button onClick={() => mailAction(selectedMail.id, "untrash")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                              <button onClick={() => mailAction(selectedMail.id, "untrash")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                                 <RotateCcw size={14} /> Restaurer
                               </button>
                             ) : (
                               <>
                                 {mailFolder !== "spam" && (
-                                  <button onClick={() => mailAction(selectedMail.id, "archive")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                  <button onClick={() => mailAction(selectedMail.id, "archive")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                                     <Archive size={14} /> Archiver
                                   </button>
                                 )}
                                 {mailFolder === "spam" ? (
-                                  <button onClick={() => mailAction(selectedMail.id, "notspam")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                  <button onClick={() => mailAction(selectedMail.id, "notspam")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                                     <Inbox size={14} /> Pas un spam
                                   </button>
                                 ) : (
-                                  <button onClick={() => mailAction(selectedMail.id, "spam")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                  <button onClick={() => mailAction(selectedMail.id, "spam")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                                     <ShieldAlert size={14} /> Spam
                                   </button>
                                 )}
-                                <button onClick={() => mailAction(selectedMail.id, "trash")} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                                <button onClick={() => mailAction(selectedMail.id, "trash")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                                   <Trash2 size={14} /> Corbeille
                                 </button>
                               </>
                             )}
-                            <button onClick={() => { mailAction(selectedMail.id, "unread"); setSelectedMail(null); }} className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50">
+                            <button onClick={() => { mailAction(selectedMail.id, "unread"); setSelectedMail(null); }} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
                               <MailOpen size={14} /> Non lu
                             </button>
                             <button
                               onClick={printMail}
                               title="Imprimer"
-                              className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                              className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]"
                             >
                               <Printer size={14} /> Imprimer
                             </button>
                             <button
                               onClick={shareMail}
                               title="Partager"
-                              className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                              className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]"
                             >
                               <Share2 size={14} /> Partager
                             </button>
                             <button
                               onClick={forwardMail}
-                              className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50"
+                              className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]"
                             >
                               <Forward size={14} /> Transférer
                             </button>
@@ -3656,12 +3703,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           </span>
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-ink truncate">{parseFromHeader(selectedMail.from).name}</p>
-                            <p className="text-xs text-ink-faint truncate">{parseFromHeader(selectedMail.from).email}</p>
+                            <p className="text-sm text-ink-faint truncate">{parseFromHeader(selectedMail.from).email}</p>
                           </div>
-                          <span className="text-xs text-ink-faint ml-auto shrink-0">{formatMailDate(selectedMail.date)}</span>
+                          <span className="text-sm text-ink-faint ml-auto shrink-0">{formatMailDate(selectedMail.date)}</span>
                         </div>
                         {(selectedMail.to || selectedMail.cc) && (
-                          <p className="text-xs text-ink-faint mt-2 break-words">
+                          <p className="text-sm text-ink-faint mt-2 break-words">
                             {selectedMail.to && <>À : {selectedMail.to}</>}
                             {selectedMail.cc && <> · Cc : {selectedMail.cc}</>}
                           </p>
@@ -3669,12 +3716,12 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
                         {detectedAddresses.length > 0 && (
                           <div className="flex flex-wrap items-center gap-2 mt-4 p-3 bg-surface-alt/60 border border-line rounded-xl">
-                            <span className="text-xs text-ink-soft font-semibold shrink-0">Adresses détectées dans le message :</span>
+                            <span className="text-sm text-ink-soft font-semibold shrink-0">Adresses détectées dans le message :</span>
                             {detectedAddresses.map((addr) => (
                               <button
                                 key={addr}
                                 onClick={() => openCompose(addr, selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`)}
-                                className="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition inline-flex items-center gap-1.5"
+                                className="text-sm font-semibold px-2.5 py-1 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition inline-flex items-center gap-1.5"
                               >
                                 <Mail size={12} /> {addr}
                               </button>
@@ -3696,14 +3743,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
                         {selectedMail.attachments?.length > 0 && (
                           <div className="mt-4 pt-4 border-t border-line">
-                            <p className="text-xs font-semibold text-ink-soft mb-2">Pièces jointes</p>
+                            <p className="text-sm font-semibold text-ink-soft mb-2">Pièces jointes</p>
                             <div className="flex flex-wrap gap-2">
                               {selectedMail.attachments.map((att: any) => (
                                 <button
                                   key={att.attachmentId}
                                   onClick={() => downloadGmailAttachment(selectedMail.id, att)}
                                   disabled={downloadingAttachmentId === att.attachmentId}
-                                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1.5 rounded-lg disabled:opacity-50"
+                                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1.5 rounded-lg disabled:opacity-50 min-h-[44px]"
                                 >
                                   {downloadingAttachmentId === att.attachmentId ? (
                                     "Téléchargement…"
@@ -3720,29 +3767,29 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
 
                         <div className="mt-6 pt-4 border-t border-line">
                           <div className="flex items-center gap-2 mb-3">
-                            <label className="text-xs font-semibold text-ink-soft shrink-0">De</label>
+                            <label className="text-sm font-semibold text-ink-soft shrink-0">De</label>
                             <select
                               value={replyFrom}
                               onChange={(e) => setReplyFrom(e.target.value)}
-                              className="flex-1 bg-surface-alt border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                              className="flex-1 bg-surface-alt border border-line rounded-lg px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                             >
                               {MAIL_SENDERS.map((a) => (
                                 <option key={a} value={a}>{a}</option>
                               ))}
                             </select>
                           </div>
-                          <label className="block text-xs font-semibold text-ink-soft mb-1.5">Répondre à {parseFromHeader(selectedMail.from).name}</label>
+                          <label className="block text-sm font-semibold text-ink-soft mb-1.5">Répondre à {parseFromHeader(selectedMail.from).name}</label>
                           <textarea
                             value={mailReplyBody}
                             onChange={(e) => setMailReplyBody(e.target.value)}
                             rows={5}
                             placeholder="Écrivez votre réponse…"
-                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
                           />
                           {mailReplyAttachments.length > 0 && (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {mailReplyAttachments.map((file, i) => (
-                                <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                                <span key={i} className="text-sm bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
                                   <Paperclip size={12} /> {file.name}
                                   <button onClick={() => setMailReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
                                 </span>
@@ -3750,7 +3797,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                             </div>
                           )}
                           <div className="flex items-center gap-3 mt-3">
-                            <label className="text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt inline-flex items-center gap-1.5">
+                            <label className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt inline-flex items-center gap-1.5 min-h-[44px]">
                               <Paperclip size={13} /> Joindre un fichier
                               <input
                                 type="file"
@@ -3762,7 +3809,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                             <button
                               onClick={sendMailReply}
                               disabled={mailReplySending || !mailReplyBody.trim()}
-                              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
                             >
                               {mailReplySending ? "Envoi…" : "Envoyer"}
                             </button>
@@ -3796,37 +3843,37 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><Trophy size={18} /> Générer un certificat</h3>
-            <p className="text-xs text-ink-soft mb-4">
+            <p className="text-sm text-ink-soft mb-4">
               Génère un certificat PDF directement (téléchargé dans ce navigateur) sans que l'étudiant ait besoin de passer par le parcours d'apprentissage.
             </p>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Nom de l'étudiant</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Nom de l'étudiant</label>
             <input
               value={certName}
               onChange={(e) => setCertName(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Email (optionnel)</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Email (optionnel)</label>
             <input
               type="email"
               value={certEmail}
               onChange={(e) => setCertEmail(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Student ID de l'étudiant (recommandé)</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Student ID de l'étudiant (recommandé)</label>
             <input
               value={certMatricule}
               onChange={(e) => setCertMatricule(e.target.value)}
               placeholder="BMCA-EN-2026-004"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-1 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-1 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <p className="text-xs text-ink-faint mb-4">Le même Student ID que celui remis à l'inscription (onglet Étudiants). Le numéro du certificat (Certificate Number) est généré automatiquement.</p>
+            <p className="text-sm text-ink-faint mb-4">Le même Student ID que celui remis à l'inscription (onglet Étudiants). Le numéro du certificat (Certificate Number) est généré automatiquement.</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Langue</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Langue</label>
                 <select
                   value={certLangCode}
                   onChange={(e) => setCertLangCode(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 >
                   {availableLanguages.map((l) => (
                     <option key={l.code} value={l.code}>{l.label}</option>
@@ -3834,11 +3881,11 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-ink-soft mb-1.5">Niveau</label>
+                <label className="block text-sm font-semibold text-ink-soft mb-1.5">Niveau</label>
                 <select
                   value={certLevel}
                   onChange={(e) => setCertLevel(e.target.value)}
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 >
                   <option value="1">Niveau 1</option>
                   <option value="2">Niveau 2</option>
@@ -3846,26 +3893,26 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                 </select>
               </div>
             </div>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Titre du niveau (optionnel)</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Titre du niveau (optionnel)</label>
             <input
               value={certLevelTitle}
               onChange={(e) => setCertLevelTitle(e.target.value)}
               placeholder={`${languageLabel(certLangCode)} — Niveau ${certLevel}`}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Moyenne (%)</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Moyenne (%)</label>
             <input
               type="number"
               min="0"
               max="100"
               value={certAverage}
               onChange={(e) => setCertAverage(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setCertGenerateOpen(false)}
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition min-h-[44px]"
               >
                 Annuler
               </button>
@@ -3879,14 +3926,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     studentId: certMatricule.trim() || undefined,
                   })
                 }
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition min-h-[44px]"
               >
                 Aperçu
               </button>
               <button
                 onClick={generateCertificateManually}
                 disabled={certSending || !certName.trim()}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
               >
                 {certSending ? "Génération…" : "Générer et télécharger"}
               </button>
@@ -3931,7 +3978,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               onChange={(value) => setAudienceEdit({ ...audienceEdit, value })}
             />
             <div className="flex justify-end gap-2">
-              <button onClick={() => setAudienceEdit(null)} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink">
+              <button onClick={() => setAudienceEdit(null)} className="px-4 py-2 rounded-xl border border-line text-sm font-bold text-ink-soft hover:text-ink min-h-[44px]">
                 Annuler
               </button>
               <button
@@ -3951,7 +3998,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     alert(`Erreur : ${error.message || error}`);
                   }
                 }}
-                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold"
+                className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-bold min-h-[44px]"
               >
                 Enregistrer
               </button>
@@ -3966,43 +4013,43 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><Mail size={18} /> Message aux étudiants</h3>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Destinataire(s)</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Destinataire(s)</label>
             <select
               value={messageRecipient}
               onChange={(e) => setMessageRecipient(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             >
               <option value="__all__">Tous les étudiants approuvés</option>
               {students.filter((s) => s.email && s.uid).map((s) => (
                 <option key={s.id} value={s.uid}>{s.name} — {s.email}</option>
               ))}
             </select>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Sujet</label>
             <input
               type="text"
               value={messageSubject}
               onChange={(e) => setMessageSubject(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Message</label>
             <textarea
               value={messageBody}
               onChange={(e) => setMessageBody(e.target.value)}
               rows={6}
               placeholder="Écrivez votre message…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             {messageAttachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {messageAttachments.map((file, i) => (
-                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                  <span key={i} className="text-sm bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
                     <Paperclip size={12} /> {file.name}
                     <button onClick={() => setMessageAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
                   </span>
                 ))}
               </div>
             )}
-            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+            <label className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4 min-h-[44px]">
               <Paperclip size={13} /> Joindre un fichier
               <input
                 type="file"
@@ -4014,14 +4061,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setMessageOpen(false)}
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition min-h-[44px]"
               >
                 Annuler
               </button>
               <button
                 onClick={sendStudentMessage}
                 disabled={messageSending || !messageSubject.trim() || !messageBody.trim()}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
               >
                 {messageSending ? "Envoi…" : "Envoyer"}
               </button>
@@ -4053,54 +4100,54 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           type="text"
                           value={editSentSubject}
                           onChange={(e) => setEditSentSubject(e.target.value)}
-                          className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                          className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                         />
                         <textarea
                           value={editSentBody}
                           onChange={(e) => setEditSentBody(e.target.value)}
                           rows={4}
-                          className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60"
+                          className="w-full bg-surface border border-line rounded-lg px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
                         />
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => setEditingSentMessageId(null)}
-                            className="text-xs font-semibold text-ink-soft hover:text-ink px-3 py-1.5"
+                            className="text-sm font-semibold text-ink-soft hover:text-ink px-3 py-1.5"
                           >
                             Annuler
                           </button>
                           <button
                             onClick={() => saveSentMessageEdit(m.id)}
                             disabled={sentMessageSaving}
-                            className="text-xs font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 px-3 py-1.5 rounded-lg"
+                            className="text-sm font-bold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 px-3 py-1.5 rounded-lg min-h-[44px]"
                           >
                             {sentMessageSaving ? "Enregistrement…" : "Enregistrer"}
                           </button>
                         </div>
-                        <p className="text-[11px] text-ink-faint">La modification met à jour la notification dans le tableau de bord des destinataires — l'email déjà envoyé ne peut pas être rappelé.</p>
+                        <p className="text-sm text-ink-faint">La modification met à jour la notification dans le tableau de bord des destinataires — l'email déjà envoyé ne peut pas être rappelé.</p>
                       </div>
                     ) : (
                       <>
                         <div className="flex items-start justify-between gap-3">
                           <p className="text-sm font-bold text-ink">{m.subject}</p>
-                          <span className="text-xs text-ink-faint shrink-0">
+                          <span className="text-sm text-ink-faint shrink-0">
                             {m.createdAt ? new Date(m.createdAt).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" }) : ""}
                           </span>
                         </div>
                         <p className="text-sm text-ink-soft mt-1 whitespace-pre-wrap line-clamp-3">{m.body}</p>
-                        <p className="text-xs text-ink-faint mt-2">
+                        <p className="text-sm text-ink-faint mt-2">
                           {m.recipients?.length || 0} destinataire{(m.recipients?.length || 0) > 1 ? "s" : ""}
                           {m.attachmentNames?.length ? ` · ${m.attachmentNames.join(", ")}` : ""}
                         </p>
                         <div className="flex gap-3 mt-3">
                           <button
                             onClick={() => startEditSentMessage(m)}
-                            className="text-xs font-bold text-red-500 hover:text-red-400"
+                            className="text-sm font-bold text-red-500 hover:text-red-400"
                           >
                             Modifier
                           </button>
                           <button
                             onClick={() => deleteSentMessage(m.id)}
-                            className="text-xs font-semibold text-ink-faint hover:text-red-500"
+                            className="text-sm font-semibold text-ink-faint hover:text-red-500"
                           >
                             Supprimer
                           </button>
@@ -4120,26 +4167,26 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2"><SquarePen size={18} /> Nouveau message</h3>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">De</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">De</label>
             <select
               value={composeFrom}
               onChange={(e) => setComposeFrom(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             >
               {MAIL_SENDERS.map((a) => (
                 <option key={a} value={a}>{a}</option>
               ))}
             </select>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">À</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">À</label>
             <input
               type="email"
               value={composeTo}
               onChange={(e) => setComposeTo(e.target.value)}
               placeholder="destinataire@email.com"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-2 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-2 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             {!composeShowCc ? (
-              <button onClick={() => setComposeShowCc(true)} className="text-xs font-semibold text-red-500 hover:text-red-400 mb-4">
+              <button onClick={() => setComposeShowCc(true)} className="text-sm font-semibold text-red-500 hover:text-red-400 mb-4">
                 + Cc / Cci
               </button>
             ) : (
@@ -4149,43 +4196,43 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                   value={composeCc}
                   onChange={(e) => setComposeCc(e.target.value)}
                   placeholder="Cc (séparer par des virgules)"
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 />
                 <input
                   type="text"
                   value={composeBcc}
                   onChange={(e) => setComposeBcc(e.target.value)}
                   placeholder="Cci (copie cachée)"
-                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                  className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
                 />
               </div>
             )}
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Sujet</label>
             <input
               type="text"
               value={composeSubject}
               onChange={(e) => setComposeSubject(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Message</label>
             <textarea
               value={composeBody}
               onChange={(e) => setComposeBody(e.target.value)}
               rows={6}
               placeholder="Écrivez votre message…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             {composeAttachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {composeAttachments.map((file, i) => (
-                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                  <span key={i} className="text-sm bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
                     <Paperclip size={12} /> {file.name}
                     <button onClick={() => setComposeAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
                   </span>
                 ))}
               </div>
             )}
-            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+            <label className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4 min-h-[44px]">
               <Paperclip size={13} /> Joindre un fichier
               <input
                 type="file"
@@ -4197,14 +4244,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setComposeOpen(false)}
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition min-h-[44px]"
               >
                 Annuler
               </button>
               <button
                 onClick={sendCompose}
                 disabled={composeSending || !composeTo.trim() || !composeSubject.trim() || !composeBody.trim()}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
               >
                 {composeSending ? "Envoi…" : "Envoyer"}
               </button>
@@ -4218,44 +4265,44 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         <div className="fixed inset-0 z-[60] bg-black/70 flex items-start sm:items-center justify-center overflow-y-auto p-4">
           <div className="bg-surface border border-line rounded-2xl p-6 w-full max-w-lg shadow-2xl">
             <h3 className="text-lg font-bold text-ink mb-1">Répondre sur le site</h3>
-            <p className="text-xs text-ink-soft mb-4">
+            <p className="text-sm text-ink-soft mb-4">
               Le message part immédiatement par e-mail à <span className="text-ink font-semibold">{replyTarget.to}</span>.
             </p>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Envoyer depuis</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Envoyer depuis</label>
             <select
               value={replyVia}
               onChange={(e) => setReplyVia(e.target.value as "gmail" | "resend")}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             >
               <option value="gmail">Mon Gmail (recommandé — arrive en boîte de réception, la réponse revient ici)</option>
               <option value="resend">Adresse BM Corporation (noreply@bmcorporation-cd.com)</option>
             </select>
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Sujet</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Sujet</label>
             <input
               type="text"
               value={replySubject}
               onChange={(e) => setReplySubject(e.target.value)}
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink mb-4 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink mb-4 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
-            <label className="block text-xs font-semibold text-ink-soft mb-1.5">Message</label>
+            <label className="block text-sm font-semibold text-ink-soft mb-1.5">Message</label>
             <textarea
               value={replyMessage}
               onChange={(e) => setReplyMessage(e.target.value)}
               rows={6}
               placeholder="Écrivez votre réponse…"
-              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-sm text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60"
+              className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint mb-3 focus:outline-none focus:border-red-600/60 min-h-[44px]"
             />
             {replyAttachments.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-3">
                 {replyAttachments.map((file, i) => (
-                  <span key={i} className="text-xs bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
+                  <span key={i} className="text-sm bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
                     <Paperclip size={12} /> {file.name}
                     <button onClick={() => setReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
                   </span>
                 ))}
               </div>
             )}
-            <label className="inline-flex items-center gap-1.5 text-xs font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4">
+            <label className="inline-flex items-center gap-1.5 text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt mb-4 min-h-[44px]">
               <Paperclip size={13} /> Joindre un fichier
               <input
                 type="file"
@@ -4267,14 +4314,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setReplyTarget(null)}
-                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition"
+                className="bg-surface-alt hover:bg-surface text-ink-soft font-bold px-4 py-2 rounded-xl border border-line transition min-h-[44px]"
               >
                 Annuler
               </button>
               <button
                 onClick={sendReply}
                 disabled={replySending || !replyMessage.trim()}
-                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition"
+                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
               >
                 {replySending ? "Envoi…" : "Envoyer"}
               </button>

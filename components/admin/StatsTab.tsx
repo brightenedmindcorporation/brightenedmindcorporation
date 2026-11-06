@@ -63,7 +63,7 @@ function Section({ title, hint, children }: { title: string; hint?: string; chil
     <section className="space-y-3">
       <div>
         <h3 className="text-lg font-black text-ink">{title}</h3>
-        {hint && <p className="text-xs text-ink-soft mt-0.5 max-w-3xl">{hint}</p>}
+        {hint && <p className="text-sm text-ink-soft mt-0.5 max-w-3xl">{hint}</p>}
       </div>
       <div className="rounded-2xl border border-line bg-surface overflow-x-auto">{children}</div>
     </section>
@@ -77,7 +77,7 @@ const empty = <p className="p-5 text-sm text-ink-faint">Pas encore de données :
 function ExitBars({ it }: { it: Item }) {
   const bars = Array.from({ length: 10 }, (_, i) => v(it, `x${i}`));
   const total = bars.reduce((a, b) => a + b, 0);
-  if (total === 0) return <span className="text-ink-faint text-xs">—</span>;
+  if (total === 0) return <span className="text-ink-faint text-sm">—</span>;
   const max = Math.max(...bars);
   const worst = bars.indexOf(max);
   return (
@@ -88,7 +88,7 @@ function ExitBars({ it }: { it: Item }) {
         ))}
       </div>
       {it.duration > 0 && (
-        <p className="text-[11px] text-ink-soft mt-1">
+        <p className="text-sm text-ink-soft mt-1">
           Départs surtout vers {clock((worst / 10) * it.duration)}–{clock(((worst + 1) / 10) * it.duration)}
         </p>
       )}
@@ -119,7 +119,7 @@ function CampaignLinks({ announcements }: { announcements: { id: string; title: 
         Créez un lien différent pour chaque endroit où vous publiez. Quand quelqu&apos;un clique dessus, vous voyez combien viennent de là, et combien s&apos;inscrivent.
       </p>
       <div className="grid sm:grid-cols-2 gap-3">
-        <label className="text-xs font-bold text-ink-soft">
+        <label className="text-sm font-bold text-ink-soft">
           Page à ouvrir
           <select value={path} onChange={(e) => setPath(e.target.value)} className="mt-1 w-full px-3 py-2 rounded-lg bg-surface-alt border border-line text-sm text-ink">
             <option value="/">Accueil du site</option>
@@ -133,7 +133,7 @@ function CampaignLinks({ announcements }: { announcements: { id: string; title: 
             ))}
           </select>
         </label>
-        <label className="text-xs font-bold text-ink-soft">
+        <label className="text-sm font-bold text-ink-soft">
           Où vous le publiez
           <div className="mt-1 flex gap-2">
             <select
@@ -155,8 +155,8 @@ function CampaignLinks({ announcements }: { announcements: { id: string; title: 
         </label>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <code className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-surface-alt border border-line text-xs text-ink break-all">{link}</code>
-        <button onClick={copy} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-bold">
+        <code className="flex-1 min-w-0 px-3 py-2 rounded-lg bg-surface-alt border border-line text-sm text-ink break-all">{link}</code>
+        <button onClick={copy} className="px-4 py-2 rounded-lg bg-red-600 hover:bg-red-500 text-white text-sm font-bold min-h-[44px]">
           {copied ? "Copié ✓" : "Copier le lien"}
         </button>
       </div>
@@ -191,7 +191,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-ink-soft max-w-2xl">
+        <p className="text-sm text-ink-soft max-w-2xl">
           Statistiques anonymes (aucun cookie, aucune adresse IP). Une personne compte une fois par jour pour une même annonce ou vidéo ; vos propres visites et celles
           des robots ne sont pas comptées. Les chiffres démarrent à la mise en service.
         </p>
@@ -200,7 +200,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
             <button
               key={d}
               onClick={() => setDays(d)}
-              className={`px-3 py-1.5 rounded-lg border text-xs font-bold transition ${days === d ? "bg-red-600 text-white border-red-600" : "border-line text-ink-soft hover:text-ink"}`}
+              className={`px-3 py-1.5 rounded-lg border text-sm font-bold transition ${days === d ? "bg-red-600 text-white border-red-600" : "border-line text-ink-soft hover:text-ink"}`}
             >
               {d} jours
             </button>
@@ -240,7 +240,7 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
                       <tr key={a.id}>
                         <td className={`${td} max-w-[260px] truncate`} title={a.title}>
                           {a.title || a.key}
-                          {a.exists === false && <span className="ml-2 text-[10px] text-ink-faint">(supprimée)</span>}
+                          {a.exists === false && <span className="ml-2 text-sm text-ink-faint">(supprimée)</span>}
                         </td>
                         <td className={`${td} font-bold`}>{v(a, "views")}</td>
                         <td className={td}>{v(a, "uViews")}</td>
@@ -355,14 +355,14 @@ export default function StatsTab({ scope = "admin", getToken }: { scope?: "admin
                     <tr key={it.id}>
                       <td className={td}>
                         {lessonName(it)}
-                        {it.title && <span className="block text-[11px] text-ink-faint">{it.title}</span>}
+                        {it.title && <span className="block text-sm text-ink-faint">{it.title}</span>}
                       </td>
                       <td className={`${td} font-bold`}>{opens}</td>
                       <td className={td}>{v(it, "uPlays")}</td>
                       <td className={td}>{v(it, "quizTaken")}</td>
                       <td className={td}>{v(it, "quizPassed")}</td>
                       <td className={td}>{pct(v(it, "quizPassed"), v(it, "quizTaken"))}</td>
-                      <td className={`${td} text-xs text-ink-soft`}>{opens >= 3 && drop[worst] >= 0.4 ? `⚠️ ${names[worst]} (−${Math.round(drop[worst] * 100)} %)` : "—"}</td>
+                      <td className={`${td} text-sm text-ink-soft`}>{opens >= 3 && drop[worst] >= 0.4 ? `⚠️ ${names[worst]} (−${Math.round(drop[worst] * 100)} %)` : "—"}</td>
                     </tr>
                   );
                 })}

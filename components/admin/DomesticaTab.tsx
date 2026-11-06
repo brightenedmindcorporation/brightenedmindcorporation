@@ -146,7 +146,7 @@ export default function DomesticaTab() {
       className={`rounded-xl px-4 py-2 text-sm font-bold transition ${view === v ? "bg-red-600 text-white" : "border border-line bg-surface text-ink-soft hover:text-ink"}`}
     >
       {label}
-      {badge > 0 && <span className="ml-1.5 rounded-full bg-white/90 px-1.5 text-[10px] font-black text-red-600">{badge}</span>}
+      {badge > 0 && <span className="ml-1.5 rounded-full bg-white/90 px-1.5 text-sm font-black text-red-600">{badge}</span>}
     </button>
   );
 
@@ -177,18 +177,18 @@ export default function DomesticaTab() {
                   <p className="font-bold text-ink">
                     {label} — {item.name} <span className="font-normal text-ink-soft">({item.job})</span>
                   </p>
-                  <p className="text-xs text-ink-soft">
+                  <p className="text-sm text-ink-soft">
                     Prévu le {date(at.toISOString())}
                     {late && <b className="ml-2 text-red-500">en retard</b>} · avec {item.placedWithName}
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <a href={whatsapp(item.phone, surveyText(item, key))} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-emerald-600 px-3 py-2 text-xs font-bold text-white">
+                  <a href={whatsapp(item.phone, surveyText(item, key))} target="_blank" rel="noopener noreferrer" className="rounded-xl bg-emerald-600 px-3 py-2 text-sm font-bold text-white">
                     Envoyer le questionnaire (WhatsApp)
                   </a>
                   <button
                     onClick={() => navigator.clipboard?.writeText(surveyLink(item.id, key)).then(() => window.alert("Lien copié."))}
-                    className="rounded-xl border border-line bg-surface px-3 py-2 text-xs font-bold text-ink"
+                    className="rounded-xl border border-line bg-surface px-3 py-2 text-sm font-bold text-ink"
                   >
                     Copier le lien
                   </button>
@@ -198,7 +198,7 @@ export default function DomesticaTab() {
                       const n = window.prompt("Résultat du suivi (satisfaction, difficultés) :") ?? "";
                       act(item.id, { followUp: { key, done: true, note: n }, ...(n ? { note: `${label} : ${n}` } : {}) });
                     }}
-                    className="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                    className="rounded-xl bg-red-600 px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
                   >
                     Marquer comme fait
                   </button>
@@ -220,12 +220,12 @@ export default function DomesticaTab() {
                   <p className="font-bold text-ink">
                     {i.name} <span className="font-normal text-ink-soft">· {i.job}</span>
                   </p>
-                  <p className="text-xs text-ink-soft">
+                  <p className="text-sm text-ink-soft">
                     {i.city || "ville non précisée"} · {date(i.createdAt)}
                     {i.placedWithName && <> · placé avec {i.placedWithName}</>}
                   </p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-xs font-bold ${i.status === "new" ? "bg-red-600 text-white" : i.status === "placed" ? "bg-emerald-600 text-white" : "border border-line bg-surface-alt text-ink-soft"}`}>
+                <span className={`rounded-full px-3 py-1 text-sm font-bold ${i.status === "new" ? "bg-red-600 text-white" : i.status === "placed" ? "bg-emerald-600 text-white" : "border border-line bg-surface-alt text-ink-soft"}`}>
                   {statuses[i.status] ?? i.status}
                 </span>
               </button>
@@ -270,7 +270,7 @@ export default function DomesticaTab() {
                   </div>
                   {i.cv && (
                     <div className="rounded-xl border border-line bg-surface-alt p-3 text-ink-soft">
-                      <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft">Identité complète (CV)</p>
+                      <p className="mb-1.5 text-sm font-bold uppercase tracking-wide text-ink-soft">Identité complète (CV)</p>
                       <div className="grid gap-x-6 gap-y-1 sm:grid-cols-2">
                         <p><b className="text-ink">Nom :</b> {[i.cv.lastName, i.cv.middleName, i.cv.firstName].filter(Boolean).join(" ")}</p>
                         <p><b className="text-ink">Sexe :</b> {i.cv.gender || "—"}</p>
@@ -308,10 +308,10 @@ export default function DomesticaTab() {
                   {i.message && <p className="whitespace-pre-wrap rounded-xl border border-line bg-surface-alt p-3 text-ink-soft">{i.message}</p>}
                   {(i.documents ?? []).length > 0 && (
                     <div>
-                      <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-ink-soft">Documents joints</p>
+                      <p className="mb-1.5 text-sm font-bold uppercase tracking-wide text-ink-soft">Documents joints</p>
                       <div className="flex flex-wrap gap-2">
                         {(i.documents ?? []).map((d) => (
-                          <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-line bg-surface-alt px-3 py-2 text-xs font-bold text-ink hover:border-red-600/60">
+                          <a key={d.url} href={d.url} target="_blank" rel="noopener noreferrer" className="rounded-xl border border-line bg-surface-alt px-3 py-2 text-sm font-bold text-ink hover:border-red-600/60 min-h-[44px]">
                             📎 {d.category ? `${d.category} : ` : ""}{d.name}
                           </a>
                         ))}
@@ -320,7 +320,7 @@ export default function DomesticaTab() {
                   )}
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <label className="text-xs font-bold uppercase tracking-wide text-ink-soft">Statut</label>
+                    <label className="text-sm font-bold uppercase tracking-wide text-ink-soft">Statut</label>
                     <select
                       value={i.status}
                       disabled={busy === i.id || i.status === "placed"}
@@ -339,7 +339,7 @@ export default function DomesticaTab() {
                       <button
                         disabled={busy === i.id}
                         onClick={() => window.confirm("Annuler ce placement ? Les deux dossiers reviennent à l'état précédent.") && act(i.id, { unplace: true })}
-                        className="rounded-xl border border-line px-3 py-2 text-xs font-bold text-ink-soft hover:text-red-500"
+                        className="rounded-xl border border-line px-3 py-2 text-sm font-bold text-ink-soft hover:text-red-500 min-h-[44px]"
                       >
                         Annuler le placement
                       </button>
@@ -348,7 +348,7 @@ export default function DomesticaTab() {
 
                   {i.kind === "employer" && i.status !== "placed" && (
                     <div>
-                      <p className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-soft">Candidats correspondants ({i.job})</p>
+                      <p className="mb-2 text-sm font-bold uppercase tracking-wide text-ink-soft">Candidats correspondants ({i.job})</p>
                       {suggestions(i).length === 0 ? (
                         <p className="text-ink-faint">Aucun candidat disponible pour ce métier pour l'instant.</p>
                       ) : (
@@ -359,7 +359,7 @@ export default function DomesticaTab() {
                                 <p className="font-bold text-ink">
                                   {c.name} <span className="font-normal text-ink-soft">· {CANDIDATE_STATUS[c.status] ?? c.status}</span>
                                 </p>
-                                <p className="text-xs text-ink-soft">
+                                <p className="text-sm text-ink-soft">
                                   {c.city || "—"} · {c.experience || "expérience non précisée"} · {c.availability || "disponibilité non précisée"}
                                 </p>
                               </div>
@@ -370,7 +370,7 @@ export default function DomesticaTab() {
                                   const start = window.prompt("Date de début (AAAA-MM-JJ) :", new Date().toISOString().slice(0, 10)) ?? "";
                                   act(i.id, { placeWith: c.id, startDate: start });
                                 }}
-                                className="rounded-xl bg-red-600 px-3 py-2 text-xs font-bold text-white disabled:opacity-50"
+                                className="rounded-xl bg-red-600 px-3 py-2 text-sm font-bold text-white disabled:opacity-50"
                               >
                                 Placer chez ce client
                               </button>
@@ -397,11 +397,11 @@ export default function DomesticaTab() {
                   )}
 
                   <div>
-                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-ink-soft">Notes internes</p>
+                    <p className="mb-2 text-sm font-bold uppercase tracking-wide text-ink-soft">Notes internes</p>
                     <div className="space-y-1.5">
                       {(i.notes ?? []).map((n, idx) => (
                         <p key={idx} className="rounded-lg bg-surface-alt px-3 py-2 text-ink-soft">
-                          <span className="text-xs text-ink-faint">
+                          <span className="text-sm text-ink-faint">
                             {date(n.at)} · {n.by} —{" "}
                           </span>
                           {n.text}
@@ -421,7 +421,7 @@ export default function DomesticaTab() {
                           await act(i.id, { note: note[i.id] });
                           setNote((v) => ({ ...v, [i.id]: "" }));
                         }}
-                        className="rounded-xl bg-red-600 px-4 py-2 text-xs font-bold text-white disabled:opacity-50"
+                        className="rounded-xl bg-red-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
                       >
                         Ajouter
                       </button>
