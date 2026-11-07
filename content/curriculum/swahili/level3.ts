@@ -26,6 +26,7 @@ Sharti la pili, kwa jambo lisilowezekana au la kudhani. Kama ningekuwa na muda z
 
 Matumizi ya kibiashara. Masharti ni ya kawaida katika mazungumzo na mipango. Kama mkipunguza bei, tutatia saini mkataba.`,
       videoTopic: "Linganisha sharti la kwanza na la pili katika mazungumzo ya kibiashara.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033021/bm-lesson-videos/swahili-3-1.mp4",
       readingTitle: "Mazungumzo katika Shirika la Brightened Mind",
       reading: [
         "Wakati wa mkutano, msambazaji alisema, “Kama mkiagiza vitu vingi zaidi, tutatoa punguzo.”",
@@ -52,6 +53,7 @@ Ushauri na pendekezo. Inafaa na ungependa vinatumika kutoa ushauri. Inafaa ukagu
 
 Uwezekano. Huenda na yamkini vinaonyesha kitu kinawezekana lakini si uhakika.`,
       videoTopic: "Sikia tofauti kati ya wajibu, ushauri, na uwezekano mahali pa kazi.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033074/bm-lesson-videos/swahili-3-2.mp4",
       readingTitle: "Maandalizi ya Ukaguzi",
       reading: [
         "Meneja wa fedha alisema, “Lazima tumalize nyaraka za ukaguzi ifikapo Jumatatu.”",
@@ -81,6 +83,7 @@ Kujibu na kukubaliana kati. Hilo linaonekana la busara, lakini unaweza pia... Tu
 
 Kukamilisha mkataba. Nadhani tumefikia makubaliano. Tuandike hili kwa maandishi.`,
       videoTopic: "Tazama majadiliano kamili kuanzia mwanzo hadi kukamilika kwa mkataba.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033090/bm-lesson-videos/swahili-3-3.mp4",
       readingTitle: "Kukamilisha Mkataba",
       reading: [
         "Makampuni mawili yalijadiliana kwa karibu saa mbili kuhusu bei ya vifaa vipya.",
@@ -107,6 +110,7 @@ Kupanga mambo yako. Kwanza, nitaeleza... Kisha, nitaendelea na... Mwishowe, nita
 
 Kumalizia mawasilisho. Kwa muhtasari, mambo makuu ni... Asante kwa umakini wenu. Kuna maswali yoyote?`,
       videoTopic: "Tazama mawasilisho mafupi na yaliyopangwa vizuri ya kitaalamu.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033103/bm-lesson-videos/swahili-3-4.mp4",
       readingTitle: "Mawasilisho ya Kwanza ya Linda",
       reading: [
         "Linda alikuwa na wasiwasi kabla ya mawasilisho yake ya kwanza kwa timu ya uongozi.",
@@ -134,6 +138,7 @@ Kuomba nafasi ya kuzungumza. Naweza kusema jambo? Kama naweza kuongeza... Samaha
 
 Kuandika kumbukumbu za mkutano. Kumbukumbu zinaandika yaliyojadiliwa na kuamuliwa.`,
       videoTopic: "Ona jinsi mkutano rasmi unavyoendeshwa kutoka mwanzo hadi mwisho.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033134/bm-lesson-videos/swahili-3-5.mp4",
       readingTitle: "Mkutano wa Jumatatu",
       reading: [
         "Saa tatu asubuhi, kiongozi wa timu alisema, “Tuanze?” na kila mtu alikubaliana.",
@@ -157,6 +162,7 @@ Kuandika kumbukumbu za mkutano. Kumbukumbu zinaandika yaliyojadiliwa na kuamuliw
 
 Maneno ya muhimu. Lengo la ripoti hii ni... Takwimu zinaonyesha kuwa... Kutokana na matokeo haya, tunapendekeza...`,
       videoTopic: "Ona jinsi ripoti ya kibiashara inavyopangwa kuanzia utangulizi hadi mapendekezo.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033150/bm-lesson-videos/swahili-3-6.mp4",
       readingTitle: "Ripoti Kuhusu Kuridhika kwa Wateja",
       reading: [
         "Lengo la ripoti hii ni kutathmini kuridhika kwa wateja katika robo iliyopita.",
@@ -184,6 +190,7 @@ Wakati wa simu. Unaweza kurudia hilo, tafadhali? Samahani, mtandao hauko wazi sa
 
 Kumalizia simu. Asante kwa muda wako. Nitakutumia barua pepe kuthibitisha.`,
       videoTopic: "Sikiliza simu ya kitaalamu kuanzia mwanzo hadi mwisho.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033168/bm-lesson-videos/swahili-3-7.mp4",
       readingTitle: "Simu kwa Mteja",
       reading: [
         "“Habari, huyu ni Sara kutoka Shirika la Brightened Mind. Ninapiga simu kuhusu agizo lako la hivi karibuni.”",
@@ -210,6 +217,7 @@ Kubadilishana mawasiliano. Ilikuwa vizuri kuzungumza nawe. Naweza kupata kadi ya
 
 Mada salama dhidi ya za kuepuka. Salama ni kazi, mwelekeo wa sekta, na safari. Epuka mshahara na siasa.`,
       videoTopic: "Ona mazungumzo ya kawaida ya kitaalamu kwenye tukio la biashara.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033180/bm-lesson-videos/swahili-3-8.mp4",
       readingTitle: "Kukutana na Mtu Mpya Mkutanoni",
       reading: [
         "Mkutanoni, Michael alijitambulisha kwa mgeni aliyesimama karibu na meza ya kahawa.",
@@ -263,6 +271,7 @@ Maneno muhimu. Unaweza kunisaidia kuelewa jinsi hili linavyofanyika nchini kwako
 
 Vidokezo vya mawasiliano wazi. Zungumza kwa uwazi na epuka misemo ngumu.`,
       videoTopic: "Ona jinsi timu ya kimataifa inavyowasiliana kwa uwazi baina ya tamaduni.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033037/bm-lesson-videos/swahili-3-10.mp4",
       readingTitle: "Kufanya Kazi na Timu ya Kimataifa",
       reading: [
         "Shirika la Brightened Mind lilipoanza kufanya kazi na washirika nje ya nchi, timu iligundua tofauti za kitamaduni.",
@@ -340,6 +349,7 @@ Mfano wa mazungumzo halisi.
 Habari za asubuhi. Asante kwa kujiunga na simu hii.
 Habari za asubuhi, nina furaha kuwepo. Ninapiga simu kuhusu pendekezo ulilotuma.`,
       videoTopic: "Pitia mada zote za Kiwango cha 3 kupitia mazungumzo kamili ya kibiashara.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794033060/bm-lesson-videos/swahili-3-12.mp4",
       readingTitle: "Kukamilisha Mpango",
       reading: [
         "Baada ya kumaliza Viwango vya 1, 2, na 3, Chantal sasa anaweza kuongoza mikutano, kuandika ripoti za kitaalamu, na kujadiliana na wateja wa kimataifa kwa kujiamini.",

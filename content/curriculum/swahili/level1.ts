@@ -105,6 +105,7 @@ Sentensi za muhimu: Huyu ni baba yangu. Mama yangu ni mpole sana. Nina kaka mmoj
 
 Mfano: Ninaishi na familia yangu. Baba yangu anafanya kazi ofisini.`,
       videoTopic: "Kujifunza msamiati wa familia.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032691/bm-lesson-videos/swahili-1-4.mp4",
       readingTitle: "Jina langu ni Yosefu.",
       reading: ["Ninaishi na wazazi wangu na dada yangu.", "Baba yangu ni daktari.", "Mama yangu ni mpole sana.", "Ninapenda kutumia muda na familia yangu."],
       readingSpeakText: `Jina langu ni Yosefu. Ninaishi na wazazi wangu na dada yangu. Baba yangu ni daktari.`,
@@ -146,6 +147,7 @@ Kueleza vitu: Mkoba ni mwekundu. Simu ni nyeusi. Kiti ni cha bluu.
 
 Kueleza watu: Yeye ni mrefu. Yeye ni mfupi. Yeye ana furaha.`,
       videoTopic: "Kujifunza rangi na kufanya mazoezi ya maelezo.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032734/bm-lesson-videos/swahili-1-6.mp4",
       readingTitle: "Jina langu ni Zawadi.",
       reading: ["Nina mkoba wa shule wa bluu.", "Daftari langu ni kijani na simu yangu ni nyeusi.", "Nina furaha na ni mkarimu.", "Kaka yangu mdogo ni mfupi lakini mwenye nguvu sana."],
       readingSpeakText: `Jina langu ni Zawadi. Nina mkoba wa shule wa bluu. Daftari langu ni kijani na simu yangu ni nyeusi.`,
@@ -191,6 +193,7 @@ Sentensi za muhimu: Leo ni Jumatatu. Siku yangu ya kuzaliwa ni Julai.`,
 
 Sentensi za muhimu: Ninaamka saa kumi na mbili asubuhi. Ninakwenda shuleni saa moja asubuhi.`,
       videoTopic: "Kujifunza msamiati wa shughuli za kila siku.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032776/bm-lesson-videos/swahili-1-8.mp4",
       readingTitle: "Jina langu ni Danieli.",
       reading: [
         "Kila siku ninaamka saa kumi na mbili asubuhi.",
@@ -243,6 +246,7 @@ Sentensi za muhimu: Ninakunywa maji kila siku. Chakula ninachopenda zaidi ni wal
 
 Kuuliza njia: Hospitali iko wapi? Nifikeje benki? Soko liko karibu na kanisa.`,
       videoTopic: "Kujifunza msamiati wa maeneo na njia.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032613/bm-lesson-videos/swahili-1-10.mp4",
       readingTitle: "Jumatano iliyopita, Michael alikwenda mjini na baba yake.",
       reading: [
         "Kwanza, walisimama benki kwa sababu baba yake alihitaji kutoa pesa.",
@@ -266,6 +270,7 @@ Kuuliza njia: Hospitali iko wapi? Nifikeje benki? Soko liko karibu na kanisa.`,
 
 Sentensi za muhimu: Burudani ninayopenda zaidi ni kusoma. Ninapenda kucheza mpira wa miguu.`,
       videoTopic: "Kujifunza msamiati wa burudani na muda wa mapumziko.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032639/bm-lesson-videos/swahili-1-11.mp4",
       readingTitle: "Jumamosi mchana, James alimtembelea binamu yake Danieli.",
       reading: [
         "Alipofika, Danieli alikuwa amekaa nje akisoma kitabu kuhusu wanyama.",
@@ -319,6 +324,7 @@ Mfano wa mazungumzo halisi.
 Habari, jina langu ni David. Jina lako nani?
 Habari David, jina langu ni Sara. Nimefurahi kukutana nawe.`,
       videoTopic: "Kupitia mazungumzo ya msingi na msamiati wa Kiwango cha 1.",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032668/bm-lesson-videos/swahili-1-12.mp4",
       readingTitle: "Jumapili iliyopita, Kevin alisafiri na familia yake kumtembelea mjomba wake mjini.",
       reading: [
         "Kabla ya kuondoka, alikula mkate na kunywa chai kifungua kinywa.",

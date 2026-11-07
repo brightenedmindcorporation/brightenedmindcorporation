@@ -53,6 +53,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 他可能会迟到。`,
       videoTopic: "能态动词在工作场合的使用。",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032572/bm-lesson-videos/chinese-3-2.mp4",
       readingTitle: "会议前，经理对团队说话。(Avant la réunion, le manager a parlé à l'équipe.)",
       reading: [
         "«我们必须在星期五前完成这个项目。» (« Nous devons terminer ce projet avant vendredi. »)",
@@ -178,6 +179,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 谢谢您的来电。再见。`,
       videoTopic: "观察一个商业电话对话。",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032585/bm-lesson-videos/chinese-3-7.mp4",
       readingTitle: "秘书每天接很多电话。(La secrétaire reçoit beaucoup d'appels chaque jour.)",
       reading: [
         "有一天，一位客户打电话来找经理。(Un jour, un client a appelé pour parler au manager.)",
@@ -203,6 +205,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 我很感兴趣听听你的项目。`,
       videoTopic: "观察一场商业社交活动中的对话。",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032601/bm-lesson-videos/chinese-3-8.mp4",
       readingTitle: "在一个商业论坛上，玛丽认识了一个新合作伙伴。(Lors d'un forum d'affaires, Marie a rencontré un nouveau partenaire potentiel.)",
       reading: [
         "她说：«我是进出口公司的，我主要负责市场营销。» (Elle a dit : « Je travaille dans une entreprise d'import-export, je suis responsable du marketing. »)",
@@ -321,6 +324,7 @@ export const chineseLevel3: LevelCurriculum = {
 
 我们的报价是五万元。这个价格有点高。我们可以谈谈吗？好，我们成交了。`,
       videoTopic: "复习第三级的商业汉语技能。",
+      videoUrl: "https://res.cloudinary.com/je49b88w/video/upload/v1794032555/bm-lesson-videos/chinese-3-12.mp4",
       readingTitle: "莱论已经学了三年汉语。(Léon apprend le chinois depuis trois ans.)",
       reading: [
         "现在他可以自在地谈判、开会和做演讲。(Maintenant il peut négocier, animer des réunions et faire des présentations avec aisance.)",

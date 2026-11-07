@@ -142,7 +142,9 @@ function FrenchToggle({ langSlug }: { langSlug: string }) {
 }
 
 function VideoCard({ lesson, statsKey }: { lesson: Lesson; statsKey?: string }) {
-  const embedUrl = lesson.videoUrl ? getEmbedUrl(lesson.videoUrl) : null;
+  // Our own lesson films (mp4 on Cloudinary) play in a normal video player; everything else is a YouTube/Vimeo embed.
+  const ownVideo = lesson.videoUrl && /\.mp4(\?|$)/i.test(lesson.videoUrl) ? lesson.videoUrl : null;
+  const embedUrl = lesson.videoUrl && !ownVideo ? getEmbedUrl(lesson.videoUrl) : null;
   const frame = useRef<HTMLIFrameElement>(null);
   // Plays, time watched and drop-off of the lesson video (anonymous statistics for the administration).
   const [failed, setFailed] = useState(false);
@@ -151,7 +153,11 @@ function VideoCard({ lesson, statsKey }: { lesson: Lesson; statsKey?: string }) 
   return (
     <Card>
       <CardTitle icon={PlayCircle}>Video</CardTitle>
-      {embedUrl && failed ? (
+      {ownVideo ? (
+        <div className="mt-4 aspect-video rounded-2xl overflow-hidden border border-line bg-black" onContextMenu={(e) => e.preventDefault()}>
+          <video src={ownVideo} className="w-full h-full" controls playsInline preload="metadata" controlsList="nodownload" title={lesson.title} />
+        </div>
+      ) : embedUrl && failed ? (
         <div className="mt-4 rounded-2xl border border-line bg-surface-alt p-6 text-center space-y-3">
           <p className="font-bold text-ink">Cette vidéo n&apos;est pas disponible pour le moment.</p>
           <p className="text-sm text-ink-soft">{lesson.videoTopic}</p>
