@@ -165,7 +165,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                           <source src={it.audioUrl} />
                         </audio>
                         <a href={it.audioUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-red-600 underline">Ouvrir l&apos;enregistrement</a>
-                        <p className="text-sm text-ink-soft">Écoutez la lecture, puis tenez-en compte dans votre commentaire général ou dans la note de la lecture de l&apos;étudiant.</p>
+                        <p className="text-sm text-ink-soft">Écoutez la lecture. Sa note (sur 20) se donne dans le dossier de l&apos;étudiant : onglet Progression → Ouvrir → modifier la note du quiz, ligne « Lecture ». Tant que vous ne l&apos;avez pas donnée, la lecture ne compte pas dans la note du quiz.</p>
                       </div>
                     ) : (
                     <>

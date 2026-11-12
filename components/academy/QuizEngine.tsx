@@ -214,7 +214,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     const record = {
       quiz: [finalScore, quiz.questions.length] as [number, number],
       ...(useDialogue ? { listen: [dScore, dialogueTotal] as [number, number] } : {}),
-      ...(useReading ? { read: [readingState.percent ?? 0, 100] as [number, number] } : {}),
+      ...(useReading ? { readPending: true } : {}),
       ...(useWriting ? { write: true } : {}),
     };
     // Passed or failed on the general mark (same rule as the result shown below); the written part, not corrected yet, is left out.
@@ -246,7 +246,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
     parts: {
       quiz: [score, quiz.questions.length],
       ...(useDialogue ? { listen: [dialogueScore, dialogueTotal] as [number, number] } : {}),
-      ...(useReading ? { read: [readingState.percent ?? 0, 100] as [number, number] } : {}),
+      ...(useReading ? { readPending: true } : {}),
       ...(useWriting ? { write: true } : {}),
     },
     rawScore: score,
@@ -275,7 +275,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
   const nextHint =
     cur.kind === "dialogue" ? "Répondez à toutes les questions de la conversation pour continuer." :
     cur.kind === "question" ? "Choisissez une réponse pour continuer." :
-    cur.kind === "reading" ? "Faites la lecture à voix haute pour continuer." :
+    cur.kind === "reading" ? "Enregistrez votre lecture à voix haute pour continuer." :
     `Complétez la rédaction pour continuer : ${writingGaps.join(", ")}.`;
   const goUnit = (n: number) => {
     setUnit(Math.max(0, Math.min(units.length - 1, n)));

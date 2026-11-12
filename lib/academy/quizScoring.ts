@@ -1,6 +1,6 @@
 /**
  * The mark of a quiz, out of 100, made of every part the student did:
- *   écoute (the heard conversation) 25 · questions 30 · lecture à voix haute (microphone) 20 · écrit (corrected by a teacher,
+ *   écoute (the heard conversation) 25 · questions 30 · lecture à voix haute (enregistrée, notée à la main par l'administration) 20 · écrit (corrected by a teacher,
  *   mark out of 10) 25.
  * A quiz without one of these parts shares its points between the parts it has.
  * Until the teacher has corrected the written part, the mark is provisional (computed on the other parts).
@@ -23,6 +23,8 @@ export interface QuizPartsRecord {
   quiz: [number, number];
   /** Reading aloud with the microphone: [points out of 100, 100]; absent when the quiz has none. */
   read?: [number, number];
+  /** True when the quiz had a reading-aloud part: the student's recording is marked by the administration (no automatic score). */
+  readPending?: boolean;
   /** True when the quiz had a written part (its mark comes from the teacher). */
   write?: boolean;
 }
@@ -72,10 +74,11 @@ export function computeQuizMark(opts: {
   const quiz: [number, number] = parts?.quiz ?? [rawScore ?? 0, rawTotal];
   const listen = parts?.listen;
   const read = parts?.read;
+  const readPending = Boolean(parts?.readPending) && !read;
   const write = parts ? Boolean(parts.write) : hasMark;
 
   const has = (k: "listen" | "quiz" | "read" | "write") => adminParts != null && typeof adminParts[k] === "number";
-  const present = [listen || has("listen") ? "listen" : null, "quiz", read || has("read") ? "read" : null, write || has("write") ? "write" : null].filter(Boolean) as ("listen" | "quiz" | "read" | "write")[];
+  const present = [listen || has("listen") ? "listen" : null, "quiz", read || readPending || has("read") ? "read" : null, write || has("write") ? "write" : null].filter(Boolean) as ("listen" | "quiz" | "read" | "write")[];
   const totalWeight = present.reduce((sum, k) => sum + PART_WEIGHTS[k], 0);
   const scale = 100 / totalWeight;
   const ratio = (pair: [number, number]) => (pair[1] > 0 ? pair[0] / pair[1] : 0);
@@ -84,6 +87,7 @@ export function computeQuizMark(opts: {
   if (listen) lines.push({ key: "listen", label: "Écoute", max: round1(PART_WEIGHTS.listen * scale), got: round1(ratio(listen) * PART_WEIGHTS.listen * scale), detail: `${listen[0]}/${listen[1]}` });
   lines.push({ key: "quiz", label: "Questions", max: round1(PART_WEIGHTS.quiz * scale), got: round1(ratio(quiz) * PART_WEIGHTS.quiz * scale), detail: `${quiz[0]}/${quiz[1]}` });
   if (read) lines.push({ key: "read", label: "Lecture", max: round1(PART_WEIGHTS.read * scale), got: round1(ratio(read) * PART_WEIGHTS.read * scale), detail: `${read[0]}/${read[1]}` });
+  else if (readPending) lines.push({ key: "read", label: "Lecture", max: round1(PART_WEIGHTS.read * scale), got: null, detail: "à corriger" });
   if (write) lines.push({ key: "write", label: "Écrit", max: round1(PART_WEIGHTS.write * scale), got: hasMark ? round1((writeMark! / 10) * PART_WEIGHTS.write * scale) : null, detail: hasMark ? `${writeMark}/10` : "à corriger" });
 
   // Part by part, as set by the administration: its points replace the computed ones.
@@ -102,7 +106,7 @@ export function computeQuizMark(opts: {
   fixed("read", "Lecture", PART_WEIGHTS.read);
   fixed("write", "Écrit", PART_WEIGHTS.write);
 
-  const provisional = write && !hasMark && !has("write");
+  const provisional = (write && !hasMark && !has("write")) || (readPending && !has("read"));
   const marked = lines.filter((l) => l.got !== null);
   const earned = marked.reduce((sum, l) => sum + (l.got as number), 0);
   const possible = marked.reduce((sum, l) => sum + l.max, 0);

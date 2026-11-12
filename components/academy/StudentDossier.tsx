@@ -202,7 +202,8 @@ export default function StudentDossier({
 
   const openEdit = (level: number, lessonId: number, label: string, mark: QuizMark) => {
     const next: Record<string, string> = {};
-    for (const l of mark.lines) next[l.key] = String(l.got ?? 0);
+    // A part still waiting for the administration (reading, writing) starts empty: leaving it empty keeps it pending instead of giving 0.
+    for (const l of mark.lines) next[l.key] = l.got === null ? "" : String(l.got);
     setFields(next);
     setTotal(mark.percent !== null ? String(mark.percent) : "0");
     setEditing({ level, lessonId, label, mark });
@@ -216,6 +217,7 @@ export default function StudentDossier({
     if (mark.lines.length > 0) {
       parts = {};
       for (const l of mark.lines) {
+        if (l.got === null && !String(fields[l.key] ?? "").trim()) continue;
         const v = Number(String(fields[l.key] ?? "0").replace(",", "."));
         if (!Number.isFinite(v) || v < 0 || v > l.max) {
           alert(`« ${l.label} » : entrez une valeur entre 0 et ${l.max}.`);

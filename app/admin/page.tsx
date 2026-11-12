@@ -3091,35 +3091,56 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                     </tr>
                   </thead>
                   <tbody>
-                    {progressList.map((p) => {
-                      const owner = students.find((s) => s.uid === p.uid);
-                      return (
-                        <tr key={p.id} className="border-b border-line/60">
-                          <td className="py-2 pr-4 text-ink">{owner?.name || p.uid}</td>
-                          <td className="py-2 pr-4 text-ink-soft">{languageLabel(p.langCode)}</td>
-                          <td className="py-2 pr-4 text-ink-soft">{p.level}</td>
-                          <td className="py-2 pr-4 text-ink-soft">{(p.completedQuizzes || []).length}</td>
-                          <td className="py-2 pr-4">
-                            {p.finalQuizPassed ? (
-                              <span className="text-sm font-semibold px-2 py-1 rounded-full bg-emerald-700 text-white">Réussi ({p.finalQuizScore})</span>
-                            ) : p.finalQuizScore != null ? (
-                              <span className="text-sm font-semibold px-2 py-1 rounded-full bg-red-700 text-white">Échoué ({p.finalQuizScore})</span>
-                            ) : (
-                              <span className="text-sm text-ink-faint">—</span>
-                            )}
-                          </td>
-                          <td className="py-2 pr-4 text-ink-faint font-mono text-sm">{p.certificateId || "—"}</td>
-                          <td className="py-2 pr-4">
-                            <button
-                              onClick={() => setDossierOf({ uid: p.uid, langCode: p.langCode })}
-                              className="text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition min-h-[44px]"
-                            >
-                              Ouvrir
-                            </button>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                    {(() => {
+                      // One row (one dossier) per student and language: the levels of the same student are grouped, not listed one by one.
+                      const groups = new Map<string, any[]>();
+                      for (const p of progressList) {
+                        const key = `${p.uid}|${p.langCode}`;
+                        groups.set(key, [...(groups.get(key) || []), p]);
+                      }
+                      return [...groups.entries()].map(([key, list]) => {
+                        const levels = [...list].sort((a, b) => Number(a.level) - Number(b.level));
+                        const current = levels[levels.length - 1];
+                        const owner = students.find((st) => st.uid === current.uid);
+                        const quizzes = levels.reduce((n, p) => n + (p.completedQuizzes || []).length, 0);
+                        const finals = levels.filter((p) => p.finalQuizScore != null);
+                        const certificates = levels.map((p) => p.certificateId).filter(Boolean);
+                        return (
+                          <tr key={key} className="border-b border-line/60">
+                            <td className="py-2 pr-4 text-ink">{owner?.name || current.uid}</td>
+                            <td className="py-2 pr-4 text-ink-soft">{languageLabel(current.langCode)}</td>
+                            <td className="py-2 pr-4 text-ink-soft">
+                              {current.level}
+                              {levels.length > 1 && <span className="block text-xs text-ink-faint">déjà passé : niveau {levels.slice(0, -1).map((p) => p.level).join(", ")}</span>}
+                            </td>
+                            <td className="py-2 pr-4 text-ink-soft">{quizzes}</td>
+                            <td className="py-2 pr-4">
+                              {finals.length === 0 ? (
+                                <span className="text-sm text-ink-faint">—</span>
+                              ) : (
+                                <div className="flex flex-col gap-1">
+                                  {finals.map((p) => (
+                                    <span key={p.id} className={`text-sm font-semibold px-2 py-1 rounded-full w-fit ${p.finalQuizPassed ? "bg-emerald-700" : "bg-red-700"} text-white`}>
+                                      {levels.length > 1 ? `N${p.level} · ` : ""}
+                                      {p.finalQuizPassed ? "Réussi" : "Échoué"} ({p.finalQuizScore})
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                            </td>
+                            <td className="py-2 pr-4 text-ink-faint font-mono text-sm">{certificates.length ? certificates.map((c: string) => <span key={c} className="block">{c}</span>) : "—"}</td>
+                            <td className="py-2 pr-4">
+                              <button
+                                onClick={() => setDossierOf({ uid: current.uid, langCode: current.langCode })}
+                                className="text-sm font-bold px-3 py-1.5 rounded-lg border border-line text-ink hover:border-red-600/60 hover:text-red-500 transition min-h-[44px]"
+                              >
+                                Ouvrir
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      });
+                    })()}
                   </tbody>
                 </table>
               </div>
