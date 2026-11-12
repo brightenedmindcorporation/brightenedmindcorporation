@@ -94,22 +94,30 @@ export default function Hero() {
           >
             <div className="relative h-[560px] rounded-[40px] overflow-hidden shadow-2xl shadow-black/40 group ring-1 ring-red-700/20">
               <Image
-                src="/hero-business.webp"
+                src="/hero-bm-blur.webp"
                 alt="Équipe de professionnels en réunion"
                 fill
                 sizes="(max-width: 1200px) 50vw, 33vw"
                 className="object-cover group-hover:scale-105 transition duration-700"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
+              {/* The photo is softly blurred on purpose: it is a backdrop, the BM identity is what stands out. */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-black/35"></div>
 
-              <div className="absolute bottom-10 left-10 right-10">
-                <div className="glass-panel rounded-2xl px-6 py-5 inline-block">
-                  <p className="text-2xl font-bold text-ink leading-snug font-serif">
-                    Former. Connecter.
-                    <br />
-                    <span className="text-gradient-red">Valoriser.</span>
-                  </p>
-                </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 px-10 text-center">
+                <Image src="/logo-bm.png" alt="Brightened Mind Corporation" width={150} height={131} className="rounded-3xl bg-white p-3 shadow-xl" />
+                <p className="text-4xl font-bold leading-snug font-serif text-white">
+                  Former. Connecter.
+                  <br />
+                  <span className="text-[#ffb3bd]">Valoriser.</span>
+                </p>
+                <ul className="flex flex-wrap justify-center gap-2" aria-label="Nos activités">
+                  {["Formation", "Recrutement", "Communication"].map((t) => (
+                    <li key={t} className="rounded-full border border-white/40 bg-white/15 px-4 py-1.5 text-sm font-semibold text-white backdrop-blur-sm">
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-sm font-semibold tracking-wide text-white/85">Lubumbashi · bmcorporation-cd.com</p>
               </div>
             </div>
           </motion.div>
