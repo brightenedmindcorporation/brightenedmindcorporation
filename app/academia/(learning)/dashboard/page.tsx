@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import BmLogo from "@/components/BmLogo";
 import { Lock, MessageSquarePlus, Paperclip, X, BookText, ChevronDown } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -20,6 +19,7 @@ import { refreshLoggedStudent } from "@/lib/academy/refreshEnrollments";
 import AddProgramPanel from "@/components/academy/AddProgramPanel";
 import InstallApp from "@/components/academy/InstallApp";
 import ProgressPanel from "@/components/academy/ProgressPanel";
+import ProfileAvatar, { AddPhotoHint, useProfileBrief } from "@/components/academy/ProfileAvatar";
 import { fetchLiveSession } from "@/lib/academy/fetchLiveSession";
 import { logActivity } from "@/lib/academy/activity";
 import { getVerbReference } from "@/content/verbs";
@@ -52,6 +52,7 @@ function resolveLangSlug(langCode?: string): string {
 
 export default function Dashboard() {
   const [student, setStudent] = useState<StudentData | null>(null);
+  const profileBrief = useProfileBrief();
   const [levelRequesting, setLevelRequesting] = useState(false);
   const [lastLesson, setLastLesson] = useState<number>(1);
   const [progressStats, setProgressStats] = useState({ completed: 0, total: 12 });
@@ -487,16 +488,15 @@ export default function Dashboard() {
             <div className="absolute inset-0 radial-fade pointer-events-none" />
             <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
               <div className="flex items-center gap-5">
-                <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
-                  <BmLogo size={56} className="rounded-[14px]" />
-                </div>
+                <ProfileAvatar photoUrl={profileBrief.photoUrl} />
                 <div>
                   <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
-                    Bienvenue, {fullName}
+                    Bienvenue, {profileBrief.displayName || fullName}
                   </h1>
                   <p className="text-ink-soft text-sm mt-1 font-sans">
                     Votre inscription à <span className="text-red-500 font-semibold">{programLabel}</span> est confirmée.
                   </p>
+                  <AddPhotoHint brief={profileBrief} />
                 </div>
               </div>
 
@@ -550,16 +550,15 @@ export default function Dashboard() {
           <div className="absolute inset-0 radial-fade pointer-events-none" />
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8 relative">
             <div className="flex items-center gap-5">
-              <div className="relative w-14 h-14 rounded-2xl bg-gradient-to-br from-red-600 to-red-900 p-0.5 shadow-lg shadow-red-950/50 flex items-center justify-center overflow-hidden shrink-0 ring-1 ring-white/30">
-                <BmLogo size={56} className="rounded-[14px]" />
-              </div>
+              <ProfileAvatar photoUrl={profileBrief.photoUrl} />
               <div>
                 <h1 className="text-2xl md:text-3xl font-black tracking-tight text-ink">
-                  {t("Bienvenue", "Welcome back")}, {fullName}
+                  {t("Bienvenue", "Welcome back")}, {profileBrief.displayName || fullName}
                 </h1>
                 <p className="text-ink-soft text-sm mt-1 font-sans">
                   {office ? <>Prêt(e) à continuer votre formation <span className="text-red-500 font-semibold">{langInfo.label}</span> ?</> : <>Ready to continue your <span className="text-red-500 font-semibold">{langInfo.label}</span> lessons today?</>}
                 </p>
+                <AddPhotoHint brief={profileBrief} />
               </div>
             </div>
 
