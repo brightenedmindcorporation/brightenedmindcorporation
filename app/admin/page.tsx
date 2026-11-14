@@ -3970,7 +3970,14 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
           for (const row of progressList) if (row.uid === dossierOf.uid && row.langCode === dossierOf.langCode) levels[String(row.level)] = row;
           return (
             <StudentDossier
-              student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode }}
+              student={{ name: owner?.name || dossierOf.uid, email: owner?.email, studentId: owner?.matricule, langCode: dossierOf.langCode, photoUrl: owner?.photoUrl, phone: owner?.phone, whatsapp: owner?.whatsapp, city: owner?.city }}
+              onRemovePhoto={async () => {
+                const idToken = await auth.currentUser?.getIdToken();
+                const response = await fetch("/api/admin/student-photo", { method: "DELETE", headers: { "Content-Type": "application/json", Authorization: `Bearer ${idToken}` }, body: JSON.stringify({ uid: dossierOf.uid }) });
+                const result = await response.json().catch(() => ({}));
+                if (!response.ok) throw new Error(result.error || "Erreur serveur");
+                setStudents((list) => list.map((x) => (x.uid === dossierOf.uid ? { ...x, photoUrl: "" } : x)));
+              }}
               levels={levels}
               onClose={() => setDossierOf(null)}
               canEditScores

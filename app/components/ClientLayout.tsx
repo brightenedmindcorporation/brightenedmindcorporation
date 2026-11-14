@@ -31,7 +31,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   // future LearningShell) : le header/footer public ne s'y affiche pas.
   // Le panneau admin (/admin) garde le header public — sa page réserve
   // l'espace en haut (pt-28) pour que son propre en-tête reste visible.
-  const LEARNING_PREFIXES = ["/academia/dashboard", "/academia/program", ...availableLanguages.map((l) => `/academia/${l.slug}`)];
+  const LEARNING_PREFIXES = ["/academia/dashboard", "/academia/profile", "/academia/program", ...availableLanguages.map((l) => `/academia/${l.slug}`)];
   const hideLayoutElements =
     pathname === "/academia" || LEARNING_PREFIXES.some((p) => pathname?.startsWith(p)) || false;
   const isHome = pathname === "/";

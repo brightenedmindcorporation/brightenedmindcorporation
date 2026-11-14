@@ -182,9 +182,12 @@ export default function StudentDossier({
   levels,
   onClose,
   onAct,
+  onRemovePhoto,
   canEditScores = false,
 }: {
-  student: { name: string; email?: string; studentId?: string; langCode: string };
+  student: { name: string; email?: string; studentId?: string; langCode: string; photoUrl?: string; phone?: string; whatsapp?: string; city?: string };
+  /** Administration: delete the student's profile photo (when it is not appropriate). */
+  onRemovePhoto?: () => Promise<void>;
   /** level number → saved progress */
   levels: Record<string, ProgressDoc | undefined>;
   onClose: () => void;
@@ -291,13 +294,42 @@ Ses résultats actuels sont archivés, mais ses notes et ses leçons validées r
     <div className="fixed inset-0 z-[80] bg-black/60 flex items-start justify-center overflow-y-auto p-4" onClick={onClose}>
       <div className="w-full max-w-[min(96vw,1400px)] my-6 bg-surface border border-line rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-start justify-between gap-4 p-6 border-b border-line">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-wide text-red-500">Dossier de l'étudiant</p>
-            <h2 className="text-2xl font-black text-ink mt-1">{student.name}</h2>
-            <p className="text-sm text-ink-soft mt-0.5">
-              {student.email} · {lang?.label ?? student.langCode}
-              {student.studentId ? ` · ${student.studentId}` : ""}
-            </p>
+          <div className="flex items-start gap-4">
+            {student.photoUrl ? (
+              <div className="shrink-0 text-center">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={student.photoUrl} alt={`Photo de ${student.name}`} className="h-20 w-20 rounded-full object-cover border border-line" />
+                {onRemovePhoto && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!confirm("Supprimer la photo de profil de cet étudiant ? Il pourra en mettre une autre.")) return;
+                      try {
+                        await onRemovePhoto();
+                      } catch (error: any) {
+                        alert(`Erreur : ${error.message || error}`);
+                      }
+                    }}
+                    className="mt-1 text-xs font-bold text-red-600 dark:text-red-300 underline min-h-[44px]"
+                  >
+                    Supprimer la photo
+                  </button>
+                )}
+              </div>
+            ) : null}
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wide text-red-500">Dossier de l'étudiant</p>
+              <h2 className="text-2xl font-black text-ink mt-1">{student.name}</h2>
+              <p className="text-sm text-ink-soft mt-0.5">
+                {student.email} · {lang?.label ?? student.langCode}
+                {student.studentId ? ` · ${student.studentId}` : ""}
+              </p>
+              {(student.phone || student.whatsapp || student.city) && (
+                <p className="text-sm text-ink-soft mt-0.5">
+                  {[student.phone && `Tél. ${student.phone}`, student.whatsapp && `WhatsApp ${student.whatsapp}`, student.city].filter(Boolean).join(" · ")}
+                </p>
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             {lang && (

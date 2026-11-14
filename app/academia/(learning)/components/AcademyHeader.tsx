@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { LayoutDashboard, LogOut } from "lucide-react";
+import { LayoutDashboard, LogOut, UserRound } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import NotificationBell from "@/components/academy/NotificationBell";
@@ -34,7 +34,7 @@ export default function AcademyHeader() {
             className="flex items-center gap-1 min-h-[44px] text-sm font-medium text-ink-soft hover:text-ink transition"
             title="Retour au site principal"
           >
-            ← Site Général
+            ← <span className="hidden sm:inline">&nbsp;Site Général</span>
           </Link>
 
           {!isDashboard && (
@@ -44,20 +44,23 @@ export default function AcademyHeader() {
                 href="/academia/dashboard"
                 className="text-sm font-semibold text-red-600 dark:text-red-300 hover:text-red-500 transition flex items-center gap-1.5 min-h-[44px]"
               >
-                <LayoutDashboard size={15} /> Mon Dashboard
+                <LayoutDashboard size={15} /> <span className="hidden sm:inline">Mon Dashboard</span><span className="sm:hidden">Dashboard</span>
               </Link>
             </>
           )}
         </div>
 
         {/* CÔTÉ DROIT */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <NotificationBell scope="student" />
+          <Link href="/academia/profile" className="flex items-center gap-2 text-sm font-semibold text-ink-soft hover:text-ink border border-line px-3 min-h-[44px] rounded-xl transition" aria-label="Mon profil">
+            <UserRound size={16} aria-hidden="true" /> <span className="hidden sm:inline">Mon profil</span>
+          </Link>
           <button
             onClick={handleLogout}
-            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-4 min-h-[44px] rounded-xl transition-all duration-200 bg-red-950/30"
+            className="flex items-center gap-2 text-sm font-semibold text-red-500 hover:text-white hover:bg-red-600 border border-red-900/50 hover:border-red-600 px-3 sm:px-4 min-h-[44px] rounded-xl transition-all duration-200 bg-red-950/30"
           >
-            <LogOut size={15} /> Déconnexion
+            <LogOut size={15} aria-hidden="true" /> <span className="hidden sm:inline">Déconnexion</span><span className="sr-only sm:hidden">Déconnexion</span>
           </button>
         </div>
 

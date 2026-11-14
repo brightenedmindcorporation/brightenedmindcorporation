@@ -89,6 +89,11 @@ export async function GET(request: Request) {
       const account = accounts.get(uid);
       if (!String(r.name || "").trim()) r.name = profile?.name || account?.name || "(nom non renseigné)";
       if (!String(r.email || "").trim()) r.email = profile?.email || account?.email || "";
+      // What the student filled in on their own profile page.
+      r.photoUrl = profile?.photoUrl || "";
+      r.phone = profile?.phone || "";
+      r.whatsapp = profile?.whatsapp || "";
+      r.city = profile?.city || "";
       // When the student last came (from the sign-in service, plus tracked activity).
       r.lastSignInAt = account?.lastSignIn || null;
       r.lastSeenAt = profile?.lastSeenAt || null;
