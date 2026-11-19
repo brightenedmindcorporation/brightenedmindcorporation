@@ -381,8 +381,7 @@ export default function QuizEngine({ quiz, badge, alreadyScore, onSubmit, dialog
                     Conversation :{" "}
                     <span className={dialoguePassed ? "text-emerald-400" : "text-red-500"}>
                       {dialogueScore} / {dialogueTotal}
-                    </span>{" "}
-                    (compte dans la note générale)
+                    </span>
                   </p>
                 )}
                 {useWriting && <p className="text-sm font-semibold mt-1 text-emerald-400">Rédaction enregistrée : un professeur la corrigera (25 points).</p>}

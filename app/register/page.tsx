@@ -10,6 +10,7 @@ import { otherPrograms, isOtherProgramCode, getOtherProgramLabel } from "@/conte
 import PasswordInput from "@/components/academy/PasswordInput";
 import StepBar from "@/components/StepBar";
 import { trackFunnel } from "@/lib/trackEvent";
+import { compressImage } from "@/lib/imageClient";
 
 export default function RegisterPage() {
   return (
@@ -31,6 +32,11 @@ function RegisterForm() {
   const [gender, setGender] = useState<"" | "M" | "F">("");
   const [email, setEmail] = useState("");
   const [emailConfirm, setEmailConfirm] = useState("");
+  const [phone, setPhone] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [city, setCity] = useState("");
+  const [photo, setPhoto] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirm, setPasswordConfirm] = useState("");
   const [level, setLevel] = useState("Level 1");
@@ -73,6 +79,10 @@ function RegisterForm() {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) errs.email = "Cette adresse e-mail n'est pas complète. Exemple : prenom@gmail.com";
       if (!emailConfirm.trim()) errs.emailConfirm = "Retapez votre adresse e-mail pour la confirmer.";
       else if (email.trim().toLowerCase() !== emailConfirm.trim().toLowerCase()) errs.emailConfirm = "Les deux adresses e-mail ne sont pas identiques. Vérifiez votre saisie.";
+      const phoneOk = (v: string) => /^\+?[0-9 ().-]{6,25}$/.test(v.trim());
+      if (!phoneOk(phone)) errs.phone = "Écrivez votre numéro de téléphone (chiffres, espaces et « + » seulement). Exemple : +243 970 000 000";
+      if (whatsapp.trim() && !phoneOk(whatsapp)) errs.whatsapp = "Ce numéro WhatsApp n'est pas valide (chiffres, espaces et « + » seulement).";
+      if (city.trim().length < 2) errs.city = "Indiquez votre ville.";
     }
     if (which === 3) {
       if (password.length < 8) errs.password = "Le mot de passe doit contenir au moins 8 caractères.";
@@ -187,6 +197,9 @@ function RegisterForm() {
             }
           })(),
           langCode: programCode,
+          phone: phone.trim(),
+          whatsapp: whatsapp.trim(),
+          city: city.trim(),
           level: hasLevels ? level : "N/A",
           placement: hasLevels && levelMode === "test",
           studyDays: hasLevels ? studyDays : undefined,
@@ -208,6 +221,18 @@ function RegisterForm() {
         }
         setLoading(false);
         return;
+      }
+
+      // Optional photo: sent once the account exists; a failure here never blocks the registration.
+      if (photo) {
+        try {
+          const light = await compressImage(photo, 1200, 0.8);
+          const form = new FormData();
+          form.append("photo", light, light.name);
+          await fetch("/api/academy/profile/photo", { method: "POST", headers: { Authorization: `Bearer ${idToken}` }, body: form });
+        } catch (photoError) {
+          console.error("Profile photo not sent at sign-up:", photoError);
+        }
       }
 
       setDone(true);
@@ -462,6 +487,88 @@ function RegisterForm() {
                   autoComplete="off"
                 />
                 {fieldErrors.emailConfirm && <p role="alert" className="field-error">{fieldErrors.emailConfirm}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="reg-phone" className="block text-sm font-semibold text-ink mb-1">Téléphone</label>
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  maxLength={25}
+                  placeholder="+243 …"
+                  aria-invalid={!!fieldErrors.phone}
+                  className={`w-full min-h-[48px] border border-line bg-surface px-3.5 py-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600 ${fieldErrors.phone ? "field-invalid" : ""}`}
+                  value={phone}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    clearField("phone");
+                  }}
+                />
+                {fieldErrors.phone && <p role="alert" className="field-error">{fieldErrors.phone}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="reg-wa" className="block text-sm font-semibold text-ink mb-1">WhatsApp (facultatif)</label>
+                <input
+                  id="reg-wa"
+                  type="tel"
+                  inputMode="tel"
+                  maxLength={25}
+                  placeholder="+243 … (laissez vide si c'est le même numéro)"
+                  aria-invalid={!!fieldErrors.whatsapp}
+                  className={`w-full min-h-[48px] border border-line bg-surface px-3.5 py-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600 ${fieldErrors.whatsapp ? "field-invalid" : ""}`}
+                  value={whatsapp}
+                  onChange={(e) => {
+                    setWhatsapp(e.target.value);
+                    clearField("whatsapp");
+                  }}
+                />
+                {fieldErrors.whatsapp && <p role="alert" className="field-error">{fieldErrors.whatsapp}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="reg-city" className="block text-sm font-semibold text-ink mb-1">Ville</label>
+                <input
+                  id="reg-city"
+                  autoComplete="address-level2"
+                  maxLength={60}
+                  placeholder="Lubumbashi"
+                  aria-invalid={!!fieldErrors.city}
+                  className={`w-full min-h-[48px] border border-line bg-surface px-3.5 py-3 rounded-lg text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-red-600 ${fieldErrors.city ? "field-invalid" : ""}`}
+                  value={city}
+                  onChange={(e) => {
+                    setCity(e.target.value);
+                    clearField("city");
+                  }}
+                />
+                {fieldErrors.city && <p role="alert" className="field-error">{fieldErrors.city}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="reg-photo" className="block text-sm font-semibold text-ink mb-1">Photo de profil (facultatif)</label>
+                <div className="flex items-center gap-3">
+                  {photoPreview ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={photoPreview} alt="Aperçu de votre photo" className="h-16 w-16 rounded-full object-cover border border-line" />
+                  ) : null}
+                  <input
+                    id="reg-photo"
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0] ?? null;
+                      setPhoto(file);
+                      setPhotoPreview((old) => {
+                        if (old) URL.revokeObjectURL(old);
+                        return file ? URL.createObjectURL(file) : "";
+                      });
+                    }}
+                    className="block w-full text-sm text-ink-soft file:mr-3 file:min-h-[44px] file:rounded-lg file:border-0 file:bg-red-700 file:px-4 file:font-semibold file:text-white"
+                  />
+                </div>
+                <p className="text-sm text-ink-soft mt-1.5">Une photo où l&apos;on voit bien votre visage. Vous pourrez la changer plus tard dans « Mon profil ».</p>
               </div>
             </>
           )}

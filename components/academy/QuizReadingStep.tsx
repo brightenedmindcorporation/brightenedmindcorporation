@@ -169,7 +169,7 @@ export default function QuizReadingStep({
             <p className="text-sm font-bold text-ink">Lisez le texte à voix haute et enregistrez-vous</p>
             {canRecord ? (
               <>
-                <p className="text-sm text-ink-soft">Appuyez sur « Enregistrer ma voix », lisez le texte, arrêtez, écoutez-vous, puis envoyez. L&apos;administration écoutera votre lecture et vous donnera la note : le site ne la corrige pas.</p>
+                <p className="text-sm text-ink-soft">Appuyez sur « Enregistrer ma voix », lisez le texte, arrêtez, écoutez-vous, puis envoyez. L&apos;administration écoutera votre lecture et vous donnera la note.</p>
                 {rec === "recording" ? (
                   <button type="button" onClick={stopRecording} className={`${btn} bg-ink text-surface animate-pulse`}>
                     <Square size={14} aria-hidden="true" /> Arrêter l&apos;enregistrement

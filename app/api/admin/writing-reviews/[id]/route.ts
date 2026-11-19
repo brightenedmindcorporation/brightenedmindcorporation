@@ -32,7 +32,10 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     const overall = typeof body.overall === "string" ? body.overall.trim().slice(0, 1500) : "";
     const rawMark = body.mark === "" || body.mark === null || body.mark === undefined ? null : Number(body.mark);
     const mark = rawMark !== null && Number.isFinite(rawMark) ? Math.max(0, Math.min(10, Math.round(rawMark * 2) / 2)) : null;
-    if (!overall && !feedback.some((f: any) => f.corrected || f.comment)) {
+    const hasReading = Array.isArray(review.items) && review.items.some((i: any) => i?.kind === "reading");
+    const rawRead = body.readMark === "" || body.readMark === null || body.readMark === undefined ? null : Number(body.readMark);
+    const readMark = hasReading && rawRead !== null && Number.isFinite(rawRead) ? Math.max(0, Math.min(10, Math.round(rawRead * 2) / 2)) : null;
+    if (!overall && readMark === null && !feedback.some((f: any) => f.corrected || f.comment)) {
       return NextResponse.json({ error: "Ajoutez au moins une correction ou un commentaire." }, { status: 400 });
     }
 
@@ -41,6 +44,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       feedback,
       overall,
       mark,
+      readMark,
       reviewedAt: new Date().toISOString(),
       reviewedBy: caller.name || caller.email,
     });
@@ -50,7 +54,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         audience: review.uid,
         type: "writing-corrected",
         title: "Votre rédaction est corrigée",
-        message: `${review.quizTitle || "Votre quiz"} : ${caller.role === "teacher" ? "votre professeur" : "l'administration"} a corrigé vos textes${mark !== null ? ` (${mark}/10)` : ""}.`,
+        message: `${review.quizTitle || "Votre quiz"} : ${caller.role === "teacher" ? "votre professeur" : "l'administration"} a corrigé vos textes${mark !== null ? ` (${mark}/10)` : ""}.${readMark !== null ? ` Lecture à voix haute : ${readMark}/10.` : ""}`,
         link: "/academia/corrections",
       });
     } catch (error) {

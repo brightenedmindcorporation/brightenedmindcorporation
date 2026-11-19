@@ -33,9 +33,19 @@ export async function POST(request: Request) {
       );
     }
 
-    const { idToken, name, gender: rawGender, langCode, level, studyDays, source: rawSource, placement: wantsPlacement } = await request.json();
+    const { idToken, name, gender: rawGender, langCode, level, studyDays, source: rawSource, placement: wantsPlacement, phone: rawPhone, whatsapp: rawWhatsapp, city: rawCity } = await request.json();
     const source = typeof rawSource === "string" && /^[a-z0-9_-]{1,30}$/.test(rawSource) ? rawSource : "";
     const gender = normalizeGender(rawGender);
+    // Contact details given at sign-up (same checks as the profile page); only filled in when the profile has none yet.
+    const cleanText = (v: unknown, max: number) => (typeof v === "string" ? v.replace(/[\u0000-\u001f]/g, " ").trim().slice(0, max) : "");
+    const phoneOk = (v: string) => v === "" || /^\+?[0-9 ().-]{6,25}$/.test(v);
+    const profileFields: Record<string, string> = {};
+    const p = cleanText(rawPhone, 25);
+    const w = cleanText(rawWhatsapp, 25);
+    const c = cleanText(rawCity, 60);
+    if (p && phoneOk(p)) profileFields.phone = p;
+    if (w && phoneOk(w)) profileFields.whatsapp = w;
+    if (c) profileFields.city = c;
     if (!idToken || !langCode || !level) {
       return NextResponse.json({ error: "Champs requis manquants." }, { status: 400 });
     }
@@ -78,9 +88,13 @@ export async function POST(request: Request) {
       }
 
       if (!studentSnap.exists) {
-        tx.set(studentRef, { uid, name, email, ...(gender ? { gender } : {}), createdAt: new Date().toISOString() });
-      } else if (gender && !studentSnap.data()?.gender) {
-        tx.update(studentRef, { gender });
+        tx.set(studentRef, { uid, name, email, ...(gender ? { gender } : {}), ...profileFields, createdAt: new Date().toISOString() });
+      } else {
+        const existing = studentSnap.data() || {};
+        const missing: Record<string, string> = {};
+        if (gender && !existing.gender) missing.gender = gender;
+        for (const [k, v] of Object.entries(profileFields)) if (!existing[k]) missing[k] = v;
+        if (Object.keys(missing).length) tx.update(studentRef, missing);
       }
 
       tx.set(enrollmentRef, {

@@ -60,12 +60,14 @@ export function computeQuizMark(opts: {
   rawTotal: number;
   /** Teacher's mark out of 10 for the written part, when corrected. */
   writeMark?: number | null;
+  /** Administration's mark out of 10 for the reading aloud, given in the Corrections tab. */
+  readMark?: number | null;
   /** The administration's own mark out of 100. */
   adminPercent?: number | null;
   /** Points set part by part by the administration (each out of the part's maximum shown in the lines). */
   adminParts?: Partial<Record<"listen" | "quiz" | "read" | "write", number>> | null;
 }): QuizMark {
-  const { parts, rawScore, rawTotal, writeMark, adminPercent, adminParts } = opts;
+  const { parts, rawScore, rawTotal, writeMark, readMark, adminPercent, adminParts } = opts;
   if (rawScore === null && typeof adminPercent !== "number") return { percent: null, provisional: false, legacy: false, byAdmin: false, lines: [] };
 
   const hasMark = typeof writeMark === "number";
@@ -87,7 +89,10 @@ export function computeQuizMark(opts: {
   if (listen) lines.push({ key: "listen", label: "Écoute", max: round1(PART_WEIGHTS.listen * scale), got: round1(ratio(listen) * PART_WEIGHTS.listen * scale), detail: `${listen[0]}/${listen[1]}` });
   lines.push({ key: "quiz", label: "Questions", max: round1(PART_WEIGHTS.quiz * scale), got: round1(ratio(quiz) * PART_WEIGHTS.quiz * scale), detail: `${quiz[0]}/${quiz[1]}` });
   if (read) lines.push({ key: "read", label: "Lecture", max: round1(PART_WEIGHTS.read * scale), got: round1(ratio(read) * PART_WEIGHTS.read * scale), detail: `${read[0]}/${read[1]}` });
-  else if (readPending) lines.push({ key: "read", label: "Lecture", max: round1(PART_WEIGHTS.read * scale), got: null, detail: "à corriger" });
+  else if (readPending) {
+    const hasRead = typeof readMark === "number";
+    lines.push({ key: "read", label: "Lecture", max: round1(PART_WEIGHTS.read * scale), got: hasRead ? round1((readMark! / 10) * PART_WEIGHTS.read * scale) : null, detail: hasRead ? `${readMark}/10` : "à corriger" });
+  }
   if (write) lines.push({ key: "write", label: "Écrit", max: round1(PART_WEIGHTS.write * scale), got: hasMark ? round1((writeMark! / 10) * PART_WEIGHTS.write * scale) : null, detail: hasMark ? `${writeMark}/10` : "à corriger" });
 
   // Part by part, as set by the administration: its points replace the computed ones.
@@ -106,7 +111,7 @@ export function computeQuizMark(opts: {
   fixed("read", "Lecture", PART_WEIGHTS.read);
   fixed("write", "Écrit", PART_WEIGHTS.write);
 
-  const provisional = (write && !hasMark && !has("write")) || (readPending && !has("read"));
+  const provisional = (write && !hasMark && !has("write")) || (readPending && !has("read") && typeof readMark !== "number");
   const marked = lines.filter((l) => l.got !== null);
   const earned = marked.reduce((sum, l) => sum + (l.got as number), 0);
   const possible = marked.reduce((sum, l) => sum + l.max, 0);

@@ -11,9 +11,11 @@ export async function loadWritingMarks(db: Firestore, uid?: string): Promise<Map
   const out = new Map<string, Record<string, number>>();
   for (const d of snap.docs) {
     const r = d.data();
-    if (r.status !== "reviewed" || typeof r.mark !== "number") continue;
+    if (r.status !== "reviewed") continue;
     const id = `${r.uid}_${r.langCode}_${r.level}`;
-    out.set(id, { ...(out.get(id) || {}), [String(r.key)]: r.mark });
+    // The mark of the reading aloud (out of 10) is kept under "<key>:read".
+    if (typeof r.readMark === "number") out.set(id, { ...(out.get(id) || {}), [`${r.key}:read`]: r.readMark });
+    if (typeof r.mark === "number") out.set(id, { ...(out.get(id) || {}), [String(r.key)]: r.mark });
   }
   return out;
 }

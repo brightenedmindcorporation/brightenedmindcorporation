@@ -58,6 +58,7 @@ export function summarizeLevel(curriculum: LevelCurriculum, progress: ProgressDo
       rawScore: raw,
       rawTotal: total,
       writeMark: progress.writingMarks?.[key],
+      readMark: progress.writingMarks?.[`${key}:read`],
       adminPercent: progress.adminPercent?.[key],
       adminParts: progress.adminParts?.[key],
     });

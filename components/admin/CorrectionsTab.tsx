@@ -26,6 +26,7 @@ interface Review {
   feedback?: { corrected: string; comment: string }[];
   overall?: string;
   mark?: number | null;
+  readMark?: number | null;
   reviewedBy?: string;
 }
 
@@ -40,7 +41,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<"pending" | "reviewed">("pending");
   const [open, setOpen] = useState<string | null>(null);
-  const [draft, setDraft] = useState<Record<string, { feedback: { corrected: string; comment: string }[]; overall: string; mark: string }>>({});
+  const [draft, setDraft] = useState<Record<string, { feedback: { corrected: string; comment: string }[]; overall: string; mark: string; readMark: string }>>({});
   const [busy, setBusy] = useState<string | null>(null);
   // One folder per student; the folders the person opened or closed by hand (otherwise: open on the work to correct, closed on the finished work).
   const [folders, setFolders] = useState<Record<string, boolean>>({});
@@ -69,6 +70,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
       feedback: r.items.map((it, i) => ({ corrected: r.feedback?.[i]?.corrected ?? it.text, comment: r.feedback?.[i]?.comment ?? "" })),
       overall: r.overall ?? "",
       mark: r.mark != null ? String(r.mark) : "",
+      readMark: r.readMark != null ? String(r.readMark) : "",
     };
 
   const save = async (r: Review) => {
@@ -83,6 +85,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
           feedback: d.feedback.map((f, i) => ({ corrected: f.corrected.trim() === r.items[i].text.trim() ? "" : f.corrected, comment: f.comment })),
           overall: d.overall,
           mark: d.mark,
+          readMark: d.readMark,
         }),
       });
       const result = await response.json();
@@ -165,7 +168,18 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                           <source src={it.audioUrl} />
                         </audio>
                         <a href={it.audioUrl} target="_blank" rel="noopener noreferrer" className="text-sm font-bold text-red-600 underline">Ouvrir l&apos;enregistrement</a>
-                        <p className="text-sm text-ink-soft">Écoutez la lecture. Sa note (sur 20) se donne dans le dossier de l&apos;étudiant : onglet Progression → Ouvrir → modifier la note du quiz, ligne « Lecture ». Tant que vous ne l&apos;avez pas donnée, la lecture ne compte pas dans la note du quiz.</p>
+                        <label className="flex flex-wrap items-center gap-2 text-sm font-semibold text-ink-soft">
+                          Note de lecture (sur 10)
+                          <input
+                            value={d.readMark}
+                            onChange={(e) => setDraft((s) => ({ ...s, [r.id]: { ...d, readMark: e.target.value } }))}
+                            disabled={r.status === "reviewed"}
+                            inputMode="decimal"
+                            placeholder="/10"
+                            className="w-24 bg-surface border border-line rounded-lg px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
+                          />
+                        </label>
+                        <p className="text-sm text-ink-soft">Écoutez la lecture puis donnez sa note ici : elle est ajoutée à la note du quiz de l&apos;étudiant. Tant que vous ne l&apos;avez pas donnée, la lecture ne compte pas.</p>
                       </div>
                     ) : (
                     <>
@@ -196,7 +210,7 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                   </div>
                 ))}
 
-                <div className="grid sm:grid-cols-[1fr_120px] gap-3">
+                <div className={r.items.some((x) => x.kind !== "reading") ? "grid sm:grid-cols-[1fr_120px] gap-3" : "grid gap-3"}>
                   <textarea
                     value={d.overall}
                     onChange={(e) => setDraft((s) => ({ ...s, [r.id]: { ...d, overall: e.target.value } }))}
@@ -205,14 +219,14 @@ export default function CorrectionsTab({ getToken }: { getToken?: () => Promise<
                     placeholder="Commentaire général pour l'étudiant (points forts, ce qu'il faut travailler)…"
                     className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
                   />
-                  <input
+                  {r.items.some((x) => x.kind !== "reading") && <input
                     value={d.mark}
                     onChange={(e) => setDraft((s) => ({ ...s, [r.id]: { ...d, mark: e.target.value } }))}
                     disabled={r.status === "reviewed"}
                     inputMode="decimal"
-                    placeholder="Note /10"
+                    placeholder="Note écrit /10"
                     className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 disabled:opacity-70 min-h-[44px]"
-                  />
+                  />}
                 </div>
 
                 {r.status === "pending" ? (
