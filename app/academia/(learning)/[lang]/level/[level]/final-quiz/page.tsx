@@ -10,7 +10,7 @@ import { useParams, useRouter } from "next/navigation";
 import { GraduationCap } from "lucide-react";
 import { getLevelCurriculum } from "@/content/curriculum";
 import QuizEngine from "@/components/academy/QuizEngine";
-import { getLevelProgress, recordFinalQuizResult } from "@/lib/academy/progress";
+import { getLevelProgress, lessonsBehind, recordFinalQuizResult } from "@/lib/academy/progress";
 import { pullProgress, submitWritingForReview, syncProgress } from "@/lib/academy/progressSync";
 import { logActivity } from "@/lib/academy/activity";
 import { getDialogue } from "@/content/dialogues";
@@ -59,7 +59,8 @@ export default function FinalQuizPage() {
 
       const progress = getLevelProgress(langSlug, level);
       const totalLessons = curriculum?.lessons.length ?? 0;
-      const allLessonsDone = totalLessons > 0 && progress.completedQuizzes.length >= totalLessons;
+      // Same count as the level page (lessons the administration opened ahead count as passed), otherwise the page shows 100 % but sends the student back.
+      const allLessonsDone = totalLessons > 0 && lessonsBehind(progress).filter((id) => id <= totalLessons).length >= totalLessons;
       if (!allLessonsDone) {
         router.push(base);
         return;
