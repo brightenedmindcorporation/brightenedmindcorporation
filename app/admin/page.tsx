@@ -31,6 +31,8 @@ import {
   MailOpen,
   RotateCcw,
   Search,
+  Send,
+  FileText,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
@@ -1711,6 +1713,16 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
     const parsed = new Date(date);
     if (isNaN(parsed.getTime())) return date;
     return parsed.toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" });
+  };
+
+  const formatMailListDate = (date?: string) => {
+    if (!date) return "";
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return "";
+    const now = new Date();
+    if (d.toDateString() === now.toDateString()) return d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" });
+    if (d.getFullYear() === now.getFullYear()) return d.toLocaleDateString("fr-FR", { day: "numeric", month: "short" });
+    return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "2-digit" });
   };
 
   const avatarColor = (seed: string) => {
@@ -3533,57 +3545,81 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
               </div>
             ) : (
               <div className="bg-surface border border-line rounded-2xl overflow-hidden shadow-xl">
-                <div className="flex flex-wrap items-center justify-between gap-2 px-4 sm:px-5 py-4 border-b border-line bg-surface-alt/50">
-                  <div>
-                    <p className="font-black text-ink flex items-center gap-2"><Inbox size={16} /> brightenedmindcorporation@gmail.com</p>
-                    <p className="text-sm text-ink-soft mt-0.5">
-                      {mailUnreadInbox} non lu(s) dans la réception · {mailMessages.length} affiché(s)
-                    </p>
+                {/* Mailbox header */}
+                <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-5 py-3.5 border-b border-line bg-surface-alt/50">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-600 to-red-900 text-white flex items-center justify-center shrink-0">
+                      <Mail size={18} />
+                    </span>
+                    <div className="min-w-0">
+                      <p className="font-black text-ink truncate">brightenedmindcorporation@gmail.com</p>
+                      <p className="text-xs text-ink-soft mt-0.5">
+                        {mailUnreadInbox > 0 ? <span className="font-bold text-red-500">{mailUnreadInbox} non lu{mailUnreadInbox > 1 ? "s" : ""}</span> : "Aucun message non lu"} · {mailMessages.length} affiché{mailMessages.length > 1 ? "s" : ""}
+                      </p>
+                    </div>
                   </div>
-                  <button
-                    onClick={() => openCompose()}
-                    className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shrink-0 inline-flex items-center gap-2 min-h-[44px]"
-                  >
-                    <SquarePen size={15} /> Nouveau message
-                  </button>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      onClick={() => fetchMailMessages()}
+                      title="Actualiser"
+                      aria-label="Actualiser"
+                      className="w-11 h-11 rounded-xl border border-line text-ink-soft hover:text-ink hover:border-red-600/50 inline-flex items-center justify-center transition"
+                    >
+                      <RefreshCw size={16} className={mailLoading ? "animate-spin" : ""} />
+                    </button>
+                    <button
+                      onClick={() => openCompose()}
+                      className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 text-white text-sm font-bold px-4 rounded-xl transition inline-flex items-center gap-2 min-h-[44px]"
+                    >
+                      <SquarePen size={15} /> Nouveau message
+                    </button>
+                  </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-5">
-                  <div className="lg:col-span-2 lg:border-r border-line flex flex-col">
-                    <div className="p-3 border-b border-line space-y-2 shrink-0">
-                      <div className="flex gap-1.5 overflow-x-auto pb-1">
-                        {MAIL_FOLDERS.map((f) => (
-                          <button
-                            key={f.id}
-                            onClick={() => changeMailFolder(f.id)}
-                            className={`text-sm font-bold px-3 py-1.5 rounded-lg transition whitespace-nowrap ${
-                              mailFolder === f.id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
-                            }`}
-                          >
-                            {f.label}
-                            {f.id === "inbox" && mailUnreadInbox > 0 ? ` (${mailUnreadInbox})` : ""}
-                          </button>
-                        ))}
-                      </div>
-                      <form
-                        onSubmit={(e) => { e.preventDefault(); submitMailSearch(); }}
-                        className="relative"
-                      >
+                <div className="grid grid-cols-1 lg:grid-cols-[190px_minmax(300px,380px)_minmax(0,1fr)] lg:h-[74vh]">
+                  {/* Folders */}
+                  <nav className="border-b lg:border-b-0 lg:border-r border-line bg-surface-alt/30 p-2 flex lg:flex-col gap-1 overflow-x-auto lg:overflow-y-auto">
+                    {MAIL_FOLDERS.map((f) => {
+                      const FolderIcon = { inbox: Inbox, starred: Star, sent: Send, drafts: FileText, all: Mail, spam: ShieldAlert, trash: Trash2 }[f.id];
+                      const active = mailFolder === f.id;
+                      return (
+                        <button
+                          key={f.id}
+                          onClick={() => changeMailFolder(f.id)}
+                          className={`flex items-center gap-2.5 px-3 rounded-lg text-sm font-semibold transition whitespace-nowrap min-h-[44px] lg:w-full ${
+                            active ? "bg-red-600 text-white shadow" : "text-ink-soft hover:bg-surface-alt hover:text-ink"
+                          }`}
+                        >
+                          <FolderIcon size={16} className="shrink-0" />
+                          <span className="flex-1 text-left">{f.label}</span>
+                          {f.id === "inbox" && mailUnreadInbox > 0 && (
+                            <span className={`text-xs font-black px-1.5 py-0.5 rounded-full ${active ? "bg-white/25 text-white" : "bg-red-600 text-white"}`}>{mailUnreadInbox}</span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </nav>
+
+                  {/* Message list */}
+                  <div className={`${selectedMail || mailDetailLoading ? "hidden lg:flex" : "flex"} flex-col lg:border-r border-line min-h-0 max-h-[70vh] lg:max-h-none`}>
+                    <div className="p-3 border-b border-line space-y-2.5 shrink-0">
+                      <form onSubmit={(e) => { e.preventDefault(); submitMailSearch(); }} className="relative">
                         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-faint" />
                         <input
                           type="text"
                           value={mailSearch}
                           onChange={(e) => setMailSearch(e.target.value)}
-                          placeholder="Rechercher (Entrée) — ex. from:nom, has:attachment"
-                          className="w-full bg-surface-alt border border-line rounded-lg pl-9 pr-8 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
+                          placeholder="Rechercher un message…"
+                          title="Entrée pour lancer. Exemples : from:nom, has:attachment"
+                          className="w-full bg-surface-alt border border-line rounded-xl pl-9 pr-8 py-2.5 text-base sm:text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60"
                         />
                         {(mailSearch || mailQuery) && (
-                          <button type="button" onClick={clearMailSearch} className="absolute right-2 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink">
+                          <button type="button" onClick={clearMailSearch} aria-label="Effacer la recherche" className="absolute right-2.5 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink">
                             <X size={14} />
                           </button>
                         )}
                       </form>
-                      <div className="flex gap-1.5">
+                      <div className="inline-flex p-0.5 rounded-lg bg-surface-alt border border-line">
                         {([
                           { id: "all", label: "Tous" },
                           { id: "unread", label: "Non lus" },
@@ -3592,8 +3628,8 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                           <button
                             key={f.id}
                             onClick={() => setMailFilter(f.id)}
-                            className={`text-sm font-bold px-3 py-1.5 rounded-lg transition ${
-                              mailFilter === f.id ? "bg-red-600 text-white" : "bg-surface-alt text-ink-soft hover:text-ink"
+                            className={`text-xs font-bold px-3 py-1.5 rounded-md transition ${
+                              mailFilter === f.id ? "bg-surface text-ink shadow-sm" : "text-ink-soft hover:text-ink"
                             }`}
                           >
                             {f.label}
@@ -3601,239 +3637,275 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
                         ))}
                       </div>
                     </div>
-                    <div className="flex-1 overflow-y-auto max-h-[55vh]">
-                    {mailLoading ? (
-                      <div className="p-6 text-ink-soft text-sm">Chargement…</div>
-                    ) : filteredMailMessages.length === 0 ? (
-                      <div className="p-6 text-ink-soft text-sm">Aucun email ne correspond.</div>
-                    ) : (
-                      filteredMailMessages.map((m) => {
-                        const { name } = parseFromHeader(mailFolder === "sent" || mailFolder === "drafts" ? m.to || m.from : m.from);
-                        return (
-                          <button
-                            key={m.id}
-                            onClick={() => openMail(m.id)}
-                            className={`w-full text-left px-4 py-3.5 border-b border-line/60 transition flex gap-3 items-start ${
-                              selectedMail?.id === m.id ? "bg-red-950/10" : "hover:bg-surface-alt"
-                            }`}
-                          >
-                            <span className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 ${avatarColor(name)}`}>
-                              {name.trim().charAt(0).toUpperCase() || "?"}
-                            </span>
-                            <span className="min-w-0 flex-1">
-                              <span className="flex items-center justify-between gap-2">
-                                <span className={`text-sm truncate ${m.unread ? "font-black text-ink" : "font-semibold text-ink-soft"}`}>{name}</span>
-                                <span className="flex items-center gap-1.5 shrink-0">
-                                  {m.starred && <Star size={13} className="text-yellow-400 fill-yellow-400" />}
-                                  {m.unread && <span className="w-2 h-2 rounded-full bg-red-500" />}
-                                </span>
+
+                    <div className="flex-1 overflow-y-auto min-h-0">
+                      {mailLoading ? (
+                        <div className="divide-y divide-line/60">
+                          {[0, 1, 2, 3, 4].map((i) => (
+                            <div key={i} className="px-4 py-4 flex gap-3 animate-pulse">
+                              <span className="w-10 h-10 rounded-full bg-surface-alt shrink-0" />
+                              <span className="flex-1 space-y-2">
+                                <span className="block h-3 w-1/3 rounded bg-surface-alt" />
+                                <span className="block h-3 w-2/3 rounded bg-surface-alt" />
+                                <span className="block h-3 w-full rounded bg-surface-alt" />
                               </span>
-                              <span className={`block text-sm truncate ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject}</span>
-                              <span className="block text-sm text-ink-faint truncate mt-0.5">{m.snippet}</span>
-                            </span>
-                          </button>
-                        );
-                      })
-                    )}
-                    {mailNextToken && !mailLoading && (
-                      <button
-                        onClick={() => fetchMailMessages(true, mailNextToken)}
-                        disabled={mailLoadingMore}
-                        className="w-full py-3 text-sm font-bold text-red-500 hover:bg-surface-alt disabled:opacity-50 transition"
-                      >
-                        {mailLoadingMore ? "Chargement…" : "Charger plus"}
-                      </button>
-                    )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : filteredMailMessages.length === 0 ? (
+                        <div className="p-10 text-center text-ink-soft">
+                          <Inbox size={32} className="mx-auto text-ink-faint mb-3" />
+                          <p className="text-sm font-semibold text-ink">Aucun message</p>
+                          <p className="text-xs mt-1">Rien ne correspond à ce dossier ou à cette recherche.</p>
+                        </div>
+                      ) : (
+                        filteredMailMessages.map((m) => {
+                          const outgoing = mailFolder === "sent" || mailFolder === "drafts";
+                          const { name } = parseFromHeader(outgoing ? m.to || m.from : m.from);
+                          const active = selectedMail?.id === m.id;
+                          return (
+                            <button
+                              key={m.id}
+                              onClick={() => openMail(m.id)}
+                              className={`relative w-full text-left pl-4 pr-3 py-3.5 border-b border-line/60 transition flex gap-3 items-start ${
+                                active ? "bg-red-600/10" : m.unread ? "bg-surface hover:bg-surface-alt" : "hover:bg-surface-alt"
+                              }`}
+                            >
+                              {(active || m.unread) && <span className={`absolute left-0 top-0 bottom-0 w-1 ${active ? "bg-red-600" : "bg-red-500/60"}`} />}
+                              <span className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 ${avatarColor(name)}`}>
+                                {name.trim().charAt(0).toUpperCase() || "?"}
+                              </span>
+                              <span className="min-w-0 flex-1">
+                                <span className="flex items-baseline justify-between gap-2">
+                                  <span className={`text-sm truncate ${m.unread ? "font-black text-ink" : "font-semibold text-ink-soft"}`}>{outgoing ? `À : ${name}` : name}</span>
+                                  <span className={`text-xs shrink-0 ${m.unread ? "font-bold text-red-500" : "text-ink-faint"}`}>{formatMailListDate(m.date)}</span>
+                                </span>
+                                <span className="flex items-center gap-1.5 mt-0.5">
+                                  <span className={`text-sm truncate flex-1 ${m.unread ? "font-bold text-ink" : "text-ink-soft"}`}>{m.subject || "(sans objet)"}</span>
+                                  {m.starred && <Star size={13} className="text-yellow-400 fill-yellow-400 shrink-0" />}
+                                </span>
+                                <span className="block text-xs text-ink-faint truncate mt-0.5">{m.snippet}</span>
+                              </span>
+                            </button>
+                          );
+                        })
+                      )}
+                      {mailNextToken && !mailLoading && (
+                        <button
+                          onClick={() => fetchMailMessages(true, mailNextToken)}
+                          disabled={mailLoadingMore}
+                          className="w-full py-3.5 text-sm font-bold text-red-500 hover:bg-surface-alt disabled:opacity-50 transition"
+                        >
+                          {mailLoadingMore ? "Chargement…" : "Charger plus de messages"}
+                        </button>
+                      )}
                     </div>
                   </div>
 
-                  <div className="lg:col-span-3 max-h-[65vh] overflow-y-auto">
+                  {/* Reading pane */}
+                  <div className={`${selectedMail || mailDetailLoading ? "block" : "hidden lg:block"} min-h-0 overflow-y-auto lg:max-h-none max-h-[85vh]`}>
                     {mailDetailLoading ? (
-                      <div className="p-6 text-ink-soft text-sm">Chargement…</div>
+                      <div className="p-6 space-y-3 animate-pulse">
+                        <div className="h-5 w-2/3 rounded bg-surface-alt" />
+                        <div className="h-10 w-1/2 rounded bg-surface-alt" />
+                        <div className="h-48 rounded-xl bg-surface-alt" />
+                      </div>
                     ) : !selectedMail ? (
-                      <div className="p-10 text-ink-soft text-sm text-center">
-                        Sélectionne un email à gauche pour le lire.
+                      <div className="h-full min-h-[260px] flex flex-col items-center justify-center text-center p-10 text-ink-soft">
+                        <span className="w-16 h-16 rounded-2xl bg-surface-alt border border-line flex items-center justify-center mb-4">
+                          <MailOpen size={28} className="text-ink-faint" />
+                        </span>
+                        <p className="font-bold text-ink">Aucun message sélectionné</p>
+                        <p className="text-sm mt-1">Choisissez un email dans la liste pour le lire et y répondre.</p>
                       </div>
                     ) : (
-                      <div className="p-6">
-                        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+                      <div>
+                        {/* Toolbar */}
+                        <div className="sticky top-0 z-10 flex items-center justify-between gap-2 flex-wrap px-4 sm:px-6 py-2.5 border-b border-line bg-surface/95 backdrop-blur">
                           <button
                             onClick={() => setSelectedMail(null)}
-                            className="text-sm font-semibold text-ink-soft hover:text-ink inline-flex items-center gap-1.5"
+                            className="text-sm font-semibold text-ink-soft hover:text-ink inline-flex items-center gap-1.5 min-h-[44px] lg:hidden"
                           >
-                            <ArrowLeft size={14} /> Retour
+                            <ArrowLeft size={16} /> Retour
                           </button>
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <button onClick={() => mailAction(selectedMail.id, selectedMail.starred ? "unstar" : "star")} title={selectedMail.starred ? "Retirer des favoris" : "Favori"} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                              <Star size={14} className={selectedMail.starred ? "text-yellow-400 fill-yellow-400" : ""} /> Favori
-                            </button>
-                            {mailFolder === "trash" ? (
-                              <button onClick={() => mailAction(selectedMail.id, "untrash")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                                <RotateCcw size={14} /> Restaurer
-                              </button>
-                            ) : (
-                              <>
-                                {mailFolder !== "spam" && (
-                                  <button onClick={() => mailAction(selectedMail.id, "archive")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                                    <Archive size={14} /> Archiver
+                          <div className="flex items-center gap-1 flex-wrap lg:ml-auto">
+                            {(() => {
+                              const btn = "text-sm font-semibold text-ink-soft hover:text-ink hover:bg-surface-alt rounded-lg px-2.5 inline-flex items-center gap-1.5 transition min-h-[44px]";
+                              return (
+                                <>
+                                  <button onClick={() => mailAction(selectedMail.id, selectedMail.starred ? "unstar" : "star")} title={selectedMail.starred ? "Retirer des favoris" : "Ajouter aux favoris"} className={btn}>
+                                    <Star size={16} className={selectedMail.starred ? "text-yellow-400 fill-yellow-400" : ""} /> <span className="hidden xl:inline">Favori</span>
                                   </button>
-                                )}
-                                {mailFolder === "spam" ? (
-                                  <button onClick={() => mailAction(selectedMail.id, "notspam")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                                    <Inbox size={14} /> Pas un spam
-                                  </button>
-                                ) : (
-                                  <button onClick={() => mailAction(selectedMail.id, "spam")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                                    <ShieldAlert size={14} /> Spam
-                                  </button>
-                                )}
-                                <button onClick={() => mailAction(selectedMail.id, "trash")} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                                  <Trash2 size={14} /> Corbeille
-                                </button>
-                              </>
-                            )}
-                            <button onClick={() => { mailAction(selectedMail.id, "unread"); setSelectedMail(null); }} className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]">
-                              <MailOpen size={14} /> Non lu
-                            </button>
-                            <button
-                              onClick={printMail}
-                              title="Imprimer"
-                              className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]"
-                            >
-                              <Printer size={14} /> Imprimer
-                            </button>
-                            <button
-                              onClick={shareMail}
-                              title="Partager"
-                              className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]"
-                            >
-                              <Share2 size={14} /> Partager
-                            </button>
-                            <button
-                              onClick={forwardMail}
-                              className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-1.5 inline-flex items-center gap-1.5 transition hover:border-red-600/50 min-h-[44px]"
-                            >
-                              <Forward size={14} /> Transférer
-                            </button>
-                          </div>
-                        </div>
-                        <p className="text-xl font-bold text-ink">{selectedMail.subject}</p>
-                        <div className="flex items-center gap-3 mt-3">
-                          <span className={`w-10 h-10 rounded-full flex items-center justify-center text-white text-sm font-black shrink-0 ${avatarColor(parseFromHeader(selectedMail.from).name)}`}>
-                            {parseFromHeader(selectedMail.from).name.trim().charAt(0).toUpperCase() || "?"}
-                          </span>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-ink truncate">{parseFromHeader(selectedMail.from).name}</p>
-                            <p className="text-sm text-ink-faint truncate">{parseFromHeader(selectedMail.from).email}</p>
-                          </div>
-                          <span className="text-sm text-ink-faint ml-auto shrink-0">{formatMailDate(selectedMail.date)}</span>
-                        </div>
-                        {(selectedMail.to || selectedMail.cc) && (
-                          <p className="text-sm text-ink-faint mt-2 break-words">
-                            {selectedMail.to && <>À : {selectedMail.to}</>}
-                            {selectedMail.cc && <> · Cc : {selectedMail.cc}</>}
-                          </p>
-                        )}
-
-                        {detectedAddresses.length > 0 && (
-                          <div className="flex flex-wrap items-center gap-2 mt-4 p-3 bg-surface-alt/60 border border-line rounded-xl">
-                            <span className="text-sm text-ink-soft font-semibold shrink-0">Adresses détectées dans le message :</span>
-                            {detectedAddresses.map((addr) => (
-                              <button
-                                key={addr}
-                                onClick={() => openCompose(addr, selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`)}
-                                className="text-sm font-semibold px-2.5 py-1 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition inline-flex items-center gap-1.5"
-                              >
-                                <Mail size={12} /> {addr}
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="mt-4 pt-4 border-t border-line">
-                          {/* Email HTML comes from arbitrary senders — never trusted, so it
-                              renders in a fully sandboxed iframe (no scripts, no same-origin
-                              access) instead of dangerouslySetInnerHTML on the page itself. */}
-                          <iframe
-                            sandbox=""
-                            srcDoc={selectedMail.body || selectedMail.snippet}
-                            className="w-full h-64 rounded-xl bg-white border border-line"
-                            title="Contenu de l'email"
-                          />
-                        </div>
-
-                        {selectedMail.attachments?.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-line">
-                            <p className="text-sm font-semibold text-ink-soft mb-2">Pièces jointes</p>
-                            <div className="flex flex-wrap gap-2">
-                              {selectedMail.attachments.map((att: any) => (
-                                <button
-                                  key={att.attachmentId}
-                                  onClick={() => downloadGmailAttachment(selectedMail.id, att)}
-                                  disabled={downloadingAttachmentId === att.attachmentId}
-                                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-red-500 hover:text-red-400 bg-red-500/10 border border-red-700/30 px-2.5 py-1.5 rounded-lg disabled:opacity-50 min-h-[44px]"
-                                >
-                                  {downloadingAttachmentId === att.attachmentId ? (
-                                    "Téléchargement…"
+                                  {mailFolder === "trash" ? (
+                                    <button onClick={() => mailAction(selectedMail.id, "untrash")} title="Restaurer" className={btn}>
+                                      <RotateCcw size={16} /> <span className="hidden xl:inline">Restaurer</span>
+                                    </button>
                                   ) : (
                                     <>
-                                      <Download size={12} /> {att.filename}
+                                      {mailFolder !== "spam" && (
+                                        <button onClick={() => mailAction(selectedMail.id, "archive")} title="Archiver" className={btn}>
+                                          <Archive size={16} /> <span className="hidden xl:inline">Archiver</span>
+                                        </button>
+                                      )}
+                                      {mailFolder === "spam" ? (
+                                        <button onClick={() => mailAction(selectedMail.id, "notspam")} title="Ce n'est pas un spam" className={btn}>
+                                          <Inbox size={16} /> <span className="hidden xl:inline">Pas un spam</span>
+                                        </button>
+                                      ) : (
+                                        <button onClick={() => mailAction(selectedMail.id, "spam")} title="Signaler comme spam" className={btn}>
+                                          <ShieldAlert size={16} /> <span className="hidden xl:inline">Spam</span>
+                                        </button>
+                                      )}
+                                      <button onClick={() => mailAction(selectedMail.id, "trash")} title="Mettre à la corbeille" className={btn}>
+                                        <Trash2 size={16} /> <span className="hidden xl:inline">Corbeille</span>
+                                      </button>
                                     </>
                                   )}
-                                </button>
-                              ))}
-                            </div>
+                                  <span className="w-px h-6 bg-line mx-1" />
+                                  <button onClick={() => { mailAction(selectedMail.id, "unread"); setSelectedMail(null); }} title="Marquer comme non lu" className={btn}>
+                                    <MailOpen size={16} /> <span className="hidden xl:inline">Non lu</span>
+                                  </button>
+                                  <button onClick={printMail} title="Imprimer" className={btn}>
+                                    <Printer size={16} /> <span className="hidden xl:inline">Imprimer</span>
+                                  </button>
+                                  <button onClick={shareMail} title="Partager" className={btn}>
+                                    <Share2 size={16} /> <span className="hidden xl:inline">Partager</span>
+                                  </button>
+                                  <button onClick={forwardMail} title="Transférer" className={btn}>
+                                    <Forward size={16} /> <span className="hidden xl:inline">Transférer</span>
+                                  </button>
+                                </>
+                              );
+                            })()}
                           </div>
-                        )}
+                        </div>
 
-                        <div className="mt-6 pt-4 border-t border-line">
-                          <div className="flex items-center gap-2 mb-3">
-                            <label className="text-sm font-semibold text-ink-soft shrink-0">De</label>
-                            <select
-                              value={replyFrom}
-                              onChange={(e) => setReplyFrom(e.target.value)}
-                              className="flex-1 bg-surface-alt border border-line rounded-lg px-3 py-2 text-base text-ink focus:outline-none focus:border-red-600/60 min-h-[44px]"
-                            >
-                              {MAIL_SENDERS.map((a) => (
-                                <option key={a} value={a}>{a}</option>
-                              ))}
-                            </select>
+                        <div className="px-4 sm:px-6 py-5">
+                          <h3 className="text-xl sm:text-2xl font-black text-ink leading-snug break-words">{selectedMail.subject || "(sans objet)"}</h3>
+                          <div className="flex items-center gap-3 mt-4">
+                            <span className={`w-11 h-11 rounded-full flex items-center justify-center text-white text-base font-black shrink-0 ${avatarColor(parseFromHeader(selectedMail.from).name)}`}>
+                              {parseFromHeader(selectedMail.from).name.trim().charAt(0).toUpperCase() || "?"}
+                            </span>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-bold text-ink truncate">{parseFromHeader(selectedMail.from).name}</p>
+                              <p className="text-xs text-ink-faint truncate">{parseFromHeader(selectedMail.from).email}</p>
+                            </div>
+                            <span className="text-xs text-ink-faint shrink-0 text-right">{formatMailDate(selectedMail.date)}</span>
                           </div>
-                          <label className="block text-sm font-semibold text-ink-soft mb-1.5">Répondre à {parseFromHeader(selectedMail.from).name}</label>
-                          <textarea
-                            value={mailReplyBody}
-                            onChange={(e) => setMailReplyBody(e.target.value)}
-                            rows={5}
-                            placeholder="Écrivez votre réponse…"
-                            className="w-full bg-surface-alt border border-line rounded-xl px-3 py-2.5 text-base text-ink placeholder:text-ink-faint focus:outline-none focus:border-red-600/60 min-h-[44px]"
-                          />
-                          {mailReplyAttachments.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {mailReplyAttachments.map((file, i) => (
-                                <span key={i} className="text-sm bg-surface-alt border border-line rounded-full px-3 py-1 flex items-center gap-2 text-ink-soft">
-                                  <Paperclip size={12} /> {file.name}
-                                  <button onClick={() => setMailReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} className="text-ink-faint hover:text-red-500"><X size={12} /></button>
-                                </span>
+                          {(selectedMail.to || selectedMail.cc) && (
+                            <p className="text-xs text-ink-faint mt-3 break-words bg-surface-alt/60 rounded-lg px-3 py-2">
+                              {selectedMail.to && <><span className="font-semibold text-ink-soft">À :</span> {selectedMail.to}</>}
+                              {selectedMail.cc && <> · <span className="font-semibold text-ink-soft">Cc :</span> {selectedMail.cc}</>}
+                            </p>
+                          )}
+
+                          {detectedAddresses.length > 0 && (
+                            <div className="flex flex-wrap items-center gap-2 mt-4 p-3 bg-surface-alt/60 border border-line rounded-xl">
+                              <span className="text-xs text-ink-soft font-semibold shrink-0">Adresses détectées :</span>
+                              {detectedAddresses.map((addr) => (
+                                <button
+                                  key={addr}
+                                  onClick={() => openCompose(addr, selectedMail.subject.startsWith("Re:") ? selectedMail.subject : `Re: ${selectedMail.subject}`)}
+                                  className="text-xs font-semibold px-2.5 py-1.5 rounded-full bg-surface border border-line text-red-500 hover:border-red-600 hover:bg-red-950/10 transition inline-flex items-center gap-1.5"
+                                >
+                                  <Mail size={12} /> {addr}
+                                </button>
                               ))}
                             </div>
                           )}
-                          <div className="flex items-center gap-3 mt-3">
-                            <label className="text-sm font-semibold text-ink-soft hover:text-ink border border-line rounded-lg px-3 py-2 cursor-pointer transition bg-surface-alt inline-flex items-center gap-1.5 min-h-[44px]">
-                              <Paperclip size={13} /> Joindre un fichier
-                              <input
-                                type="file"
-                                multiple
-                                className="hidden"
-                                onChange={(e) => setMailReplyAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
-                              />
-                            </label>
-                            <button
-                              onClick={sendMailReply}
-                              disabled={mailReplySending || !mailReplyBody.trim()}
-                              className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-5 py-2 rounded-xl transition min-h-[44px]"
-                            >
-                              {mailReplySending ? "Envoi…" : "Envoyer"}
-                            </button>
+
+                          <div className="mt-5">
+                            {/* Email HTML comes from arbitrary senders — never trusted, so it
+                                renders in a fully sandboxed iframe (no scripts, no same-origin
+                                access) instead of dangerouslySetInnerHTML on the page itself. */}
+                            <iframe
+                              sandbox=""
+                              srcDoc={selectedMail.body || selectedMail.snippet}
+                              className="w-full h-[45vh] min-h-[280px] rounded-xl bg-white border border-line"
+                              title="Contenu de l'email"
+                            />
+                          </div>
+
+                          {selectedMail.attachments?.length > 0 && (
+                            <div className="mt-5">
+                              <p className="text-xs font-bold uppercase tracking-wider text-ink-faint mb-2 flex items-center gap-1.5">
+                                <Paperclip size={12} /> {selectedMail.attachments.length} pièce{selectedMail.attachments.length > 1 ? "s" : ""} jointe{selectedMail.attachments.length > 1 ? "s" : ""}
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {selectedMail.attachments.map((att: any) => (
+                                  <button
+                                    key={att.attachmentId}
+                                    onClick={() => downloadGmailAttachment(selectedMail.id, att)}
+                                    disabled={downloadingAttachmentId === att.attachmentId}
+                                    className="inline-flex items-center gap-2 text-sm font-semibold text-ink bg-surface-alt border border-line hover:border-red-600/50 px-3 rounded-xl disabled:opacity-50 min-h-[44px] max-w-full transition"
+                                  >
+                                    {downloadingAttachmentId === att.attachmentId ? (
+                                      "Téléchargement…"
+                                    ) : (
+                                      <>
+                                        <Download size={14} className="text-red-500 shrink-0" /> <span className="truncate">{att.filename}</span>
+                                      </>
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Reply */}
+                          <div className="mt-6 rounded-2xl border border-line bg-surface-alt/40 overflow-hidden">
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 px-4 py-3 border-b border-line">
+                              <Forward size={14} className="text-ink-faint -scale-x-100" />
+                              <span className="text-sm font-bold text-ink">Répondre à {parseFromHeader(selectedMail.from).name}</span>
+                              <span className="flex items-center gap-2 sm:ml-auto">
+                                <label htmlFor="mail-reply-from" className="text-xs font-semibold text-ink-soft">Depuis</label>
+                                <select
+                                  id="mail-reply-from"
+                                  value={replyFrom}
+                                  onChange={(e) => setReplyFrom(e.target.value)}
+                                  className="bg-surface border border-line rounded-lg px-2.5 py-2 text-sm text-ink focus:outline-none focus:border-red-600/60 min-h-[44px] max-w-[60vw]"
+                                >
+                                  {MAIL_SENDERS.map((a) => (
+                                    <option key={a} value={a}>{a}</option>
+                                  ))}
+                                </select>
+                              </span>
+                            </div>
+                            <textarea
+                              value={mailReplyBody}
+                              onChange={(e) => setMailReplyBody(e.target.value)}
+                              rows={5}
+                              placeholder="Écrivez votre réponse…"
+                              className="w-full bg-transparent px-4 py-3 text-base text-ink placeholder:text-ink-faint focus:outline-none resize-y"
+                            />
+                            {mailReplyAttachments.length > 0 && (
+                              <div className="flex flex-wrap gap-2 px-4 pb-3">
+                                {mailReplyAttachments.map((file, i) => (
+                                  <span key={i} className="text-xs bg-surface border border-line rounded-full pl-3 pr-2 py-1.5 flex items-center gap-2 text-ink-soft">
+                                    <Paperclip size={12} /> <span className="truncate max-w-[180px]">{file.name}</span>
+                                    <button onClick={() => setMailReplyAttachments((prev) => prev.filter((_, idx) => idx !== i))} aria-label="Retirer le fichier" className="text-ink-faint hover:text-red-500"><X size={13} /></button>
+                                  </span>
+                                ))}
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between gap-3 px-4 py-3 border-t border-line bg-surface/60">
+                              <label className="text-sm font-semibold text-ink-soft hover:text-ink rounded-lg px-3 cursor-pointer transition hover:bg-surface-alt inline-flex items-center gap-1.5 min-h-[44px]">
+                                <Paperclip size={15} /> Joindre
+                                <input
+                                  type="file"
+                                  multiple
+                                  className="hidden"
+                                  onChange={(e) => setMailReplyAttachments((prev) => [...prev, ...Array.from(e.target.files || [])])}
+                                />
+                              </label>
+                              <button
+                                onClick={sendMailReply}
+                                disabled={mailReplySending || !mailReplyBody.trim()}
+                                className="glow-accent bg-gradient-to-br from-red-600 to-red-900 hover:from-red-500 hover:to-red-800 disabled:opacity-50 text-white font-bold px-6 rounded-xl transition min-h-[44px] inline-flex items-center gap-2"
+                              >
+                                <Send size={15} /> {mailReplySending ? "Envoi…" : "Envoyer"}
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
