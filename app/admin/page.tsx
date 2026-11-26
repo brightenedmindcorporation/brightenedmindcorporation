@@ -35,6 +35,7 @@ import {
   FileText,
 } from "lucide-react";
 import { auth } from "@/lib/firebase";
+import FinanceTab from "@/components/admin/FinanceTab";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { availableLanguages, findProgramByCode, programLevels } from "@/content/curriculum";
 import { getOtherProgramLabel, isOtherProgramCode as isOtherCode, otherPrograms } from "@/content/programs";
@@ -1869,7 +1870,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
           const tabItems = [
             { id: "students", label: "Étudiants", badge: stats.pending },
             { id: "live", label: "Cours en direct", badge: 0 },
-            { id: "payments", label: "Paiements", badge: 0 },
+            { id: "payments", label: "Finances", badge: 0 },
             { id: "announcements", label: "Publicité", badge: 0 },
             { id: "applications", label: "Candidatures", badge: jobApplications.filter((a) => a.status === "new").length },
             { id: "projects", label: "Projets", badge: projectRequests.filter((r) => r.status === "new").length },
@@ -2682,71 +2683,7 @@ Vérifiez d'abord que l'étudiant a réglé ses frais si ce niveau est payant. S
         {tab === "backups" && <BackupTab />}
 
         {/* ================= PAYMENTS TAB ================= */}
-        {tab === "payments" && (
-          <div>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-ink">{paymentsStats.count}</p>
-                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">Total</p>
-              </div>
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-emerald-400">{paymentsStats.paid}</p>
-                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">Payés</p>
-              </div>
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-red-500">${paymentsStats.totalAmount}</p>
-                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">Revenu confirmé</p>
-              </div>
-              <div className="p-4 rounded-2xl border border-line bg-surface">
-                <p className="text-2xl font-black text-amber-400">${paymentsStats.pendingAmount}</p>
-                <p className="text-sm text-ink-soft uppercase tracking-wide mt-1">En attente</p>
-              </div>
-            </div>
-
-            {paymentsLoading ? (
-              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">Chargement…</div>
-            ) : payments.length === 0 ? (
-              <div className="p-4 rounded-2xl border border-line bg-surface text-ink-soft">
-                Aucun paiement enregistré pour le moment.
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="text-left text-ink-soft border-b border-line">
-                      <th className="py-2 pr-4">Étudiant</th>
-                      <th className="py-2 pr-4">Langue</th>
-                      <th className="py-2 pr-4">Montant</th>
-                      <th className="py-2 pr-4">Statut</th>
-                      <th className="py-2 pr-4">Student ID</th>
-                      <th className="py-2 pr-4">Référence</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {payments.map((p) => (
-                      <tr key={p.id} className="border-b border-line/60">
-                        <td className="py-2 pr-4 text-ink">{p.studentName || "-"}</td>
-                        <td className="py-2 pr-4 text-ink-soft">{languageLabel(p.langCode)}</td>
-                        <td className="py-2 pr-4 text-ink">{p.amount} {p.currency || "USD"}</td>
-                        <td className="py-2 pr-4">
-                          <span className={`text-sm font-semibold px-2 py-1 rounded-full ${
-                            p.status === "paid" ? "bg-emerald-700 text-white" :
-                            p.status === "failed" ? "bg-red-700 text-white" :
-                            "bg-amber-700 text-white"
-                          }`}>
-                            {p.status}
-                          </span>
-                        </td>
-                        <td className="py-2 pr-4 text-ink-soft font-mono text-sm">{p.matricule || "-"}</td>
-                        <td className="py-2 pr-4 text-ink-faint font-mono text-sm">{p.id}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
+        {tab === "payments" && <FinanceTab students={students} languageLabel={languageLabel} />}
 
         {/* ================= ANNOUNCEMENTS TAB ================= */}
         {tab === "announcements" && <AnnouncementsTab refreshKey={annRefresh} />}

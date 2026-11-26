@@ -25,6 +25,8 @@ export async function POST(request: Request) {
         currency: currency || "USD",
         phone: phone ?? null,
         status: "pending",
+        // No real gateway yet: the payment is only simulated, so it must never count as money received.
+        ...(isFlexPayConfigured() ? {} : { simulated: true }),
         createdAt: new Date(),
       });
     }

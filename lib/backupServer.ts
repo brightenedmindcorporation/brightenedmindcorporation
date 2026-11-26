@@ -15,6 +15,7 @@ export const BACKUP_COLLECTIONS = [
   "certificates",
   "certificateReservations",
   "payments",
+  "ledger",
   "placementTests",
   "writingReviews",
   "studentRequests",
